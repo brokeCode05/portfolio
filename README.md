@@ -6,7 +6,7 @@
   <p><strong>BSIT Student &bull; Home Lab Builder &bull; Future SysAdmin</strong></p>
   <br />
   <p>
-    <a href="https://brokeCode05.github.io" target="_blank">
+    <a href="https://brokeCode05.github.io/portfolio" target="_blank">
       <img src="https://img.shields.io/badge/Live_Site-4ADE80?style=for-the-badge&logo=githubpages&logoColor=black" alt="Live Site" />
     </a>
     &nbsp;
