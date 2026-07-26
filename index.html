@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>John Bryan Capellan — BSIT Student &amp; Home Lab Builder</title>
+  <meta name="description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
+  <meta property="og:description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://brokeCode05.github.io" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
+  <meta name="twitter:description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
+
+  <!-- Inline theme script (prevents FOUC) -->
+  <script>
+    (function(){
+      var t = localStorage.getItem('portfolio-theme');
+      if (!t) { t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Preload critical CSS -->
+  <link rel="preload" href="css/style.min.css" as="style" />
+
+  <!-- Styles (minified) -->
+  <link rel="stylesheet" href="css/style.min.css" />
+
+  <!-- Skills progress bar cards styles -->
+  <style>
+    /* ===== Hero Photo Frame ===== */
+    .hero-layout {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3xl);
+    }
+    .hero-content {
+      flex: 1;
+      max-width: 600px;
+    }
+    .hero-photo-wrapper {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 320px;
+    }
+    .hero-photo-frame {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      padding: 6px;
+      background: var(--color-border);
+      box-shadow: 0 0 0 1px var(--color-border),
+                  0 0 30px rgba(74, 222, 128, 0.08);
+      transition: box-shadow var(--transition-base), transform var(--transition-base);
+    }
+    .hero-photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid var(--color-accent);
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity var(--transition-base), transform var(--transition-base);
+      pointer-events: none;
+    }
+    .hero-photo-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: var(--color-surface);
+    }
+    .hero-photo {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(40%) contrast(1.1);
+      transition: filter var(--transition-base), transform var(--transition-base);
+    }
+    /* CRT scan-line overlay */
+    .hero-photo-scanlines {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.06) 2px,
+        rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
+    /* Glow dot / status indicator */
+    .hero-photo-status {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      border: 2px solid var(--color-bg);
+      z-index: 3;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+    }
+    /* Hover effects */
+    .hero-photo-wrapper:hover .hero-photo-frame {
+      box-shadow: 0 0 0 3px var(--color-accent),
+                  0 0 0 7px var(--color-border),
+                  0 0 40px rgba(74, 222, 128, 0.25);
+      transform: scale(1.02);
+    }
+    .hero-photo-wrapper:hover .hero-photo-frame::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .hero-photo-wrapper:hover .hero-photo {
+      filter: grayscale(10%) contrast(1.05);
+      transform: scale(1.04);
+    }
+    /* Light theme adjustments */
+    [data-theme="light"] .hero-photo-frame {
+      box-shadow: 0 0 0 1px var(--color-border),
+                  0 0 30px rgba(5, 150, 105, 0.06);
+    }
+    [data-theme="light"] .hero-photo-wrapper:hover .hero-photo-frame {
+      box-shadow: 0 0 0 1px var(--color-border-hover),
+                  0 0 40px rgba(5, 150, 105, 0.15);
+    }
+    [data-theme="light"] .hero-photo {
+      filter: grayscale(30%) contrast(1.05);
+    }
+    [data-theme="light"] .hero-photo-wrapper:hover .hero-photo {
+      filter: grayscale(0%) contrast(1);
+    }
+    [data-theme="light"] .hero-photo-wrapper:hover .hero-photo-frame {
+      box-shadow: 0 0 0 3px var(--color-accent),
+                  0 0 0 7px var(--color-border),
+                  0 0 40px rgba(5, 150, 105, 0.15);
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-layout {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2xl);
+      }
+      .hero-content {
+        max-width: 100%;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .hero-photo-wrapper {
+        width: 240px;
+        order: -1;
+      }
+      .hero-photo-frame {
+        width: 210px;
+        height: 210px;
+      }
+      .hero-photo-status {
+        bottom: 8px;
+        right: 8px;
+        width: 12px;
+        height: 12px;
+      }
+    }
+    @media (max-width: 480px) {
+      .hero-photo-wrapper {
+        width: 180px;
+      }
+      .hero-photo-frame {
+        width: 160px;
+        height: 160px;
+      }
+      .hero-layout {
+        gap: var(--space-xl);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-photo-status {
+        animation: none;
+      }
+      .hero-photo-frame,
+      .hero-photo {
+        transition: none;
+      }
+      .hero-photo-wrapper:hover .hero-photo-frame {
+        transform: none;
+      }
+      .hero-photo-wrapper:hover .hero-photo {
+        transform: none;
+      }
+    }
+
+    /* ===== Mobile Nav / Hamburger ===== */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      background: transparent;
+      cursor: pointer;
+      gap: 5px;
+      padding: 0;
+      transition: border-color var(--transition-fast);
+    }
+    .hamburger:hover {
+      border-color: var(--color-border-hover);
+    }
+    .hamburger-line {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background-color: var(--color-text-secondary);
+      border-radius: 1px;
+      transition: transform var(--transition-base), opacity var(--transition-fast);
+      transform-origin: center;
+    }
+    .hamburger.active .hamburger-line:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .hamburger.active .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active .hamburger-line:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+    .nav-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 98;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-base);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    .nav-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .nav-menu-mobile {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100vh;
+      background-color: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      z-index: 99;
+      transform: translateX(100%);
+      transition: transform var(--transition-base);
+      display: flex;
+      flex-direction: column;
+      padding: calc(var(--nav-height) + var(--space-lg)) var(--space-lg) var(--space-lg);
+      gap: var(--space-xs);
+    }
+    .nav-menu-mobile.open {
+      transform: translateX(0);
+    }
+    .nav-menu-mobile .nav-link {
+      display: block;
+      padding: var(--space-md);
+      font-size: var(--text-base);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      border-radius: var(--border-radius-sm);
+      transition: color var(--transition-fast), background-color var(--transition-fast);
+    }
+    .nav-menu-mobile .nav-link:hover {
+      color: var(--color-text-primary);
+      background-color: var(--color-surface-hover);
+    }
+    .nav-menu-mobile .nav-link.active {
+      color: var(--color-accent);
+    }
+    .nav-menu-mobile .theme-toggle {
+      margin-top: auto;
+      margin-left: 0;
+      width: 100%;
+      justify-content: center;
+      gap: var(--space-sm);
+      font-size: var(--text-sm);
+      font-family: var(--font-body);
+      color: var(--color-text-secondary);
+      border-color: var(--color-border);
+      padding: var(--space-md);
+      height: auto;
+    }
+    .nav-menu-mobile .theme-toggle:hover {
+      color: var(--color-text-primary);
+      border-color: var(--color-border-hover);
+      background-color: var(--color-surface-hover);
+    }
+    .nav-menu-mobile .theme-toggle-text {
+      display: inline;
+      font-size: var(--text-sm);
+      font-weight: 500;
+    }
+    @media (max-width: 768px) {
+      .navbar-links { display: none; }
+      .hamburger { display: flex; }
+    }
+    [data-theme="light"] .nav-overlay {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hamburger-line { transition: none; }
+      .nav-menu-mobile, .nav-overlay { transition: none; }
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-lg);
+    }
+    .skill-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      padding: var(--space-lg);
+      background-color: var(--color-surface);
+      transition: border-color var(--transition-fast), transform var(--transition-base), box-shadow var(--transition-base);
+    }
+    .skill-card:hover {
+      border-color: var(--color-border-hover);
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .skill-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .skill-card-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--border-radius-sm);
+      border: 1px solid var(--color-border);
+      color: var(--color-accent);
+      flex-shrink: 0;
+    }
+    .skill-card-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0;
+      line-height: 1.3;
+    }
+    .skill-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .skill-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-xs);
+    }
+    .skill-item-name {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+    .skill-item-level {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      font-family: var(--font-code);
+    }
+    .skill-progress-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .skill-pct-label {
+      position: relative;
+      font-size: var(--text-xs);
+      font-family: var(--font-code);
+      color: var(--color-accent);
+      font-weight: 600;
+      min-width: 2.5em;
+      text-align: right;
+      flex-shrink: 0;
+      cursor: help;
+    }
+    .skill-pct-label[data-desc]::after {
+      content: attr(data-desc);
+      position: absolute;
+      bottom: calc(100% + 10px);
+      right: 0;
+      width: 220px;
+      max-width: calc(100vw - 2rem);
+      padding: 0.625rem 0.75rem;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--color-text-primary);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+      white-space: normal;
+      text-align: left;
+    }
+    /* Small arrow pointing down to the label */
+    .skill-pct-label[data-desc]::before {
+      content: '';
+      position: absolute;
+      bottom: calc(100% + 4px);
+      right: 14px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--color-border);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .skill-pct-label[data-desc]:hover::after,
+    .skill-pct-label[data-desc]:hover::before {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .skill-pct-label[data-desc]:hover::before {
+      transform: none;
+    }
+    /* Progress row hover also triggers the tooltip */
+    .skill-progress-row:hover .skill-pct-label[data-desc]::after,
+    .skill-progress-row:hover .skill-pct-label[data-desc]::before {
+      opacity: 1;
+    }
+    .skill-progress-row:hover .skill-pct-label[data-desc]::after {
+      transform: translateY(0);
+    }
+    .skill-progress {
+      flex: 1;
+      height: 6px;
+      background-color: var(--color-border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .skill-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim));
+      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: width;
+    }
+    .skill-card.revealed .skill-progress-fill {
+      width: var(--target);
+    }
+    .skill-card:hover .skill-progress-fill {
+      filter: brightness(1.35);
+      box-shadow: 0 0 10px var(--color-accent);
+    }
+    /* Staggered delay: each skill item animates slightly after the previous */
+    .skill-card .skill-item:nth-child(1) .skill-progress-fill { transition-delay: 0.05s; }
+    .skill-card .skill-item:nth-child(2) .skill-progress-fill { transition-delay: 0.12s; }
+    .skill-card .skill-item:nth-child(3) .skill-progress-fill { transition-delay: 0.19s; }
+    .skill-card .skill-item:nth-child(4) .skill-progress-fill { transition-delay: 0.26s; }
+    .skill-card .skill-item:nth-child(5) .skill-progress-fill { transition-delay: 0.33s; }
+    @media (prefers-reduced-motion: reduce) {
+      .skill-card .skill-progress-fill {
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+      }
+    }
+    @media (max-width: 1024px) {
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .skills-grid { grid-template-columns: 1fr; }
+      .skill-card { padding: var(--space-md); }
+    }
+  </style>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "John Bryan Capellan",
+    "jobTitle": "BSIT Student",
+    "description": "BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects.",
+    "url": "https://brokeCode05.github.io",
+    "sameAs": [
+      "https://github.com/brokeCode05"
+    ],
+    "knowsAbout": [
+      "Linux Administration",
+      "Networking",
+      "Cybersecurity",
+      "System Administration",
+      "Web Development",
+      "Home Lab"
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Scroll progress indicator -->
+  <div class="scroll-progress" role="progressbar" aria-hidden="true"></div>
+
+  <!-- Skip to content (accessibility) -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- ============ NAVBAR ============ -->
+  <header class="navbar" role="banner" aria-label="Site navigation">
+    <div class="navbar-inner container">
+      <a href="#hero" class="navbar-logo" aria-label="Home">
+        <span class="navbar-logo-code">~</span>
+        <span class="navbar-logo-text">/portfolio</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <ul class="navbar-links">
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#skills" class="nav-link">Skills</a></li>
+          <li><a href="#projects" class="nav-link">Projects</a></li>
+          <li><a href="#github" class="nav-link">GitHub</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+          <li>
+            <button class="theme-toggle" aria-label="Switch to light mode" title="Toggle dark/light mode" aria-pressed="false">
+              <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <button class="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+    <!-- Mobile menu overlay + panel -->
+    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+    <div class="nav-menu-mobile" id="nav-menu-mobile" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <a href="#about" class="nav-link">About</a>
+      <a href="#skills" class="nav-link">Skills</a>
+      <a href="#projects" class="nav-link">Projects</a>
+      <a href="#github" class="nav-link">GitHub</a>
+      <a href="#contact" class="nav-link">Contact</a>
+      <button id="mobile-theme-toggle" class="theme-toggle" aria-label="Switch to light mode" title="Toggle dark/light mode" aria-pressed="false">
+        <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span class="theme-toggle-text">Toggle theme</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main id="main-content">
+
+  <!-- ============ HERO ============ -->
+  <section id="hero" class="hero section" aria-label="Introduction">
+    <div class="container">
+      <div class="hero-layout">
+        <div class="hero-content">
+          <div class="hero-badge">BSIT Student</div>
+          <h1 class="hero-title">
+            Learning infrastructure,<br />
+            one lab at a time.
+          </h1>
+          <p class="hero-description">
+            BS Information Technology student passionate about Linux, networking,
+            system administration, and cybersecurity. Building hands-on home lab
+            projects to turn theory into real skills.
+          </p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">View Projects</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          </div>
+          <div class="hero-terminal" aria-hidden="true">
+            <div class="terminal-line">
+              <span class="prompt">$</span>
+              <span class="typing" id="hero-typing"></span>
+              <span class="cursor-blink" id="hero-cursor">▊</span>
+            </div>
+            <div class="terminal-output" id="hero-output"></div>
+          </div>
+        </div>
+        <div class="hero-photo-wrapper">
+          <div class="hero-photo-frame">
+            <div class="hero-photo-inner">
+              <img src="img/profile.png" alt="John Bryan Capellan" class="hero-photo"
+                   onerror="this.closest('.hero-photo-wrapper').style.display='none'" />
+              <div class="hero-photo-scanlines" aria-hidden="true"></div>
+              <div class="hero-photo-status" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" class="about section" aria-label="About me">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>About</h2>
+      </div>
+      <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
+        <div class="about-text">
+          <p>
+            I'm a BS Information Technology student with a passion for Linux, networking,
+            system administration, and cybersecurity. I enjoy learning through hands-on
+            projects in my home lab while expanding my skills beyond web development.
+            My goal is to build practical solutions, continuously improve my technical
+            knowledge, and grow into a well-rounded IT professional.
+          </p>
+        </div>
+        <div class="about-terminal" aria-hidden="true">
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-title">~/about — zsh</span>
+            </div>
+            <div class="terminal-body">
+              <span class="line"><span class="prompt">$</span> cat about.txt</span>
+              <span class="line output">{</span>
+              <span class="line output indent">"role": "BSIT Student",</span>
+              <span class="line output indent">"focus": ["Linux", "Security", "Networking"],</span>
+              <span class="line output indent">"philosophy": "Know the fundamentals.",</span>
+              <span class="line output indent">"status": "Building"</span>
+              <span class="line output">}</span>
+              <span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">▊</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section id="skills" class="skills section" aria-label="Skills">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Skills</h2>
+        <p>Technologies and tools I work with regularly.</p>
+      </div>
+
+      <div class="skills-grid" data-reveal data-reveal-delay="100">
+
+        <!-- 🐧 Linux & System Administration -->
+        <div class="skill-card" data-reveal data-reveal-delay="100">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Linux &amp; System Administration</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Linux Mint XFCE</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Linux Command Line</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Basic Linux Administration</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 30%"></div>
+                </div>
+                <span class="skill-pct-label">30%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🌐 Networking -->
+        <div class="skill-card" data-reveal data-reveal-delay="150">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Networking</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Networking Fundamentals</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 30%"></div>
+                </div>
+                <span class="skill-pct-label">30%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">TCP/IP Fundamentals</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 25%"></div>
+                </div>
+                <span class="skill-pct-label">25%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🔐 Remote Administration -->
+        <div class="skill-card" data-reveal data-reveal-delay="200">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Remote Administration</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">SSH / OpenSSH</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Tailscale</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🌐 Web Development -->
+        <div class="skill-card" data-reveal data-reveal-delay="250">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Web Development</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">HTML</span>
+                <span class="skill-item-level">Intermediate+</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 70%"></div>
+                </div>
+                <span class="skill-pct-label">70%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">CSS</span>
+                <span class="skill-item-level">Intermediate+</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 65%"></div>
+                </div>
+                <span class="skill-pct-label">65%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">JavaScript</span>
+                <span class="skill-item-level">Intermediate</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 60%"></div>
+                </div>
+                <span class="skill-pct-label">60%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Responsive Web Design</span>
+                <span class="skill-item-level">Intermediate+</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 65%"></div>
+                </div>
+                <span class="skill-pct-label">65%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🛠 Development Tools -->
+        <div class="skill-card" data-reveal data-reveal-delay="300">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Development Tools</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">VS Code</span>
+                <span class="skill-item-level">Intermediate+</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 70%"></div>
+                </div>
+                <span class="skill-pct-label">70%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Git</span>
+                <span class="skill-item-level">Basic Awareness</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 20%"></div>
+                </div>
+                <span class="skill-pct-label">20%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">npm</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Termius</span>
+                <span class="skill-item-level">Beginner</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 35%"></div>
+                </div>
+                <span class="skill-pct-label">35%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🔐 Cybersecurity -->
+        <div class="skill-card" data-reveal data-reveal-delay="350">
+          <div class="skill-card-header">
+            <span class="skill-card-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <h3 class="skill-card-title">Cybersecurity</h3>
+          </div>
+          <div class="skill-card-body">
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Cybersecurity Fundamentals</span>
+                <span class="skill-item-level">Basic Awareness</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 20%"></div>
+                </div>
+                <span class="skill-pct-label">20%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">Ethical Hacking Fundamentals</span>
+                <span class="skill-item-level">Basic Awareness</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 20%"></div>
+                </div>
+                <span class="skill-pct-label">20%</span>
+              </div>
+            </div>
+            <div class="skill-item">
+              <div class="skill-item-header">
+                <span class="skill-item-name">System Enumeration Concepts</span>
+                <span class="skill-item-level">Basic Awareness</span>
+              </div>
+              <div class="skill-progress-row">
+                <div class="skill-progress" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                  <div class="skill-progress-fill" style="--target: 20%"></div>
+                </div>
+                <span class="skill-pct-label">20%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Currently Learning -->
+      <div class="skill-learning" data-reveal data-reveal-delay="100">
+        <h3 class="skill-card-title">Currently Learning</h3>
+        <p class="skill-learning-desc">
+          Topics I'm actively exploring through hands-on home lab projects.
+        </p>
+        <div class="learning-list">
+          <span class="learning-tag">Linux Administration</span>
+          <span class="learning-tag">Networking</span>
+          <span class="learning-tag">Cybersecurity</span>
+          <span class="learning-tag">System Administration</span>
+          <span class="learning-tag">Home Lab Development</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section id="projects" class="projects section" aria-label="Projects">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Projects</h2>
+        <p>Home lab projects focused on security monitoring and system administration.</p>
+      </div>
+      <div class="projects-grid grid grid-cols-2">
+        
+        <article class="project-card" data-reveal data-reveal-delay="100">
+          <div class="project-card-header">
+            <div class="project-card-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <h3 class="project-card-title">Home SOC</h3>
+          </div>
+          <p class="project-card-description">
+            A web-based security monitoring platform that provides real-time visibility
+            into a home lab environment. Monitors Linux and Windows hosts, tracks system
+            health, collects logs, displays security events, monitors SSH activity, and
+            provides alerts through a centralized dashboard.
+          </p>
+          <div class="project-card-tech flex flex-wrap gap-sm">
+            <span class="tech-tag">Python</span>
+            <span class="tech-tag">Linux Mint</span>
+            <span class="tech-tag">Windows 11</span>
+            <span class="tech-tag">SSH</span>
+            <span class="tech-tag">SQLite</span>
+            <span class="tech-tag">UFW</span>
+            <span class="tech-tag">psutil</span>
+            <span class="tech-tag">journalctl</span>
+          </div>
+        </article>
+
+        <article class="project-card" data-reveal data-reveal-delay="200">
+          <div class="project-card-header">
+            <div class="project-card-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"/>
+                <line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+            </div>
+            <h3 class="project-card-title">SSH Management System</h3>
+          </div>
+          <p class="project-card-description">
+            A secure command-line application for managing multiple Linux machines over
+            SSH. Stores server profiles, establishes encrypted connections, executes
+            administrative commands, transfers files via SFTP, and maintains logs of
+            all sessions.
+          </p>
+          <div class="project-card-tech flex flex-wrap gap-sm">
+            <span class="tech-tag">Python</span>
+            <span class="tech-tag">Paramiko</span>
+            <span class="tech-tag">Rich</span>
+            <span class="tech-tag">OpenSSH</span>
+            <span class="tech-tag">SFTP</span>
+            <span class="tech-tag">SQLite</span>
+            <span class="tech-tag">Linux Mint</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CERTIFICATIONS ============ -->
+  <section id="certifications" class="certifications section" aria-label="Certifications">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Certifications</h2>
+        <p>Foundational certifications in programming, web development, and cybersecurity.</p>
+      </div>
+      <div class="certs-grid grid grid-cols-2">
+        <div class="cert-card" data-reveal data-reveal-delay="100">
+          <div class="cert-card-badge" aria-hidden="true">JVA</div>
+          <div class="cert-card-body">
+            <h3 class="cert-card-title">Java Fundamentals</h3>
+            <p class="cert-card-issuer">Oracle</p>
+            <p class="cert-card-date">Issued 2024</p>
+          </div>
+        </div>
+        <div class="cert-card" data-reveal data-reveal-delay="200">
+          <div class="cert-card-badge" aria-hidden="true">WEB</div>
+          <div class="cert-card-body">
+            <h3 class="cert-card-title">Web Development Basics</h3>
+            <p class="cert-card-issuer">IBM</p>
+            <p class="cert-card-date">Issued 2025</p>
+          </div>
+        </div>
+        <div class="cert-card" data-reveal data-reveal-delay="300">
+          <div class="cert-card-badge" aria-hidden="true">SEC</div>
+          <div class="cert-card-body">
+            <h3 class="cert-card-title">Introduction to Cybersecurity</h3>
+            <p class="cert-card-issuer">Cisco Net Academy</p>
+            <p class="cert-card-date">Issued 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEARNING JOURNEY ============ -->
+  <section id="learning" class="learning section" aria-label="Learning journey">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Learning Journey</h2>
+        <p>Key milestones in my academic and self-directed learning path.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item" data-reveal data-reveal-delay="100">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <time class="timeline-date" datetime="2026">2026</time>
+            <h3 class="timeline-title">Cybersecurity, Networking &amp; Mobile Development</h3>
+            <p class="timeline-description">Studying cybersecurity fundamentals, ethical hacking, and advanced networking concepts while exploring Android development with Android Studio.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-reveal data-reveal-delay="200">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <time class="timeline-date" datetime="2025">2025</time>
+            <h3 class="timeline-title">Web Development, Networking &amp; Database Management</h3>
+            <p class="timeline-description">Studied web development, networking fundamentals, and database management with MySQL and MongoDB. Gained hands-on experience building full-stack applications and designing relational and NoSQL database schemas.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-reveal data-reveal-delay="300">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <time class="timeline-date" datetime="2024">2024</time>
+            <h3 class="timeline-title">UI/UX Design</h3>
+            <p class="timeline-description">Learned user interface and user experience design principles using Figma. Created wireframes, prototypes, and design systems.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-reveal data-reveal-delay="350">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <time class="timeline-date" datetime="2023">2023</time>
+            <h3 class="timeline-title">Programming</h3>
+            <p class="timeline-description">Started learning programming fundamentals with Java and C#. Built foundational knowledge in object-oriented programming, data structures, and basic application development.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="skill-learning" data-reveal data-reveal-delay="100">
+        <h3 class="skill-category-title">Currently Studying</h3>
+        <p class="skill-learning-desc">
+          Topics I'm actively exploring to expand my skill set.
+        </p>
+        <div class="learning-list">
+          <span class="learning-tag">Cybersecurity</span>
+          <span class="learning-tag">Ethical Hacking</span>
+          <span class="learning-tag">Advanced Networking</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCE ============ -->
+  <section id="experience" class="experience section" aria-label="Experience">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Experience</h2>
+        <p>Professional background in customer service and exam administration.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item" data-reveal data-reveal-delay="100">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta flex items-center justify-between mb-sm">
+              <h3 class="timeline-title">Customer Service Representative</h3>
+              <time class="timeline-date">VXI Philippines</time>
+            </div>
+            <ul class="timeline-bullets">
+              <li>Assisted customers with technical support, financial/account-related inquiries, and sales concerns through phone-based customer service.</li>
+              <li>Diagnosed and resolved customer issues while providing accurate information and effective solutions.</li>
+              <li>Maintained clear and professional communication to ensure a positive customer experience.</li>
+              <li>Followed company procedures to document customer interactions and resolve cases efficiently.</li>
+              <li>Developed strong problem-solving, communication, and customer service skills in a fast-paced BPO environment.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="timeline-item" data-reveal data-reveal-delay="200">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta flex items-center justify-between mb-sm">
+              <h3 class="timeline-title">Exam Proctor</h3>
+              <time class="timeline-date">CLAD Asia</time>
+            </div>
+            <ul class="timeline-bullets">
+              <li>Facilitated and supervised onsite and online examinations while ensuring compliance with testing policies and procedures.</li>
+              <li>Verified candidate identities and monitored examinations to maintain test integrity.</li>
+              <li>Assisted examinees with exam instructions and resolved basic technical or procedural concerns during testing.</li>
+              <li>Coordinated with the examination team to ensure smooth and organized exam operations.</li>
+              <li>Maintained accurate records and reported any incidents encountered during examination sessions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GITHUB ============ -->
+  <section id="github" class="github section" aria-label="GitHub Activity">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>GitHub</h2>
+        <p>Open source activity and contributions.</p>
+      </div>
+      <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
+        <div class="github-card">
+          <h3 class="github-card-title">Stats</h3>
+          <div class="gh-stats-grid" id="gh-stats-container">
+            <div class="gh-stat-item">
+              <span class="gh-stat-value" id="gh-repos">—</span>
+              <span class="gh-stat-label">Repos</span>
+            </div>
+            <div class="gh-stat-item">
+              <span class="gh-stat-value" id="gh-followers">—</span>
+              <span class="gh-stat-label">Followers</span>
+            </div>
+            <div class="gh-stat-item">
+              <span class="gh-stat-value" id="gh-following">—</span>
+              <span class="gh-stat-label">Following</span>
+            </div>
+            <div class="gh-stat-item">
+              <span class="gh-stat-value" id="gh-stars">—</span>
+              <span class="gh-stat-label">Stars</span>
+            </div>
+          </div>
+        </div>
+        <div class="github-card">
+          <h3 class="github-card-title">Streak</h3>
+          <img class="github-img" id="gh-streak" alt="GitHub Streak" loading="lazy" onerror="this.style.display='none'" />
+        </div>
+      </div>
+      <div class="github-graph-wrap" data-reveal data-reveal-delay="200">
+        <h3 class="github-card-title">Contribution Graph</h3>
+        <img class="github-graph-img" id="gh-graph" alt="GitHub Contribution Graph" loading="lazy" onerror="this.parentElement.style.display='none'" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" class="contact section" aria-label="Contact">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <h2>Contact</h2>
+        <p>Get in touch for collaboration, opportunities, or questions.</p>
+      </div>
+      <div class="contact-content flex flex-col items-start gap-lg" data-reveal data-reveal-delay="100">
+        <p class="contact-text">
+          I'm always open to connecting with fellow learners, discussing
+          IT and cybersecurity, or exploring opportunities to collaborate.
+          Feel free to reach out.
+        </p>
+        <a href="resume.pdf" class="btn btn-primary btn-resume" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          Download Resume (PDF)
+        </a>
+        <div class="contact-links flex flex-wrap gap-lg">
+          <a href="mailto:jhnbryn05@gmail.com" class="contact-link" aria-label="Send email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            jhnbryn05@gmail.com
+          </a>
+          <a href="https://github.com/brokeCode05" class="contact-link" aria-label="GitHub profile" target="_blank" rel="noopener noreferrer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            github.com/brokeCode05
+          </a>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-inner flex items-center justify-between">
+        <p class="footer-copyright">&copy; 2026 — Built with HTML, CSS &amp; JavaScript</p>
+        <a href="#hero" class="footer-back" aria-label="Back to top">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 15l-6-6-6 6"/>
+          </svg>
+          <span>Back to top</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript (minified) -->
+  <script src="js/main.min.js" defer></script>
+
+  <!-- GitHub & Skills widget scripts -->
+  <script>
+    (function(){
+      var GH_USER = 'brokeCode05';
+
+      var ghImages = {
+        streak: {
+          dark: 'https://github-readme-streak-stats.herokuapp.com/?user=' + GH_USER + '&hide_border=true&background=171A21&stroke=2B313D&ring=4ADE80&fire=4ADE80&currStreakNum=F5F7FA&sideNums=A7B0BE&currStreakLabel=4ADE80&sideLabels=A7B0BE&dates=A7B0BE',
+          light: 'https://github-readme-streak-stats.herokuapp.com/?user=' + GH_USER + '&hide_border=true&background=FFFFFF&stroke=E5E7EB&ring=059669&fire=059669&currStreakNum=1A1D23&sideNums=6B7280&currStreakLabel=059669&sideLabels=6B7280&dates=6B7280'
+        },
+        graph: {
+          dark: 'https://github-readme-activity-graph.vercel.app/graph?username=' + GH_USER + '&theme=react-dark&hide_border=true&bg_color=171A21&color=4ADE80&line=4ADE80&point=2DA05A&area=true',
+          light: 'https://github-readme-activity-graph.vercel.app/graph?username=' + GH_USER + '&hide_border=true&bg_color=FFFFFF&color=059669&line=059669&point=047857&area=true'
+        }
+      };
+
+      function displayGitHub() {
+        var theme = document.documentElement.getAttribute('data-theme') || 'dark';
+        var t = theme === 'dark' ? 'dark' : 'light';
+        var el = document.getElementById('gh-streak');
+        if (el) el.src = ghImages.streak[t];
+        el = document.getElementById('gh-graph');
+        if (el) el.src = ghImages.graph[t];
+      }
+
+      function loadGhStats() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://api.github.com/users/' + GH_USER);
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var d = JSON.parse(xhr.responseText);
+            var el = document.getElementById('gh-repos');
+            if (el) el.textContent = d.public_repos;
+            el = document.getElementById('gh-followers');
+            if (el) el.textContent = d.followers;
+            el = document.getElementById('gh-following');
+            if (el) el.textContent = d.following;
+          }
+        };
+        xhr.send();
+        var xhr2 = new XMLHttpRequest();
+        xhr2.open('GET', 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&sort=updated');
+        xhr2.onload = function() {
+          if (xhr2.status === 200) {
+            var repos = JSON.parse(xhr2.responseText);
+            var stars = 0;
+            for (var i = 0; i < repos.length; i++) {
+              stars += repos[i].stargazers_count || 0;
+            }
+            var el = document.getElementById('gh-stars');
+            if (el) el.textContent = stars;
+          }
+        };
+        xhr2.send();
+      }
+
+      displayGitHub();
+      loadGhStats();
+
+      var observer = new MutationObserver(function(m) {
+        for (var i = 0; i < m.length; i++) {
+          if (m[i].attributeName === 'data-theme') {
+            displayGitHub();
+            break;
+          }
+        }
+      });
+      observer.observe(document.documentElement, { attributes: true });
+
+      // ---- Skill tooltips: maps skill names to descriptions ----
+      (function() {
+        var descs = {
+          "Linux Mint XFCE": "Learning Linux through hands-on home lab activities, terminal usage, and remote administration.",
+          "Linux Command Line": "Learning Linux through hands-on home lab activities, terminal usage, and remote administration.",
+          "Basic Linux Administration": "Learning Linux through hands-on home lab activities, terminal usage, and remote administration.",
+          "Networking Fundamentals": "Studying core networking concepts including OSI model, IP addressing, and network protocols through coursework and home lab experiments.",
+          "TCP/IP Fundamentals": "Learning TCP/IP protocol suite, subnetting, and packet analysis as part of networking curriculum.",
+          "SSH / OpenSSH": "Using SSH for secure remote access to Linux machines in home lab environment.",
+          "Tailscale": "Setting up secure mesh VPNs with Tailscale for remote home lab access.",
+          "HTML": "Experienced building responsive webpages using semantic HTML.",
+          "CSS": "Skilled in modern CSS including Flexbox, Grid, custom properties, and responsive design.",
+          "JavaScript": "Building interactive web applications with vanilla JavaScript and DOM manipulation.",
+          "Responsive Web Design": "Creating layouts that adapt seamlessly across desktop, tablet, and mobile devices.",
+          "VS Code": "Primary editor with extensions, debugging, and integrated terminal for daily development.",
+          "Git": "Learning version control fundamentals including commit, push, pull, and branching.",
+          "npm": "Using npm for package management in JavaScript projects.",
+          "Termius": "SSH client used for managing remote servers in home lab.",
+          "Cybersecurity Fundamentals": "Studying security principles and best practices through coursework.",
+          "Ethical Hacking Fundamentals": "Learning ethical hacking concepts and penetration testing methodologies.",
+          "System Enumeration Concepts": "Exploring system fingerprinting and information gathering techniques."
+        };
+        var items = document.querySelectorAll('.skill-item');
+        for (var i = 0; i < items.length; i++) {
+          var nameEl = items[i].querySelector('.skill-item-name');
+          var label = items[i].querySelector('.skill-pct-label');
+          if (nameEl && label && descs[nameEl.textContent]) {
+            label.setAttribute('data-desc', descs[nameEl.textContent]);
+            label.title = descs[nameEl.textContent];
+          }
+        }
+      })();
+
+      // ---- Hamburger menu toggle ----
+      (function() {
+        var hamburger = document.querySelector('.hamburger');
+        var overlay = document.getElementById('nav-overlay');
+        var menu = document.getElementById('nav-menu-mobile');
+        var body = document.body;
+
+        if (!hamburger || !overlay || !menu) return;
+
+        function openMenu() {
+          hamburger.classList.add('active');
+          hamburger.setAttribute('aria-expanded', 'true');
+          hamburger.setAttribute('aria-label', 'Close menu');
+          overlay.classList.add('open');
+          menu.classList.add('open');
+          body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+          hamburger.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          hamburger.setAttribute('aria-label', 'Open menu');
+          overlay.classList.remove('open');
+          menu.classList.remove('open');
+          body.style.overflow = '';
+        }
+
+        hamburger.addEventListener('click', function() {
+          if (menu.classList.contains('open')) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+
+        overlay.addEventListener('click', closeMenu);
+
+        // Wire up mobile theme toggle to dispatch a click on the desktop one
+        var mobileToggle = document.getElementById('mobile-theme-toggle');
+        var desktopToggle = document.querySelector('.navbar-links .theme-toggle');
+        if (mobileToggle && desktopToggle) {
+          mobileToggle.addEventListener('click', function() {
+            desktopToggle.click();
+          });
+        }
+
+        // Close on nav link click (smooth scroll will happen via main.min.js)
+        var links = menu.querySelectorAll('.nav-link');
+        for (var i = 0; i < links.length; i++) {
+          links[i].addEventListener('click', function(e) {
+            closeMenu();
+          });
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && menu.classList.contains('open')) {
+            closeMenu();
+          }
+        });
+
+        // Close on scroll
+        var scrollTimer;
+        window.addEventListener('scroll', function() {
+          if (menu.classList.contains('open')) {
+            if (scrollTimer) clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(closeMenu, 150);
+          }
+        }, { passive: true });
+      })();
+
+      // ---- Animated counter: counts from 0 to target when card is revealed ----
+      (function() {
+        var prefersReducedMotion = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Easing that matches the CSS cubic-bezier(0.25, 0.46, 0.45, 0.94)
+        function easeOutQuart(t) {
+          return 1 - Math.pow(1 - t, 4);
+        }
+
+        function animateLabel(label, target, delay) {
+          var t = parseInt(target, 10);
+          if (prefersReducedMotion) {
+            label.textContent = t + '%';
+            return;
+          }
+          var duration = 800;
+          var startTime;
+
+          function frame(time) {
+            if (!startTime) startTime = time;
+            var elapsed = time - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            var eased = easeOutQuart(progress);
+            label.textContent = Math.round(eased * t) + '%';
+            if (progress < 1) requestAnimationFrame(frame);
+          }
+
+          setTimeout(function() {
+            requestAnimationFrame(frame);
+          }, (delay || 0) * 1000);
+        }
+
+        // Map nth-child index to CSS delay values
+        var staggerDelays = [0.05, 0.12, 0.19, 0.26, 0.33];
+
+        function triggerCardCounters(card) {
+          var skillItems = card.querySelectorAll('.skill-item');
+          for (var i = 0; i < skillItems.length; i++) {
+            var label = skillItems[i].querySelector('.skill-pct-label');
+            if (label && !label.hasAttribute('data-target')) {
+              var val = parseInt(label.textContent, 10);
+              if (!isNaN(val)) {
+                label.setAttribute('data-target', val);
+                label.textContent = '0%';
+                var delay = staggerDelays[i] || staggerDelays[staggerDelays.length - 1];
+                animateLabel(label, val, delay);
+              }
+            }
+          }
+        }
+
+        // MutationObserver for cards revealed after this script runs
+        var cardsObserver = new MutationObserver(function(records) {
+          for (var r = 0; r < records.length; r++) {
+            var card = records[r].target;
+            if (card.classList.contains('revealed')) {
+              triggerCardCounters(card);
+              cardsObserver.unobserve(card);
+            }
+          }
+        });
+
+        var cards = document.querySelectorAll('.skill-card');
+        for (var c = 0; c < cards.length; c++) {
+          // Handle already-revealed cards (above the fold)
+          if (cards[c].classList.contains('revealed')) {
+            triggerCardCounters(cards[c]);
+          } else {
+            cardsObserver.observe(cards[c], { attributes: true, attributeFilter: ['class'] });
+          }
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>

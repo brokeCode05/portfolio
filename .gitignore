@@ -1,0 +1,24 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Environment
+.env
+.env.local
+
+# Dependencies (if any are added later)
+node_modules/
+vendor/
+
+# Local server
+*.pid
+*.log
