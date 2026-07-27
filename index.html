@@ -1983,41 +1983,7 @@
         if (el) el.src = ghImages.graph[t];
       }
 
-      function loadGhStats() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://api.github.com/users/' + GH_USER);
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            var d = JSON.parse(xhr.responseText);
-            var el = document.getElementById('gh-repos');
-            if (el) el.textContent = d.public_repos;
-            el = document.getElementById('gh-followers');
-            if (el) el.textContent = d.followers;
-            el = document.getElementById('gh-following');
-            if (el) el.textContent = d.following;
-          }
-        };
-        xhr.onerror = function(){};
-        xhr.send();
-        var xhr2 = new XMLHttpRequest();
-        xhr2.open('GET', 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&sort=updated');
-        xhr2.onload = function() {
-          if (xhr2.status === 200) {
-            var repos = JSON.parse(xhr2.responseText);
-            var stars = 0;
-            for (var i = 0; i < repos.length; i++) {
-              stars += repos[i].stargazers_count || 0;
-            }
-            var el = document.getElementById('gh-stars');
-            if (el) el.textContent = stars;
-          }
-        };
-        xhr2.onerror = function(){};
-        xhr2.send();
-      }
-
       displayGitHub();
-      loadGhStats();
 
       var observer = new MutationObserver(function(m) {
         for (var i = 0; i < m.length; i++) {
