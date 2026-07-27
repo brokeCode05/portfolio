@@ -1390,7 +1390,7 @@
              data-cert-key="java"
              data-cert-index="0"
              onclick="openCertViewer(this)"
-             onkeydown="if(event.key==='Enter'||event.key===' ')openCertViewer(this)"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCertViewer(this)}"
              tabindex="0" role="button">
           <div class="cert-card-badge" aria-hidden="true">JVA</div>
           <div class="cert-card-body">
@@ -1407,7 +1407,7 @@
              data-cert-key="web"
              data-cert-index="1"
              onclick="openCertViewer(this)"
-             onkeydown="if(event.key==='Enter'||event.key===' ')openCertViewer(this)"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCertViewer(this)}"
              tabindex="0" role="button">
           <div class="cert-card-badge" aria-hidden="true">WEB</div>
           <div class="cert-card-body">
@@ -1424,7 +1424,7 @@
              data-cert-key="sec"
              data-cert-index="2"
              onclick="openCertViewer(this)"
-             onkeydown="if(event.key==='Enter'||event.key===' ')openCertViewer(this)"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCertViewer(this)}"
              tabindex="0" role="button">
           <div class="cert-card-badge" aria-hidden="true">SEC</div>
           <div class="cert-card-body">
