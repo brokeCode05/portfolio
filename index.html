@@ -1795,6 +1795,7 @@
             if (el) el.textContent = d.following;
           }
         };
+        xhr.onerror = function(){};
         xhr.send();
         var xhr2 = new XMLHttpRequest();
         xhr2.open('GET', 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&sort=updated');
@@ -1809,6 +1810,7 @@
             if (el) el.textContent = stars;
           }
         };
+        xhr2.onerror = function(){};
         xhr2.send();
       }
 
@@ -1987,7 +1989,7 @@
             var card = records[r].target;
             if (card.classList.contains('revealed')) {
               triggerCardCounters(card);
-              cardsObserver.unobserve(card);
+              cardsObserver.disconnect();
             }
           }
         });
