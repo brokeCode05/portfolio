@@ -2524,8 +2524,7 @@
     }
 
     // ─── Projects ─────────────────────────────
-    var projectsGrid = document.querySelector('#projects .section-header + .projects-grid, #projects .projects-grid');
-    if (!projectsGrid) projectsGrid = document.querySelector('#projects .container > .projects-grid');
+    var projectsGrid = document.querySelector('.projects-grid');
     if (projectsGrid && data.projects && data.projects.length) {
       projectsGrid.innerHTML = renderProjects(data);
     }
@@ -2534,15 +2533,12 @@
     var certsGrid = document.querySelector('.certs-grid');
     if (certsGrid && data.certifications && data.certifications.length) {
       certsGrid.innerHTML = renderCerts(data);
-      // Re-attach cert click handlers
-      if (typeof initCertViewer === 'function') initCertViewer();
     }
 
     // ─── Experience ───────────────────────────
-    var timeline = document.querySelector('.timeline');
-    if (!timeline) timeline = document.querySelector('#experience .container > div, .experience-list');
-    if (timeline && data.experience && data.experience.length) {
-      timeline.innerHTML = renderExperience(data);
+    var experienceContainer = document.querySelector('#experience .timeline');
+    if (experienceContainer && data.experience && data.experience.length) {
+      experienceContainer.innerHTML = renderExperience(data);
     }
 
   })();
