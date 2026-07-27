@@ -2043,22 +2043,31 @@
         currentIndex = -1;
       }
 
-      // Click handlers for cert cards
-      for (var ci = 0; ci < certCards.length; ci++) {
-        (function(idx, el) {
-          el.addEventListener('click', function(e) {
-            // Don't trigger if clicking a link inside
-            if (e.target.closest('a')) return;
-            // Pulse animation
-            el.classList.remove('pulsing');
-            void el.offsetWidth; // force reflow
-            el.classList.add('pulsing');
-            // Open modal after pulse finishes
-            setTimeout(function() {
-              openModal(idx);
-            }, 420);
-          });
-        })(ci, certCards[ci]);
+      // Click handler via event delegation on the certs grid
+      var certGrid = document.querySelector('.certs-grid');
+      if (certGrid) {
+        certGrid.addEventListener('click', function(e) {
+          var card = e.target.closest('.cert-card[data-cert-path]');
+          if (!card) return;
+          if (e.target.closest('a')) return;
+          // Find the index
+          var idx = -1;
+          for (var ci2 = 0; ci2 < certData.length; ci2++) {
+            if (certData[ci2].el === card) {
+              idx = ci2;
+              break;
+            }
+          }
+          if (idx < 0) return;
+          // Pulse animation
+          card.classList.remove('pulsing');
+          void card.offsetWidth;
+          card.classList.add('pulsing');
+          // Open modal after pulse finishes
+          setTimeout(function() {
+            openModal(idx);
+          }, 420);
+        });
       }
 
       // Prev/Next
