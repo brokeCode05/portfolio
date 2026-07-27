@@ -1374,7 +1374,7 @@
       </div>
       <div class="certs-grid grid grid-cols-2">
         <div class="cert-card" data-reveal data-reveal-delay="100"
-             data-cert-path="img/certs/java-fundamentals.svg"
+             data-cert-path="img/certs/certificate.jpg"
              data-cert-name="Java Fundamentals"
              data-cert-issuer="Oracle"
              data-cert-date="2024"
@@ -1387,7 +1387,7 @@
           </div>
         </div>
         <div class="cert-card" data-reveal data-reveal-delay="200"
-             data-cert-path="img/certs/web-development.svg"
+             data-cert-path="img/certs/certificate.jpg"
              data-cert-name="Web Development Basics"
              data-cert-issuer="IBM"
              data-cert-date="2025"
@@ -1400,7 +1400,7 @@
           </div>
         </div>
         <div class="cert-card" data-reveal data-reveal-delay="300"
-             data-cert-path="img/certs/cybersecurity.svg"
+             data-cert-path="img/certs/certificate.jpg"
              data-cert-name="Introduction to Cybersecurity"
              data-cert-issuer="Cisco Net Academy"
              data-cert-date="2026"
@@ -1971,7 +1971,7 @@
         var cert = certData[index];
 
         // Build filename
-        var filename = cert.key + '-' + cert.name.toLowerCase().replace(/\s+/g, '-') + '.svg';
+        var filename = cert.name.toLowerCase().replace(/\s+/g, '-') + ' --view';
         filenameEl.textContent = filename;
 
         // Update counter
@@ -1986,7 +1986,7 @@
         certImg.src = '';
 
         // Type the command
-        var cmdText = filename + ' --view';
+        var cmdText = filename;
         typeCommand(cmdText, function() {
           // After typing finishes, load the image
           certImg.src = cert.path;
