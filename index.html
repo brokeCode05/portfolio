@@ -424,87 +424,138 @@
     }
 
     /* ===== Learning Journey Widget ===== */
-    .journey-card {
-      margin-top: var(--space-lg);
+    /* ===== Learning Journey Timeline ===== */
+    .about-journey {
+      margin-top: var(--space-xl);
+      padding: var(--space-xl);
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius);
-      padding: var(--space-lg);
       background-color: var(--color-surface);
     }
-    .journey-card-title {
+    .about-journey-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .about-journey-header h3 {
       font-family: var(--font-heading);
       font-size: var(--text-sm);
       font-weight: 600;
       color: var(--color-text-primary);
-      margin-bottom: var(--space-md);
+      margin-bottom: 0;
     }
-    .journey-steps {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-    .journey-step {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-md);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius-sm);
-      background-color: var(--color-bg);
-      font-size: var(--text-sm);
-      color: var(--color-text-secondary);
-      transition: border-color var(--transition-fast);
-    }
-    .journey-step:hover {
-      border-color: var(--color-border-hover);
-    }
-    .journey-step-icon {
+    .about-journey-header .header-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      font-size: 11px;
-      flex-shrink: 0;
-    }
-    .journey-step-icon.done {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
       background-color: var(--color-accent-subtle);
       color: var(--color-accent);
-    }
-    .journey-step-icon.active {
-      background-color: rgba(74, 222, 128, 0.15);
-      color: var(--color-accent);
-      box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
-    }
-    .journey-step-icon.next {
-      background-color: var(--color-surface);
-      color: var(--color-text-secondary);
-      border: 1px dashed var(--color-border);
-    }
-    .journey-step-label {
-      font-weight: 500;
-    }
-    .journey-step-desc {
-      font-size: var(--text-xs);
-      color: var(--color-text-secondary);
-      margin-left: auto;
       flex-shrink: 0;
     }
-    .journey-connector {
-      width: 1px;
-      height: 12px;
-      margin-left: 11px;
-      background-color: var(--color-border);
+    .journey-timeline {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
-    @media (max-width: 480px) {
-      .journey-step {
-        flex-wrap: wrap;
+    .journey-timeline::before {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 16px;
+      bottom: 16px;
+      width: 2px;
+      background-color: var(--color-border);
+      z-index: 0;
+    }
+    .journey-item {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+    }
+    .journey-item-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      font-size: 12px;
+      position: relative;
+      z-index: 2;
+    }
+    .journey-item-marker.done {
+      background-color: var(--color-accent);
+      color: var(--color-bg);
+    }
+    .journey-item-marker.active {
+      background-color: var(--color-accent);
+      color: var(--color-bg);
+      box-shadow: 0 0 0 3px var(--color-accent-subtle);
+    }
+    .journey-item-marker.next {
+      background-color: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 2px dashed var(--color-border);
+    }
+    .journey-item-body {
+      flex: 1;
+      min-width: 0;
+      padding-top: 2px;
+    }
+    .journey-item-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 2px;
+    }
+    .journey-item-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+    [data-theme="light"] .journey-item-marker.done,
+    [data-theme="light"] .journey-item-marker.active {
+      background-color: var(--color-accent);
+      color: var(--color-bg);
+    }
+
+    /* Journey item hover */
+    .journey-item {
+      border-radius: var(--border-radius-sm);
+      margin: 0 calc(var(--space-md) * -1);
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
+      transition: background-color 0.2s ease;
+    }
+    .journey-item:hover {
+      background-color: var(--color-surface-hover);
+    }
+
+    @media (max-width: 600px) {
+      .about-journey {
+        padding: var(--space-lg);
       }
-      .journey-step-desc {
-        margin-left: 0;
-        width: 100%;
-        padding-left: calc(24px + var(--space-sm));
+      .journey-item {
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .journey-item-title {
+        font-size: var(--text-xs);
+      }
+      .journey-item-desc {
+        font-size: 11px;
       }
     }
 
@@ -1312,32 +1363,6 @@
             Every project teaches me something, and that's what keeps me going.
           </p>
 
-          <!-- Learning Journey -->
-          <div class="journey-card" data-reveal data-reveal-delay="200">
-            <div class="journey-card-title">My Journey</div>
-            <div class="journey-steps">
-              <div class="journey-step">
-                <span class="journey-step-icon done" aria-hidden="true">🌐</span>
-                <span class="journey-step-label">Web Development</span>
-                <span class="journey-step-desc">Started here</span>
-              </div>
-              <div class="journey-step">
-                <span class="journey-step-icon done" aria-hidden="true">🔗</span>
-                <span class="journey-step-label">Networking</span>
-                <span class="journey-step-desc">Got into it</span>
-              </div>
-              <div class="journey-step">
-                <span class="journey-step-icon active" aria-hidden="true">🛡️</span>
-                <span class="journey-step-label">Cybersecurity</span>
-                <span class="journey-step-desc">Currently diving deep</span>
-              </div>
-              <div class="journey-step">
-                <span class="journey-step-icon next" aria-hidden="true">?</span>
-                <span class="journey-step-label">What's next?</span>
-                <span class="journey-step-desc">Still exploring</span>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="about-terminal" aria-hidden="true">
           <div class="terminal-window">
@@ -1356,6 +1381,48 @@
               <span class="line output indent">"status": "Exploring"</span>
               <span class="line output">}</span>
               <span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">▊</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full-width Learning Journey Timeline -->
+      <div class="about-journey" data-reveal data-reveal-delay="200">
+        <div class="about-journey-header">
+          <span class="header-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </span>
+          <h3>My Journey</h3>
+        </div>
+        <div class="journey-timeline">
+          <div class="journey-item">
+            <span class="journey-item-marker done" aria-hidden="true">✓</span>
+            <div class="journey-item-body">
+              <div class="journey-item-title">Web Development</div>
+              <div class="journey-item-desc">Built my foundation here — HTML, CSS, JavaScript</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <span class="journey-item-marker done" aria-hidden="true">✓</span>
+            <div class="journey-item-body">
+              <div class="journey-item-title">Networking</div>
+              <div class="journey-item-desc">Learned how systems connect — TCP/IP, SSH, infrastructure</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <span class="journey-item-marker active" aria-hidden="true">●</span>
+            <div class="journey-item-body">
+              <div class="journey-item-title">Cybersecurity</div>
+              <div class="journey-item-desc">Currently diving deep — Google Cybersecurity Certificate</div>
+            </div>
+          </div>
+          <div class="journey-item">
+            <span class="journey-item-marker next" aria-hidden="true">?</span>
+            <div class="journey-item-body">
+              <div class="journey-item-title">What's next?</div>
+              <div class="journey-item-desc">Still exploring — always curious, always learning</div>
             </div>
           </div>
         </div>
