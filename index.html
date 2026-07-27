@@ -1387,7 +1387,8 @@
              data-cert-name="Java Fundamentals"
              data-cert-issuer="Oracle"
              data-cert-date="2024"
-             data-cert-key="java">
+             data-cert-key="java"
+             onclick="openCertViewer(this)">
           <div class="cert-card-badge" aria-hidden="true">JVA</div>
           <div class="cert-card-body">
             <h3 class="cert-card-title">Java Fundamentals</h3>
@@ -1400,7 +1401,8 @@
              data-cert-name="Web Development Basics"
              data-cert-issuer="IBM"
              data-cert-date="2025"
-             data-cert-key="web">
+             data-cert-key="web"
+             onclick="openCertViewer(this)">
           <div class="cert-card-badge" aria-hidden="true">WEB</div>
           <div class="cert-card-body">
             <h3 class="cert-card-title">Web Development Basics</h3>
@@ -1413,7 +1415,8 @@
              data-cert-name="Introduction to Cybersecurity"
              data-cert-issuer="Cisco Net Academy"
              data-cert-date="2026"
-             data-cert-key="sec">
+             data-cert-key="sec"
+             onclick="openCertViewer(this)">
           <div class="cert-card-badge" aria-hidden="true">SEC</div>
           <div class="cert-card-body">
             <h3 class="cert-card-title">Introduction to Cybersecurity</h3>
@@ -2043,32 +2046,27 @@
         currentIndex = -1;
       }
 
-      // Click handler via event delegation on the certs grid
-      var certGrid = document.querySelector('.certs-grid');
-      if (certGrid) {
-        certGrid.addEventListener('click', function(e) {
-          var card = e.target.closest('.cert-card[data-cert-path]');
-          if (!card) return;
-          if (e.target.closest('a')) return;
-          // Find the index
-          var idx = -1;
-          for (var ci2 = 0; ci2 < certData.length; ci2++) {
-            if (certData[ci2].el === card) {
-              idx = ci2;
-              break;
-            }
+      // Global function called by onclick on cert cards
+      window.openCertViewer = function(card) {
+        if (!card || !overlay || !modal) return;
+        // Find the index
+        var idx = -1;
+        for (var ci2 = 0; ci2 < certData.length; ci2++) {
+          if (certData[ci2].el === card) {
+            idx = ci2;
+            break;
           }
-          if (idx < 0) return;
-          // Pulse animation
-          card.classList.remove('pulsing');
-          void card.offsetWidth;
-          card.classList.add('pulsing');
-          // Open modal after pulse finishes
-          setTimeout(function() {
-            openModal(idx);
-          }, 420);
-        });
-      }
+        }
+        if (idx < 0) return;
+        // Pulse animation
+        card.classList.remove('pulsing');
+        void card.offsetWidth;
+        card.classList.add('pulsing');
+        // Open modal after pulse finishes
+        setTimeout(function() {
+          openModal(idx);
+        }, 420);
+      };
 
       // Prev/Next
       prevBtn.addEventListener('click', function() {
