@@ -743,6 +743,15 @@
     }
     .cert-card {
       cursor: pointer;
+      user-select: none;
+    }
+    /* Entire card is clickable — let clicks pass through children */
+    .cert-card-badge,
+    .cert-card-body {
+      pointer-events: none;
+    }
+    .cert-card:active {
+      transform: scale(0.97);
     }
     @media (max-width: 600px) {
       .cert-modal {
