@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560">
+  <rect width="800" height="560" rx="8" fill="#0F1115"/>
+  <rect x="0" y="0" width="800" height="32" rx="8" fill="#1A1D27"/>
+  <rect x="0" y="16" width="800" height="16" fill="#1A1D27"/>
+  <text x="20" y="22" font-family="monospace" font-size="12" fill="#6B7280">●</text>
+  <text x="36" y="22" font-family="monospace" font-size="12" fill="#F59E0B">●</text>
+  <text x="52" y="22" font-family="monospace" font-size="12" fill="#4ADE80">●</text>
+  <text x="360" y="22" font-family="monospace" font-size="11" fill="#6B7280">~/certificates/cybersecurity</text>
+  <line x1="0" y1="32" x2="800" y2="32" stroke="#2A2D35" stroke-width="1"/>
+  <text x="80" y="80" font-family="monospace" font-size="13" fill="#6B7280">$ cat cybersecurity.pdf --view</text>
+  <rect x="60" y="100" width="680" height="380" rx="4" fill="#1A1D27" stroke="#2A2D35" stroke-width="1"/>
+  <rect x="60" y="100" width="680" height="380" rx="4" fill="url(#scanlines)" opacity="0.3"/>
+  <rect x="80" y="120" width="640" height="340" rx="2" fill="none" stroke="#2A2D35" stroke-width="1" stroke-dasharray="4,4"/>
+  <!-- Shield icon -->
+  <text x="400" y="170" font-family="monospace" font-size="24" fill="#4ADE80" text-anchor="middle">🛡</text>
+  <text x="400" y="200" font-family="monospace" font-size="14" fill="#4ADE80" text-anchor="middle">INTRODUCTION TO CYBERSECURITY</text>
+  <text x="400" y="225" font-family="monospace" font-size="11" fill="#9CA3AF" text-anchor="middle">Certificate of Completion</text>
+  <line x1="200" y1="245" x2="600" y2="245" stroke="#4ADE80" stroke-width="1" opacity="0.5"/>
+  <text x="400" y="285" font-family="monospace" font-size="13" fill="#E5E7EB" text-anchor="middle">John Bryan Capellan</text>
+  <text x="400" y="310" font-family="monospace" font-size="10" fill="#6B7280" text-anchor="middle">has successfully completed</text>
+  <text x="400" y="335" font-family="monospace" font-size="11" fill="#9CA3AF" text-anchor="middle">the Introduction to Cybersecurity course</text>
+  <line x1="200" y1="365" x2="600" y2="365" stroke="#2A2D35" stroke-width="1"/>
+  <text x="250" y="395" font-family="monospace" font-size="10" fill="#6B7280" text-anchor="middle">Issued: 2026</text>
+  <text x="550" y="395" font-family="monospace" font-size="10" fill="#4ADE80" text-anchor="middle">Cisco Net Academy</text>
+  <rect x="340" y="415" width="120" height="30" rx="2" fill="none" stroke="#2A2D35" stroke-width="1"/>
+  <text x="400" y="435" font-family="monospace" font-size="9" fill="#6B7280" text-anchor="middle">CISCO NETACAD</text>
+  <text x="720" y="460" font-family="monospace" font-size="9" fill="#4ADE80" text-anchor="end">[VERIFIED]</text>
+  <defs>
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="4" y2="0" stroke="#000" stroke-width="1" opacity="0.08"/>
+    </pattern>
+  </defs>
+</svg>
