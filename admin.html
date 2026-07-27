@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Portfolio Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen" class="admin-login">
+  <div class="admin-login-box">
+    <h1>Portfolio Dashboard</h1>
+    <p>Enter admin password to manage content</p>
+    <input type="password" id="admin-pw-input" placeholder="Password" autocomplete="off" />
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary" id="admin-login-btn" style="width:100%;justify-content:center">Sign In</button>
+    <p style="margin-top:1rem;font-size:0.75rem;color:var(--admin-text-secondary)">
+      Default: <code>admin123</code>
+    </p>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="admin-app" class="admin-app" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+      <h2>Portfolio</h2>
+      <p>Content Manager</p>
+    </div>
+    <nav class="admin-nav" id="admin-nav">
+      <button class="admin-nav-btn active" data-section="hero">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <span>Hero</span>
+      </button>
+      <button class="admin-nav-btn" data-section="about">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </span>
+        <span>About</span>
+      </button>
+      <button class="admin-nav-btn" data-section="skills">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </span>
+        <span>Skills</span>
+      </button>
+      <button class="admin-nav-btn" data-section="currently">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </span>
+        <span>Currently</span>
+      </button>
+      <button class="admin-nav-btn" data-section="projects">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </span>
+        <span>Projects</span>
+      </button>
+      <button class="admin-nav-btn" data-section="certs">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        <span>Certs</span>
+      </button>
+      <button class="admin-nav-btn" data-section="experience">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </span>
+        <span>Experience</span>
+      </button>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <button class="btn btn-sm" id="admin-reset-btn" style="width:100%;justify-content:center">
+        Reset to Defaults
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <h3 id="section-title">Hero</h3>
+      <div class="admin-topbar-actions">
+        <button class="btn btn-sm" id="admin-export-btn">Export JSON</button>
+        <label class="btn btn-sm" style="cursor:pointer">
+          Import JSON
+          <input type="file" id="admin-import-input" accept=".json" style="display:none" />
+        </label>
+        <a href="index.html" class="btn btn-sm" target="_blank">View Site</a>
+      </div>
+    </div>
+    <div class="admin-content" id="admin-content">
+
+      <!-- ===== HERO SECTION ===== -->
+      <div class="admin-section active" id="section-hero">
+        <h2 class="admin-section-title">Hero Section</h2>
+        <p class="admin-section-desc">Edit the main hero content shown at the top of your portfolio.</p>
+        <div class="admin-card">
+          <div class="form-group">
+            <label>Badge Text</label>
+            <input type="text" id="hero-badge" />
+          </div>
+          <div class="form-group">
+            <label>Status Text</label>
+            <input type="text" id="hero-status" />
+          </div>
+          <div class="form-group">
+            <label>Headline Title</label>
+            <input type="text" id="hero-title" />
+            <div class="char-count">Use <code>&lt;br /&gt;</code> for line breaks</div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="hero-desc" rows="4"></textarea>
+          </div>
+          <button class="btn btn-primary" id="hero-save">Save Hero</button>
+        </div>
+      </div>
+
+      <!-- ===== ABOUT SECTION ===== -->
+      <div class="admin-section" id="section-about">
+        <h2 class="admin-section-title">About Section</h2>
+        <p class="admin-section-desc">Edit your bio and terminal JSON display.</p>
+        <div class="admin-card">
+          <div class="form-group">
+            <label>Bio Paragraph</label>
+            <textarea id="about-bio" rows="6"></textarea>
+          </div>
+          <h4 style="font-size:0.875rem;font-weight:600;margin:1rem 0 0.75rem">Terminal JSON</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Role</label>
+              <input type="text" id="about-role" />
+            </div>
+            <div class="form-group">
+              <label>Philosophy</label>
+              <input type="text" id="about-philosophy" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Path (comma separated)</label>
+              <input type="text" id="about-path" placeholder="Web Dev, Networking, Security" />
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <input type="text" id="about-status" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="about-save">Save About</button>
+        </div>
+      </div>
+
+      <!-- ===== SKILLS SECTION ===== -->
+      <div class="admin-section" id="section-skills">
+        <h2 class="admin-section-title">Skills &amp; Technologies</h2>
+        <p class="admin-section-desc">Manage skill cards — add, edit, or remove skills and their progress bars.</p>
+        <div id="skills-list"></div>
+        <button class="btn" id="skills-add-card">+ Add Skill Card</button>
+      </div>
+
+      <!-- ===== CURRENTLY SECTION ===== -->
+      <div class="admin-section" id="section-currently">
+        <h2 class="admin-section-title">Currently</h2>
+        <p class="admin-section-desc">Topics, courses, and resources you're actively exploring.</p>
+        <div class="admin-card">
+          <div class="tag-input-wrap">
+            <input type="text" id="currently-input" placeholder="Add a new item..." />
+            <button class="btn btn-sm btn-primary" id="currently-add">Add</button>
+          </div>
+          <div class="tag-list" id="currently-list"></div>
+          <button class="btn btn-primary" id="currently-save" style="margin-top:1rem">Save Currently</button>
+        </div>
+      </div>
+
+      <!-- ===== PROJECTS SECTION ===== -->
+      <div class="admin-section" id="section-projects">
+        <h2 class="admin-section-title">Projects</h2>
+        <p class="admin-section-desc">Manage your featured projects.</p>
+        <div id="projects-list"></div>
+        <button class="btn" id="projects-add">+ Add Project</button>
+      </div>
+
+      <!-- ===== CERTS SECTION ===== -->
+      <div class="admin-section" id="section-certs">
+        <h2 class="admin-section-title">Certifications</h2>
+        <p class="admin-section-desc">Manage your certificate cards.</p>
+        <div id="certs-list"></div>
+        <button class="btn" id="certs-add">+ Add Certificate</button>
+      </div>
+
+      <!-- ===== EXPERIENCE SECTION ===== -->
+      <div class="admin-section" id="section-experience">
+        <h2 class="admin-section-title">Experience</h2>
+        <p class="admin-section-desc">Manage your work experience timeline.</p>
+        <div id="experience-list"></div>
+        <button class="btn" id="experience-add">+ Add Experience</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="admin-toast" id="admin-toast"></div>
+
+<script src="js/portfolio-data.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  var currentSection = 'hero';
+  var data = loadData();
+
+  // ─── Login ─────────────────────────────────
+  var loginScreen = document.getElementById('login-screen');
+  var adminApp = document.getElementById('admin-app');
+  var loginBtn = document.getElementById('admin-login-btn');
+  var pwInput = document.getElementById('admin-pw-input');
+  var loginError = document.getElementById('login-error');
+
+  function checkLogin() {
+    if (sessionStorage.getItem('portfolio_admin_logged_in') === 'true') {
+      loginScreen.style.display = 'none';
+      adminApp.style.display = 'flex';
+      initDashboard();
+    }
+  }
+
+  loginBtn.addEventListener('click', function() {
+    var pw = pwInput.value;
+    var storedPw = getAdminPassword();
+    if (pw === storedPw) {
+      sessionStorage.setItem('portfolio_admin_logged_in', 'true');
+      loginScreen.style.display = 'none';
+      adminApp.style.display = 'flex';
+      initDashboard();
+    } else {
+      loginError.textContent = 'Incorrect password';
+    }
+  });
+
+  pwInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+
+  checkLogin();
+
+  // ─── Toast ─────────────────────────────────
+  function showToast(msg, type) {
+    var toast = document.getElementById('admin-toast');
+    toast.textContent = msg;
+    toast.className = 'admin-toast ' + (type || '') + ' show';
+    setTimeout(function() { toast.classList.remove('show'); }, 2500);
+  }
+
+  // ─── Navigation ────────────────────────────
+  function switchSection(id) {
+    currentSection = id;
+    document.querySelectorAll('.admin-section').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById('section-' + id).classList.add('active');
+    document.querySelectorAll('.admin-nav-btn').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelector('.admin-nav-btn[data-section="' + id + '"]').classList.add('active');
+    document.getElementById('section-title').textContent =
+      document.querySelector('.admin-nav-btn[data-section="' + id + '"] span:last-child').textContent;
+  }
+
+  document.querySelectorAll('.admin-nav-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { switchSection(this.dataset.section); });
+  });
+
+  // ─── Helpers ───────────────────────────────
+  function readData() { data = loadData(); return data; }
+  function writeData() { savePortfolioData(data); }
+
+  // ─── Hero ──────────────────────────────────
+  function loadHero() {
+    var d = readData();
+    document.getElementById('hero-badge').value = d.hero.badge || '';
+    document.getElementById('hero-status').value = d.hero.status || '';
+    document.getElementById('hero-title').value = d.hero.title || '';
+    document.getElementById('hero-desc').value = d.hero.description || '';
+  }
+
+  document.getElementById('hero-save').addEventListener('click', function() {
+    var d = readData();
+    d.hero.badge = document.getElementById('hero-badge').value;
+    d.hero.status = document.getElementById('hero-status').value;
+    d.hero.title = document.getElementById('hero-title').value;
+    d.hero.description = document.getElementById('hero-desc').value;
+    writeData();
+    showToast('Hero saved!', 'success');
+  });
+
+  // ─── About ─────────────────────────────────
+  function loadAbout() {
+    var d = readData();
+    document.getElementById('about-bio').value = d.about.bio || '';
+    document.getElementById('about-role').value = d.about.terminal.role || '';
+    document.getElementById('about-philosophy').value = d.about.terminal.philosophy || '';
+    document.getElementById('about-path').value = (d.about.terminal.path || []).join(', ');
+    document.getElementById('about-status').value = d.about.terminal.status || '';
+  }
+
+  document.getElementById('about-save').addEventListener('click', function() {
+    var d = readData();
+    d.about.bio = document.getElementById('about-bio').value;
+    d.about.terminal.role = document.getElementById('about-role').value;
+    d.about.terminal.philosophy = document.getElementById('about-philosophy').value;
+    d.about.terminal.path = document.getElementById('about-path').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    d.about.terminal.status = document.getElementById('about-status').value;
+    writeData();
+    showToast('About saved!', 'success');
+  });
+
+  // ─── Skills ────────────────────────────────
+  var SKILL_ICONS = ['terminal', 'activity', 'lock', 'code', 'tool', 'shield', 'globe', 'database'];
+
+  function renderSkillCards() {
+    var d = readData();
+    var container = document.getElementById('skills-list');
+    if (!d.skills || !d.skills.length) {
+      container.innerHTML = '<div class="empty-state">No skill cards yet.</div>';
+      return;
+    }
+    container.innerHTML = d.skills.map(function(skill, idx) {
+      var itemsHtml = (skill.items || []).map(function(item, iidx) {
+        return '<div class="skill-item-editor">' +
+          '<input type="text" class="sk-item-name" value="' + escapeHtml(item.name) + '" placeholder="Skill name" />' +
+          '<input type="text" class="sk-item-level" value="' + escapeHtml(item.level) + '" placeholder="Level" />' +
+          '<input type="number" class="sk-item-pct" value="' + item.percent + '" min="0" max="100" />' +
+          '<button class="btn btn-sm btn-danger sk-item-remove" data-idx="' + idx + '" data-iidx="' + iidx + '">×</button>' +
+        '</div>';
+      }).join('') +
+      '<button class="btn btn-sm sk-item-add" data-idx="' + idx + '">+ Add Item</button>';
+
+      return '<div class="admin-card" data-sk-idx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<h4>' + escapeHtml(skill.title) + '</h4>' +
+          '<button class="btn btn-sm btn-danger sk-card-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Card Title</label>' +
+            '<input type="text" class="sk-card-title" value="' + escapeHtml(skill.title) + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Icon</label>' +
+            '<select class="sk-card-icon">' +
+              SKILL_ICONS.map(function(ic) { return '<option value="' + ic + '"' + (ic === skill.icon ? ' selected' : '') + '>' + ic + '</option>'; }).join('') +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Skills</label>' +
+          itemsHtml +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Attach events
+    container.querySelectorAll('.sk-card-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        if (!confirm('Remove this skill card?')) return;
+        var d = readData();
+        d.skills.splice(idx, 1);
+        writeData();
+        renderSkillCards();
+        showToast('Skill card removed', 'success');
+      });
+    });
+
+    container.querySelectorAll('.sk-item-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var iidx = parseInt(this.dataset.iidx);
+        var d = readData();
+        d.skills[idx].items.splice(iidx, 1);
+        writeData();
+        renderSkillCards();
+      });
+    });
+
+    container.querySelectorAll('.sk-item-add').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var d = readData();
+        if (!d.skills[idx].items) d.skills[idx].items = [];
+        d.skills[idx].items.push({ name: 'New Skill', level: 'Beginner', percent: 30 });
+        writeData();
+        renderSkillCards();
+      });
+    });
+
+    container.querySelectorAll('.sk-card-title, .sk-card-icon, .sk-item-name, .sk-item-level, .sk-item-pct').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var d = readData();
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.skIdx);
+        d.skills[idx].title = card.querySelector('.sk-card-title').value;
+        d.skills[idx].icon = card.querySelector('.sk-card-icon').value;
+        var items = card.querySelectorAll('.skill-item-editor');
+        items.forEach(function(itemEl, iidx) {
+          if (d.skills[idx].items[iidx]) {
+            d.skills[idx].items[iidx].name = itemEl.querySelector('.sk-item-name').value;
+            d.skills[idx].items[iidx].level = itemEl.querySelector('.sk-item-level').value;
+            d.skills[idx].items[iidx].percent = parseInt(itemEl.querySelector('.sk-item-pct').value) || 0;
+          }
+        });
+        writeData();
+      });
+    });
+  }
+
+  document.getElementById('skills-add-card').addEventListener('click', function() {
+    var d = readData();
+    var idx = d.skills.length;
+    d.skills.push({
+      id: 'sk-' + Date.now(),
+      title: 'New Skill Card',
+      icon: 'code',
+      delay: 100 + idx * 50,
+      items: [{ name: 'New Skill', level: 'Beginner', percent: 30 }]
+    });
+    writeData();
+    renderSkillCards();
+    showToast('New skill card added', 'success');
+  });
+
+  // ─── Currently ─────────────────────────────
+  function loadCurrently() {
+    var d = readData();
+    var list = document.getElementById('currently-list');
+    list.innerHTML = (d.currently || []).map(function(tag) {
+      return '<span class="tag-item">' + escapeHtml(tag) +
+        '<button class="tag-remove" data-tag="' + escapeHtml(tag) + '">×</button></span>';
+    }).join('');
+    list.querySelectorAll('.tag-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var tag = this.dataset.tag;
+        var d = readData();
+        d.currently = (d.currently || []).filter(function(t) { return t !== tag; });
+        writeData();
+        loadCurrently();
+      });
+    });
+  }
+
+  document.getElementById('currently-add').addEventListener('click', function() {
+    var input = document.getElementById('currently-input');
+    var val = input.value.trim();
+    if (!val) return;
+    var d = readData();
+    if (!d.currently) d.currently = [];
+    if (d.currently.indexOf(val) === -1) {
+      d.currently.push(val);
+      writeData();
+      loadCurrently();
+    }
+    input.value = '';
+  });
+
+  document.getElementById('currently-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('currently-add').click();
+  });
+
+  document.getElementById('currently-save').addEventListener('click', function() {
+    showToast('Currently saved!', 'success');
+  });
+
+  // ─── Projects ──────────────────────────────
+  function renderProjects() {
+    var d = readData();
+    var container = document.getElementById('projects-list');
+    if (!d.projects || !d.projects.length) {
+      container.innerHTML = '<div class="empty-state">No projects yet.</div>';
+      return;
+    }
+    container.innerHTML = d.projects.map(function(proj, idx) {
+      var tags = (proj.tags || []).join(', ');
+      return '<div class="admin-card" data-pidx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<h4>' + escapeHtml(proj.title) + '</h4>' +
+          '<button class="btn btn-sm btn-danger proj-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Title</label>' +
+          '<input type="text" class="proj-title" value="' + escapeHtml(proj.title) + '" />' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Description</label>' +
+          '<textarea class="proj-desc" rows="3">' + escapeHtml(proj.description) + '</textarea>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Tags (comma separated)</label>' +
+          '<input type="text" class="proj-tags" value="' + escapeHtml(tags) + '" />' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Live URL</label>' +
+            '<input type="text" class="proj-live" value="' + (proj.links.live || '') + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Repo URL</label>' +
+            '<input type="text" class="proj-repo" value="' + (proj.links.repo || '') + '" />' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.querySelectorAll('.proj-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!confirm('Remove this project?')) return;
+        var d = readData();
+        d.projects.splice(parseInt(this.dataset.idx), 1);
+        writeData();
+        renderProjects();
+        showToast('Project removed', 'success');
+      });
+    });
+
+    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.pidx);
+        var d = readData();
+        d.projects[idx].title = card.querySelector('.proj-title').value;
+        d.projects[idx].description = card.querySelector('.proj-desc').value;
+        d.projects[idx].tags = card.querySelector('.proj-tags').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+        if (!d.projects[idx].links) d.projects[idx].links = {};
+        d.projects[idx].links.live = card.querySelector('.proj-live').value;
+        d.projects[idx].links.repo = card.querySelector('.proj-repo').value;
+        writeData();
+      });
+    });
+  }
+
+  document.getElementById('projects-add').addEventListener('click', function() {
+    var d = readData();
+    if (!d.projects) d.projects = [];
+    d.projects.push({
+      id: 'proj-' + Date.now(),
+      title: 'New Project',
+      description: 'Project description here.',
+      tags: ['Tag1'],
+      links: { live: '', repo: '' }
+    });
+    writeData();
+    renderProjects();
+    showToast('New project added', 'success');
+  });
+
+  // ─── Certs ─────────────────────────────────
+  function renderCerts() {
+    var d = readData();
+    var container = document.getElementById('certs-list');
+    if (!d.certifications || !d.certifications.length) {
+      container.innerHTML = '<div class="empty-state">No certifications yet.</div>';
+      return;
+    }
+    container.innerHTML = d.certifications.map(function(cert, idx) {
+      return '<div class="admin-card" data-cidx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<h4>' + escapeHtml(cert.name) + '</h4>' +
+          '<button class="btn btn-sm btn-danger cert-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Name</label>' +
+            '<input type="text" class="cert-name" value="' + escapeHtml(cert.name) + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Issuer</label>' +
+            '<input type="text" class="cert-issuer" value="' + escapeHtml(cert.issuer) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Date</label>' +
+            '<input type="text" class="cert-date" value="' + escapeHtml(cert.date) + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Image Path</label>' +
+            '<input type="text" class="cert-path" value="' + escapeHtml(cert.path) + '" />' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.querySelectorAll('.cert-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!confirm('Remove this certificate?')) return;
+        var d = readData();
+        d.certifications.splice(parseInt(this.dataset.idx), 1);
+        writeData();
+        renderCerts();
+        showToast('Certificate removed', 'success');
+      });
+    });
+
+    container.querySelectorAll('.admin-card input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.cidx);
+        var d = readData();
+        d.certifications[idx].name = card.querySelector('.cert-name').value;
+        d.certifications[idx].issuer = card.querySelector('.cert-issuer').value;
+        d.certifications[idx].date = card.querySelector('.cert-date').value;
+        d.certifications[idx].path = card.querySelector('.cert-path').value;
+        writeData();
+      });
+    });
+  }
+
+  document.getElementById('certs-add').addEventListener('click', function() {
+    var d = readData();
+    if (!d.certifications) d.certifications = [];
+    d.certifications.push({ id: 'cert-' + Date.now(), name: 'New Certificate', issuer: 'Issuer', date: '2026', path: 'img/certs/certificate.jpg' });
+    writeData();
+    renderCerts();
+    showToast('New certificate added', 'success');
+  });
+
+  // ─── Experience ────────────────────────────
+  function renderExperience() {
+    var d = readData();
+    var container = document.getElementById('experience-list');
+    if (!d.experience || !d.experience.length) {
+      container.innerHTML = '<div class="empty-state">No experience entries yet.</div>';
+      return;
+    }
+    container.innerHTML = d.experience.map(function(exp, idx) {
+      var bullets = (exp.bullets || []).map(function(b, bi) {
+        return '<div class="bullet-item">' +
+          '<textarea class="exp-bullet" data-idx="' + idx + '" data-bi="' + bi + '" rows="2">' + escapeHtml(b) + '</textarea>' +
+          '<button class="btn btn-sm btn-danger bullet-remove" data-idx="' + idx + '" data-bi="' + bi + '">×</button>' +
+        '</div>';
+      }).join('');
+      return '<div class="admin-card" data-eidx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<h4>' + escapeHtml(exp.role) + ' @ ' + escapeHtml(exp.company) + '</h4>' +
+          '<button class="btn btn-sm btn-danger exp-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Role</label>' +
+            '<input type="text" class="exp-role" value="' + escapeHtml(exp.role) + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Company</label>' +
+            '<input type="text" class="exp-company" value="' + escapeHtml(exp.company) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Bullet Points</label>' +
+          bullets +
+          '<button class="btn btn-sm bullet-add" data-idx="' + idx + '" style="margin-top:0.5rem">+ Add Bullet</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.querySelectorAll('.exp-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!confirm('Remove this experience entry?')) return;
+        var d = readData();
+        d.experience.splice(parseInt(this.dataset.idx), 1);
+        writeData();
+        renderExperience();
+        showToast('Experience removed', 'success');
+      });
+    });
+
+    container.querySelectorAll('.bullet-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var d = readData();
+        d.experience[parseInt(this.dataset.idx)].bullets.splice(parseInt(this.dataset.bi), 1);
+        writeData();
+        renderExperience();
+      });
+    });
+
+    container.querySelectorAll('.exp-role, .exp-company').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.eidx);
+        var d = readData();
+        d.experience[idx].role = card.querySelector('.exp-role').value;
+        d.experience[idx].company = card.querySelector('.exp-company').value;
+        writeData();
+      });
+    });
+
+    container.querySelectorAll('.exp-bullet').forEach(function(textarea) {
+      textarea.addEventListener('change', function() {
+        var d = readData();
+        d.experience[parseInt(this.dataset.idx)].bullets[parseInt(this.dataset.bi)] = this.value;
+        writeData();
+      });
+    });
+
+    container.querySelectorAll('.bullet-add').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var d = readData();
+        d.experience[idx].bullets.push('New bullet point');
+        writeData();
+        renderExperience();
+      });
+    });
+  }
+
+  document.getElementById('experience-add').addEventListener('click', function() {
+    var d = readData();
+    if (!d.experience) d.experience = [];
+    d.experience.push({
+      id: 'exp-' + Date.now(),
+      role: 'New Role',
+      company: 'Company Name',
+      date: '2026',
+      bullets: ['Bullet point 1']
+    });
+    writeData();
+    renderExperience();
+    showToast('New experience added', 'success');
+  });
+
+  // ─── JSON Export/Import ────────────────────
+  document.getElementById('admin-export-btn').addEventListener('click', function() {
+    exportDataJSON();
+    showToast('Data exported!', 'success');
+  });
+
+  document.getElementById('admin-import-input').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      importDataJSON(this.files[0], function(err, importedData) {
+        if (err) {
+          showToast(err, 'error');
+          return;
+        }
+        data = importedData;
+        showToast('Data imported! Reloading...', 'success');
+        setTimeout(function() { location.reload(); }, 1000);
+      });
+    }
+    this.value = '';
+  });
+
+  // ─── Reset ─────────────────────────────────
+  document.getElementById('admin-reset-btn').addEventListener('click', function() {
+    if (!confirm('Reset all portfolio data to defaults? This cannot be undone.')) return;
+    if (!confirm('Are you sure? All your custom edits will be lost.')) return;
+    resetPortfolioData();
+    data = loadData();
+    location.reload();
+  });
+
+  // ─── Init ──────────────────────────────────
+  function initDashboard() {
+    loadHero();
+    loadAbout();
+    renderSkillCards();
+    loadCurrently();
+    renderProjects();
+    renderCerts();
+    renderExperience();
+  }
+
+})();
+</script>
+</body>
+</html>

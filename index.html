@@ -2466,5 +2466,87 @@
       });
     })();
   </script>
+
+  <!-- Portfolio Data Override (admin dashboard support) -->
+  <script src="js/portfolio-data.js"></script>
+  <script>
+  (function(){
+    'use strict';
+
+    var savedData = getPortfolioData();
+    if (!savedData) return; // No saved data, show defaults
+
+    var data = savedData;
+
+    // ─── Hero ─────────────────────────────────
+    var badgeEl = document.querySelector('.hero-badge');
+    var statusTextEl = document.querySelector('.hero-status-text');
+    var titleEl = document.querySelector('.hero-title');
+    var descEl = document.querySelector('.hero-description');
+
+    if (badgeEl && data.hero.badge) badgeEl.textContent = data.hero.badge;
+    if (statusTextEl && data.hero.status) statusTextEl.textContent = data.hero.status;
+    if (titleEl && data.hero.title) {
+      titleEl.innerHTML = data.hero.title.replace(/\n/g, '<br />');
+    }
+    if (descEl && data.hero.description) descEl.textContent = data.hero.description;
+
+    // ─── About ────────────────────────────────
+    var aboutParagraph = document.querySelector('.about-text p');
+    if (aboutParagraph && data.about.bio) aboutParagraph.textContent = data.about.bio;
+
+    // Terminal JSON
+    var terminalBody = document.querySelector('.about-terminal .terminal-body');
+    if (terminalBody && data.about.terminal) {
+      var t = data.about.terminal;
+      var pathStr = (t.path || []).map(function(p) { return '"' + p + '"'; }).join(', ');
+      terminalBody.innerHTML =
+        '<span class="line"><span class="prompt">$</span> cat about.txt</span>' +
+        '<span class="line output">{</span>' +
+        '<span class="line output indent">"role": "' + escapeHtml(t.role || '') + '",</span>' +
+        '<span class="line output indent">"path": [' + pathStr + '],</span>' +
+        '<span class="line output indent">"philosophy": "' + escapeHtml(t.philosophy || '') + '",</span>' +
+        '<span class="line output indent">"status": "' + escapeHtml(t.status || '') + '"</span>' +
+        '<span class="line output">}</span>' +
+        '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
+    }
+
+    // ─── Skills ───────────────────────────────
+    var skillsGrid = document.querySelector('.skills-grid');
+    if (skillsGrid && data.skills && data.skills.length) {
+      skillsGrid.innerHTML = renderSkills(data);
+    }
+
+    // ─── Currently ────────────────────────────
+    var learningList = document.querySelector('.skill-learning .learning-list');
+    if (learningList && data.currently && data.currently.length) {
+      learningList.innerHTML = renderCurrently(data);
+    }
+
+    // ─── Projects ─────────────────────────────
+    var projectsGrid = document.querySelector('#projects .section-header + .projects-grid, #projects .projects-grid');
+    if (!projectsGrid) projectsGrid = document.querySelector('#projects .container > .projects-grid');
+    if (projectsGrid && data.projects && data.projects.length) {
+      projectsGrid.innerHTML = renderProjects(data);
+    }
+
+    // ─── Certs ────────────────────────────────
+    var certsGrid = document.querySelector('.certs-grid');
+    if (certsGrid && data.certifications && data.certifications.length) {
+      certsGrid.innerHTML = renderCerts(data);
+      // Re-attach cert click handlers
+      if (typeof initCertViewer === 'function') initCertViewer();
+    }
+
+    // ─── Experience ───────────────────────────
+    var timeline = document.querySelector('.timeline');
+    if (!timeline) timeline = document.querySelector('#experience .container > div, .experience-list');
+    if (timeline && data.experience && data.experience.length) {
+      timeline.innerHTML = renderExperience(data);
+    }
+
+  })();
+  </script>
+
 </body>
 </html>
