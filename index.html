@@ -387,6 +387,127 @@
       }
     }
 
+    /* ===== Hero Status Badge ===== */
+    .hero-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: var(--space-md);
+      padding: 4px 12px 4px 8px;
+      font-size: var(--text-xs);
+      font-family: var(--font-code);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      background-color: var(--color-surface);
+      white-space: nowrap;
+    }
+    .hero-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      animation: hero-status-pulse 2s ease-in-out infinite;
+    }
+    @keyframes hero-status-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .hero-status-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 900px) {
+      .hero-status {
+        justify-content: center;
+      }
+    }
+
+    /* ===== Learning Journey Widget ===== */
+    .journey-card {
+      margin-top: var(--space-lg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      padding: var(--space-lg);
+      background-color: var(--color-surface);
+    }
+    .journey-card-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--space-md);
+    }
+    .journey-steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .journey-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      background-color: var(--color-bg);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      transition: border-color var(--transition-fast);
+    }
+    .journey-step:hover {
+      border-color: var(--color-border-hover);
+    }
+    .journey-step-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .journey-step-icon.done {
+      background-color: var(--color-accent-subtle);
+      color: var(--color-accent);
+    }
+    .journey-step-icon.active {
+      background-color: rgba(74, 222, 128, 0.15);
+      color: var(--color-accent);
+      box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+    }
+    .journey-step-icon.next {
+      background-color: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px dashed var(--color-border);
+    }
+    .journey-step-label {
+      font-weight: 500;
+    }
+    .journey-step-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .journey-connector {
+      width: 1px;
+      height: 12px;
+      margin-left: 11px;
+      background-color: var(--color-border);
+    }
+    @media (max-width: 480px) {
+      .journey-step {
+        flex-wrap: wrap;
+      }
+      .journey-step-desc {
+        margin-left: 0;
+        width: 100%;
+        padding-left: calc(24px + var(--space-sm));
+      }
+    }
+
     /* ===== Mobile Nav / Hamburger ===== */
     .hamburger {
       display: none;
@@ -1100,6 +1221,10 @@
         <!-- Left: Content -->
         <div class="hero-content">
           <div class="hero-badge">BSIT Student &amp; Lifelong Learner</div>
+          <div class="hero-status" aria-label="Currently working on cybersecurity">
+            <span class="hero-status-dot" aria-hidden="true"></span>
+            <span class="hero-status-text">Currently studying: Google Cybersecurity Certificate</span>
+          </div>
           <h1 class="hero-title">
             Learning infrastructure,<br />
             one lab at a time.
@@ -1186,6 +1311,33 @@
             or tinkering with Linux configs, I'm always exploring something new.
             Every project teaches me something, and that's what keeps me going.
           </p>
+
+          <!-- Learning Journey -->
+          <div class="journey-card" data-reveal data-reveal-delay="200">
+            <div class="journey-card-title">My Journey</div>
+            <div class="journey-steps">
+              <div class="journey-step">
+                <span class="journey-step-icon done" aria-hidden="true">🌐</span>
+                <span class="journey-step-label">Web Development</span>
+                <span class="journey-step-desc">Started here</span>
+              </div>
+              <div class="journey-step">
+                <span class="journey-step-icon done" aria-hidden="true">🔗</span>
+                <span class="journey-step-label">Networking</span>
+                <span class="journey-step-desc">Got into it</span>
+              </div>
+              <div class="journey-step">
+                <span class="journey-step-icon active" aria-hidden="true">🛡️</span>
+                <span class="journey-step-label">Cybersecurity</span>
+                <span class="journey-step-desc">Currently diving deep</span>
+              </div>
+              <div class="journey-step">
+                <span class="journey-step-icon next" aria-hidden="true">?</span>
+                <span class="journey-step-label">What's next?</span>
+                <span class="journey-step-desc">Still exploring</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="about-terminal" aria-hidden="true">
           <div class="terminal-window">
@@ -1215,7 +1367,7 @@
   <section id="skills" class="skills section" aria-label="Skills">
     <div class="container">
       <div class="section-header" data-reveal>
-        <h2>Skills</h2>
+        <h2>Skills &amp; Technologies</h2>
         <p>Technologies and tools I work with regularly.</p>
       </div>
 
@@ -1548,7 +1700,7 @@
   <section id="projects" class="projects section" aria-label="Projects">
     <div class="container">
       <div class="section-header" data-reveal>
-        <h2>Projects</h2>
+        <h2>Featured Projects</h2>
         <p>Home lab projects focused on security monitoring and system administration.</p>
       </div>
       <div class="projects-grid grid grid-cols-2">
@@ -1821,7 +1973,7 @@
   <section id="github" class="github section" aria-label="GitHub Activity">
     <div class="container">
       <div class="section-header" data-reveal>
-        <h2>GitHub</h2>
+        <h2>GitHub Activity</h2>
         <p>Open source activity and contributions.</p>
       </div>
       <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
