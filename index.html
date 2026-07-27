@@ -423,14 +423,10 @@
       }
     }
 
-    /* ===== Learning Journey Widget ===== */
     /* ===== Learning Journey Timeline ===== */
     .about-journey {
-      margin-top: var(--space-xl);
-      padding: var(--space-xl);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      background-color: var(--color-surface);
+      margin-top: var(--space-lg);
+      padding: var(--space-lg) var(--space-xl);
     }
     .about-journey-header {
       display: flex;
@@ -553,6 +549,10 @@
     }
     .journey-item:hover {
       background-color: var(--color-surface-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .journey-item { transition: none; }
     }
 
     @media (max-width: 480px) {
@@ -1460,7 +1460,7 @@
 
       <div class="skills-grid" data-reveal data-reveal-delay="100">
 
-        <!-- 🐧 Linux & System Administration -->
+        <!-- Linux & System Administration -->
         <div class="skill-card" data-reveal data-reveal-delay="100">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1511,7 +1511,7 @@
           </div>
         </div>
 
-        <!-- 🌐 Networking -->
+        <!-- Networking -->
         <div class="skill-card" data-reveal data-reveal-delay="150">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1549,7 +1549,7 @@
           </div>
         </div>
 
-        <!-- 🔐 Remote Administration -->
+        <!-- Remote Administration -->
         <div class="skill-card" data-reveal data-reveal-delay="200">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1588,7 +1588,7 @@
           </div>
         </div>
 
-        <!-- 🌐 Web Development -->
+        <!-- Web Development -->
         <div class="skill-card" data-reveal data-reveal-delay="250">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1651,7 +1651,7 @@
           </div>
         </div>
 
-        <!-- 🛠 Development Tools -->
+        <!-- Development Tools -->
         <div class="skill-card" data-reveal data-reveal-delay="300">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1713,7 +1713,7 @@
           </div>
         </div>
 
-        <!-- 🔐 Cybersecurity -->
+        <!-- Cybersecurity -->
         <div class="skill-card" data-reveal data-reveal-delay="350">
           <div class="skill-card-header">
             <span class="skill-card-icon" aria-hidden="true">
@@ -1765,18 +1765,21 @@
 
       </div>
 
-      <!-- Currently Learning -->
+      <!-- Currently -->
       <div class="skill-learning" data-reveal data-reveal-delay="100">
-        <h3 class="skill-card-title">Currently Learning</h3>
+        <h3 class="skill-card-title">Currently</h3>
         <p class="skill-learning-desc">
-          Topics I'm actively exploring through hands-on home lab projects.
+          Topics, courses, and resources I'm actively exploring.
         </p>
         <div class="learning-list">
           <span class="learning-tag">Linux Administration</span>
-          <span class="learning-tag">Networking</span>
           <span class="learning-tag">Cybersecurity</span>
+          <span class="learning-tag">Ethical Hacking</span>
+          <span class="learning-tag">Advanced Networking</span>
           <span class="learning-tag">System Administration</span>
           <span class="learning-tag">Home Lab Development</span>
+          <span class="learning-tag">The Practice of Network Security Monitoring</span>
+          <span class="learning-tag">Google Cybersecurity Certificate</span>
         </div>
       </div>
 
@@ -1986,29 +1989,6 @@
         </div>
       </div>
 
-      <div class="skill-learning" data-reveal data-reveal-delay="100">
-        <h3 class="skill-category-title">Currently Studying</h3>
-        <p class="skill-learning-desc">
-          Topics I'm actively exploring to expand my skill set.
-        </p>
-        <div class="learning-list">
-          <span class="learning-tag">Cybersecurity</span>
-          <span class="learning-tag">Ethical Hacking</span>
-          <span class="learning-tag">Advanced Networking</span>
-        </div>
-      </div>
-
-      <!-- Currently Reading -->
-      <div class="skill-learning" data-reveal data-reveal-delay="200">
-        <h3 class="skill-category-title">Currently Reading</h3>
-        <p class="skill-learning-desc">
-          Books, courses, and resources I'm diving into right now.
-        </p>
-        <div class="learning-list">
-          <span class="learning-tag">📖 The Practice of Network Security Monitoring</span>
-          <span class="learning-tag">🎓 Google Cybersecurity Certificate</span>
-        </div>
-      </div>
     </div>
   </section>
 
