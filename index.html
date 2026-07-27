@@ -533,23 +533,43 @@
     /* Journey item hover */
     .journey-item {
       border-radius: var(--border-radius-sm);
-      margin: 0 calc(var(--space-md) * -1);
       padding-left: var(--space-md);
       padding-right: var(--space-md);
+      margin-left: calc(var(--space-md) * -1);
+      margin-right: calc(var(--space-md) * -1);
       transition: background-color 0.2s ease;
+    }
+    .journey-item:first-child {
+      margin-top: calc(var(--space-md) * -1);
+      padding-top: var(--space-md);
+      border-top-left-radius: var(--border-radius-sm);
+      border-top-right-radius: var(--border-radius-sm);
+    }
+    .journey-item:last-child {
+      margin-bottom: calc(var(--space-md) * -1);
+      padding-bottom: var(--space-md);
+      border-bottom-left-radius: var(--border-radius-sm);
+      border-bottom-right-radius: var(--border-radius-sm);
     }
     .journey-item:hover {
       background-color: var(--color-surface-hover);
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 480px) {
       .about-journey {
         padding: var(--space-lg);
       }
       .journey-item {
-        margin: 0;
+        margin-left: 0;
+        margin-right: 0;
         padding-left: 0;
         padding-right: 0;
+      }
+      .journey-item:first-child {
+        margin-top: 0;
+      }
+      .journey-item:last-child {
+        margin-bottom: 0;
       }
       .journey-item-title {
         font-size: var(--text-xs);
