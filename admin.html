@@ -163,36 +163,27 @@
       <!-- ===== TECH STACK SECTION ===== -->
       <div class="admin-section" id="section-skills">
         <h2 class="admin-section-title">Tech Stack</h2>
-        <p class="admin-section-desc">Manage the tech stack badges shown on your portfolio.</p>
-        <div class="admin-card">
-          <div class="form-row form-row-3">
+        <p class="admin-section-desc">Add or edit tech items. Upload a logo image for each — it will be auto-resized on save.</p>
+        <div class="admin-card" id="tech-editor-card">
+          <input type="hidden" id="tech-edit-idx" value="-1" />
+          <div class="form-row">
             <div class="form-group">
               <label>Name</label>
-              <input type="text" id="tech-name" placeholder="Linux" />
+              <input type="text" id="tech-name" placeholder="e.g. Linux" />
             </div>
             <div class="form-group">
-              <label>Icon</label>
-              <select id="tech-icon">
-                <option value="terminal">Terminal</option>
-                <option value="lock">Lock</option>
-                <option value="activity">Activity</option>
-                <option value="tool">Tool</option>
-                <option value="git-branch">Git Branch</option>
-                <option value="package">Package</option>
-                <option value="code">Code</option>
-                <option value="layout">Layout</option>
-                <option value="js">JS</option>
-                <option value="coffee">Coffee</option>
-                <option value="hash">Hash</option>
-                <option value="shield">Shield</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Category</label>
-              <input type="text" id="tech-cat" placeholder="System" />
+              <label>Logo Image</label>
+              <input type="file" id="tech-logo-input" accept="image/*" />
+              <div id="tech-logo-preview" style="margin-top:0.5rem;display:none">
+                <img id="tech-logo-preview-img" style="max-width:48px;max-height:48px;border:1px solid var(--admin-border);border-radius:4px;padding:4px;background:var(--admin-bg)" />
+                <button class="btn btn-sm btn-danger" id="tech-logo-clear" style="margin-left:0.5rem">Remove</button>
+              </div>
             </div>
           </div>
-          <button class="btn btn-primary" id="tech-add">+ Add Tech</button>
+          <div style="display:flex;gap:0.5rem">
+            <button class="btn btn-primary" id="tech-add">+ Add Tech</button>
+            <button class="btn" id="tech-cancel" style="display:none">Cancel</button>
+          </div>
         </div>
         <div id="tech-list" class="admin-card"></div>
         <div style="margin-top:0.75rem">
@@ -364,6 +355,49 @@
   });
 
   // ─── Tech Stack ────────────────────────────
+  var techEditIdx = -1;
+  var techLogoData = null;
+
+  function resetTechForm() {
+    document.getElementById('tech-name').value = '';
+    document.getElementById('tech-logo-input').value = '';
+    document.getElementById('tech-logo-preview').style.display = 'none';
+    document.getElementById('tech-edit-idx').value = '-1';
+    document.getElementById('tech-add').textContent = '+ Add Tech';
+    document.getElementById('tech-cancel').style.display = 'none';
+    techEditIdx = -1;
+    techLogoData = null;
+  }
+
+  // Logo file upload handler
+  document.getElementById('tech-logo-input').addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    // Auto-resize to 64x64 for consistency
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 64, 64);
+        techLogoData = canvas.toDataURL('image/png');
+        document.getElementById('tech-logo-preview-img').src = techLogoData;
+        document.getElementById('tech-logo-preview').style.display = 'flex';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('tech-logo-clear').addEventListener('click', function() {
+    document.getElementById('tech-logo-input').value = '';
+    document.getElementById('tech-logo-preview').style.display = 'none';
+    techLogoData = null;
+  });
+
   function renderTechItems() {
     var d = readData();
     var container = document.getElementById('tech-list');
@@ -372,12 +406,14 @@
       return;
     }
     container.innerHTML = '<div class="item-list">' + d.techStack.map(function(item, idx) {
+      var logoPreview = item.logo ? '<img src="' + item.logo + '" style="width:28px;height:28px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />' : '';
       return '<div class="item-row">' +
+        logoPreview +
         '<div class="item-row-info">' +
           '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
-          '<div class="item-row-sub">' + escapeHtml(item.icon) + ' &middot; ' + escapeHtml(item.cat || '') + '</div>' +
         '</div>' +
         '<div class="item-row-actions">' +
+          '<button class="btn btn-sm tech-edit" data-idx="' + idx + '">Edit</button>' +
           '<button class="btn btn-sm btn-danger tech-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
       '</div>';
@@ -392,27 +428,60 @@
         renderTechItems();
       });
     });
+
+    container.querySelectorAll('.tech-edit').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var d = readData();
+        var item = d.techStack[idx];
+        if (!item) return;
+        document.getElementById('tech-name').value = item.name;
+        document.getElementById('tech-edit-idx').value = idx;
+        document.getElementById('tech-add').textContent = 'Update Tech';
+        document.getElementById('tech-cancel').style.display = 'inline-flex';
+        techEditIdx = idx;
+        techLogoData = null;
+        document.getElementById('tech-logo-input').value = '';
+        if (item.logo) {
+          document.getElementById('tech-logo-preview-img').src = item.logo;
+          document.getElementById('tech-logo-preview').style.display = 'flex';
+          techLogoData = item.logo;
+        } else {
+          document.getElementById('tech-logo-preview').style.display = 'none';
+        }
+      });
+    });
   }
+
+  document.getElementById('tech-cancel').addEventListener('click', function() {
+    resetTechForm();
+  });
 
   document.getElementById('tech-add').addEventListener('click', function() {
     var name = document.getElementById('tech-name').value.trim();
-    var icon = document.getElementById('tech-icon').value;
-    var cat = document.getElementById('tech-cat').value.trim();
     if (!name) { showToast('Enter a tech name', 'error'); return; }
     var d = readData();
     if (!d.techStack) d.techStack = [];
-    d.techStack.push({ name: name, icon: icon, cat: cat || 'General' });
-    writeData();
-    renderTechItems();
-    document.getElementById('tech-name').value = '';
-    document.getElementById('tech-cat').value = '';
-    showToast('Tech added!', 'success');
+    var editIdx = parseInt(document.getElementById('tech-edit-idx').value);
+    if (editIdx >= 0 && d.techStack[editIdx]) {
+      // Edit existing
+      d.techStack[editIdx].name = name;
+      if (techLogoData) d.techStack[editIdx].logo = techLogoData;
+      writeData();
+      renderTechItems();
+      resetTechForm();
+      showToast('Tech updated!', 'success');
+    } else {
+      // Add new
+      d.techStack.push({ name: name, logo: techLogoData || null });
+      writeData();
+      renderTechItems();
+      resetTechForm();
+      showToast('Tech added!', 'success');
+    }
   });
 
   document.getElementById('tech-save').addEventListener('click', function() {
-    var d = readData();
-    var items = document.querySelectorAll('#tech-list .item-row');
-    // The data is already saved via add/remove, this just confirms
     writeData();
     showToast('Tech stack saved!', 'success');
   });

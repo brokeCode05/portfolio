@@ -182,14 +182,20 @@ function renderTechStack(data) {
     var items = row.indices.map(function(idx) {
       var tech = data.techStack[idx];
       if (!tech) return '';
-      var fallbackSvg = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
       var logoHtml;
-      if (tech.brand) {
+      if (tech.logo) {
+        // Custom uploaded logo from admin panel
+        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
+      } else if (tech.brand) {
+        // CDN brand logo with SVG fallback
         var slug = encodeURIComponent(tech.brand.toLowerCase());
+        var fallbackSvg = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
         logoHtml = '<img class="tech-logo-img" src="' + SIMPLE_ICONS_BASE + slug + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
           '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvg + '</span>';
       } else {
-        logoHtml = '<span class="tech-logo-fallback" aria-hidden="true">' + fallbackSvg + '</span>';
+        // Fallback SVG icon
+        var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
+        logoHtml = '<span class="tech-logo-fallback" aria-hidden="true">' + svg + '</span>';
       }
       return '<span class="tech-logo">' +
         '<span class="tech-logo-icon">' + logoHtml + '</span>' +
