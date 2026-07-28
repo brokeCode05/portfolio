@@ -162,31 +162,12 @@
 
       <!-- ===== TECH STACK SECTION ===== -->
       <div class="admin-section" id="section-skills">
-        <div class="admin-section-header">
-          <div>
-            <h2 class="admin-section-title">Tech Stack</h2>
-            <p class="admin-section-desc">Items are auto-saved when added or updated.</p>
-          </div>
+        <div>
+          <h2 class="admin-section-title">Tech Stack</h2>
+          <p class="admin-section-desc">Click <strong>+ Add</strong> on a category or <strong>Edit</strong> on an item. Changes auto-save.</p>
         </div>
 
-        <!-- Compact Editor Bar -->
-        <div class="tech-editor-bar" id="tech-editor-bar">
-          <input type="hidden" id="tech-edit-idx" value="-1" />
-          <input type="text" id="tech-name" placeholder="Name" class="tech-editor-input" />
-          <input type="text" id="tech-cat" placeholder="Category" class="tech-editor-input tech-editor-cat" />
-          <input type="text" id="tech-brand" placeholder="Brand slug (e.g. python)" class="tech-editor-input tech-editor-brand" />
-          <div class="tech-editor-upload">
-            <input type="file" id="tech-logo-input" accept="image/*" />
-            <div id="tech-logo-preview" class="tech-logo-preview" style="display:none">
-              <img id="tech-logo-preview-img" />
-              <button id="tech-logo-clear">×</button>
-            </div>
-          </div>
-          <button class="btn btn-sm btn-primary" id="tech-add" style="flex-shrink:0;white-space:nowrap">+ Add</button>
-          <button class="btn btn-sm" id="tech-cancel" style="display:none;flex-shrink:0">Cancel</button>
-        </div>
-
-        <!-- Category Groups -->
+        <!-- Category Groups (inline edit/add) -->
         <div id="tech-list"></div>
       </div>
 
@@ -353,59 +334,24 @@
     showToast('About saved!', 'success');
   });
 
-  // ─── Tech Stack ────────────────────────────
-  var techEditIdx = -1;
-  var techLogoData = null;
-
-  function resetTechForm() {
-    document.getElementById('tech-name').value = '';
-    document.getElementById('tech-cat').value = '';
-    document.getElementById('tech-brand').value = '';
-    document.getElementById('tech-logo-input').value = '';
-    document.getElementById('tech-logo-preview').style.display = 'none';
-    document.getElementById('tech-edit-idx').value = '-1';
-    document.getElementById('tech-add').textContent = '+ Add';
-    document.getElementById('tech-cancel').style.display = 'none';
-    techEditIdx = -1;
-    techLogoData = null;
-    document.getElementById('tech-editor-bar').classList.remove('editing');
-  }
-
-  // Logo file upload handler
-  document.getElementById('tech-logo-input').addEventListener('change', function() {
-    var file = this.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var img = new Image();
-      img.onload = function() {
-        var canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, 64, 64);
-        techLogoData = canvas.toDataURL('image/png');
-        document.getElementById('tech-logo-preview-img').src = techLogoData;
-        document.getElementById('tech-logo-preview').style.display = 'flex';
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  document.getElementById('tech-logo-clear').addEventListener('click', function() {
-    document.getElementById('tech-logo-input').value = '';
-    document.getElementById('tech-logo-preview').style.display = 'none';
-    techLogoData = null;
-  });
+  // ─── Tech Stack: Inline Edit/Add ────────────
+  var techEditIdx = -1;  // -1 = none, otherwise index being edited
+  var techAddCat = null; // null = none, otherwise category being added to
+  var techTempLogo = {};  // temporary logo data URIs keyed by index or 'new'
 
   function renderTechItems() {
     var d = readData();
     var container = document.getElementById('tech-list');
     if (!d.techStack || !d.techStack.length) {
-      container.innerHTML = '<div class="empty-state">No tech items yet. Add one above.</div>';
+      if (techAddCat) {
+        // Show empty state with add form
+        renderInlineAddForm(container, d, techAddCat);
+      } else {
+        container.innerHTML = '<div class="empty-state">No tech items yet. Click <strong>+ Add</strong> below to get started.</div>';
+      }
       return;
     }
+
     // Group items by category
     var groups = {};
     var order = [];
@@ -424,17 +370,26 @@
       var itemsHtml = items.map(function(entry) {
         var item = entry.item;
         var idx = entry.idx;
-        var logoIndicator = '';
+
+        // If this item is being edited, show inline edit form
+        if (techEditIdx === idx) {
+          return renderInlineEditRow(item, idx);
+        }
+
+        // Normal display row
+        var indicator = '';
         if (item.logo) {
-          logoIndicator = '<img src="' + item.logo + '" style="width:22px;height:22px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
+          indicator = '<img src="' + item.logo + '" style="width:22px;height:22px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
+        } else if (item.logoUrl) {
+          indicator = '<span style="display:inline-flex;width:22px;height:22px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.3;align-items:center;justify-content:center;font-size:8px;color:#0F1115;font-weight:600">URL</span>';
         } else if (item.brand) {
-          logoIndicator = '<span style="display:inline-flex;width:22px;height:22px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.2;align-items:center;justify-content:center;font-size:9px;color:var(--admin-accent)">C</span>';
+          indicator = '<span style="display:inline-flex;width:22px;height:22px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.2;align-items:center;justify-content:center;font-size:9px;color:var(--admin-accent)">C</span>';
         }
         return '<div class="item-row" style="padding:0.375rem 0.625rem">' +
-          logoIndicator +
+          indicator +
           '<div class="item-row-info">' +
             '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
-            '<div class="item-row-sub">' + (item.brand ? escapeHtml(item.brand) : 'icon') + '</div>' +
+            '<div class="item-row-sub">' + (item.brand ? escapeHtml(item.brand) : item.logoUrl ? 'URL' : 'fallback') + '</div>' +
           '</div>' +
           '<div class="item-row-actions">' +
             '<button class="btn btn-sm tech-edit" data-idx="' + idx + '" style="padding:0.25rem 0.5rem;font-size:0.6875rem">Edit</button>' +
@@ -443,16 +398,70 @@
         '</div>';
       }).join('');
 
+      // If adding to this category, append inline add form
+      var addForm = '';
+      if (techAddCat === cat) {
+        addForm = renderInlineAddForm(null, d, cat);
+      }
+
       html += '<div class="tech-cat-group">' +
         '<div class="tech-cat-header">' +
           '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
           '<span class="tech-cat-count">' + items.length + '</span>' +
           '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
         '</div>' +
-        '<div class="tech-cat-items">' + itemsHtml + '</div>' +
+        '<div class="tech-cat-items">' + itemsHtml + addForm + '</div>' +
       '</div>';
     });
     container.innerHTML = html;
+
+    // Bind events
+    bindTechEvents();
+  }
+
+  function renderInlineEditRow(item, idx) {
+    var name = escapeHtml(item.name);
+    var brand = escapeHtml(item.brand || '');
+    var logoUrl = escapeHtml(item.logoUrl || '');
+    var logoSrc = techTempLogo[idx] || item.logo || '';
+    var previewHtml = logoSrc
+      ? '<div class="inline-logo-preview"><img src="' + logoSrc + '" /><button class="inline-logo-clear" data-idx="' + idx + '">×</button></div>'
+      : '';
+    return '<div class="item-row item-row-editing" data-edit-idx="' + idx + '">' +
+      '<input type="text" class="inline-edit-name" value="' + name + '" placeholder="Name" />' +
+      '<input type="text" class="inline-edit-brand" value="' + brand + '" placeholder="Brand slug" />' +
+      '<input type="text" class="inline-edit-logourl" value="' + logoUrl + '" placeholder="Logo URL" />' +
+      '<label class="inline-upload-label" title="Upload logo">📁<input type="file" class="inline-edit-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
+      previewHtml +
+      '<button class="btn btn-sm btn-primary inline-save" data-idx="' + idx + '" style="flex-shrink:0">Save</button>' +
+      '<button class="btn btn-sm inline-cancel" data-idx="' + idx + '" style="flex-shrink:0">Cancel</button>' +
+    '</div>';
+  }
+
+  function renderInlineAddForm(existingHtml, d, cat) {
+    var formHtml = '<div class="item-row item-row-editing" data-add-cat="' + cat.replace(/"/g, '&quot;') + '">' +
+      '<input type="text" class="inline-add-name" placeholder="Name" />' +
+      '<input type="text" class="inline-add-brand" placeholder="Brand slug" />' +
+      '<input type="text" class="inline-add-logourl" placeholder="Logo URL" />' +
+      '<label class="inline-upload-label" title="Upload logo">📁<input type="file" class="inline-add-upload" accept="image/*" data-add="1" style="display:none" /></label>' +
+      '<div class="inline-logo-preview inline-add-preview" style="display:none"><img /><button class="inline-add-clear">×</button></div>' +
+      '<button class="btn btn-sm btn-primary inline-add-save" style="flex-shrink:0">Save</button>' +
+      '<button class="btn btn-sm inline-add-cancel" style="flex-shrink:0">Cancel</button>' +
+    '</div>';
+    if (existingHtml !== null) return formHtml;
+    // Return full HTML string including category wrapper for empty state
+    return '<div class="tech-cat-group">' +
+      '<div class="tech-cat-header">' +
+        '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
+        '<span class="tech-cat-count">0</span>' +
+        '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
+      '</div>' +
+      '<div class="tech-cat-items">' + formHtml + '</div>' +
+    '</div>';
+  }
+
+  function bindTechEvents() {
+    var container = document.getElementById('tech-list');
 
     // Remove buttons
     container.querySelectorAll('.tech-remove').forEach(function(btn) {
@@ -462,85 +471,163 @@
         var d = readData();
         d.techStack.splice(parseInt(this.dataset.idx), 1);
         writeData();
+        techEditIdx = -1;
         renderTechItems();
       });
     });
 
-    // Edit buttons
+    // Edit buttons — set editing index and re-render
     container.querySelectorAll('.tech-edit').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        var idx = parseInt(this.dataset.idx);
-        var d = readData();
-        var item = d.techStack[idx];
-        if (!item) return;
-        document.getElementById('tech-name').value = item.name;
-        document.getElementById('tech-cat').value = item.cat || '';
-        document.getElementById('tech-brand').value = item.brand || '';
-        document.getElementById('tech-edit-idx').value = idx;
-        document.getElementById('tech-add').textContent = 'Update';
-        document.getElementById('tech-cancel').style.display = 'inline-flex';
-        document.getElementById('tech-editor-bar').classList.add('editing');
-        techEditIdx = idx;
-        techLogoData = null;
-        document.getElementById('tech-logo-input').value = '';
-        if (item.logo) {
-          document.getElementById('tech-logo-preview-img').src = item.logo;
-          document.getElementById('tech-logo-preview').style.display = 'flex';
-          techLogoData = item.logo;
-        } else {
-          document.getElementById('tech-logo-preview').style.display = 'none';
-        }
-        document.getElementById('tech-name').focus();
+        techEditIdx = parseInt(this.dataset.idx);
+        techAddCat = null;
+        renderTechItems();
+        // Focus the name input after render
+        var nameInput = container.querySelector('.inline-edit-name');
+        if (nameInput) nameInput.focus();
       });
     });
 
-    // Category add buttons — pre-fill category field
+    // Save inline edit
+    container.querySelectorAll('.inline-save').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var row = this.closest('.item-row-editing');
+        var name = row.querySelector('.inline-edit-name').value.trim();
+        if (!name) { showToast('Enter a name', 'error'); return; }
+        var d = readData();
+        if (!d.techStack[idx]) return;
+        d.techStack[idx].name = name;
+        d.techStack[idx].brand = row.querySelector('.inline-edit-brand').value.trim().toLowerCase() || null;
+        d.techStack[idx].logoUrl = row.querySelector('.inline-edit-logourl').value.trim() || null;
+        if (techTempLogo[idx] !== undefined) {
+          d.techStack[idx].logo = techTempLogo[idx];
+        }
+        writeData();
+        delete techTempLogo[idx];
+        techEditIdx = -1;
+        renderTechItems();
+        showToast('Updated!', 'success');
+      });
+    });
+
+    // Cancel inline edit
+    container.querySelectorAll('.inline-cancel').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        delete techTempLogo[idx];
+        techEditIdx = -1;
+        renderTechItems();
+      });
+    });
+
+    // Category add buttons
     container.querySelectorAll('.tech-cat-add').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        resetTechForm();
-        document.getElementById('tech-cat').value = this.dataset.cat;
-        document.getElementById('tech-name').focus();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        techAddCat = this.dataset.cat;
+        techEditIdx = -1;
+        renderTechItems();
+        // Focus the name input
+        var nameInput = container.querySelector('.inline-add-name');
+        if (nameInput) setTimeout(function() { nameInput.focus(); }, 100);
+      });
+    });
+
+    // Save inline add
+    container.querySelectorAll('.inline-add-save').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var row = this.closest('.item-row-editing');
+        var name = row.querySelector('.inline-add-name').value.trim();
+        if (!name) { showToast('Enter a name', 'error'); return; }
+        var d = readData();
+        if (!d.techStack) d.techStack = [];
+        var newItem = {
+          name: name,
+          cat: techAddCat,
+          brand: row.querySelector('.inline-add-brand').value.trim().toLowerCase() || null,
+          logoUrl: row.querySelector('.inline-add-logourl').value.trim() || null,
+          icon: 'code'
+        };
+        if (techTempLogo['new']) {
+          newItem.logo = techTempLogo['new'];
+        }
+        d.techStack.push(newItem);
+        writeData();
+        delete techTempLogo['new'];
+        techAddCat = null;
+        renderTechItems();
+        showToast('Added!', 'success');
+      });
+    });
+
+    // Cancel inline add
+    container.querySelectorAll('.inline-add-cancel').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        delete techTempLogo['new'];
+        techAddCat = null;
+        renderTechItems();
+      });
+    });
+
+    // File upload for edit rows
+    container.querySelectorAll('.inline-edit-upload').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var idx = parseInt(this.dataset.idx);
+        handleInlineUpload(this, function(dataUrl) {
+          techTempLogo[idx] = dataUrl;
+          renderTechItems();
+        });
+      });
+    });
+
+    // File upload for add rows
+    container.querySelectorAll('.inline-add-upload').forEach(function(input) {
+      input.addEventListener('change', function() {
+        handleInlineUpload(this, function(dataUrl) {
+          techTempLogo['new'] = dataUrl;
+          renderTechItems();
+        });
+      });
+    });
+
+    // Clear logo for edit rows
+    container.querySelectorAll('.inline-logo-clear').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = this.dataset.idx;
+        techTempLogo[idx] = null;
+        renderTechItems();
+      });
+    });
+
+    // Clear logo for add rows
+    container.querySelectorAll('.inline-add-clear').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        delete techTempLogo['new'];
+        var preview = this.closest('.inline-add-preview');
+        preview.style.display = 'none';
       });
     });
   }
 
-  document.getElementById('tech-cancel').addEventListener('click', function() {
-    resetTechForm();
-  });
-
-  document.getElementById('tech-add').addEventListener('click', function() {
-    var name = document.getElementById('tech-name').value.trim();
-    if (!name) { showToast('Enter a name', 'error'); return; }
-    var cat = document.getElementById('tech-cat').value.trim() || null;
-    var brand = document.getElementById('tech-brand').value.trim().toLowerCase() || null;
-    var d = readData();
-    if (!d.techStack) d.techStack = [];
-    var editIdx = parseInt(document.getElementById('tech-edit-idx').value);
-    if (editIdx >= 0 && d.techStack[editIdx]) {
-      // Edit existing
-      d.techStack[editIdx].name = name;
-      d.techStack[editIdx].cat = cat;
-      d.techStack[editIdx].brand = brand;
-      if (techLogoData !== null) {
-        d.techStack[editIdx].logo = techLogoData;
-      } else if (document.getElementById('tech-logo-preview').style.display === 'none') {
-        d.techStack[editIdx].logo = null;
-      }
-      writeData();
-      renderTechItems();
-      resetTechForm();
-      showToast('Updated!', 'success');
-    } else {
-      // Add new
-      d.techStack.push({ name: name, cat: cat, brand: brand, logo: techLogoData || null });
-      writeData();
-      renderTechItems();
-      resetTechForm();
-      showToast('Added!', 'success');
-    }
-  });
+  function handleInlineUpload(input, callback) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 64, 64);
+        callback(canvas.toDataURL('image/png'));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 
   // ─── Currently ─────────────────────────────
   function loadCurrently() {
