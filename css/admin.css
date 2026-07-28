@@ -625,8 +625,23 @@ body {
 .tech-editor-upload input[type="file"] {
   font-size: 0.6875rem;
   color: var(--admin-text-secondary);
-  max-width: 90px;
+  max-width: 120px;
   cursor: pointer;
+}
+
+.tech-editor-upload input[type="file"]::-webkit-file-upload-button {
+  padding: 0.25rem 0.5rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-sm);
+  color: var(--admin-text);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.tech-editor-upload input[type="file"]::-webkit-file-upload-button:hover {
+  border-color: var(--admin-border-hover);
 }
 
 .tech-editor-upload input[type="file"]::file-selector-button {
