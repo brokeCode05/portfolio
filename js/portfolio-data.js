@@ -24,84 +24,22 @@ const DEFAULT_DATA = {
       status: 'Exploring'
     }
   },
-  skills: [
-    {
-      id: 'sk-linux',
-      title: 'Linux & System Administration',
-      icon: 'terminal',
-      delay: 100,
-      items: [
-        { name: 'Linux Mint XFCE', level: 'Beginner', percent: 35 },
-        { name: 'Linux Command Line', level: 'Beginner', percent: 35 },
-        { name: 'Basic Linux Administration', level: 'Beginner', percent: 30 }
-      ]
-    },
-    {
-      id: 'sk-networking',
-      title: 'Networking',
-      icon: 'activity',
-      delay: 150,
-      items: [
-        { name: 'Networking Fundamentals', level: 'Beginner', percent: 30 },
-        { name: 'TCP/IP Fundamentals', level: 'Beginner', percent: 25 }
-      ]
-    },
-    {
-      id: 'sk-remote',
-      title: 'Remote Administration',
-      icon: 'lock',
-      delay: 200,
-      items: [
-        { name: 'SSH / OpenSSH', level: 'Beginner', percent: 35 },
-        { name: 'Tailscale', level: 'Beginner', percent: 35 }
-      ]
-    },
-    {
-      id: 'sk-webdev',
-      title: 'Web Development',
-      icon: 'code',
-      delay: 250,
-      items: [
-        { name: 'HTML', level: 'Intermediate+', percent: 70 },
-        { name: 'CSS', level: 'Intermediate+', percent: 65 },
-        { name: 'JavaScript', level: 'Intermediate', percent: 60 },
-        { name: 'Responsive Web Design', level: 'Intermediate+', percent: 65 }
-      ]
-    },
-    {
-      id: 'sk-tools',
-      title: 'Development Tools',
-      icon: 'tool',
-      delay: 300,
-      items: [
-        { name: 'VS Code', level: 'Intermediate+', percent: 70 },
-        { name: 'Git', level: 'Basic Awareness', percent: 20 },
-        { name: 'npm', level: 'Beginner', percent: 35 },
-        { name: 'Termius', level: 'Beginner', percent: 35 }
-      ]
-    },
-    {
-      id: 'sk-cyber',
-      title: 'Cybersecurity',
-      icon: 'shield',
-      delay: 350,
-      items: [
-        { name: 'Cybersecurity Fundamentals', level: 'Basic Awareness', percent: 20 },
-        { name: 'Ethical Hacking Fundamentals', level: 'Basic Awareness', percent: 20 },
-        { name: 'System Enumeration Concepts', level: 'Basic Awareness', percent: 20 }
-      ]
-    },
-    {
-      id: 'sk-programming',
-      title: 'Programming',
-      icon: 'code',
-      delay: 400,
-      items: [
-        { name: 'Java', level: 'Intermediate', percent: 60 },
-        { name: 'C#', level: 'Intermediate+', percent: 70 },
-        { name: 'Python', level: 'Intermediate', percent: 60 }
-      ]
-    }
+  techStack: [
+    { name: 'Linux', icon: 'terminal', cat: 'System' },
+    { name: 'SSH', icon: 'lock', cat: 'Remote' },
+    { name: 'Tailscale', icon: 'activity', cat: 'Network' },
+    { name: 'VS Code', icon: 'tool', cat: 'Editor' },
+    { name: 'Git', icon: 'git-branch', cat: 'VCS' },
+    { name: 'npm', icon: 'package', cat: 'Tools' },
+    { name: 'Termius', icon: 'terminal', cat: 'Remote' },
+    { name: 'HTML', icon: 'code', cat: 'Frontend' },
+    { name: 'CSS', icon: 'layout', cat: 'Frontend' },
+    { name: 'JavaScript', icon: 'js', cat: 'Frontend' },
+    { name: 'Java', icon: 'coffee', cat: 'Languages' },
+    { name: 'C#', icon: 'hash', cat: 'Languages' },
+    { name: 'Python', icon: 'terminal', cat: 'Languages' },
+    { name: 'Networking', icon: 'activity', cat: 'Infra' },
+    { name: 'Cybersecurity', icon: 'shield', cat: 'Security' }
   ],
   currently: [
     'Linux Administration',
@@ -216,7 +154,33 @@ function getSkillIconSVG(type) {
   return icons[type] || icons.code;
 }
 
+var TECH_ICONS = {
+  terminal: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+  lock: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  activity: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  tool: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+  'git-branch': '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>',
+  package: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+  code: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+  layout: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+  js: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M15 9a3 3 0 0 0-3-3h-1a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-1a3 3 0 0 1-3-3"/><line x1="9" y1="18" x2="9" y2="14"/></svg>',
+  coffee: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',
+  hash: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>',
+  shield: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+};
+
 // ─── Render Section HTML ──────────────────────────────
+
+function renderTechStack(data) {
+  if (!data || !data.techStack) return '';
+  return data.techStack.map(function(tech) {
+    var svg = TECH_ICONS[tech.icon] || TECH_ICONS.terminal;
+    return '<a class="tech-badge" data-reveal>' +
+      '<span class="tech-badge-icon" aria-hidden="true">' + svg + '</span>' +
+      '<span class="tech-badge-name">' + escapeHtml(tech.name) + '</span>' +
+    '</a>';
+  }).join('');
+}
 
 function renderSkills(data) {
   if (!data || !data.skills) return '';

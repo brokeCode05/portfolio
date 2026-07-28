@@ -51,7 +51,7 @@
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </span>
-        <span>Skills</span>
+        <span>Tech Stack</span>
       </button>
       <button class="admin-nav-btn" data-section="currently">
         <span class="nav-icon">
@@ -160,14 +160,43 @@
         </div>
       </div>
 
-      <!-- ===== SKILLS SECTION ===== -->
+      <!-- ===== TECH STACK SECTION ===== -->
       <div class="admin-section" id="section-skills">
-        <h2 class="admin-section-title">Skills &amp; Technologies</h2>
-        <p class="admin-section-desc">Manage skill cards — add, edit, or remove skills and their progress bars.</p>
-        <div id="skills-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="skills-add-card">+ Add Skill Card</button>
-          <button class="btn btn-primary" id="skills-save">Save All Skills</button>
+        <h2 class="admin-section-title">Tech Stack</h2>
+        <p class="admin-section-desc">Manage the tech stack badges shown on your portfolio.</p>
+        <div class="admin-card">
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="tech-name" placeholder="Linux" />
+            </div>
+            <div class="form-group">
+              <label>Icon</label>
+              <select id="tech-icon">
+                <option value="terminal">Terminal</option>
+                <option value="lock">Lock</option>
+                <option value="activity">Activity</option>
+                <option value="tool">Tool</option>
+                <option value="git-branch">Git Branch</option>
+                <option value="package">Package</option>
+                <option value="code">Code</option>
+                <option value="layout">Layout</option>
+                <option value="js">JS</option>
+                <option value="coffee">Coffee</option>
+                <option value="hash">Hash</option>
+                <option value="shield">Shield</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="tech-cat" placeholder="System" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="tech-add">+ Add Tech</button>
+        </div>
+        <div id="tech-list" class="admin-card"></div>
+        <div style="margin-top:0.75rem">
+          <button class="btn btn-primary" id="tech-save">Save Tech Stack</button>
         </div>
       </div>
 
@@ -334,141 +363,58 @@
     showToast('About saved!', 'success');
   });
 
-  // ─── Skills ────────────────────────────────
-  var SKILL_ICONS = ['terminal', 'activity', 'lock', 'code', 'tool', 'shield', 'globe', 'database'];
-
-  function renderSkillCards() {
+  // ─── Tech Stack ────────────────────────────
+  function renderTechItems() {
     var d = readData();
-    var container = document.getElementById('skills-list');
-    if (!d.skills || !d.skills.length) {
-      container.innerHTML = '<div class="empty-state">No skill cards yet.</div>';
+    var container = document.getElementById('tech-list');
+    if (!d.techStack || !d.techStack.length) {
+      container.innerHTML = '<div class="empty-state">No tech items yet. Add one above.</div>';
       return;
     }
-    container.innerHTML = d.skills.map(function(skill, idx) {
-      var itemsHtml = (skill.items || []).map(function(item, iidx) {
-        return '<div class="skill-item-editor">' +
-          '<input type="text" class="sk-item-name" value="' + escapeHtml(item.name) + '" placeholder="Skill name" />' +
-          '<input type="text" class="sk-item-level" value="' + escapeHtml(item.level) + '" placeholder="Level" />' +
-          '<input type="number" class="sk-item-pct" value="' + item.percent + '" min="0" max="100" />' +
-          '<button class="btn btn-sm btn-danger sk-item-remove" data-idx="' + idx + '" data-iidx="' + iidx + '">×</button>' +
-        '</div>';
-      }).join('') +
-      '<button class="btn btn-sm sk-item-add" data-idx="' + idx + '">+ Add Item</button>';
-
-      return '<div class="admin-card" data-sk-idx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<h4>' + escapeHtml(skill.title) + '</h4>' +
-          '<button class="btn btn-sm btn-danger sk-card-remove" data-idx="' + idx + '">Remove</button>' +
+    container.innerHTML = '<div class="item-list">' + d.techStack.map(function(item, idx) {
+      return '<div class="item-row">' +
+        '<div class="item-row-info">' +
+          '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
+          '<div class="item-row-sub">' + escapeHtml(item.icon) + ' &middot; ' + escapeHtml(item.cat || '') + '</div>' +
         '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Card Title</label>' +
-            '<input type="text" class="sk-card-title" value="' + escapeHtml(skill.title) + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Icon</label>' +
-            '<select class="sk-card-icon">' +
-              SKILL_ICONS.map(function(ic) { return '<option value="' + ic + '"' + (ic === skill.icon ? ' selected' : '') + '>' + ic + '</option>'; }).join('') +
-            '</select>' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Skills</label>' +
-          itemsHtml +
+        '<div class="item-row-actions">' +
+          '<button class="btn btn-sm btn-danger tech-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
       '</div>';
-    }).join('');
+    }).join('') + '</div>';
 
-    // Attach events
-    container.querySelectorAll('.sk-card-remove').forEach(function(btn) {
+    container.querySelectorAll('.tech-remove').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        if (!confirm('Remove this skill card?')) return;
+        if (!confirm('Remove this tech item?')) return;
         var d = readData();
-        d.skills.splice(idx, 1);
+        d.techStack.splice(parseInt(this.dataset.idx), 1);
         writeData();
-        renderSkillCards();
-        showToast('Skill card removed', 'success');
-      });
-    });
-
-    container.querySelectorAll('.sk-item-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        var iidx = parseInt(this.dataset.iidx);
-        var d = readData();
-        d.skills[idx].items.splice(iidx, 1);
-        writeData();
-        renderSkillCards();
-      });
-    });
-
-    container.querySelectorAll('.sk-item-add').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        var d = readData();
-        if (!d.skills[idx].items) d.skills[idx].items = [];
-        d.skills[idx].items.push({ name: 'New Skill', level: 'Beginner', percent: 30 });
-        writeData();
-        renderSkillCards();
-      });
-    });
-
-    container.querySelectorAll('.sk-card-title, .sk-card-icon, .sk-item-name, .sk-item-level, .sk-item-pct').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var d = readData();
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.skIdx);
-        d.skills[idx].title = card.querySelector('.sk-card-title').value;
-        d.skills[idx].icon = card.querySelector('.sk-card-icon').value;
-        var items = card.querySelectorAll('.skill-item-editor');
-        items.forEach(function(itemEl, iidx) {
-          if (d.skills[idx].items[iidx]) {
-            d.skills[idx].items[iidx].name = itemEl.querySelector('.sk-item-name').value;
-            d.skills[idx].items[iidx].level = itemEl.querySelector('.sk-item-level').value;
-            d.skills[idx].items[iidx].percent = parseInt(itemEl.querySelector('.sk-item-pct').value) || 0;
-          }
-        });
-        writeData();
+        renderTechItems();
       });
     });
   }
 
-  document.getElementById('skills-add-card').addEventListener('click', function() {
+  document.getElementById('tech-add').addEventListener('click', function() {
+    var name = document.getElementById('tech-name').value.trim();
+    var icon = document.getElementById('tech-icon').value;
+    var cat = document.getElementById('tech-cat').value.trim();
+    if (!name) { showToast('Enter a tech name', 'error'); return; }
     var d = readData();
-    var idx = d.skills.length;
-    d.skills.push({
-      id: 'sk-' + Date.now(),
-      title: 'New Skill Card',
-      icon: 'code',
-      delay: 100 + idx * 50,
-      items: [{ name: 'New Skill', level: 'Beginner', percent: 30 }]
-    });
+    if (!d.techStack) d.techStack = [];
+    d.techStack.push({ name: name, icon: icon, cat: cat || 'General' });
     writeData();
-    renderSkillCards();
-    showToast('New skill card added', 'success');
+    renderTechItems();
+    document.getElementById('tech-name').value = '';
+    document.getElementById('tech-cat').value = '';
+    showToast('Tech added!', 'success');
   });
 
-  document.getElementById('skills-save').addEventListener('click', function() {
+  document.getElementById('tech-save').addEventListener('click', function() {
     var d = readData();
-    var container = document.getElementById('skills-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.skIdx);
-      if (isNaN(idx) || !d.skills[idx]) return;
-      d.skills[idx].title = card.querySelector('.sk-card-title').value;
-      d.skills[idx].icon = card.querySelector('.sk-card-icon').value;
-      var items = card.querySelectorAll('.skill-item-editor');
-      items.forEach(function(itemEl, iidx) {
-        if (!d.skills[idx].items[iidx]) {
-          d.skills[idx].items[iidx] = { name: '', level: '', percent: 0 };
-        }
-        d.skills[idx].items[iidx].name = itemEl.querySelector('.sk-item-name').value;
-        d.skills[idx].items[iidx].level = itemEl.querySelector('.sk-item-level').value;
-        d.skills[idx].items[iidx].percent = parseInt(itemEl.querySelector('.sk-item-pct').value) || 0;
-      });
-    });
+    var items = document.querySelectorAll('#tech-list .item-row');
+    // The data is already saved via add/remove, this just confirms
     writeData();
-    showToast('All skills saved!', 'success');
+    showToast('Tech stack saved!', 'success');
   });
 
   // ─── Currently ─────────────────────────────
@@ -865,7 +811,7 @@
   function initDashboard() {
     loadHero();
     loadAbout();
-    renderSkillCards();
+    renderTechItems();
     loadCurrently();
     renderProjects();
     renderCerts();
