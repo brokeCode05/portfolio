@@ -165,7 +165,10 @@
         <h2 class="admin-section-title">Skills &amp; Technologies</h2>
         <p class="admin-section-desc">Manage skill cards — add, edit, or remove skills and their progress bars.</p>
         <div id="skills-list"></div>
-        <button class="btn" id="skills-add-card">+ Add Skill Card</button>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="skills-add-card">+ Add Skill Card</button>
+          <button class="btn btn-primary" id="skills-save">Save All Skills</button>
+        </div>
       </div>
 
       <!-- ===== CURRENTLY SECTION ===== -->
@@ -187,7 +190,10 @@
         <h2 class="admin-section-title">Projects</h2>
         <p class="admin-section-desc">Manage your featured projects.</p>
         <div id="projects-list"></div>
-        <button class="btn" id="projects-add">+ Add Project</button>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="projects-add">+ Add Project</button>
+          <button class="btn btn-primary" id="projects-save">Save All Projects</button>
+        </div>
       </div>
 
       <!-- ===== CERTS SECTION ===== -->
@@ -195,7 +201,10 @@
         <h2 class="admin-section-title">Certifications</h2>
         <p class="admin-section-desc">Manage your certificate cards.</p>
         <div id="certs-list"></div>
-        <button class="btn" id="certs-add">+ Add Certificate</button>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="certs-add">+ Add Certificate</button>
+          <button class="btn btn-primary" id="certs-save">Save All Certificates</button>
+        </div>
       </div>
 
       <!-- ===== EXPERIENCE SECTION ===== -->
@@ -203,7 +212,10 @@
         <h2 class="admin-section-title">Experience</h2>
         <p class="admin-section-desc">Manage your work experience timeline.</p>
         <div id="experience-list"></div>
-        <button class="btn" id="experience-add">+ Add Experience</button>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="experience-add">+ Add Experience</button>
+          <button class="btn btn-primary" id="experience-save">Save All Experience</button>
+        </div>
       </div>
 
     </div>
@@ -437,6 +449,28 @@
     showToast('New skill card added', 'success');
   });
 
+  document.getElementById('skills-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('skills-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.skIdx);
+      if (isNaN(idx) || !d.skills[idx]) return;
+      d.skills[idx].title = card.querySelector('.sk-card-title').value;
+      d.skills[idx].icon = card.querySelector('.sk-card-icon').value;
+      var items = card.querySelectorAll('.skill-item-editor');
+      items.forEach(function(itemEl, iidx) {
+        if (!d.skills[idx].items[iidx]) {
+          d.skills[idx].items[iidx] = { name: '', level: '', percent: 0 };
+        }
+        d.skills[idx].items[iidx].name = itemEl.querySelector('.sk-item-name').value;
+        d.skills[idx].items[iidx].level = itemEl.querySelector('.sk-item-level').value;
+        d.skills[idx].items[iidx].percent = parseInt(itemEl.querySelector('.sk-item-pct').value) || 0;
+      });
+    });
+    writeData();
+    showToast('All skills saved!', 'success');
+  });
+
   // ─── Currently ─────────────────────────────
   function loadCurrently() {
     var d = readData();
@@ -560,6 +594,23 @@
     showToast('New project added', 'success');
   });
 
+  document.getElementById('projects-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('projects-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.pidx);
+      if (isNaN(idx) || !d.projects[idx]) return;
+      d.projects[idx].title = card.querySelector('.proj-title').value;
+      d.projects[idx].description = card.querySelector('.proj-desc').value;
+      d.projects[idx].tags = card.querySelector('.proj-tags').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+      if (!d.projects[idx].links) d.projects[idx].links = {};
+      d.projects[idx].links.live = card.querySelector('.proj-live').value;
+      d.projects[idx].links.repo = card.querySelector('.proj-repo').value;
+    });
+    writeData();
+    showToast('All projects saved!', 'success');
+  });
+
   // ─── Certs ─────────────────────────────────
   function renderCerts() {
     var d = readData();
@@ -629,6 +680,21 @@
     writeData();
     renderCerts();
     showToast('New certificate added', 'success');
+  });
+
+  document.getElementById('certs-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('certs-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.cidx);
+      if (isNaN(idx) || !d.certifications[idx]) return;
+      d.certifications[idx].name = card.querySelector('.cert-name').value;
+      d.certifications[idx].issuer = card.querySelector('.cert-issuer').value;
+      d.certifications[idx].date = card.querySelector('.cert-date').value;
+      d.certifications[idx].path = card.querySelector('.cert-path').value;
+    });
+    writeData();
+    showToast('All certifications saved!', 'success');
   });
 
   // ─── Experience ────────────────────────────
@@ -732,6 +798,26 @@
     writeData();
     renderExperience();
     showToast('New experience added', 'success');
+  });
+
+  document.getElementById('experience-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('experience-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.eidx);
+      if (isNaN(idx) || !d.experience[idx]) return;
+      d.experience[idx].role = card.querySelector('.exp-role').value;
+      d.experience[idx].company = card.querySelector('.exp-company').value;
+      var bullets = card.querySelectorAll('.exp-bullet');
+      bullets.forEach(function(textarea, bi) {
+        if (!d.experience[idx].bullets[bi]) {
+          d.experience[idx].bullets[bi] = '';
+        }
+        d.experience[idx].bullets[bi] = textarea.value;
+      });
+    });
+    writeData();
+    showToast('All experience saved!', 'success');
   });
 
   // ─── JSON Export/Import ────────────────────
