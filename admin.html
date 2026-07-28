@@ -478,7 +478,7 @@
         '<div class="tech-cat-header">' +
           '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
           '<span class="tech-cat-count">' + items.length + '</span>' +
-          '<button class="btn btn-sm tech-cat-add" data-cat="' + escapeHtml(cat) + '" style="margin-left:auto">+ Add</button>' +
+          '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
         '</div>' +
         '<div class="tech-cat-items">' + itemsHtml + '</div>' +
       '</div>';
