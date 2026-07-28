@@ -140,20 +140,6 @@ function loadData() {
   return getPortfolioData() || DEFAULT_DATA;
 }
 
-// ─── SVG Icon Helpers ─────────────────────────────────
-
-function getSkillIconSVG(type) {
-  var icons = {
-    terminal: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
-    activity: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
-    lock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-    code: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-    tool: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-    shield: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
-  };
-  return icons[type] || icons.code;
-}
-
 var TECH_ICONS = {
   terminal: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
   lock: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
@@ -179,34 +165,6 @@ function renderTechStack(data) {
       '<span class="tech-badge-icon" aria-hidden="true">' + svg + '</span>' +
       '<span class="tech-badge-name">' + escapeHtml(tech.name) + '</span>' +
     '</a>';
-  }).join('');
-}
-
-function renderSkills(data) {
-  if (!data || !data.skills) return '';
-  return data.skills.map(function(skill, idx) {
-    var items = skill.items.map(function(item) {
-      return '<div class="skill-item">' +
-        '<div class="skill-item-header">' +
-          '<span class="skill-item-name">' + escapeHtml(item.name) + '</span>' +
-          '<span class="skill-item-level">' + escapeHtml(item.level) + '</span>' +
-        '</div>' +
-        '<div class="skill-progress-row">' +
-          '<div class="skill-progress" role="progressbar" aria-valuenow="' + item.percent + '" aria-valuemin="0" aria-valuemax="100">' +
-            '<div class="skill-progress-fill" style="--target: ' + item.percent + '%"></div>' +
-          '</div>' +
-          '<span class="skill-pct-label">' + item.percent + '%</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    return '<div class="skill-card" data-reveal data-reveal-delay="' + skill.delay + '">' +
-      '<div class="skill-card-header">' +
-        '<span class="skill-card-icon" aria-hidden="true">' + getSkillIconSVG(skill.icon) + '</span>' +
-        '<h3 class="skill-card-title">' + escapeHtml(skill.title) + '</h3>' +
-      '</div>' +
-      '<div class="skill-card-body">' + items + '</div>' +
-    '</div>';
   }).join('');
 }
 
