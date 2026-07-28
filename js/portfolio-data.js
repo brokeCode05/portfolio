@@ -188,7 +188,7 @@ var SIMPLE_ICONS_BASE = 'https://cdn.simpleicons.org/';
 
 var MARQUEE_ROWS = [
   { dir: 'right', label: 'Languages', indices: [0, 1, 2, 3, 4, 5, 6] },
-  { dir: 'left', label: 'Web', indices: [7, 8] },
+  { dir: 'left', label: 'Web Tech', indices: [7, 8] },
   { dir: 'right', label: 'Databases', indices: [9, 10] },
   { dir: 'left', label: 'Version Control', indices: [11, 12] },
   { dir: 'right', label: 'Dev Tools', indices: [13, 14, 15, 16] },
