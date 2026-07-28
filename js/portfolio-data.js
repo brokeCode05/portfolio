@@ -25,21 +25,21 @@ const DEFAULT_DATA = {
     }
   },
   techStack: [
-    { name: 'Linux', icon: 'terminal', cat: 'System' },
-    { name: 'SSH', icon: 'lock', cat: 'Remote' },
-    { name: 'Tailscale', icon: 'activity', cat: 'Network' },
-    { name: 'VS Code', icon: 'tool', cat: 'Editor' },
-    { name: 'Git', icon: 'git-branch', cat: 'VCS' },
-    { name: 'npm', icon: 'package', cat: 'Tools' },
-    { name: 'Termius', icon: 'terminal', cat: 'Remote' },
-    { name: 'HTML', icon: 'code', cat: 'Frontend' },
-    { name: 'CSS', icon: 'layout', cat: 'Frontend' },
-    { name: 'JavaScript', icon: 'js', cat: 'Frontend' },
-    { name: 'Java', icon: 'coffee', cat: 'Languages' },
-    { name: 'C#', icon: 'hash', cat: 'Languages' },
-    { name: 'Python', icon: 'terminal', cat: 'Languages' },
+    { name: 'Linux', icon: 'terminal', cat: 'System', brand: 'linux' },
+    { name: 'SSH', icon: 'lock', cat: 'Remote', brand: 'openssh' },
+    { name: 'Tailscale', icon: 'activity', cat: 'Network', brand: 'tailscale' },
+    { name: 'VS Code', icon: 'tool', cat: 'Editor', brand: 'visualstudiocode' },
+    { name: 'Git', icon: 'git-branch', cat: 'VCS', brand: 'git' },
+    { name: 'npm', icon: 'package', cat: 'Tools', brand: 'npm' },
+    { name: 'Termius', icon: 'terminal', cat: 'Remote', brand: 'iterm2' },
+    { name: 'HTML', icon: 'code', cat: 'Frontend', brand: 'html5' },
+    { name: 'CSS', icon: 'layout', cat: 'Frontend', brand: 'css3' },
+    { name: 'JavaScript', icon: 'js', cat: 'Frontend', brand: 'javascript' },
+    { name: 'Java', icon: 'coffee', cat: 'Languages', brand: 'java' },
+    { name: 'C#', icon: 'hash', cat: 'Languages', brand: 'csharp' },
+    { name: 'Python', icon: 'terminal', cat: 'Languages', brand: 'python' },
     { name: 'Networking', icon: 'activity', cat: 'Infra' },
-    { name: 'Cybersecurity', icon: 'shield', cat: 'Security' }
+    { name: 'Cybersecurity', icon: 'shield', cat: 'Security', brand: 'letsencrypt' }
   ],
   currently: [
     'Linux Administration',
@@ -149,20 +149,10 @@ function loadData() {
 
 var BRAND_LOGOS = {
   terminal: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 22 14 16 6 10"/><line x1="18" y1="24" x2="26" y2="24"/></svg>',
-  lock: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="14" width="20" height="14" rx="2"/><path d="M10 14V10a6 6 0 0 1 12 0v4"/><circle cx="16" cy="20" r="2" fill="currentColor"/><line x1="16" y1="22" x2="16" y2="25"/></svg>',
-  activity: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h5l3-9 4 18 3-9h5"/></svg>',
-  tool: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a1.5 1.5 0 0 0 0 3l2 2a1.5 1.5 0 0 0 3 0l4-4a7 7 0 0 1-9 9l-8 8a2.5 2.5 0 0 1-3.5-3.5l8-8a7 7 0 0 1 9-9l-4 4z"/></svg>',
-  'git-branch': '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3"/><circle cx="10" cy="24" r="3"/><circle cx="24" cy="14" r="3"/><line x1="10" y1="11" x2="10" y2="21"/><path d="M10 21a8 8 0 0 0 8-8"/></svg>',
-  package: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="24" height="20" rx="2"/><line x1="4" y1="14" x2="28" y2="14"/><polyline points="12 14 12 20 16 17 20 20 20 14"/></svg>',
-  code: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 22 6 16 12 10"/><polyline points="20 10 26 16 20 22"/></svg>',
-  layout: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="24" height="24" rx="2"/><line x1="4" y1="12" x2="28" y2="12"/><line x1="14" y1="12" x2="14" y2="28"/></svg>',
-  js: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="24" height="24" rx="2"/><path d="M18 12a3 3 0 0 0-3-3h-2a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4h-2a3 3 0 0 1-3-3"/><line x1="12" y1="22" x2="12" y2="18"/></svg>',
-  coffee: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10h2a5 5 0 0 1 0 10h-2"/><path d="M4 10h18v12a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V10z"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="20" y1="2" x2="20" y2="6"/></svg>',
-  hash: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="13" x2="26" y2="13"/><line x1="6" y1="19" x2="26" y2="19"/><line x1="14" y1="6" x2="10" y2="26"/><line x1="22" y1="6" x2="18" y2="26"/></svg>',
-  shield: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28s10-5 10-12V8l-10-4L6 8v8c0 7 10 12 10 12z"/><path d="M12 16l3 3 5-6" stroke-linecap="round"/></svg>',
-  'linux': '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="12" r="6"/><path d="M10 18c-2 2-3 5-2 7 1 2 3 3 6 3h4c3 0 5-1 6-3 1-2 0-5-2-7"/><circle cx="12" cy="10" r="1" fill="currentColor"/><circle cx="20" cy="10" r="1" fill="currentColor"/><path d="M14 18l2 2 2-2"/></svg>',
-  'network': '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="6" r="2"/><circle cx="8" cy="20" r="2"/><circle cx="24" cy="20" r="2"/><circle cx="16" cy="26" r="2"/><line x1="14" y1="8" x2="10" y2="18"/><line x1="18" y1="8" x2="22" y2="18"/><line x1="10" y1="22" x2="14" y2="24"/><line x1="22" y1="22" x2="18" y2="24"/></svg>'
+  shield: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28s10-5 10-12V8l-10-4L6 8v8c0 7 10 12 10 12z"/></svg>'
 };
+
+var SIMPLE_ICONS_BASE = 'https://cdn.simpleicons.org/';
 
 var MARQUEE_ROWS = [
   { dir: 'right', indices: [0, 1, 2, 3, 4] },
@@ -178,9 +168,16 @@ function renderTechStack(data) {
     var items = row.indices.map(function(idx) {
       var tech = data.techStack[idx];
       if (!tech) return '';
-      var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
+      var logoHtml;
+      if (tech.brand) {
+        var slug = encodeURIComponent(tech.brand.toLowerCase());
+        logoHtml = '<img class="tech-logo-img" src="' + SIMPLE_ICONS_BASE + slug + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" />';
+      } else {
+        var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
+        logoHtml = '<span class="tech-logo-fallback" aria-hidden="true">' + svg + '</span>';
+      }
       return '<span class="tech-logo">' +
-        '<span class="tech-logo-icon" aria-hidden="true">' + svg + '</span>' +
+        '<span class="tech-logo-icon">' + logoHtml + '</span>' +
         '<span class="tech-logo-name">' + escapeHtml(tech.name) + '</span>' +
       '</span>';
     }).join('');

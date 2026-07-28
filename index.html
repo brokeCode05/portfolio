@@ -706,14 +706,25 @@
       opacity: 1;
       transform: scale(1.15);
     }
-    .tech-logo svg {
+    .tech-logo-img {
+      width: 32px;
+      height: 32px;
+      display: block;
+      object-fit: contain;
+      filter: brightness(0.7) saturate(0.3);
+      transition: filter var(--transition-fast);
+    }
+    .tech-logo:hover .tech-logo-img {
+      filter: brightness(1) saturate(1);
+    }
+    .tech-logo-fallback svg {
       width: 32px;
       height: 32px;
       display: block;
       color: var(--color-text-secondary);
       transition: color var(--transition-fast);
     }
-    .tech-logo:hover svg {
+    .tech-logo:hover .tech-logo-fallback svg {
       color: var(--color-accent);
     }
     .tech-logo-name {
