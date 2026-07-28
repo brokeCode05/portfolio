@@ -172,11 +172,18 @@
               <input type="text" id="tech-name" placeholder="e.g. Linux" />
             </div>
             <div class="form-group">
-              <label>Brand Slug (for CDN logo)</label>
+              <label>Brand Slug (Simple Icons CDN)</label>
               <input type="text" id="tech-brand" placeholder="e.g. linux, python, git" />
               <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Uses <code>cdn.simpleicons.org/SLUG</code>. Leave blank to use uploaded logo or fallback icon.
+                Uses <code>cdn.simpleicons.org/SLUG</code>. Leave blank for URL or upload.
               </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Logo URL (paste any image link)</label>
+            <input type="text" id="tech-logourl" placeholder="https://example.com/logo.png" />
+            <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
+              Paste a direct URL to any logo image. Overrides CDN brand slug.
             </div>
           </div>
           <div class="form-group">
@@ -368,6 +375,7 @@
   function resetTechForm() {
     document.getElementById('tech-name').value = '';
     document.getElementById('tech-brand').value = '';
+    document.getElementById('tech-logourl').value = '';
     document.getElementById('tech-logo-input').value = '';
     document.getElementById('tech-logo-preview').style.display = 'none';
     document.getElementById('tech-edit-idx').value = '-1';
@@ -450,6 +458,7 @@
         if (!item) return;
         document.getElementById('tech-name').value = item.name;
         document.getElementById('tech-brand').value = item.brand || '';
+        document.getElementById('tech-logourl').value = item.logoUrl || '';
         document.getElementById('tech-edit-idx').value = idx;
         document.getElementById('tech-add').textContent = 'Update Tech';
         document.getElementById('tech-cancel').style.display = 'inline-flex';
@@ -475,6 +484,7 @@
     var name = document.getElementById('tech-name').value.trim();
     if (!name) { showToast('Enter a tech name', 'error'); return; }
     var brand = document.getElementById('tech-brand').value.trim().toLowerCase() || null;
+    var logoUrl = document.getElementById('tech-logourl').value.trim() || null;
     var d = readData();
     if (!d.techStack) d.techStack = [];
     var editIdx = parseInt(document.getElementById('tech-edit-idx').value);
@@ -482,14 +492,21 @@
       // Edit existing
       d.techStack[editIdx].name = name;
       d.techStack[editIdx].brand = brand;
-      d.techStack[editIdx].logo = techLogoData;
+      d.techStack[editIdx].logoUrl = logoUrl;
+      // logo overrides if uploaded, otherwise keep existing or null
+      if (techLogoData || logoUrl) {
+        d.techStack[editIdx].logo = techLogoData;
+      } else if (document.getElementById('tech-logo-preview').style.display === 'none' && !logoUrl) {
+        // No upload and no URL - clear logo
+        d.techStack[editIdx].logo = null;
+      }
       writeData();
       renderTechItems();
       resetTechForm();
       showToast('Tech updated!', 'success');
     } else {
       // Add new
-      d.techStack.push({ name: name, brand: brand, logo: techLogoData || null });
+      d.techStack.push({ name: name, brand: brand, logoUrl: logoUrl, logo: techLogoData || null });
       writeData();
       renderTechItems();
       resetTechForm();

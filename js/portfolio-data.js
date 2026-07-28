@@ -183,7 +183,10 @@ function renderTechStack(data) {
       var tech = data.techStack[idx];
       if (!tech) return '';
       var logoHtml;
-      if (tech.logo) {
+      if (tech.logoUrl) {
+        // Direct URL logo (no upload needed)
+        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" />';
+      } else if (tech.logo) {
         // Custom uploaded logo from admin panel
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
       } else if (tech.brand) {
