@@ -482,11 +482,7 @@
       // Edit existing
       d.techStack[editIdx].name = name;
       d.techStack[editIdx].brand = brand;
-      if (techLogoData) {
-        d.techStack[editIdx].logo = techLogoData;
-      } else if (document.getElementById('tech-logo-preview').style.display === 'none' && !brand) {
-        // No logo and no brand - just keep existing
-      }
+      d.techStack[editIdx].logo = techLogoData;
       writeData();
       renderTechItems();
       resetTechForm();
