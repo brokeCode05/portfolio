@@ -184,8 +184,10 @@ function renderTechStack(data) {
       if (!tech) return '';
       var logoHtml;
       if (tech.logoUrl) {
-        // Direct URL logo (no upload needed)
-        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" />';
+        // Direct URL logo (no upload needed) with SVG fallback
+        var fallbackSvgUrl = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
+        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
+          '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvgUrl + '</span>';
       } else if (tech.logo) {
         // Custom uploaded logo from admin panel
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
