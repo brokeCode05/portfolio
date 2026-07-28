@@ -158,9 +158,9 @@ var BRAND_LOGOS = {
 };
 
 var MARQUEE_ROWS = [
-  { dir: 'right', items: ['linux', 'lock', 'activity', 'tool', 'git-branch'] },
-  { dir: 'left', items: ['package', 'terminal', 'code', 'layout', 'js'] },
-  { dir: 'right', items: ['coffee', 'hash', 'terminal', 'network', 'shield'] }
+  { dir: 'right', indices: [0, 1, 2, 3, 4] },
+  { dir: 'left', indices: [5, 6, 7, 8, 9] },
+  { dir: 'right', indices: [10, 11, 12, 13, 14] }
 ];
 
 // ─── Render Section HTML ──────────────────────────────
@@ -168,8 +168,8 @@ var MARQUEE_ROWS = [
 function renderTechStack(data) {
   if (!data || !data.techStack) return '';
   return MARQUEE_ROWS.map(function(row) {
-    var items = row.items.map(function(iconKey) {
-      var tech = data.techStack.find(function(t) { return t.icon === iconKey; });
+    var items = row.indices.map(function(idx) {
+      var tech = data.techStack[idx];
       if (!tech) return '';
       var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
       return '<span class="tech-logo">' +
