@@ -138,13 +138,27 @@ function setAdminPassword(pw) {
 
 function loadData() {
   var saved = getPortfolioData();
-  // Migration: if saved data exists but missing techStack, merge defaults
-  if (saved && !saved.techStack) {
-    saved.techStack = DEFAULT_DATA.techStack;
-    savePortfolioData(saved);
+  if (saved) {
+    var changed = false;
+    // Migration 1: add techStack if missing from old saved data
+    if (!saved.techStack) {
+      saved.techStack = JSON.parse(JSON.stringify(DEFAULT_DATA.techStack));
+      changed = true;
+    } else {
+      // Migration 2: add brand fields to existing tech items if missing
+      saved.techStack.forEach(function(item, idx) {
+        if (!item.brand && DEFAULT_DATA.techStack[idx] && DEFAULT_DATA.techStack[idx].brand) {
+          item.brand = DEFAULT_DATA.techStack[idx].brand;
+          changed = true;
+        }
+      });
+    }
+    if (changed) {
+      savePortfolioData(saved);
+    }
     return saved;
   }
-  return saved || DEFAULT_DATA;
+  return DEFAULT_DATA;
 }
 
 var BRAND_LOGOS = {
