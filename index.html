@@ -676,10 +676,10 @@
       min-width: 100%;
     }
     .tech-marquee-row.right .tech-marquee-track {
-      animation: marquee-right 30s linear infinite;
+      animation: marquee-right 50s linear infinite;
     }
     .tech-marquee-row.left .tech-marquee-track {
-      animation: marquee-left 30s linear infinite;
+      animation: marquee-left 50s linear infinite;
     }
     .tech-marquee-row:hover .tech-marquee-track {
       animation-play-state: paused;
@@ -711,11 +711,9 @@
       height: 32px;
       display: block;
       object-fit: contain;
-      filter: brightness(0.7) saturate(0.3);
-      transition: filter var(--transition-fast);
     }
     .tech-logo:hover .tech-logo-img {
-      filter: brightness(1) saturate(1);
+      transform: scale(1.2);
     }
     .tech-logo-fallback svg {
       width: 32px;
