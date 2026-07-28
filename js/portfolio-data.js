@@ -253,23 +253,35 @@ function renderCurrently(data) {
   }).join('');
 }
 
+var PROJECT_ICONS = [
+  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  '<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+  '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'
+];
+
 function renderProjects(data) {
   if (!data || !data.projects) return '';
-  return data.projects.map(function(proj) {
+  return data.projects.map(function(proj, idx) {
+    var iconPath = PROJECT_ICONS[idx % PROJECT_ICONS.length];
     var links = '';
     if (proj.links) {
-      if (proj.links.live) links += '<a href="' + proj.links.live + '" class="btn btn-sm" target="_blank" rel="noopener">Live Site</a> ';
-      if (proj.links.repo) links += '<a href="' + proj.links.repo + '" class="btn btn-sm btn-ghost" target="_blank" rel="noopener">Source</a>';
+      if (proj.links.live) links += '<a href="' + escapeHtml(proj.links.live) + '" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding:0.375rem 0.875rem;font-size:var(--text-xs)">Live Demo</a> ';
+      if (proj.links.repo) links += '<a href="' + escapeHtml(proj.links.repo) + '" target="_blank" rel="noopener noreferrer" class="btn btn-ghost" style="padding:0.375rem 0.875rem;font-size:var(--text-xs)">GitHub</a>';
     }
-    var tags = (proj.tags || []).map(function(t) { return '<span class="project-tag">' + escapeHtml(t) + '</span>'; }).join('');
-    return '<div class="project-card" data-reveal>' +
-      '<div class="project-card-body">' +
-        '<h3 class="project-title">' + escapeHtml(proj.title) + '</h3>' +
-        '<p class="project-description">' + escapeHtml(proj.description) + '</p>' +
-        '<div class="project-tags">' + tags + '</div>' +
-        '<div class="project-links">' + links + '</div>' +
+    var tags = (proj.tags || []).map(function(t) { return '<span class="tech-tag">' + escapeHtml(t) + '</span>'; }).join('');
+    return '<article class="project-card" data-reveal data-reveal-delay="' + (100 + idx * 100) + '">' +
+      '<div class="project-card-header">' +
+        '<div class="project-card-icon" aria-hidden="true">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconPath + '</svg>' +
+        '</div>' +
+        '<h3 class="project-card-title">' + escapeHtml(proj.title) + '</h3>' +
       '</div>' +
-    '</div>';
+      '<p class="project-card-description">' + escapeHtml(proj.description) + '</p>' +
+      '<div class="project-card-links flex gap-sm" style="margin-bottom:var(--space-md)">' + links + '</div>' +
+      '<div class="project-card-tech flex flex-wrap gap-sm">' + tags + '</div>' +
+    '</article>';
   }).join('');
 }
 
