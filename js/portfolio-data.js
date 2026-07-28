@@ -200,27 +200,24 @@ var MARQUEE_ROWS = [
 
 function renderTechStack(data) {
   if (!data || !data.techStack) return '';
-  return MARQUEE_ROWS.map(function(row) {
+  var html = '';
+  MARQUEE_ROWS.forEach(function(row, ri) {
     var items = row.indices.map(function(idx) {
       var tech = data.techStack[idx];
       if (!tech) return '';
       var logoHtml;
       if (tech.logoUrl) {
-        // Direct URL logo (no upload needed) with SVG fallback
         var fallbackSvgUrl = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
           '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvgUrl + '</span>';
       } else if (tech.logo) {
-        // Custom uploaded logo from admin panel
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
       } else if (tech.brand) {
-        // CDN brand logo with SVG fallback
         var slug = encodeURIComponent(tech.brand.toLowerCase());
         var fallbackSvg = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
         logoHtml = '<img class="tech-logo-img" src="' + SIMPLE_ICONS_BASE + slug + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
           '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvg + '</span>';
       } else {
-        // Fallback SVG icon
         var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
         logoHtml = '<span class="tech-logo-fallback" aria-hidden="true">' + svg + '</span>';
       }
@@ -229,20 +226,30 @@ function renderTechStack(data) {
         '<span class="tech-logo-name">' + escapeHtml(tech.name) + '</span>' +
       '</span>';
     }).join('');
-    // Repeat enough times so track is always wider than viewport
     var minItems = 20;
     var repeatCount = Math.max(5, Math.ceil(minItems / row.indices.length));
     var trackHtml = '';
     for (var r = 0; r < repeatCount; r++) {
       trackHtml += items;
     }
-    return '<div class="tech-marquee-row ' + row.dir + '">' +
-      '<span class="tech-marquee-label">' + escapeHtml(row.label) + '</span>' +
+    var extraAttr = ri >= 3 ? ' data-extra="true"' : '';
+    html += '<div class="tech-marquee-row ' + row.dir + '"' + extraAttr + '>' +
+      '<span class="tech-marquee-label">' +
+        '<span class="tech-marquee-dot" aria-hidden="true"></span>' +
+        escapeHtml(row.label) +
+      '</span>' +
       '<div class="tech-marquee-track-wrap">' +
         '<div class="tech-marquee-track">' + trackHtml + '</div>' +
       '</div>' +
     '</div>';
-  }).join('');
+  });
+  html += '<button class="tech-marquee-toggle" id="tech-toggle-btn" aria-expanded="false" data-hidden="4">' +
+    '<span class="tech-toggle-text">Show ' +
+    '<span class="tech-toggle-count">4</span> more categories' +
+    '</span>' +
+    '<svg class="tech-toggle-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+  '</button>';
+  return html;
 }
 
 function renderCurrently(data) {
