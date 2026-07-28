@@ -163,7 +163,9 @@
       <!-- ===== TECH STACK SECTION ===== -->
       <div class="admin-section" id="section-skills">
         <h2 class="admin-section-title">Tech Stack</h2>
-        <p class="admin-section-desc">Add or edit tech items. Use a brand slug for auto CDN logo, or upload a custom image.</p>
+        <p class="admin-section-desc">Manage tech items organized by category groups.</p>
+
+        <!-- Editor Form -->
         <div class="admin-card" id="tech-editor-card">
           <input type="hidden" id="tech-edit-idx" value="-1" />
           <div class="form-row">
@@ -173,9 +175,9 @@
             </div>
             <div class="form-group">
               <label>Category</label>
-              <input type="text" id="tech-cat" placeholder="e.g. Languages, Networking, OS" />
+              <input type="text" id="tech-cat" placeholder="e.g. Languages, OS" />
               <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Groups tech items by category in the display.
+                Click <strong>+ Add</strong> on a category below to auto-fill this field.
               </div>
             </div>
           </div>
@@ -184,19 +186,19 @@
               <label>Brand Slug (Simple Icons CDN)</label>
               <input type="text" id="tech-brand" placeholder="e.g. linux, python, git" />
               <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Uses <code>cdn.simpleicons.org/SLUG</code>. Leave blank for URL or upload.
+                Uses <code>cdn.simpleicons.org/SLUG</code>.
               </div>
             </div>
             <div class="form-group">
-              <label>Logo URL (paste any image link)</label>
+              <label>Logo URL</label>
               <input type="text" id="tech-logourl" placeholder="https://example.com/logo.png" />
               <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Paste a direct URL. Overrides CDN brand slug.
+                Overrides CDN brand slug if set.
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label>Or Upload Custom Logo</label>
+            <label>Upload Logo</label>
             <input type="file" id="tech-logo-input" accept="image/*" />
             <div id="tech-logo-preview" style="margin-top:0.5rem;display:none">
               <img id="tech-logo-preview-img" style="max-width:48px;max-height:48px;border:1px solid var(--admin-border);border-radius:4px;padding:4px;background:var(--admin-bg)" />
@@ -204,11 +206,14 @@
             </div>
           </div>
           <div style="display:flex;gap:0.5rem">
-            <button class="btn btn-primary" id="tech-add">+ Add Tech</button>
+            <button class="btn btn-primary" id="tech-add">+ Add</button>
             <button class="btn" id="tech-cancel" style="display:none">Cancel</button>
           </div>
         </div>
-        <div id="tech-list" class="admin-card"></div>
+
+        <!-- Category Groups -->
+        <div id="tech-list"></div>
+
         <div style="margin-top:0.75rem">
           <button class="btn btn-primary" id="tech-save">Save Tech Stack</button>
         </div>
@@ -430,29 +435,61 @@
       container.innerHTML = '<div class="empty-state">No tech items yet. Add one above.</div>';
       return;
     }
-    container.innerHTML = '<div class="item-list">' + d.techStack.map(function(item, idx) {
-      var logoPreview = '';
-      if (item.logo) {
-        logoPreview = '<img src="' + item.logo + '" style="width:28px;height:28px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
-      } else if (item.brand) {
-        logoPreview = '<span style="display:inline-block;width:28px;height:28px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.3;text-align:center;line-height:28px;font-size:12px">C</span>';
+    // Group items by category
+    var groups = {};
+    var order = [];
+    d.techStack.forEach(function(item, idx) {
+      var cat = item.cat || 'Other';
+      if (!groups[cat]) {
+        groups[cat] = [];
+        order.push(cat);
       }
-      return '<div class="item-row">' +
-        logoPreview +
-        '<div class="item-row-info">' +
-          '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
-          '<div class="item-row-sub">' + (item.brand ? 'CDN: ' + escapeHtml(item.brand) : 'Custom') + '</div>' +
-        '</div>' +
-        '<div class="item-row-actions">' +
-          '<button class="btn btn-sm tech-edit" data-idx="' + idx + '">Edit</button>' +
-          '<button class="btn btn-sm btn-danger tech-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-      '</div>';
-    }).join('') + '</div>';
+      groups[cat].push({ item: item, idx: idx });
+    });
 
+    var html = '';
+    order.forEach(function(cat) {
+      var items = groups[cat];
+      var itemsHtml = items.map(function(entry) {
+        var item = entry.item;
+        var idx = entry.idx;
+        var logoPreview = '';
+        if (item.logo) {
+          logoPreview = '<img src="' + item.logo + '" style="width:26px;height:26px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
+        } else if (item.logoUrl) {
+          logoPreview = '<span style="display:inline-flex;width:26px;height:26px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.4;align-items:center;justify-content:center;font-size:10px;color:#0F1115">URL</span>';
+        } else if (item.brand) {
+          logoPreview = '<span style="display:inline-flex;width:26px;height:26px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.25;align-items:center;justify-content:center;font-size:10px;color:var(--admin-accent)">C</span>';
+        }
+        return '<div class="item-row" style="padding:0.375rem 0.625rem">' +
+          logoPreview +
+          '<div class="item-row-info">' +
+            '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
+            '<div class="item-row-sub">' + (item.brand ? escapeHtml(item.brand) : item.logoUrl ? 'URL logo' : 'icon fallback') + '</div>' +
+          '</div>' +
+          '<div class="item-row-actions">' +
+            '<button class="btn btn-sm tech-edit" data-idx="' + idx + '" style="padding:0.25rem 0.5rem;font-size:0.6875rem">Edit</button>' +
+            '<button class="btn btn-sm btn-danger tech-remove" data-idx="' + idx + '" style="padding:0.25rem 0.5rem;font-size:0.6875rem">×</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      html += '<div class="tech-cat-group">' +
+        '<div class="tech-cat-header">' +
+          '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
+          '<span class="tech-cat-count">' + items.length + '</span>' +
+          '<button class="btn btn-sm tech-cat-add" data-cat="' + escapeHtml(cat) + '" style="margin-left:auto">+ Add</button>' +
+        '</div>' +
+        '<div class="tech-cat-items">' + itemsHtml + '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+
+    // Remove buttons
     container.querySelectorAll('.tech-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        if (!confirm('Remove this tech item?')) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!confirm('Remove this item?')) return;
         var d = readData();
         d.techStack.splice(parseInt(this.dataset.idx), 1);
         writeData();
@@ -460,8 +497,10 @@
       });
     });
 
+    // Edit buttons
     container.querySelectorAll('.tech-edit').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
         var idx = parseInt(this.dataset.idx);
         var d = readData();
         var item = d.techStack[idx];
@@ -483,6 +522,17 @@
         } else {
           document.getElementById('tech-logo-preview').style.display = 'none';
         }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    // Category add buttons — pre-fill category field
+    container.querySelectorAll('.tech-cat-add').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        resetTechForm();
+        document.getElementById('tech-cat').value = this.dataset.cat;
+        document.getElementById('tech-name').focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
   }
