@@ -2033,14 +2033,6 @@
           }
         });
 
-        // Close on scroll
-        var scrollTimer;
-        window.addEventListener('scroll', function() {
-          if (menu.classList.contains('open')) {
-            if (scrollTimer) clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(closeMenu, 150);
-          }
-        }, { passive: true });
       })();
 
       // ---- Animated counter: counts from 0 to target when card is revealed ----
@@ -2095,26 +2087,9 @@
           }
         }
 
-        // MutationObserver for cards revealed after this script runs
-        var cardsObserver = new MutationObserver(function(records) {
-          for (var r = 0; r < records.length; r++) {
-            var card = records[r].target;
-            if (card.classList.contains('revealed')) {
-              triggerCardCounters(card);
-              cardsObserver.disconnect();
-            }
-          }
-        });
-
-        var cards = document.querySelectorAll('.skill-card');
-        for (var c = 0; c < cards.length; c++) {
-          // Handle already-revealed cards (above the fold)
-          if (cards[c].classList.contains('revealed')) {
-            triggerCardCounters(cards[c]);
-          } else {
-            cardsObserver.observe(cards[c], { attributes: true, attributeFilter: ['class'] });
-          }
-        }
+        // Note: .skill-card elements were replaced by the tech stack marquee.
+        // The animated counter for skill progress bars is no longer needed.
+        // Keep the function available but don't observe non-existent elements.
       })();
     })();
 
@@ -2419,6 +2394,24 @@
     if (experienceContainer && data.experience && data.experience.length) {
       experienceContainer.innerHTML = renderExperience(data);
     }
+
+    // ─── Re-observe new [data-reveal] elements replaced above ───
+    (function(){
+      var reducedMotion = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) return;
+      var freshReveals = document.querySelectorAll('[data-reveal]:not(.revealed)');
+      if (!freshReveals.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
+      freshReveals.forEach(function(el) { observer.observe(el); });
+    })();
 
   })();
   </script>
