@@ -178,6 +178,7 @@ var MARQUEE_ROWS = [
 
 function renderTechStack(data) {
   if (!data || !data.techStack) return '';
+  var REPEATS = 5;
   return MARQUEE_ROWS.map(function(row) {
     var items = row.indices.map(function(idx) {
       var tech = data.techStack[idx];
@@ -207,9 +208,13 @@ function renderTechStack(data) {
         '<span class="tech-logo-name">' + escapeHtml(tech.name) + '</span>' +
       '</span>';
     }).join('');
-    // Duplicate for seamless looping
+    // Repeat enough times so track is always wider than viewport
+    var trackHtml = '';
+    for (var r = 0; r < REPEATS; r++) {
+      trackHtml += items;
+    }
     return '<div class="tech-marquee-row ' + row.dir + '">' +
-      '<div class="tech-marquee-track">' + items + items + '</div>' +
+      '<div class="tech-marquee-track">' + trackHtml + '</div>' +
     '</div>';
   }).join('');
 }
