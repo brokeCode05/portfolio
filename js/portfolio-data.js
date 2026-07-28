@@ -232,7 +232,7 @@ function renderTechStack(data) {
     for (var r = 0; r < repeatCount; r++) {
       trackHtml += items;
     }
-    var extraAttr = ri >= 3 ? ' data-extra="true"' : '';
+    var extraAttr = ri >= 3 ? ' data-extra="true" style="animation-delay:' + ((ri - 3) * 0.06).toFixed(2) + 's"' : '';
     html += '<div class="tech-marquee-row ' + row.dir + '"' + extraAttr + '>' +
       '<span class="tech-marquee-label">' +
         '<span class="tech-marquee-dot" aria-hidden="true"></span>' +
