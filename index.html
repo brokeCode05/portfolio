@@ -41,6 +41,21 @@
 
   <!-- Skills progress bar cards styles -->
   <style>
+    /* ===== Hero: Buttons full clickable area ===== */
+    .hero-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    @media (min-width: 769px) {
+      .hero-actions {
+        flex-direction: row;
+      }
+      .hero-actions .btn {
+        width: auto;
+        justify-content: center;
+      }
+    }
+
     /* ===== Hero: Premium Portrait ===== */
     .hero-layout {
       display: grid;
@@ -749,6 +764,9 @@
       width: 76px;
       opacity: 0.7;
       transition: opacity var(--transition-fast), transform var(--transition-fast);
+      position: relative;
+      z-index: 1;
+      pointer-events: auto;
     }
     .tech-logo:hover {
       opacity: 1;
@@ -2352,21 +2370,33 @@
         '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
     }
 
-    // ─── Skills ───────────────────────────────
-    var techGrid = document.getElementById('tech-stack-grid');
+    // ─── Skills ───────────────────────────────      var techGrid = document.getElementById('tech-stack-grid');
     if (techGrid && data.techStack && data.techStack.length) {
       techGrid.innerHTML = renderTechStack(data);
       // Tech stack toggle
       var toggleBtn = document.getElementById('tech-toggle-btn');
       if (toggleBtn) {
+        var toggling = false;
         toggleBtn.addEventListener('click', function() {
-          var expanded = this.classList.toggle('expanded');
-          techGrid.classList.toggle('expanded', expanded);
-          this.setAttribute('aria-expanded', expanded);
-          var count = this.dataset.hidden || '4';
-          this.querySelector('.tech-toggle-text').innerHTML = expanded
-            ? 'Hide <span class="tech-toggle-count">' + count + '</span> categories'
-            : 'Show <span class="tech-toggle-count">' + count + '</span> more categories';
+          // Guard against rapid double-click while animation plays
+          if (toggling) return;
+          toggling = true;
+          var self = this;
+          // Re-query techGrid to ensure it's not stale
+          var grid = document.getElementById('tech-stack-grid');
+          if (!grid) { toggling = false; return; }
+          var expanded = self.classList.toggle('expanded');
+          grid.classList.toggle('expanded', expanded);
+          self.setAttribute('aria-expanded', expanded);
+          var count = self.dataset.hidden || '4';
+          var textEl = self.querySelector('.tech-toggle-text');
+          if (textEl) {
+            textEl.innerHTML = expanded
+              ? 'Hide <span class="tech-toggle-count">' + count + '</span> categories'
+              : 'Show <span class="tech-toggle-count">' + count + '</span> more categories';
+          }
+          // Release guard after animation completes
+          setTimeout(function() { toggling = false; }, 450);
         });
       }
     }
