@@ -344,7 +344,7 @@
     var container = document.getElementById('tech-list');
     if (!d.techStack || !d.techStack.length) {
       if (techAddCat) {
-        container.innerHTML = renderInlineAddForm(null, null, techAddCat);
+        container.innerHTML = renderInlineAddForm(null, techAddCat);
         bindTechEvents();
       } else {
         container.innerHTML = '<div class="empty-state">No tech items yet. Click <strong>+ Add</strong> below to get started.</div>';
