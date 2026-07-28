@@ -137,7 +137,14 @@ function setAdminPassword(pw) {
 // ─── Data Getters (with fallback) ────────────────────
 
 function loadData() {
-  return getPortfolioData() || DEFAULT_DATA;
+  var saved = getPortfolioData();
+  // Migration: if saved data exists but missing techStack, merge defaults
+  if (saved && !saved.techStack) {
+    saved.techStack = DEFAULT_DATA.techStack;
+    savePortfolioData(saved);
+    return saved;
+  }
+  return saved || DEFAULT_DATA;
 }
 
 var BRAND_LOGOS = {
