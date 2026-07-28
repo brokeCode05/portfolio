@@ -2370,7 +2370,8 @@
         '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
     }
 
-    // ─── Skills ───────────────────────────────      var techGrid = document.getElementById('tech-stack-grid');
+    // ─── Skills ───────────────────────────────
+    var techGrid = document.getElementById('tech-stack-grid');
     if (techGrid && data.techStack && data.techStack.length) {
       techGrid.innerHTML = renderTechStack(data);
       // Tech stack toggle
