@@ -344,8 +344,8 @@
     var container = document.getElementById('tech-list');
     if (!d.techStack || !d.techStack.length) {
       if (techAddCat) {
-        // Show empty state with add form
-        renderInlineAddForm(container, d, techAddCat);
+        container.innerHTML = renderInlineAddForm(null, null, techAddCat);
+        bindTechEvents();
       } else {
         container.innerHTML = '<div class="empty-state">No tech items yet. Click <strong>+ Add</strong> below to get started.</div>';
       }
@@ -401,7 +401,7 @@
       // If adding to this category, append inline add form
       var addForm = '';
       if (techAddCat === cat) {
-        addForm = renderInlineAddForm(null, d, cat);
+        addForm = renderInlineAddForm(null, cat);
       }
 
       html += '<div class="tech-cat-group">' +
@@ -438,7 +438,7 @@
     '</div>';
   }
 
-  function renderInlineAddForm(existingHtml, d, cat) {
+  function renderInlineAddForm(existingHtml, cat) {
     var formHtml = '<div class="item-row item-row-editing" data-add-cat="' + cat.replace(/"/g, '&quot;') + '">' +
       '<input type="text" class="inline-add-name" placeholder="Name" />' +
       '<input type="text" class="inline-add-brand" placeholder="Brand slug" />' +
