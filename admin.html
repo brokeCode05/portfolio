@@ -509,6 +509,17 @@
   });
 
   document.getElementById('currently-save').addEventListener('click', function() {
+    var d = readData();
+    var list = document.getElementById('currently-list');
+    var tags = list.querySelectorAll('.tag-item');
+    d.currently = [];
+    tags.forEach(function(item) {
+      var btn = item.querySelector('.tag-remove');
+      if (btn && btn.dataset.tag) {
+        d.currently.push(btn.dataset.tag);
+      }
+    });
+    writeData();
     showToast('Currently saved!', 'success');
   });
 
