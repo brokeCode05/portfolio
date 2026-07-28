@@ -653,63 +653,99 @@
     }
 
     /* ===== Tech Stack Grid ===== */
-    .tech-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-md);
-    }
-    .tech-badge {
+    /* ===== Tech Stack Marquee ===== */
+    .tech-marquee {
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      padding: var(--space-lg) var(--space-md);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      background-color: var(--color-surface);
-      transition: border-color var(--transition-fast), transform var(--transition-base), box-shadow var(--transition-base);
-      text-decoration: none;
-      color: inherit;
+      gap: var(--space-lg);
+      padding: var(--space-md) 0;
     }
-    .tech-badge:hover {
-      border-color: var(--color-border-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-    .tech-badge-icon {
+    .tech-marquee-row {
       display: flex;
+      overflow: hidden;
+      width: 100%;
+    }
+    .tech-marquee-track {
+      display: flex;
+      gap: var(--space-xl);
       align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
       flex-shrink: 0;
+      min-width: 100%;
     }
-    .tech-badge-icon svg {
-      width: 24px;
-      height: 24px;
-      stroke: var(--color-accent);
+    .tech-marquee-row.right .tech-marquee-track {
+      animation: marquee-right 30s linear infinite;
     }
-    .tech-badge-name {
-      font-size: var(--text-xs);
+    .tech-marquee-row.left .tech-marquee-track {
+      animation: marquee-left 30s linear infinite;
+    }
+    .tech-marquee-row:hover .tech-marquee-track {
+      animation-play-state: paused;
+    }
+    @keyframes marquee-right {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes marquee-left {
+      0% { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
+    }
+    .tech-logo {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      width: 76px;
+      opacity: 0.7;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+    .tech-logo:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    .tech-logo svg {
+      width: 32px;
+      height: 32px;
+      display: block;
+      color: var(--color-text-secondary);
+      transition: color var(--transition-fast);
+    }
+    .tech-logo:hover svg {
+      color: var(--color-accent);
+    }
+    .tech-logo-name {
       font-family: var(--font-code);
-      font-weight: 500;
+      font-size: 9px;
       color: var(--color-text-secondary);
       text-align: center;
-      line-height: 1.2;
+      white-space: nowrap;
+      opacity: 0.6;
+      transition: opacity var(--transition-fast);
+      letter-spacing: 0.02em;
     }
-    .tech-badge:hover .tech-badge-name {
-      color: var(--color-text-primary);
+    .tech-logo:hover .tech-logo-name {
+      opacity: 1;
     }
-    @media (max-width: 900px) {
-      .tech-grid { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 768px) {
+      .tech-marquee { gap: var(--space-md); }
+      .tech-marquee-track { gap: var(--space-lg); }
+      .tech-logo { width: 60px; }
+      .tech-logo svg { width: 26px; height: 26px; }
+      .tech-logo-name { font-size: 8px; }
     }
-    @media (max-width: 600px) {
-      .tech-grid { grid-template-columns: repeat(2, 1fr); }
-      .tech-badge { padding: var(--space-md); }
+    @media (max-width: 480px) {
+      .tech-logo { width: 50px; }
+      .tech-logo svg { width: 22px; height: 22px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .tech-badge { transition: none; }
-      .tech-badge:hover { transform: none; }
+      .tech-marquee-row.right .tech-marquee-track,
+      .tech-marquee-row.left .tech-marquee-track {
+        animation: none;
+      }
+    }
     }
 
     /* ===== Certificate Viewer Modal ===== */
@@ -1266,7 +1302,7 @@
         <p>Technologies and tools I work with regularly.</p>
       </div>
 
-      <div class="tech-grid" data-reveal data-reveal-delay="100" id="tech-stack-grid">
+      <div class="tech-marquee" data-reveal data-reveal-delay="100" id="tech-stack-grid">
         <!-- Populated by portfolio-data.js renderTechStack() -->
       </div>
 
