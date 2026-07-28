@@ -655,9 +655,6 @@
     /* ===== Tech Stack Grid ===== */
     /* ===== Tech Stack Marquee ===== */
     .tech-marquee {
-      overflow: hidden;
-      mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
       display: flex;
       flex-direction: column;
       gap: var(--space-lg);
@@ -665,14 +662,38 @@
     }
     .tech-marquee-row {
       display: flex;
-      overflow: hidden;
+      align-items: center;
+      gap: var(--space-lg);
       width: 100%;
+    }
+    .tech-marquee-label {
+      flex-shrink: 0;
+      width: 90px;
+      text-align: right;
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      opacity: 0.5;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+      transition: opacity var(--transition-fast);
+      user-select: none;
+    }
+    .tech-marquee-row:hover .tech-marquee-label {
+      opacity: 0.8;
+    }
+    .tech-marquee-track-wrap {
+      flex: 1;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
     }
     .tech-marquee-track {
       display: flex;
       gap: var(--space-xl);
       align-items: center;
       flex-shrink: 0;
+      width: max-content;
     }
     .tech-marquee-row.right .tech-marquee-track {
       animation: marquee-right 80s linear infinite;
@@ -740,6 +761,8 @@
     }
     @media (max-width: 768px) {
       .tech-marquee { gap: var(--space-md); }
+      .tech-marquee-row { gap: var(--space-md); }
+      .tech-marquee-label { display: none; }
       .tech-marquee-track { gap: var(--space-lg); }
       .tech-logo { width: 60px; }
       .tech-logo svg { width: 26px; height: 26px; }
@@ -754,7 +777,6 @@
       .tech-marquee-row.left .tech-marquee-track {
         animation: none;
       }
-    }
     }
 
     /* ===== Certificate Viewer Modal ===== */

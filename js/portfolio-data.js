@@ -25,21 +25,36 @@ const DEFAULT_DATA = {
     }
   },
   techStack: [
-    { name: 'Linux', icon: 'terminal', cat: 'System', brand: 'linux' },
-    { name: 'SSH', icon: 'lock', cat: 'Remote', brand: 'openssh' },
-    { name: 'Tailscale', icon: 'activity', cat: 'Network', brand: 'tailscale' },
-    { name: 'VS Code', icon: 'tool', cat: 'Editor', brand: 'visualstudiocode' },
+    // Programming Languages (0-6)
+    { name: 'HTML5', icon: 'code', cat: 'Programming', brand: 'html5' },
+    { name: 'CSS3', icon: 'layout', cat: 'Programming', brand: 'css3' },
+    { name: 'JavaScript', icon: 'js', cat: 'Programming', brand: 'javascript' },
+    { name: 'Java', icon: 'coffee', cat: 'Programming', brand: 'java' },
+    { name: 'Python', icon: 'terminal', cat: 'Programming', brand: 'python' },
+    { name: 'C#', icon: 'hash', cat: 'Programming', brand: 'csharp' },
+    { name: 'VB.NET', icon: 'code', cat: 'Programming', brand: 'visualbasic' },
+    // Web Technologies (7-8)
+    { name: 'Node.js', icon: 'code', cat: 'Web', brand: 'nodedotjs' },
+    { name: 'npm', icon: 'package', cat: 'Web', brand: 'npm' },
+    // Databases (9-10)
+    { name: 'MongoDB', icon: 'code', cat: 'Database', brand: 'mongodb' },
+    { name: 'MS SQL', icon: 'code', cat: 'Database', brand: 'microsoftsqlserver' },
+    // Version Control (11-12)
     { name: 'Git', icon: 'git-branch', cat: 'VCS', brand: 'git' },
-    { name: 'npm', icon: 'package', cat: 'Tools', brand: 'npm' },
-    { name: 'Termius', icon: 'terminal', cat: 'Remote', brand: 'iterm2' },
-    { name: 'HTML', icon: 'code', cat: 'Frontend', brand: 'html5' },
-    { name: 'CSS', icon: 'layout', cat: 'Frontend', brand: 'css3' },
-    { name: 'JavaScript', icon: 'js', cat: 'Frontend', brand: 'javascript' },
-    { name: 'Java', icon: 'coffee', cat: 'Languages', brand: 'java' },
-    { name: 'C#', icon: 'hash', cat: 'Languages', brand: 'csharp' },
-    { name: 'Python', icon: 'terminal', cat: 'Languages', brand: 'python' },
-    { name: 'Networking', icon: 'activity', cat: 'Infra' },
-    { name: 'Cybersecurity', icon: 'shield', cat: 'Security', brand: 'letsencrypt' }
+    { name: 'GitHub', icon: 'code', cat: 'VCS', brand: 'github' },
+    // Developer Tools (13-16)
+    { name: 'VS Code', icon: 'tool', cat: 'DevTools', brand: 'visualstudiocode' },
+    { name: 'Termius', icon: 'terminal', cat: 'DevTools', brand: 'iterm2' },
+    { name: 'Figma', icon: 'tool', cat: 'DevTools', brand: 'figma' },
+    { name: 'Chrome DevTools', icon: 'tool', cat: 'DevTools', brand: 'googlechrome' },
+    // Networking & Remote (17-20)
+    { name: 'SSH', icon: 'lock', cat: 'Networking', brand: 'openssh' },
+    { name: 'SFTP', icon: 'activity', cat: 'Networking' },
+    { name: 'Tailscale', icon: 'activity', cat: 'Networking', brand: 'tailscale' },
+    { name: 'OpenSSH', icon: 'lock', cat: 'Networking', brand: 'openssh' },
+    // Operating Systems (21-22)
+    { name: 'Windows 11', icon: 'terminal', cat: 'OS', brand: 'windows' },
+    { name: 'Linux Mint', icon: 'terminal', cat: 'OS', brand: 'linuxmint' }
   ],
   currently: [
     'Linux Administration',
@@ -140,8 +155,11 @@ function loadData() {
   var saved = getPortfolioData();
   if (saved) {
     var changed = false;
-    // Migration 1: add techStack if missing from old saved data
-    if (!saved.techStack) {
+    // Migration 1: replace old flat tech stack with organized categories
+    if (saved.techStack && saved.techStack[0] && saved.techStack[0].name === 'Linux' && saved.techStack.length <= 15) {
+      saved.techStack = JSON.parse(JSON.stringify(DEFAULT_DATA.techStack));
+      changed = true;
+    } else if (!saved.techStack) {
       saved.techStack = JSON.parse(JSON.stringify(DEFAULT_DATA.techStack));
       changed = true;
     } else {
@@ -169,16 +187,19 @@ var BRAND_LOGOS = {
 var SIMPLE_ICONS_BASE = 'https://cdn.simpleicons.org/';
 
 var MARQUEE_ROWS = [
-  { dir: 'right', indices: [0, 1, 2, 3, 4] },
-  { dir: 'left', indices: [5, 6, 7, 8, 9] },
-  { dir: 'right', indices: [10, 11, 12, 13, 14] }
+  { dir: 'right', label: 'Languages', indices: [0, 1, 2, 3, 4, 5, 6] },
+  { dir: 'left', label: 'Web', indices: [7, 8] },
+  { dir: 'right', label: 'Databases', indices: [9, 10] },
+  { dir: 'left', label: 'Version Control', indices: [11, 12] },
+  { dir: 'right', label: 'Dev Tools', indices: [13, 14, 15, 16] },
+  { dir: 'left', label: 'Networking', indices: [17, 18, 19, 20] },
+  { dir: 'right', label: 'OS', indices: [21, 22] }
 ];
 
 // ─── Render Section HTML ──────────────────────────────
 
 function renderTechStack(data) {
   if (!data || !data.techStack) return '';
-  var REPEATS = 5;
   return MARQUEE_ROWS.map(function(row) {
     var items = row.indices.map(function(idx) {
       var tech = data.techStack[idx];
@@ -209,12 +230,17 @@ function renderTechStack(data) {
       '</span>';
     }).join('');
     // Repeat enough times so track is always wider than viewport
+    var minItems = 20;
+    var repeatCount = Math.max(5, Math.ceil(minItems / row.indices.length));
     var trackHtml = '';
-    for (var r = 0; r < REPEATS; r++) {
+    for (var r = 0; r < repeatCount; r++) {
       trackHtml += items;
     }
     return '<div class="tech-marquee-row ' + row.dir + '">' +
-      '<div class="tech-marquee-track">' + trackHtml + '</div>' +
+      '<span class="tech-marquee-label">' + escapeHtml(row.label) + '</span>' +
+      '<div class="tech-marquee-track-wrap">' +
+        '<div class="tech-marquee-track">' + trackHtml + '</div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }

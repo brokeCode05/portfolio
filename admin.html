@@ -172,18 +172,27 @@
               <input type="text" id="tech-name" placeholder="e.g. Linux" />
             </div>
             <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="tech-cat" placeholder="e.g. Languages, Networking, OS" />
+              <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
+                Groups tech items by category in the display.
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label>Brand Slug (Simple Icons CDN)</label>
               <input type="text" id="tech-brand" placeholder="e.g. linux, python, git" />
               <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
                 Uses <code>cdn.simpleicons.org/SLUG</code>. Leave blank for URL or upload.
               </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Logo URL (paste any image link)</label>
-            <input type="text" id="tech-logourl" placeholder="https://example.com/logo.png" />
-            <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-              Paste a direct URL to any logo image. Overrides CDN brand slug.
+            <div class="form-group">
+              <label>Logo URL (paste any image link)</label>
+              <input type="text" id="tech-logourl" placeholder="https://example.com/logo.png" />
+              <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
+                Paste a direct URL. Overrides CDN brand slug.
+              </div>
             </div>
           </div>
           <div class="form-group">
@@ -374,6 +383,7 @@
 
   function resetTechForm() {
     document.getElementById('tech-name').value = '';
+    document.getElementById('tech-cat').value = '';
     document.getElementById('tech-brand').value = '';
     document.getElementById('tech-logourl').value = '';
     document.getElementById('tech-logo-input').value = '';
@@ -457,6 +467,7 @@
         var item = d.techStack[idx];
         if (!item) return;
         document.getElementById('tech-name').value = item.name;
+        document.getElementById('tech-cat').value = item.cat || '';
         document.getElementById('tech-brand').value = item.brand || '';
         document.getElementById('tech-logourl').value = item.logoUrl || '';
         document.getElementById('tech-edit-idx').value = idx;
@@ -483,6 +494,7 @@
   document.getElementById('tech-add').addEventListener('click', function() {
     var name = document.getElementById('tech-name').value.trim();
     if (!name) { showToast('Enter a tech name', 'error'); return; }
+    var cat = document.getElementById('tech-cat').value.trim() || null;
     var brand = document.getElementById('tech-brand').value.trim().toLowerCase() || null;
     var logoUrl = document.getElementById('tech-logourl').value.trim() || null;
     var d = readData();
@@ -491,6 +503,7 @@
     if (editIdx >= 0 && d.techStack[editIdx]) {
       // Edit existing
       d.techStack[editIdx].name = name;
+      d.techStack[editIdx].cat = cat;
       d.techStack[editIdx].brand = brand;
       d.techStack[editIdx].logoUrl = logoUrl;
       // logo overrides if uploaded, otherwise keep existing or null
@@ -506,7 +519,7 @@
       showToast('Tech updated!', 'success');
     } else {
       // Add new
-      d.techStack.push({ name: name, brand: brand, logoUrl: logoUrl, logo: techLogoData || null });
+      d.techStack.push({ name: name, cat: cat, brand: brand, logoUrl: logoUrl, logo: techLogoData || null });
       writeData();
       renderTechItems();
       resetTechForm();
