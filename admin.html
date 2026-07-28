@@ -162,61 +162,32 @@
 
       <!-- ===== TECH STACK SECTION ===== -->
       <div class="admin-section" id="section-skills">
-        <h2 class="admin-section-title">Tech Stack</h2>
-        <p class="admin-section-desc">Manage tech items organized by category groups.</p>
+        <div class="admin-section-header">
+          <div>
+            <h2 class="admin-section-title">Tech Stack</h2>
+            <p class="admin-section-desc">Items are auto-saved when added or updated.</p>
+          </div>
+        </div>
 
-        <!-- Editor Form -->
-        <div class="admin-card" id="tech-editor-card">
+        <!-- Compact Editor Bar -->
+        <div class="tech-editor-bar" id="tech-editor-bar">
           <input type="hidden" id="tech-edit-idx" value="-1" />
-          <div class="form-row">
-            <div class="form-group">
-              <label>Name</label>
-              <input type="text" id="tech-name" placeholder="e.g. Linux" />
-            </div>
-            <div class="form-group">
-              <label>Category</label>
-              <input type="text" id="tech-cat" placeholder="e.g. Languages, OS" />
-              <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Click <strong>+ Add</strong> on a category below to auto-fill this field.
-              </div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Brand Slug (Simple Icons CDN)</label>
-              <input type="text" id="tech-brand" placeholder="e.g. linux, python, git" />
-              <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Uses <code>cdn.simpleicons.org/SLUG</code>.
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Logo URL</label>
-              <input type="text" id="tech-logourl" placeholder="https://example.com/logo.png" />
-              <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:0.25rem">
-                Overrides CDN brand slug if set.
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Upload Logo</label>
+          <input type="text" id="tech-name" placeholder="Name" class="tech-editor-input" />
+          <input type="text" id="tech-cat" placeholder="Category" class="tech-editor-input tech-editor-cat" />
+          <input type="text" id="tech-brand" placeholder="Brand slug (e.g. python)" class="tech-editor-input tech-editor-brand" />
+          <div class="tech-editor-upload">
             <input type="file" id="tech-logo-input" accept="image/*" />
-            <div id="tech-logo-preview" style="margin-top:0.5rem;display:none">
-              <img id="tech-logo-preview-img" style="max-width:48px;max-height:48px;border:1px solid var(--admin-border);border-radius:4px;padding:4px;background:var(--admin-bg)" />
-              <button class="btn btn-sm btn-danger" id="tech-logo-clear" style="margin-left:0.5rem">Remove</button>
+            <div id="tech-logo-preview" class="tech-logo-preview" style="display:none">
+              <img id="tech-logo-preview-img" />
+              <button id="tech-logo-clear">×</button>
             </div>
           </div>
-          <div style="display:flex;gap:0.5rem">
-            <button class="btn btn-primary" id="tech-add">+ Add</button>
-            <button class="btn" id="tech-cancel" style="display:none">Cancel</button>
-          </div>
+          <button class="btn btn-sm btn-primary" id="tech-add" style="flex-shrink:0;white-space:nowrap">+ Add</button>
+          <button class="btn btn-sm" id="tech-cancel" style="display:none;flex-shrink:0">Cancel</button>
         </div>
 
         <!-- Category Groups -->
         <div id="tech-list"></div>
-
-        <div style="margin-top:0.75rem">
-          <button class="btn btn-primary" id="tech-save">Save Tech Stack</button>
-        </div>
       </div>
 
       <!-- ===== CURRENTLY SECTION ===== -->
@@ -390,14 +361,14 @@
     document.getElementById('tech-name').value = '';
     document.getElementById('tech-cat').value = '';
     document.getElementById('tech-brand').value = '';
-    document.getElementById('tech-logourl').value = '';
     document.getElementById('tech-logo-input').value = '';
     document.getElementById('tech-logo-preview').style.display = 'none';
     document.getElementById('tech-edit-idx').value = '-1';
-    document.getElementById('tech-add').textContent = '+ Add Tech';
+    document.getElementById('tech-add').textContent = '+ Add';
     document.getElementById('tech-cancel').style.display = 'none';
     techEditIdx = -1;
     techLogoData = null;
+    document.getElementById('tech-editor-bar').classList.remove('editing');
   }
 
   // Logo file upload handler
@@ -453,19 +424,17 @@
       var itemsHtml = items.map(function(entry) {
         var item = entry.item;
         var idx = entry.idx;
-        var logoPreview = '';
+        var logoIndicator = '';
         if (item.logo) {
-          logoPreview = '<img src="' + item.logo + '" style="width:26px;height:26px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
-        } else if (item.logoUrl) {
-          logoPreview = '<span style="display:inline-flex;width:26px;height:26px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.4;align-items:center;justify-content:center;font-size:10px;color:#0F1115">URL</span>';
+          logoIndicator = '<img src="' + item.logo + '" style="width:22px;height:22px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
         } else if (item.brand) {
-          logoPreview = '<span style="display:inline-flex;width:26px;height:26px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.25;align-items:center;justify-content:center;font-size:10px;color:var(--admin-accent)">C</span>';
+          logoIndicator = '<span style="display:inline-flex;width:22px;height:22px;border-radius:3px;margin-right:0.5rem;background:var(--admin-accent);opacity:0.2;align-items:center;justify-content:center;font-size:9px;color:var(--admin-accent)">C</span>';
         }
         return '<div class="item-row" style="padding:0.375rem 0.625rem">' +
-          logoPreview +
+          logoIndicator +
           '<div class="item-row-info">' +
             '<div class="item-row-title">' + escapeHtml(item.name) + '</div>' +
-            '<div class="item-row-sub">' + (item.brand ? escapeHtml(item.brand) : item.logoUrl ? 'URL logo' : 'icon fallback') + '</div>' +
+            '<div class="item-row-sub">' + (item.brand ? escapeHtml(item.brand) : 'icon') + '</div>' +
           '</div>' +
           '<div class="item-row-actions">' +
             '<button class="btn btn-sm tech-edit" data-idx="' + idx + '" style="padding:0.25rem 0.5rem;font-size:0.6875rem">Edit</button>' +
@@ -508,10 +477,10 @@
         document.getElementById('tech-name').value = item.name;
         document.getElementById('tech-cat').value = item.cat || '';
         document.getElementById('tech-brand').value = item.brand || '';
-        document.getElementById('tech-logourl').value = item.logoUrl || '';
         document.getElementById('tech-edit-idx').value = idx;
-        document.getElementById('tech-add').textContent = 'Update Tech';
+        document.getElementById('tech-add').textContent = 'Update';
         document.getElementById('tech-cancel').style.display = 'inline-flex';
+        document.getElementById('tech-editor-bar').classList.add('editing');
         techEditIdx = idx;
         techLogoData = null;
         document.getElementById('tech-logo-input').value = '';
@@ -522,7 +491,7 @@
         } else {
           document.getElementById('tech-logo-preview').style.display = 'none';
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('tech-name').focus();
       });
     });
 
@@ -543,10 +512,9 @@
 
   document.getElementById('tech-add').addEventListener('click', function() {
     var name = document.getElementById('tech-name').value.trim();
-    if (!name) { showToast('Enter a tech name', 'error'); return; }
+    if (!name) { showToast('Enter a name', 'error'); return; }
     var cat = document.getElementById('tech-cat').value.trim() || null;
     var brand = document.getElementById('tech-brand').value.trim().toLowerCase() || null;
-    var logoUrl = document.getElementById('tech-logourl').value.trim() || null;
     var d = readData();
     if (!d.techStack) d.techStack = [];
     var editIdx = parseInt(document.getElementById('tech-edit-idx').value);
@@ -555,31 +523,23 @@
       d.techStack[editIdx].name = name;
       d.techStack[editIdx].cat = cat;
       d.techStack[editIdx].brand = brand;
-      d.techStack[editIdx].logoUrl = logoUrl;
-      // logo overrides if uploaded, otherwise keep existing or null
-      if (techLogoData || logoUrl) {
+      if (techLogoData !== null) {
         d.techStack[editIdx].logo = techLogoData;
-      } else if (document.getElementById('tech-logo-preview').style.display === 'none' && !logoUrl) {
-        // No upload and no URL - clear logo
+      } else if (document.getElementById('tech-logo-preview').style.display === 'none') {
         d.techStack[editIdx].logo = null;
       }
       writeData();
       renderTechItems();
       resetTechForm();
-      showToast('Tech updated!', 'success');
+      showToast('Updated!', 'success');
     } else {
       // Add new
-      d.techStack.push({ name: name, cat: cat, brand: brand, logoUrl: logoUrl, logo: techLogoData || null });
+      d.techStack.push({ name: name, cat: cat, brand: brand, logo: techLogoData || null });
       writeData();
       renderTechItems();
       resetTechForm();
-      showToast('Tech added!', 'success');
+      showToast('Added!', 'success');
     }
-  });
-
-  document.getElementById('tech-save').addEventListener('click', function() {
-    writeData();
-    showToast('Tech stack saved!', 'success');
   });
 
   // ─── Currently ─────────────────────────────
