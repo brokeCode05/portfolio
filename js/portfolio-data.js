@@ -26,7 +26,7 @@ const DEFAULT_DATA = {
   },
   techStack: [
     { name: 'Linux', icon: 'terminal', cat: 'System', brand: 'linux' },
-    { name: 'SSH', icon: 'lock', cat: 'Remote' },
+    { name: 'SSH', icon: 'lock', cat: 'Remote', brand: 'openssh' },
     { name: 'Tailscale', icon: 'activity', cat: 'Network', brand: 'tailscale' },
     { name: 'VS Code', icon: 'tool', cat: 'Editor', brand: 'visualstudiocode' },
     { name: 'Git', icon: 'git-branch', cat: 'VCS', brand: 'git' },
