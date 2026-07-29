@@ -2519,6 +2519,22 @@
       freshReveals.forEach(function(el) { observer.observe(el); });
     })();
 
+    // ─── Async cloud sync (silent background) ───
+    if (typeof fetchFromSupabase === 'function') {
+      fetchFromSupabase().then(function(cloudData) {
+        if (cloudData && Object.keys(cloudData).length > 3) {
+          var local = getPortfolioData();
+          var localKeys = local ? Object.keys(local).sort().join(',') : '';
+          var cloudKeys = Object.keys(cloudData).sort().join(',');
+          if (localKeys !== cloudKeys || JSON.stringify(local) !== JSON.stringify(cloudData)) {
+            savePortfolioData(cloudData);
+            console.log('[cloud-sync] Updated from cloud. Reloading...');
+            location.reload();
+          }
+        }
+      });
+    }
+
   })();
   </script>
 

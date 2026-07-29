@@ -77,6 +77,12 @@
         </span>
         <span>Experience</span>
       </button>
+      <button class="admin-nav-btn" data-section="cloud">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+        </span>
+        <span>Cloud Sync</span>
+      </button>
     </nav>
     <div class="admin-sidebar-footer">
       <button class="btn btn-sm" id="admin-reset-btn" style="width:100%;justify-content:center">
@@ -218,6 +224,50 @@
         </div>
       </div>
 
+      <!-- ===== CLOUD SYNC SECTION ===== -->
+      <div class="admin-section" id="section-cloud">
+        <h2 class="admin-section-title">☁️ Cloud Sync</h2>
+        <p class="admin-section-desc">Sync your portfolio data to Supabase so everyone sees your updates on any device.</p>
+
+        <div class="admin-card">
+          <h4 style="margin-bottom:0.75rem">Supabase Connection</h4>
+          <div class="form-group">
+            <label>Service Role Key (kept in your browser only)</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="password" id="cloud-service-key" placeholder="Enter your service_role key" style="flex:1;font-family:var(--font-mono);font-size:0.75rem" autocomplete="off" />
+              <button class="btn btn-sm btn-primary" id="cloud-save-key" style="flex-shrink:0">Save Key</button>
+            </div>
+            <div style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:4px">
+              ⚠️ This key is stored in your browser's localStorage. Never share it. Never commit it to code.
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h4 style="margin-bottom:0.75rem">Cloud Status</h4>
+          <div id="cloud-status">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
+              <span id="cloud-status-icon" style="font-size:1.1rem">⏳</span>
+              <span id="cloud-status-text" style="color:var(--admin-text-secondary)">Checking connection...</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
+            <button class="btn btn-primary" id="cloud-publish-btn">📤 Publish to Cloud</button>
+            <button class="btn" id="cloud-fetch-btn">📥 Fetch from Cloud</button>
+          </div>
+        </div>
+
+        <div class="admin-card" style="background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)">
+          <h4 style="margin-bottom:0.5rem">📖 How It Works</h4>
+          <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
+            <li><strong>Enter your Supabase service role key</strong> above (one-time setup, stays in your browser)</li>
+            <li>Any <strong>Save</strong> action in this dashboard <strong>auto-publishes</strong> to the cloud</li>
+            <li>Visitors to your portfolio fetch the latest data from Supabase automatically</li>
+            <li>Changes are <strong>instant and worldwide</strong> — no more per-device localStorage limits!</li>
+          </ol>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -292,7 +342,11 @@
 
   // ─── Helpers ───────────────────────────────
   function readData() { data = loadData(); return data; }
-  function writeData() { savePortfolioData(data); }
+  function writeData() {
+    savePortfolioData(data);
+    // Auto-push to cloud if service key is set
+    autoPushToCloud();
+  }
 
   // ─── Hero ──────────────────────────────────
   function loadHero() {
@@ -1080,6 +1134,79 @@
     location.reload();
   });
 
+  // ─── Cloud Sync Functions ───────────────────
+  function loadCloudKey() {
+    var key = getSupabaseServiceKey();
+    document.getElementById('cloud-service-key').value = key;
+  }
+
+  function updateCloudStatus() {
+    var icon = document.getElementById('cloud-status-icon');
+    var text = document.getElementById('cloud-status-text');
+    var key = getSupabaseServiceKey();
+    if (!key) {
+      icon.textContent = '⚡';
+      text.textContent = 'Not connected. Enter your service role key above to enable cloud sync.';
+      text.style.color = 'var(--admin-text-secondary)';
+      return;
+    }
+    icon.textContent = '☁️';
+    text.textContent = 'Connected. Data will auto-sync on save.';
+    text.style.color = 'var(--admin-accent)';
+  }
+
+  function autoPushToCloud() {
+    var key = getSupabaseServiceKey();
+    if (!key) return;
+    pushToSupabase(data).then(function(ok) {
+      if (ok) {
+        showToast('☁️ Synced to cloud!', 'success');
+        document.getElementById('cloud-status-icon').textContent = '✅';
+        document.getElementById('cloud-status-text').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
+        document.getElementById('cloud-status-text').style.color = 'var(--admin-accent)';
+      }
+    });
+  }
+
+  document.getElementById('cloud-save-key').addEventListener('click', function() {
+    var key = document.getElementById('cloud-service-key').value.trim();
+    if (!key) { showToast('Enter a service role key', 'error'); return; }
+    setSupabaseServiceKey(key);
+    updateCloudStatus();
+    showToast('Service key saved! (browser only)', 'success');
+  });
+
+  document.getElementById('cloud-publish-btn').addEventListener('click', function() {
+    var key = getSupabaseServiceKey();
+    if (!key) { showToast('Enter your service role key first', 'error'); return; }
+    readData();
+    pushToSupabase(data).then(function(ok) {
+      if (ok) {
+        showToast('✅ Published to cloud!', 'success');
+        document.getElementById('cloud-status-icon').textContent = '✅';
+        document.getElementById('cloud-status-text').textContent = 'Published: ' + new Date().toLocaleTimeString();
+        document.getElementById('cloud-status-text').style.color = 'var(--admin-accent)';
+      } else {
+        showToast('❌ Failed to publish. Check your service key.', 'error');
+      }
+    });
+  });
+
+  document.getElementById('cloud-fetch-btn').addEventListener('click', function() {
+    showToast('⏳ Fetching from cloud...', '');
+    fetchFromSupabase().then(function(cloudData) {
+      if (cloudData && Object.keys(cloudData).length > 1) {
+        savePortfolioData(cloudData);
+        showToast('✅ Cloud data loaded! Reloading...', 'success');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else {
+        showToast('⚠️ No cloud data found. Publish first.', 'error');
+      }
+    }).catch(function() {
+      showToast('❌ Failed to fetch from cloud.', 'error');
+    });
+  });
+
   // ─── Init ──────────────────────────────────
   function initDashboard() {
     loadHero();
@@ -1089,6 +1216,8 @@
     renderProjects();
     renderCerts();
     renderExperience();
+    loadCloudKey();
+    updateCloudStatus();
   }
 
 })();

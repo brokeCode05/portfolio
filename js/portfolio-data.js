@@ -149,6 +149,59 @@ function setAdminPassword(pw) {
   localStorage.setItem(ADMIN_PASSWORD_KEY, pw);
 }
 
+// ─── Supabase Cloud Sync ───────────────────────────────
+
+const SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
+
+function getSupabaseServiceKey() {
+  try { return localStorage.getItem('portfolio_supabase_service_key') || ''; } catch(e) { return ''; }
+}
+
+function setSupabaseServiceKey(key) {
+  localStorage.setItem('portfolio_supabase_service_key', key);
+}
+
+async function fetchFromSupabase() {
+  try {
+    var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data?id=eq.1&select=json_data', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      }
+    });
+    if (!resp.ok) return null;
+    var rows = await resp.json();
+    if (rows && rows.length > 0 && rows[0].json_data) {
+      return rows[0].json_data;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function pushToSupabase(data) {
+  var serviceKey = getSupabaseServiceKey();
+  if (!serviceKey) return false;
+  try {
+    var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + serviceKey,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        id: 1,
+        json_data: data,
+        updated_at: new Date().toISOString()
+      })
+    });
+    return resp.ok;
+  } catch(e) {}
+  return false;
+}
+
 // ─── Data Getters (with fallback) ────────────────────
 
 function loadData() {
