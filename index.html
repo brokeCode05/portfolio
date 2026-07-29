@@ -2241,6 +2241,9 @@
         // Type the command
         var cmdText = filename;
         typeCommand(cmdText, function() {
+          // Remove any placeholder that may have been added by phantom error from src=''
+          var p = document.querySelector('.cert-image-wrap .cert-error-placeholder');
+          if (p) p.remove();
           // After typing finishes, load the image
           certImg.style.display = '';
           certImg.src = cert.path;
