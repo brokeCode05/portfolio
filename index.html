@@ -2167,18 +2167,25 @@
 
       if (!overlay || !modal) return;
 
-      var certCards = document.querySelectorAll('.cert-card[data-cert-path]');
-      var certData = [];
-      for (var i = 0; i < certCards.length; i++) {
-        certData.push({
-          el: certCards[i],
-          path: certCards[i].getAttribute('data-cert-path'),
-          name: certCards[i].getAttribute('data-cert-name'),
-          issuer: certCards[i].getAttribute('data-cert-issuer'),
-          date: certCards[i].getAttribute('data-cert-date'),
-          key: certCards[i].getAttribute('data-cert-key') || ''
-        });
+      // ---- Live DOM query (never cached — read fresh every time) ----
+      function getCertCards() {
+        var cards = document.querySelectorAll('.cert-card[data-cert-path]');
+        var result = [];
+        for (var i = 0; i < cards.length; i++) {
+          result.push({
+            el: cards[i],
+            path: cards[i].getAttribute('data-cert-path'),
+            name: cards[i].getAttribute('data-cert-name'),
+            issuer: cards[i].getAttribute('data-cert-issuer'),
+            date: cards[i].getAttribute('data-cert-date'),
+            key: cards[i].getAttribute('data-cert-key') || ''
+          });
+        }
+        return result;
       }
+
+      // Initial population
+      var certData = getCertCards();
 
       var currentIndex = -1;
       var typingTimer = null;
@@ -2201,7 +2208,13 @@
         }, 30);
       }
 
+      // Refresh certData from live DOM (solves stale cache after dynamic re-render)
+      function refreshCertData() {
+        certData = getCertCards();
+      }
+
       function showCert(index) {
+        refreshCertData();
         if (index < 0 || index >= certData.length) return;
         currentIndex = index;
         var cert = certData[index];
@@ -2275,7 +2288,7 @@
         if (!card || !overlay || !modal) return;
         // Read index directly from data attribute (most reliable)
         var idx = parseInt(card.getAttribute('data-cert-index'), 10);
-        if (isNaN(idx) || idx < 0 || idx >= certData.length) return;
+        if (isNaN(idx) || idx < 0) return; // bounds check done in showCert() with live data
         // Pulse animation
         card.classList.remove('pulsing');
         void card.offsetWidth;

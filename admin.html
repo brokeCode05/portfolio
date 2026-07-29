@@ -789,6 +789,14 @@
       return;
     }
     container.innerHTML = d.certifications.map(function(cert, idx) {
+      var isDataUri = cert.path && cert.path.indexOf('data:') === 0;
+      var previewHtml = '';
+      if (cert.path) {
+        previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
+          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display=\'none\'" />' +
+          '<button class="btn btn-sm cert-upload-clear" data-idx="' + idx + '" style="padding:2px 6px;font-size:10px;margin-left:6px" title="Remove image">×</button>' +
+        '</div>';
+      }
       return '<div class="admin-card" data-cidx="' + idx + '">' +
         '<div class="admin-card-header">' +
           '<h4>' + escapeHtml(cert.name) + '</h4>' +
@@ -811,7 +819,11 @@
           '</div>' +
           '<div class="form-group">' +
             '<label>Image Path</label>' +
-            '<input type="text" class="cert-path" value="' + escapeHtml(cert.path) + '" />' +
+            '<div style="display:flex;gap:6px;align-items:center">' +
+              '<input type="text" class="cert-path" value="' + escapeHtml(cert.path) + '" placeholder="File path or URL" style="flex:1" />' +
+              '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0;font-size:11px;padding:4px 8px">📁 Upload<input type="file" class="cert-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
+            '</div>' +
+            previewHtml +
           '</div>' +
         '</div>' +
       '</div>';
@@ -828,7 +840,7 @@
       });
     });
 
-    container.querySelectorAll('.admin-card input').forEach(function(input) {
+    container.querySelectorAll('.admin-card input:not(.cert-upload)').forEach(function(input) {
       input.addEventListener('change', function() {
         var card = this.closest('.admin-card');
         var idx = parseInt(card.dataset.cidx);
@@ -838,6 +850,55 @@
         d.certifications[idx].date = card.querySelector('.cert-date').value;
         d.certifications[idx].path = card.querySelector('.cert-path').value;
         writeData();
+      });
+    });
+
+    // File upload for cert images
+    container.querySelectorAll('.cert-upload').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var idx = parseInt(this.dataset.idx);
+        var file = this.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var d = readData();
+          if (!d.certifications[idx]) return;
+          // Resize to max 800px width for performance
+          var img = new Image();
+          img.onload = function() {
+            var MAX = 800;
+            var w = img.width, h = img.height;
+            if (w > MAX || h > MAX) {
+              var ratio = Math.min(MAX / w, MAX / h);
+              var canvas = document.createElement('canvas');
+              canvas.width = Math.round(w * ratio);
+              canvas.height = Math.round(h * ratio);
+              var ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              d.certifications[idx].path = canvas.toDataURL('image/jpeg', 0.85);
+            } else {
+              d.certifications[idx].path = e.target.result;
+            }
+            writeData();
+            renderCerts();
+            showToast('Image uploaded!', 'success');
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Clear uploaded image
+    container.querySelectorAll('.cert-upload-clear').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        var d = readData();
+        if (d.certifications[idx]) {
+          d.certifications[idx].path = '';
+          writeData();
+          renderCerts();
+        }
       });
     });
   }

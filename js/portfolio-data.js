@@ -294,7 +294,8 @@ function renderProjects(data) {
 function renderCerts(data) {
   if (!data || !data.certifications) return '';
   return data.certifications.map(function(cert, idx) {
-    return '<div class="cert-card" data-cert-path="' + cert.path + '" data-cert-name="' + escapeHtml(cert.name) + '" data-cert-issuer="' + escapeHtml(cert.issuer) + '" data-cert-date="' + cert.date + '" data-cert-key="' + (cert.id || 'cert-' + idx) + '" data-cert-index="' + idx + '" data-reveal onclick="openCertViewer(this)" onkeydown="if(event.key===\' \'||event.key===\'Enter\'){event.preventDefault();openCertViewer(this)}" tabindex="0" role="button">' +
+    var path = escapeHtml(cert.path || '');
+    return '<div class="cert-card" data-cert-path="' + path + '" data-cert-name="' + escapeHtml(cert.name) + '" data-cert-issuer="' + escapeHtml(cert.issuer) + '" data-cert-date="' + escapeHtml(cert.date) + '" data-cert-key="' + escapeHtml(cert.id || 'cert-' + idx) + '" data-cert-index="' + idx + '" data-reveal onclick="openCertViewer(this)" onkeydown="if(event.key===\' \'||event.key===\'Enter\'){event.preventDefault();openCertViewer(this)}" tabindex="0" role="button">' +
       '<div class="cert-card-badge" aria-hidden="true">' +
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
       '</div>' +
