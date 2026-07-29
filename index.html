@@ -1871,18 +1871,40 @@
       spinnerEl.textContent = spinnerChars[spinnerIdx] + ' ';
     }, 100);
 
+    // Progress bar — keeps animating until data is ready
     var interval = setInterval(function() {
-      var increment = progress < 50 ? Math.random() * 6 + 4 : Math.random() * 4 + 1;
+      if (progress >= 99) {
+        // Keep pulsing at 99% while waiting for cloud sync
+        bar.style.opacity = 0.6;
+        return;
+      }
+      var increment = progress < 50 ? Math.random() * 6 + 4 : Math.random() * 3 + 1;
       progress = Math.min(progress + increment, 99);
       if (bar) bar.style.width = progress + '%';
     }, 250);
 
-    var hideLoader = function() {
+    // Add a "Syncing..." line that appears after the cursor
+    var syncLine = document.createElement('div');
+    syncLine.className = 'loader-line';
+    syncLine.style.cssText = 'opacity:0;animation:loader-fade-in 0.25s ease 2s forwards;color:#F59E0B';
+    syncLine.innerHTML = '<span class="loader-warn"> SYNC </span> Fetching portfolio data from cloud...';
+    var content = document.getElementById('loader-content');
+    if (content) content.appendChild(syncLine);
+
+    // Global hideLoader — called by portfolio init script when data is ready
+    window.hideLoader = function() {
       if (progress >= 100) return;
       clearInterval(interval);
       clearInterval(spinnerInterval);
       progress = 100;
-      if (bar) bar.style.width = '100%';
+      if (bar) {
+        bar.style.width = '100%';
+        bar.style.opacity = '1';
+      }
+      // Update sync line status
+      if (syncLine) {
+        syncLine.innerHTML = '<span class="loader-ok">  OK  </span> Portfolio data synced! Ready.';
+      }
       setTimeout(function() {
         spinnerEl.textContent = '✓ ';
         setTimeout(function() {
@@ -1892,14 +1914,15 @@
       }, 300);
     };
 
-    window.addEventListener('load', function() {
-      setTimeout(hideLoader, 1800);
-    });
-
-    // Also hide if it takes too long (safety net)
+    // Safety net — hide loader after 12s even if data never arrives
     setTimeout(function() {
-      if (progress < 100) hideLoader();
-    }, 4000);
+      if (progress < 100 && typeof window.hideLoader === 'function') {
+        if (syncLine) {
+          syncLine.innerHTML = '<span class="loader-warn"> WARN </span> Using local data (cloud unavailable).';
+        }
+        setTimeout(window.hideLoader, 800);
+      }
+    }, 12000);
   })();
   </script>
 
@@ -2410,132 +2433,156 @@
   (function(){
     'use strict';
 
-    var data = loadData(); // Uses defaults if no saved data
+    // ─── Load data (cloud-first, localStorage fallback) ───
+    (function loadAndRender(){
+      var localStorageData = loadData();
+      var resolved = false;
 
-    // ─── Hero ─────────────────────────────────
-    var badgeEl = document.querySelector('.hero-badge');
-    var statusTextEl = document.querySelector('.hero-status-text');
-    var titleEl = document.querySelector('.hero-title');
-    var descEl = document.querySelector('.hero-description');
+      function renderPortfolio(data) {
+        // ─── Hero ─────────────────────────────────
+        var badgeEl = document.querySelector('.hero-badge');
+        var statusTextEl = document.querySelector('.hero-status-text');
+        var titleEl = document.querySelector('.hero-title');
+        var descEl = document.querySelector('.hero-description');
 
-    if (badgeEl && data.hero.badge) badgeEl.textContent = data.hero.badge;
-    if (statusTextEl && data.hero.status) statusTextEl.textContent = data.hero.status;
-    if (titleEl && data.hero.title) {
-      titleEl.innerHTML = data.hero.title.replace(/\n/g, '<br />');
-    }
-    if (descEl && data.hero.description) descEl.textContent = data.hero.description;
+        if (badgeEl && data.hero.badge) badgeEl.textContent = data.hero.badge;
+        if (statusTextEl && data.hero.status) statusTextEl.textContent = data.hero.status;
+        if (titleEl && data.hero.title) {
+          titleEl.innerHTML = data.hero.title.replace(/\n/g, '<br />');
+        }
+        if (descEl && data.hero.description) descEl.textContent = data.hero.description;
 
-    // ─── About ────────────────────────────────
-    var aboutParagraph = document.querySelector('.about-text p');
-    if (aboutParagraph && data.about.bio) aboutParagraph.textContent = data.about.bio;
+        // ─── About ────────────────────────────────
+        var aboutParagraph = document.querySelector('.about-text p');
+        if (aboutParagraph && data.about.bio) aboutParagraph.textContent = data.about.bio;
 
-    // Terminal JSON
-    var terminalBody = document.querySelector('.about-terminal .terminal-body');
-    if (terminalBody && data.about.terminal) {
-      var t = data.about.terminal;
-      var pathStr = (t.path || []).map(function(p) { return '"' + p + '"'; }).join(', ');
-      terminalBody.innerHTML =
-        '<span class="line"><span class="prompt">$</span> cat about.txt</span>' +
-        '<span class="line output">{</span>' +
-        '<span class="line output indent">"role": "' + escapeHtml(t.role || '') + '",</span>' +
-        '<span class="line output indent">"path": [' + pathStr + '],</span>' +
-        '<span class="line output indent">"philosophy": "' + escapeHtml(t.philosophy || '') + '",</span>' +
-        '<span class="line output indent">"status": "' + escapeHtml(t.status || '') + '"</span>' +
-        '<span class="line output">}</span>' +
-        '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
-    }
+        // Terminal JSON
+        var terminalBody = document.querySelector('.about-terminal .terminal-body');
+        if (terminalBody && data.about.terminal) {
+          var t = data.about.terminal;
+          var pathStr = (t.path || []).map(function(p) { return '\"' + p + '\"'; }).join(', ');
+          terminalBody.innerHTML =
+            '<span class="line"><span class="prompt">$</span> cat about.txt</span>' +
+            '<span class="line output">{</span>' +
+            '<span class="line output indent">\"role\": \"' + escapeHtml(t.role || '') + '\",</span>' +
+            '<span class="line output indent">\"path\": [' + pathStr + '],</span>' +
+            '<span class="line output indent">\"philosophy\": \"' + escapeHtml(t.philosophy || '') + '\",</span>' +
+            '<span class="line output indent">\"status\": \"' + escapeHtml(t.status || '') + '\"</span>' +
+            '<span class="line output">}</span>' +
+            '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
+        }
 
-    // ─── Skills ───────────────────────────────
-    var techGrid = document.getElementById('tech-stack-grid');
-    if (techGrid && data.techStack && data.techStack.length) {
-      techGrid.innerHTML = renderTechStack(data);
-      // Tech stack toggle
-      var toggleBtn = document.getElementById('tech-toggle-btn');
-      if (toggleBtn) {
-        var toggling = false;
-        toggleBtn.addEventListener('click', function() {
-          // Guard against rapid double-click while animation plays
-          if (toggling) return;
-          toggling = true;
-          var self = this;
-          // Re-query techGrid to ensure it's not stale
-          var grid = document.getElementById('tech-stack-grid');
-          if (!grid) { toggling = false; return; }
-          var expanded = self.classList.toggle('expanded');
-          grid.classList.toggle('expanded', expanded);
-          self.setAttribute('aria-expanded', expanded);
-          var count = self.dataset.hidden || '4';
-          var textEl = self.querySelector('.tech-toggle-text');
-          if (textEl) {
-            textEl.innerHTML = expanded
-              ? 'Hide <span class="tech-toggle-count">' + count + '</span> categories'
-              : 'Show <span class="tech-toggle-count">' + count + '</span> more categories';
-          }
-          // Release guard after animation completes
-          setTimeout(function() { toggling = false; }, 450);
-        });
-      }
-    }
-
-    // ─── Currently ────────────────────────────
-    var learningList = document.querySelector('.skill-learning .learning-list');
-    if (learningList && data.currently && data.currently.length) {
-      learningList.innerHTML = renderCurrently(data);
-    }
-
-    // ─── Projects ─────────────────────────────
-    var projectsGrid = document.querySelector('.projects-grid');
-    if (projectsGrid && data.projects && data.projects.length) {
-      projectsGrid.innerHTML = renderProjects(data);
-    }
-
-    // ─── Certs ────────────────────────────────
-    var certsGrid = document.querySelector('.certs-grid');
-    if (certsGrid && data.certifications && data.certifications.length) {
-      certsGrid.innerHTML = renderCerts(data);
-    }
-
-    // ─── Experience ───────────────────────────
-    var experienceContainer = document.querySelector('#experience .timeline');
-    if (experienceContainer && data.experience && data.experience.length) {
-      experienceContainer.innerHTML = renderExperience(data);
-    }
-
-    // ─── Re-observe new [data-reveal] elements replaced above ───
-    (function(){
-      var reducedMotion = window.matchMedia &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reducedMotion) return;
-      var freshReveals = document.querySelectorAll('[data-reveal]:not(.revealed)');
-      if (!freshReveals.length) return;
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
-      freshReveals.forEach(function(el) { observer.observe(el); });
-    })();
-
-    // ─── Async cloud sync (silent background) ───
-    if (typeof fetchFromSupabase === 'function') {
-      fetchFromSupabase().then(function(cloudData) {
-        if (cloudData && Object.keys(cloudData).length > 3) {
-          var local = getPortfolioData();
-          var localKeys = local ? Object.keys(local).sort().join(',') : '';
-          var cloudKeys = Object.keys(cloudData).sort().join(',');
-          if (localKeys !== cloudKeys || JSON.stringify(local) !== JSON.stringify(cloudData)) {
-            savePortfolioData(cloudData);
-            console.log('[cloud-sync] Updated from cloud. Reloading...');
-            location.reload();
+        // ─── Skills ───────────────────────────────
+        var techGrid = document.getElementById('tech-stack-grid');
+        if (techGrid && data.techStack && data.techStack.length) {
+          techGrid.innerHTML = renderTechStack(data);
+          var toggleBtn = document.getElementById('tech-toggle-btn');
+          if (toggleBtn) {
+            var toggling = false;
+            toggleBtn.addEventListener('click', function() {
+              if (toggling) return;
+              toggling = true;
+              var self = this;
+              var grid = document.getElementById('tech-stack-grid');
+              if (!grid) { toggling = false; return; }
+              var expanded = self.classList.toggle('expanded');
+              grid.classList.toggle('expanded', expanded);
+              self.setAttribute('aria-expanded', expanded);
+              var count = self.dataset.hidden || '4';
+              var textEl = self.querySelector('.tech-toggle-text');
+              if (textEl) {
+                textEl.innerHTML = expanded
+                  ? 'Hide <span class="tech-toggle-count">' + count + '</span> categories'
+                  : 'Show <span class="tech-toggle-count">' + count + '</span> more categories';
+              }
+              setTimeout(function() { toggling = false; }, 450);
+            });
           }
         }
-      });
-    }
 
-  })();
+        // ─── Currently ────────────────────────────
+        var learningList = document.querySelector('.skill-learning .learning-list');
+        if (learningList && data.currently && data.currently.length) {
+          learningList.innerHTML = renderCurrently(data);
+        }
+
+        // ─── Projects ─────────────────────────────
+        var projectsGrid = document.querySelector('.projects-grid');
+        if (projectsGrid && data.projects && data.projects.length) {
+          projectsGrid.innerHTML = renderProjects(data);
+        }
+
+        // ─── Certs ────────────────────────────────
+        var certsGrid = document.querySelector('.certs-grid');
+        if (certsGrid && data.certifications && data.certifications.length) {
+          certsGrid.innerHTML = renderCerts(data);
+        }
+
+        // ─── Experience ───────────────────────────
+        var experienceContainer = document.querySelector('#experience .timeline');
+        if (experienceContainer && data.experience && data.experience.length) {
+          experienceContainer.innerHTML = renderExperience(data);
+        }
+
+        // ─── Re-observe new [data-reveal] elements ───
+        (function(){
+          var reducedMotion = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (reducedMotion) return;
+          var freshReveals = document.querySelectorAll('[data-reveal]:not(.revealed)');
+          if (!freshReveals.length) return;
+          var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
+          freshReveals.forEach(function(el) { observer.observe(el); });
+        })();
+      }
+
+      // Render with local data immediately (so user sees content fast)
+      renderPortfolio(localStorageData);
+
+      // Async cloud fetch — runs in background, upgrades if newer data found
+      if (typeof fetchFromSupabase === 'function') {
+        fetchFromSupabase().then(function(cloudData) {
+          if (resolved) return;
+          resolved = true;
+
+          if (cloudData && Object.keys(cloudData).length > 3) {
+            // Compare with local data
+            var localStr = JSON.stringify(localStorageData);
+            var cloudStr = JSON.stringify(cloudData);
+            if (localStr !== cloudStr) {
+              // Cloud has different data — save and re-render (no reload!)
+              savePortfolioData(cloudData);
+              renderPortfolio(cloudData);
+            }
+          }
+
+          // Hide the loading screen now that we have the best data
+          if (typeof window.hideLoader === 'function') {
+            window.hideLoader();
+          }
+        }).catch(function() {
+          if (resolved) return;
+          resolved = true;
+          // Cloud failed — we already rendered with local data, just hide loader
+          if (typeof window.hideLoader === 'function') {
+            window.hideLoader();
+          }
+        });
+      } else {
+        // No cloud sync available — hide loader immediately
+        if (typeof window.hideLoader === 'function') {
+          window.hideLoader();
+        }
+      }
+
+    })();
   </script>
 
 </body>
