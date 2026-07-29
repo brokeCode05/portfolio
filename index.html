@@ -2553,35 +2553,47 @@
 
       // Async cloud fetch — runs in background, upgrades if newer data found
       if (typeof fetchFromSupabase === 'function') {
-        fetchFromSupabase().then(function(cloudData) {
-          if (resolved) return;
-          resolved = true;
+        console.log('[cloud-sync] Fetching from Supabase...');
+        fetchFromSupabase()
+          .then(function(cloudData) {
+            if (resolved) { console.log('[cloud-sync] Already resolved, skipping'); return; }
+            resolved = true;
 
-          if (cloudData && Object.keys(cloudData).length > 3) {
-            // Compare with local data
-            var localStr = JSON.stringify(localStorageData);
-            var cloudStr = JSON.stringify(cloudData);
-            if (localStr !== cloudStr) {
-              // Cloud has different data — save and re-render (no reload!)
-              savePortfolioData(cloudData);
-              renderPortfolio(cloudData);
+            console.log('[cloud-sync] Cloud data received:', cloudData ? 'keys=' + Object.keys(cloudData).join(',') : 'null');
+
+            if (cloudData && Object.keys(cloudData).length > 3) {
+              var localStr = JSON.stringify(localStorageData);
+              var cloudStr = JSON.stringify(cloudData);
+              var isDifferent = localStr !== cloudStr;
+              console.log('[cloud-sync] Data differs from local?', isDifferent, 'localKeys=', Object.keys(localStorageData).join(','), 'cloudKeys=', Object.keys(cloudData).join(','));
+
+              if (isDifferent) {
+                console.log('[cloud-sync] Saving cloud data to localStorage and re-rendering...');
+                savePortfolioData(cloudData);
+                renderPortfolio(cloudData);
+                console.log('[cloud-sync] Re-render complete!');
+              } else {
+                console.log('[cloud-sync] Data is identical to local, no update needed.');
+              }
+            } else {
+              console.log('[cloud-sync] Cloud data rejected: keys=' + (cloudData ? Object.keys(cloudData).length : 0) + ' (need > 3)');
             }
-          }
 
-          // Hide the loading screen now that we have the best data
-          if (typeof window.hideLoader === 'function') {
-            window.hideLoader();
-          }
-        }).catch(function() {
-          if (resolved) return;
-          resolved = true;
-          // Cloud failed — we already rendered with local data, just hide loader
-          if (typeof window.hideLoader === 'function') {
-            window.hideLoader();
-          }
-        });
+            // Hide the loading screen now that we have the best data
+            if (typeof window.hideLoader === 'function') {
+              window.hideLoader();
+            }
+          })
+          .catch(function(err) {
+            console.log('[cloud-sync] ERROR:', err ? err.message || err : 'unknown error');
+            if (resolved) return;
+            resolved = true;
+            if (typeof window.hideLoader === 'function') {
+              window.hideLoader();
+            }
+          });
       } else {
-        // No cloud sync available — hide loader immediately
+        console.log('[cloud-sync] fetchFromSupabase not available');
         if (typeof window.hideLoader === 'function') {
           window.hideLoader();
         }
