@@ -1758,12 +1758,21 @@
         </div>
         <div class="github-card">
           <h3 class="github-card-title">Streak</h3>
-          <img class="github-img" id="gh-streak" alt="GitHub Streak" loading="lazy" onerror="this.style.display='none'" />
+          <img class="github-img" id="gh-streak" alt="GitHub Streak" loading="lazy" onerror="this.onerror=null;this.style.display='none';var f=document.getElementById('gh-streak-fallback');if(f)f.style.display='block'" />
+          <div class="github-fallback" id="gh-streak-fallback" style="display:none;text-align:center;padding:1rem;color:var(--color-text-secondary);font-family:var(--font-code);font-size:var(--text-xs)">
+            <p style="margin-bottom:0.5rem">Streak image unavailable</p>
+            <a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline">View profile →</a>
+          </div>
         </div>
       </div>
       <div class="github-graph-wrap" data-reveal data-reveal-delay="200">
         <h3 class="github-card-title">Contribution Graph</h3>
-        <img class="github-graph-img" id="gh-graph" alt="GitHub Contribution Graph" loading="lazy" onerror="this.parentElement.style.display='none'" />
+        <img class="github-graph-img" id="gh-graph" alt="GitHub Contribution Graph" loading="lazy" onerror="this.onerror=null;this.style.display='none';var f=document.getElementById('gh-graph-fallback');if(f)f.style.display='block'" />
+        <div class="github-fallback" id="gh-graph-fallback" style="display:none;text-align:center;padding:2rem 1rem;color:var(--color-text-secondary);font-family:var(--font-code);font-size:var(--text-xs)">
+          <p style="margin-bottom:0.5rem">Contribution graph unavailable</p>
+          <p style="font-size:0.75rem;opacity:0.6">Try disabling ad/tracker blockers for this site, or</p>
+          <a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline">visit GitHub profile →</a>
+        </div>
       </div>
     </div>
   </section>
@@ -1936,6 +1945,38 @@
         }
       };
 
+      // ---- GitHub Stats (repos, followers, stars) via API ----
+      function fetchGitHubStats() {
+        var userUrl = 'https://api.github.com/users/' + GH_USER;
+        var reposUrl = 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&page=1';
+        var totalStars = 0;
+
+        // Fetch user profile
+        fetch(userUrl)
+          .then(function(r) { return r.json(); })
+          .then(function(user) {
+            if (user.message) return;
+            var el = document.getElementById('gh-repos');
+            if (el) el.textContent = user.public_repos || '—';
+            el = document.getElementById('gh-followers');
+            if (el) el.textContent = user.followers || '—';
+            el = document.getElementById('gh-following');
+            if (el) el.textContent = user.following || '—';
+          })
+          .catch(function() {});
+
+        // Fetch repos to count total stars
+        fetch(reposUrl)
+          .then(function(r) { return r.json(); })
+          .then(function(repos) {
+            if (!Array.isArray(repos)) return;
+            repos.forEach(function(repo) { totalStars += repo.stargazers_count || 0; });
+            var el = document.getElementById('gh-stars');
+            if (el) el.textContent = totalStars || '—';
+          })
+          .catch(function() {});
+      }
+
       function displayGitHub() {
         var theme = document.documentElement.getAttribute('data-theme') || 'dark';
         var t = theme === 'dark' ? 'dark' : 'light';
@@ -1946,6 +1987,7 @@
       }
 
       displayGitHub();
+      fetchGitHubStats();
 
       var observer = new MutationObserver(function(m) {
         for (var i = 0; i < m.length; i++) {
