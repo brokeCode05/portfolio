@@ -2242,6 +2242,7 @@
         var cmdText = filename;
         typeCommand(cmdText, function() {
           // After typing finishes, load the image
+          certImg.style.display = '';
           certImg.src = cert.path;
         });
       }
@@ -2251,8 +2252,9 @@
         certImg.classList.add('loaded');
       });
       certImg.addEventListener('error', function() {
-        // Diagnostic: log the failing path to browser console
-        console.warn('Certificate image failed to load. Check if admin & portfolio are on the same origin (localStorage):', currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : 'unknown');
+        // Check if this is a real error (non-empty path) or a phantom error from src=''
+        var path = currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : '';
+        if (!path) return; // Ignore phantom errors from certImg.src = ''
         // If image fails, show visible SVG placeholder
         certImg.style.display = 'none';
         var wrap = document.querySelector('.cert-image-wrap');
