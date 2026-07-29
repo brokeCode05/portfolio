@@ -2232,7 +2232,11 @@
 
         // Hide image until loaded
         certImg.classList.remove('loaded');
+        certImg.style.display = '';
         certImg.src = '';
+        // Remove any previous error placeholder
+        var oldPlaceholder = document.querySelector('.cert-image-wrap .cert-error-placeholder');
+        if (oldPlaceholder) oldPlaceholder.remove();
 
         // Type the command
         var cmdText = filename;
@@ -2247,12 +2251,23 @@
         certImg.classList.add('loaded');
       });
       certImg.addEventListener('error', function() {
-        // If image fails, show fallback placeholder
-        certImg.classList.add('loaded');
-        certImg.style.objectFit = 'contain';
-        certImg.style.padding = '40px';
-        certImg.style.opacity = '0.5';
-        certImg.alt = 'Certificate image not available';
+        // Diagnostic: log the failing path to browser console
+        console.warn('Certificate image failed to load. Check if admin & portfolio are on the same origin (localStorage):', currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : 'unknown');
+        // If image fails, show visible SVG placeholder
+        certImg.style.display = 'none';
+        var wrap = document.querySelector('.cert-image-wrap');
+        if (!wrap) return;
+        // Remove old placeholder if exists
+        var old = wrap.querySelector('.cert-error-placeholder');
+        if (old) old.remove();
+        var div = document.createElement('div');
+        div.className = 'cert-error-placeholder';
+        div.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center;gap:0.75rem;width:100%';
+        div.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
+          '<p style="font-family:var(--font-code);font-size:var(--text-xs);color:var(--color-text-secondary);margin:0">Certificate image not available</p>' +
+          '<p style="font-family:var(--font-body);font-size:11px;color:#6B7280;margin:0;max-width:280px">Save and view from the same location (both local or both deployed) for uploaded images to work.</p>' +
+          '<a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-code);font-size:var(--text-xs);color:var(--color-accent);text-decoration:underline">Visit GitHub →</a>';
+        wrap.appendChild(div);
       });
 
       function openModal(index) {
