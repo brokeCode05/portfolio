@@ -34,10 +34,15 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <!-- Preload critical CSS -->
-  <link rel="preload" href="css/style.min.css" as="style" />
+  <link rel="preload" href="css/style.min.css?v=20260729" as="style" />
 
   <!-- Styles (minified) -->
-  <link rel="stylesheet" href="css/style.min.css" />
+  <link rel="stylesheet" href="css/style.min.css?v=20260729" />
+
+  <!-- Cache busting: force CDN to re-serve updated files -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
   <!-- Skills progress bar cards styles -->
   <style>
@@ -1849,7 +1854,7 @@
   </footer>
 
   <!-- JavaScript (minified) -->
-  <script src="js/main.min.js" defer></script>
+  <script src="js/main.min.js?v=20260729" defer></script>
 
   <!-- Loading screen JS -->
   <script>
@@ -2428,7 +2433,7 @@
   </script>
 
   <!-- Portfolio Data Override (admin dashboard support) -->
-  <script src="js/portfolio-data.js"></script>
+  <script src="js/portfolio-data.js?v=20260729"></script>
   <script>
   (function(){
     'use strict';
