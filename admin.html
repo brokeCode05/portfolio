@@ -789,7 +789,6 @@
       return;
     }
     container.innerHTML = d.certifications.map(function(cert, idx) {
-      var isDataUri = cert.path && cert.path.indexOf('data:') === 0;
       var previewHtml = '';
       if (cert.path) {
         previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
@@ -886,6 +885,7 @@
           img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+        this.value = '';
       });
     });
 
