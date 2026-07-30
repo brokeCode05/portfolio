@@ -1112,7 +1112,7 @@ CREATE POLICY "Admin update portfolio_data"
       var previewHtml = '';
       if (cert.path) {
         previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
-          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display=\\'none\\'" />' +
+          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display='none'" />' +
           '<button class="btn btn-sm cert-upload-clear" data-idx="' + idx + '" style="padding:2px 6px;font-size:10px;margin-left:6px" title="Remove image">×</button>' +
         '</div>';
       }
