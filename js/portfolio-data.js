@@ -134,6 +134,8 @@ function getPortfolioData() {
 }
 
 function savePortfolioData(data) {
+  // Stamp with current time to protect local edits from being overwritten by older cloud data
+  data._syncTimestamp = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
