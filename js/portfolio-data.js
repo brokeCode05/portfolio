@@ -249,25 +249,52 @@ var BRAND_LOGOS = {
 
 // Removed: SIMPLE_ICONS_BASE — using local TECH_ICONS from js/tech-icons.js instead
 
-var MARQUEE_ROWS = [
-  { dir: 'right', label: 'Languages', indices: [0, 1, 2, 3, 4, 5, 6] },
-  { dir: 'left', label: 'Web Tech', indices: [7, 8] },
-  { dir: 'right', label: 'Databases', indices: [9, 10] },
-  { dir: 'left', label: 'Version Control', indices: [11, 12] },
-  { dir: 'right', label: 'Dev Tools', indices: [13, 14, 15, 16] },
-  { dir: 'left', label: 'Networking', indices: [17, 18, 19, 20] },
-  { dir: 'right', label: 'OS', indices: [21, 22] }
-];
-
 // ─── Render Section HTML ──────────────────────────────
+
+// Map known categories to display labels
+var CATEGORY_LABELS = {
+  'Programming': 'Languages',
+  'Web': 'Web Tech',
+  'Database': 'Databases',
+  'VCS': 'Version Control',
+  'DevTools': 'Dev Tools',
+  'Networking': 'Networking',
+  'OS': 'OS'
+};
+
+// Order of categories (known first, then any new ones)
+var CATEGORY_ORDER = ['Programming', 'Web', 'Database', 'VCS', 'DevTools', 'Networking', 'OS'];
 
 function renderTechStack(data) {
   if (!data || !data.techStack) return '';
+  
+  // Group items by category dynamically
+  var groups = {};
+  data.techStack.forEach(function(tech) {
+    var cat = tech.cat || 'Other';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(tech);
+  });
+  
+  // Determine row order: known categories first, then new ones sorted alphabetically
+  var seen = {};
+  CATEGORY_ORDER.forEach(function(c) { seen[c] = true; });
+  var rowOrder = CATEGORY_ORDER.filter(function(c) { return groups[c]; });
+  Object.keys(groups).sort().forEach(function(c) {
+    if (!seen[c]) rowOrder.push(c);
+  });
+  
+  var directions = ['right', 'left'];
   var html = '';
-  MARQUEE_ROWS.forEach(function(row, ri) {
-    var items = row.indices.map(function(idx) {
-      var tech = data.techStack[idx];
-      if (!tech) return '';
+  var extraCount = 0;
+  
+  rowOrder.forEach(function(cat, ri) {
+    var items = groups[cat];
+    if (!items || !items.length) return;
+    var dir = directions[ri % 2];
+    var label = CATEGORY_LABELS[cat] || cat;
+    
+    var itemsHtml = items.map(function(tech) {
       var logoHtml;
       if (tech.logoUrl) {
         var fallbackSvgUrl = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
@@ -288,29 +315,38 @@ function renderTechStack(data) {
         '<span class="tech-logo-name">' + escapeHtml(tech.name) + '</span>' +
       '</span>';
     }).join('');
+    
     var minItems = 20;
-    var repeatCount = Math.max(5, Math.ceil(minItems / row.indices.length));
+    var repeatCount = Math.max(5, Math.ceil(minItems / items.length));
     var trackHtml = '';
     for (var r = 0; r < repeatCount; r++) {
-      trackHtml += items;
+      trackHtml += itemsHtml;
     }
-    var extraAttr = ri >= 3 ? ' data-extra="true" style="animation-delay:' + ((ri - 3) * 0.06).toFixed(2) + 's"' : '';
-    html += '<div class="tech-marquee-row ' + row.dir + '"' + extraAttr + '>' +
+    
+    // First 3 categories are always visible, rest are extra (hidden behind toggle)
+    var isExtra = ri >= 3;
+    if (isExtra) extraCount++;
+    var extraAttr = isExtra ? ' data-extra="true" style="animation-delay:' + ((ri - 3) * 0.06).toFixed(2) + 's"' : '';
+    
+    html += '<div class="tech-marquee-row ' + dir + '"' + extraAttr + '>' +
       '<span class="tech-marquee-label">' +
         '<span class="tech-marquee-dot" aria-hidden="true"></span>' +
-        escapeHtml(row.label) +
+        escapeHtml(label) +
       '</span>' +
       '<div class="tech-marquee-track-wrap">' +
         '<div class="tech-marquee-track">' + trackHtml + '</div>' +
       '</div>' +
     '</div>';
   });
-  html += '<button class="tech-marquee-toggle" id="tech-toggle-btn" aria-expanded="false" data-hidden="4">' +
-    '<span class="tech-toggle-text">Show ' +
-    '<span class="tech-toggle-count">4</span> more categories' +
-    '</span>' +
-    '<svg class="tech-toggle-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
-  '</button>';
+  
+  if (extraCount > 0) {
+    html += '<button class="tech-marquee-toggle" id="tech-toggle-btn" aria-expanded="false" data-hidden="' + extraCount + '">' +
+      '<span class="tech-toggle-text">Show ' +
+      '<span class="tech-toggle-count">' + extraCount + '</span> more categor' + (extraCount === 1 ? 'y' : 'ies') +
+      '</span>' +
+      '<svg class="tech-toggle-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+    '</button>';
+  }
   return html;
 }
 
