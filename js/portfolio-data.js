@@ -149,18 +149,12 @@ function setAdminPassword(pw) {
   localStorage.setItem(ADMIN_PASSWORD_KEY, pw);
 }
 
-// ─── Supabase Cloud Sync ───────────────────────────────
+// ─── Supabase Cloud Sync (Secure) ─────────────────────
+// Uses Row Level Security (RLS) with admin password header
+// Service key is NEVER stored in the browser.
 
 const SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
-
-function getSupabaseServiceKey() {
-  try { return localStorage.getItem('portfolio_supabase_service_key') || ''; } catch(e) { return ''; }
-}
-
-function setSupabaseServiceKey(key) {
-  localStorage.setItem('portfolio_supabase_service_key', key);
-}
 
 async function fetchFromSupabase() {
   var controller = new AbortController();
@@ -187,8 +181,9 @@ async function fetchFromSupabase() {
 }
 
 async function pushToSupabase(data) {
-  var serviceKey = getSupabaseServiceKey();
-  if (!serviceKey) return false;
+  // Uses the admin password as a custom header that the RLS policy checks
+  var adminPw = getAdminPassword();
+  if (!adminPw) return false;
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
@@ -197,9 +192,10 @@ async function pushToSupabase(data) {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + serviceKey,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'resolution=merge-duplicates',
+        'x-portfolio-secret': adminPw
       },
       body: JSON.stringify({
         id: 1,
