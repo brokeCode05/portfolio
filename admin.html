@@ -463,7 +463,7 @@ CREATE POLICY "Admin update portfolio_data"
   function sendOtp() {
     clearAllErrors();
     if (!supabaseClient) {
-      loginError.textContent = 'Supabase is not initialized. Check console for errors.';
+      loginError.textContent = 'Supabase is not initialized';
       return;
     }
     var email = authEmailInput.value.trim();
@@ -477,6 +477,7 @@ CREATE POLICY "Admin update portfolio_data"
     }
 
     setLoading(sendOtpBtn, sendText, sendSpinner, true);
+    loginError.textContent = '⏳ Sending code to your email...';
 
     supabaseClient.auth.signInWithOtp({
       email: email,
@@ -484,17 +485,20 @@ CREATE POLICY "Admin update portfolio_data"
     }).then(function(result) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
       if (result.error) {
-        loginError.textContent = 'Failed to send code: ' + result.error.message;
+        loginError.textContent = 'Failed: ' + result.error.message;
         return;
       }
-      // Show OTP step
+      // ✅ Show success + transition to OTP step
+      loginError.textContent = '';
       loginStepEmail.style.display = 'none';
       loginStepOtp.style.display = 'block';
       authEmailDisplay.textContent = email;
       authOtpInput.focus();
+      // Show a toast confirmation too
+      showToast('✅ Code sent to ' + email + ' — check your inbox (and spam!)', 'success');
     }).catch(function(err) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
-      loginError.textContent = 'Connection error: ' + (err.message || 'Unknown error');
+      loginError.textContent = 'Could not send code. ' + (err.message || '');
     });
   }
 
