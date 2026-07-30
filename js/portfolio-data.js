@@ -184,6 +184,9 @@ async function pushToSupabase(data) {
   // Uses the admin password as a custom header that the RLS policy checks
   var adminPw = getAdminPassword();
   if (!adminPw) return false;
+  var now = new Date().toISOString();
+  // Stamp the data with our sync timestamp so the next sync can compare
+  data._syncTimestamp = now;
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
@@ -200,10 +203,14 @@ async function pushToSupabase(data) {
       body: JSON.stringify({
         id: 1,
         json_data: data,
-        updated_at: new Date().toISOString()
+        updated_at: now
       })
     });
     clearTimeout(timeoutId);
+    if (resp.ok) {
+      // Also stamp the local copy so we know the cloud is in sync
+      savePortfolioData(data);
+    }
     return resp.ok;
   } catch(e) {
     console.log('[cloud-sync] Push error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));

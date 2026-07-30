@@ -2703,18 +2703,22 @@
             console.log('[cloud-sync] Cloud data received:', cloudData ? 'keys=' + Object.keys(cloudData).join(',') : 'null');
 
             if (cloudData && Object.keys(cloudData).length > 3) {
-              var localStr = JSON.stringify(localStorageData);
-              var cloudStr = JSON.stringify(cloudData);
-              var isDifferent = localStr !== cloudStr;
-              console.log('[cloud-sync] Data differs from local?', isDifferent, 'localKeys=', Object.keys(localStorageData).join(','), 'cloudKeys=', Object.keys(cloudData).join(','));
+              var cloudTime = cloudData._syncTimestamp || '';
+              var localTime = localStorageData._syncTimestamp || '';
+              console.log('[cloud-sync] Cloud timestamp:', cloudTime, '| Local timestamp:', localTime);
 
-              if (isDifferent) {
-                console.log('[cloud-sync] Saving cloud data to localStorage and re-rendering...');
+              // Only overwrite local data if cloud data is newer or local has no timestamp
+              var shouldUpdate = cloudTime > localTime;
+
+              if (shouldUpdate) {
+                console.log('[cloud-sync] Cloud data is newer. Saving to localStorage and re-rendering...');
                 savePortfolioData(cloudData);
                 renderPortfolio(cloudData);
                 console.log('[cloud-sync] Re-render complete!');
+              } else if (cloudTime === localTime) {
+                console.log('[cloud-sync] Data is in sync (same timestamp). No update needed.');
               } else {
-                console.log('[cloud-sync] Data is identical to local, no update needed.');
+                console.log('[cloud-sync] Local data is newer than cloud. Keeping local data.');
               }
             } else {
               console.log('[cloud-sync] Cloud data rejected: keys=' + (cloudData ? Object.keys(cloudData).length : 0) + ' (need > 3)');
