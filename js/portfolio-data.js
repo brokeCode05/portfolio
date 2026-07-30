@@ -298,7 +298,7 @@ function renderTechStack(data) {
       var logoHtml;
       if (tech.logoUrl) {
         var fallbackSvgUrl = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
-        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.remove()" />' +
+        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="handleTechImgError(this)" />' +
           '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvgUrl + '</span>';
       } else if (tech.logo) {
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
@@ -424,6 +424,12 @@ function renderExperience(data) {
 }
 
 // ─── Helper ───────────────────────────────────────────
+
+function handleTechImgError(img) {
+  img.style.display = 'none';
+  var fb = img.parentNode.querySelector('.tech-logo-fallback');
+  if (fb) fb.style.display = 'flex';
+}
 
 function escapeHtml(str) {
   var div = document.createElement('div');
