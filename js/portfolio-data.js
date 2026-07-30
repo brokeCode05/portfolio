@@ -251,7 +251,7 @@ var BRAND_LOGOS = {
   shield: '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28s10-5 10-12V8l-10-4L6 8v8c0 7 10 12 10 12z"/></svg>'
 };
 
-var SIMPLE_ICONS_BASE = 'https://cdn.simpleicons.org/';
+// Removed: SIMPLE_ICONS_BASE — using local TECH_ICONS from js/tech-icons.js instead
 
 var MARQUEE_ROWS = [
   { dir: 'right', label: 'Languages', indices: [0, 1, 2, 3, 4, 5, 6] },
@@ -280,10 +280,9 @@ function renderTechStack(data) {
       } else if (tech.logo) {
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
       } else if (tech.brand) {
-        var slug = encodeURIComponent(tech.brand.toLowerCase());
-        var fallbackSvg = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
-        logoHtml = '<img class="tech-logo-img" src="' + SIMPLE_ICONS_BASE + slug + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
-          '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvg + '</span>';
+        var slug = tech.brand.toLowerCase();
+        var brandLogo = (window.TECH_ICONS && window.TECH_ICONS[slug]) || BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
+        logoHtml = '<span class="tech-logo-icon-inline" aria-hidden="true">' + brandLogo + '</span>';
       } else {
         var svg = BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal;
         logoHtml = '<span class="tech-logo-fallback" aria-hidden="true">' + svg + '</span>';

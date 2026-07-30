@@ -881,6 +881,24 @@
     .tech-logo:hover .tech-logo-img {
       transform: scale(1.2);
     }
+    .tech-logo-icon-inline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+    .tech-logo-icon-inline svg {
+      width: 32px;
+      height: 32px;
+      display: block;
+      color: var(--color-text-secondary);
+      transition: color var(--transition-fast), transform var(--transition-fast);
+    }
+    .tech-logo:hover .tech-logo-icon-inline svg {
+      color: var(--color-accent);
+      transform: scale(1.2);
+    }
     .tech-logo-fallback svg {
       width: 32px;
       height: 32px;
@@ -2559,6 +2577,7 @@
   </script>
 
   <!-- Portfolio Data Override (admin dashboard support) -->
+  <script src="js/tech-icons.js?v=20260730"></script>
   <script src="js/portfolio-data.js?v=20260729"></script>
   <script>
   (function(){
