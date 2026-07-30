@@ -117,24 +117,28 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         </span>
         <span>Projects</span>
+        <span class="nav-count"></span>
       </button>
       <button class="admin-nav-btn" data-section="certs">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </span>
         <span>Certs</span>
+        <span class="nav-count"></span>
       </button>
       <button class="admin-nav-btn" data-section="experience">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         </span>
         <span>Experience</span>
+        <span class="nav-count"></span>
       </button>
       <button class="admin-nav-btn" data-section="learning">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2M8 18l4 4 4-4M8 6l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
         </span>
         <span>Learning</span>
+        <span class="nav-count"></span>
       </button>
       <button class="admin-nav-btn" data-section="cloud">
         <span class="nav-icon">
@@ -145,8 +149,7 @@
     </nav>
     <div class="admin-sidebar-footer" style="display:flex;flex-direction:column;gap:0.5rem">
       <div style="font-size:0.6875rem;color:var(--admin-text-secondary);text-align:center;padding:0 0.5rem" id="auth-email-footer"></div>
-      <button class="btn btn-sm" id="admin-signout-btn" style="width:100%;justify-content:center;font-size:0.75rem">
-        <span>🚪</span> Sign Out
+      <button class="btn btn-sm" id="admin-signout-btn" style="width:100%;justify-content:center;font-size:0.75rem">Sign Out
       </button>
       <button class="btn btn-sm" id="admin-reset-btn" style="width:100%;justify-content:center">
         Reset to Defaults
@@ -391,6 +394,38 @@ CREATE POLICY "Admin update portfolio_data"
 
     </div>
   </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-dialog">
+    <div class="confirm-header">
+      <div class="confirm-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <span>confirm action</span>
+      <span style="margin-left:auto;opacity:0.4;font-size:0.6875rem">~/dashboard</span>
+    </div>
+    <div class="confirm-body">
+      <p id="confirm-message">Are you sure?</p>
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-btn confirm-btn-cancel" id="confirm-cancel-btn">Cancel</button>
+      <button class="confirm-btn confirm-btn-danger" id="confirm-ok-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Status Bar -->
+<div class="admin-statusbar" id="admin-statusbar">
+  <span class="statusbar-dot" id="statusbar-dot"></span>
+  <span class="statusbar-text" id="statusbar-text">Ready</span>
+  <span class="statusbar-section" id="statusbar-section"></span>
+  <span class="statusbar-shortcut">Ctrl+S</span>
 </div>
 
 <!-- Toast -->
@@ -669,6 +704,92 @@ CREATE POLICY "Admin update portfolio_data"
     setTimeout(function() { toast.classList.remove('show'); }, 2500);
   }
 
+  // ─── Confirmation Modal ────────────────────
+  var confirmCallback = null;
+
+  function showConfirm(message, callback) {
+    document.getElementById('confirm-message').textContent = message;
+    document.getElementById('confirm-overlay').classList.add('open');
+    confirmCallback = callback;
+    document.getElementById('confirm-ok-btn').focus();
+  }
+
+  document.getElementById('confirm-ok-btn').addEventListener('click', function() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    if (confirmCallback) { var cb = confirmCallback; confirmCallback = null; cb(true); }
+  });
+
+  document.getElementById('confirm-cancel-btn').addEventListener('click', function() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    if (confirmCallback) { var cb = confirmCallback; confirmCallback = null; cb(false); }
+  });
+
+  document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('open');
+      if (confirmCallback) { var cb = confirmCallback; confirmCallback = null; cb(false); }
+    }
+  });
+
+  // ─── Save Status Bar ───────────────────────
+  var statusTimeout = null;
+
+  function updateStatusBar(state) {
+    var dot = document.getElementById('statusbar-dot');
+    var text = document.getElementById('statusbar-text');
+    var section = document.getElementById('statusbar-section');
+    dot.className = 'statusbar-dot';
+    if (state === 'saved') {
+      dot.classList.add('saved');
+      text.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+      if (statusTimeout) clearTimeout(statusTimeout);
+      statusTimeout = setTimeout(function() {
+        text.textContent = 'Ready';
+        dot.className = 'statusbar-dot saved';
+      }, 5000);
+    } else if (state === 'saving') {
+      dot.classList.add('saving');
+      text.textContent = 'Saving...';
+    } else if (state === 'error') {
+      dot.classList.add('error');
+      text.textContent = 'Save failed';
+    }
+    var navBtn = document.querySelector('.admin-nav-btn.active');
+    if (navBtn) {
+      section.textContent = navBtn.querySelector('span:last-child').textContent;
+    }
+  }
+
+  // ─── Sidebar Counts ────────────────────────
+  function updateSidebarCounts() {
+    var d = readData();
+    var counts = {
+      projects: (d.projects || []).length,
+      certs: (d.certifications || []).length,
+      experience: (d.experience || []).length,
+      learning: (d.learning || []).length
+    };
+    document.querySelectorAll('.admin-nav-btn').forEach(function(btn) {
+      var section = btn.dataset.section;
+      var countEl = btn.querySelector('.nav-count');
+      if (countEl && counts[section] !== undefined) {
+        countEl.textContent = '(' + counts[section] + ')';
+      }
+    });
+  }
+
+  // ─── Ctrl+S Shortcut ──────────────────────
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      var saveBtn = document.querySelector('.admin-section.active .btn-primary');
+      if (saveBtn) {
+        updateStatusBar('saving');
+        saveBtn.click();
+      }
+    }
+  });
+
   // ─── Navigation ────────────────────────────
   function switchSection(id) {
     currentSection = id;
@@ -684,11 +805,17 @@ CREATE POLICY "Admin update portfolio_data"
     btn.addEventListener('click', function() { switchSection(this.dataset.section); });
   });
 
+  // ─── Reorder SVG Icons ─────────────────────
+  var REORDER_UP_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+  var REORDER_DOWN_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
   // ─── Helpers ───────────────────────────────
   function readData() { data = loadData(); return data; }
   function writeData() {
     savePortfolioData(data);
     autoPushToCloud();
+    updateStatusBar('saved');
+    updateSidebarCounts();
   }
 
   // ─── Hero ──────────────────────────────────
@@ -853,12 +980,14 @@ CREATE POLICY "Admin update portfolio_data"
     container.querySelectorAll('.tech-remove').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (!confirm('Remove this item?')) return;
-        var d = readData();
-        d.techStack.splice(parseInt(this.dataset.idx), 1);
-        writeData();
-        techEditIdx = -1;
-        renderTechItems();
+        showConfirm('Remove this item?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.techStack.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          techEditIdx = -1;
+          renderTechItems();
+        });
       });
     });
     container.querySelectorAll('.tech-edit').forEach(function(btn) {
@@ -1057,6 +1186,10 @@ CREATE POLICY "Admin update portfolio_data"
       var tags = (proj.tags || []).join(', ');
       return '<div class="admin-card" data-pidx="' + idx + '">' +
         '<div class="admin-card-header">' +
+          '<div class="admin-card-actions">' +
+            '<button class="reorder-btn proj-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
+            '<button class="reorder-btn proj-move-down" data-idx="' + idx + '"' + (idx === d.projects.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
+          '</div>' +
           '<h4>' + escapeHtml(proj.title) + '</h4>' +
           '<button class="btn btn-sm btn-danger proj-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
@@ -1087,12 +1220,14 @@ CREATE POLICY "Admin update portfolio_data"
 
     container.querySelectorAll('.proj-remove').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (!confirm('Remove this project?')) return;
-        var d = readData();
-        d.projects.splice(parseInt(this.dataset.idx), 1);
-        writeData();
-        renderProjects();
-        showToast('Project removed', 'success');
+        showConfirm('Remove this project?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.projects.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          renderProjects();
+          showToast('Project removed', 'success');
+        });
       });
     });
 
@@ -1144,6 +1279,27 @@ CREATE POLICY "Admin update portfolio_data"
     showToast('All projects saved!', 'success');
   });
 
+  // ─── Project Reorder ───────────────────────
+  document.getElementById('projects-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('.proj-move-up, .proj-move-down');
+    if (!btn) return;
+    var idx = parseInt(btn.dataset.idx);
+    var d = readData();
+    if (btn.classList.contains('proj-move-up')) {
+      if (idx === 0) return;
+      var tmp = d.projects[idx];
+      d.projects[idx] = d.projects[idx - 1];
+      d.projects[idx - 1] = tmp;
+    } else {
+      if (idx >= d.projects.length - 1) return;
+      var tmp = d.projects[idx];
+      d.projects[idx] = d.projects[idx + 1];
+      d.projects[idx + 1] = tmp;
+    }
+    writeData();
+    renderProjects();
+  });
+
   // ─── Certs ─────────────────────────────────
   function renderCerts() {
     var d = readData();
@@ -1162,6 +1318,10 @@ CREATE POLICY "Admin update portfolio_data"
       }
       return '<div class="admin-card" data-cidx="' + idx + '">' +
         '<div class="admin-card-header">' +
+          '<div class="admin-card-actions">' +
+            '<button class="reorder-btn cert-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
+            '<button class="reorder-btn cert-move-down" data-idx="' + idx + '"' + (idx === d.certifications.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
+          '</div>' +
           '<h4>' + escapeHtml(cert.name) + '</h4>' +
           '<button class="btn btn-sm btn-danger cert-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
@@ -1194,12 +1354,14 @@ CREATE POLICY "Admin update portfolio_data"
 
     container.querySelectorAll('.cert-remove').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (!confirm('Remove this certificate?')) return;
-        var d = readData();
-        d.certifications.splice(parseInt(this.dataset.idx), 1);
-        writeData();
-        renderCerts();
-        showToast('Certificate removed', 'success');
+        showConfirm('Remove this certificate?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.certifications.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          renderCerts();
+          showToast('Certificate removed', 'success');
+        });
       });
     });
 
@@ -1262,6 +1424,27 @@ CREATE POLICY "Admin update portfolio_data"
         }
       });
     });
+
+    // ─── Certs Reorder ──────────────────────────
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.cert-move-up, .cert-move-down');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.idx);
+      var d = readData();
+      if (btn.classList.contains('cert-move-up')) {
+        if (idx === 0) return;
+        var tmp = d.certifications[idx];
+        d.certifications[idx] = d.certifications[idx - 1];
+        d.certifications[idx - 1] = tmp;
+      } else {
+        if (idx >= d.certifications.length - 1) return;
+        var tmp = d.certifications[idx];
+        d.certifications[idx] = d.certifications[idx + 1];
+        d.certifications[idx + 1] = tmp;
+      }
+      writeData();
+      renderCerts();
+    });
   }
 
   document.getElementById('certs-add').addEventListener('click', function() {
@@ -1305,6 +1488,10 @@ CREATE POLICY "Admin update portfolio_data"
       }).join('');
       return '<div class="admin-card" data-eidx="' + idx + '">' +
         '<div class="admin-card-header">' +
+          '<div class="admin-card-actions">' +
+            '<button class="reorder-btn exp-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
+            '<button class="reorder-btn exp-move-down" data-idx="' + idx + '"' + (idx === d.experience.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
+          '</div>' +
           '<h4>' + escapeHtml(exp.role) + ' @ ' + escapeHtml(exp.company) + '</h4>' +
           '<button class="btn btn-sm btn-danger exp-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
@@ -1328,12 +1515,14 @@ CREATE POLICY "Admin update portfolio_data"
 
     container.querySelectorAll('.exp-remove').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (!confirm('Remove this experience entry?')) return;
-        var d = readData();
-        d.experience.splice(parseInt(this.dataset.idx), 1);
-        writeData();
-        renderExperience();
-        showToast('Experience removed', 'success');
+        showConfirm('Remove this experience entry?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.experience.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          renderExperience();
+          showToast('Experience removed', 'success');
+        });
       });
     });
 
@@ -1373,6 +1562,27 @@ CREATE POLICY "Admin update portfolio_data"
         writeData();
         renderExperience();
       });
+    });
+
+    // ─── Experience Reorder ─────────────────────
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.exp-move-up, .exp-move-down');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.idx);
+      var d = readData();
+      if (btn.classList.contains('exp-move-up')) {
+        if (idx === 0) return;
+        var tmp = d.experience[idx];
+        d.experience[idx] = d.experience[idx - 1];
+        d.experience[idx - 1] = tmp;
+      } else {
+        if (idx >= d.experience.length - 1) return;
+        var tmp = d.experience[idx];
+        d.experience[idx] = d.experience[idx + 1];
+        d.experience[idx + 1] = tmp;
+      }
+      writeData();
+      renderExperience();
     });
   }
 
@@ -1422,6 +1632,10 @@ CREATE POLICY "Admin update portfolio_data"
     container.innerHTML = d.learning.map(function(item, idx) {
       return '<div class="admin-card" data-lidx="' + idx + '">' +
         '<div class="admin-card-header">' +
+          '<div class="admin-card-actions">' +
+            '<button class="reorder-btn learn-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
+            '<button class="reorder-btn learn-move-down" data-idx="' + idx + '"' + (idx === d.learning.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
+          '</div>' +
           '<h4>' + escapeHtml(item.title) + ' (' + escapeHtml(item.year) + ')</h4>' +
           '<button class="btn btn-sm btn-danger learn-remove" data-idx="' + idx + '">Remove</button>' +
         '</div>' +
@@ -1444,12 +1658,14 @@ CREATE POLICY "Admin update portfolio_data"
 
     container.querySelectorAll('.learn-remove').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (!confirm('Remove this milestone?')) return;
-        var d = readData();
-        d.learning.splice(parseInt(this.dataset.idx), 1);
-        writeData();
-        renderLearningMilestones();
-        showToast('Milestone removed', 'success');
+        showConfirm('Remove this milestone?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.learning.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          renderLearningMilestones();
+          showToast('Milestone removed', 'success');
+        });
       });
     });
 
@@ -1464,6 +1680,27 @@ CREATE POLICY "Admin update portfolio_data"
         d.learning[idx].description = card.querySelector('.learn-desc').value;
         writeData();
       });
+    });
+
+    // ─── Learning Reorder ───────────────────────
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.learn-move-up, .learn-move-down');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.idx);
+      var d = readData();
+      if (btn.classList.contains('learn-move-up')) {
+        if (idx === 0) return;
+        var tmp = d.learning[idx];
+        d.learning[idx] = d.learning[idx - 1];
+        d.learning[idx - 1] = tmp;
+      } else {
+        if (idx >= d.learning.length - 1) return;
+        var tmp = d.learning[idx];
+        d.learning[idx] = d.learning[idx + 1];
+        d.learning[idx + 1] = tmp;
+      }
+      writeData();
+      renderLearningMilestones();
     });
   }
 
@@ -1513,8 +1750,15 @@ CREATE POLICY "Admin update portfolio_data"
 
   // ─── Reset ─────────────────────────────────
   document.getElementById('admin-reset-btn').addEventListener('click', function() {
-    if (!confirm('Reset all portfolio data to defaults? This cannot be undone.')) return;
-    if (!confirm('Are you sure? All your custom edits will be lost.')) return;
+    showConfirm('Reset all portfolio data to defaults? This cannot be undone.', function(ok) {
+      if (!ok) return;
+      showConfirm('Are you sure? All your custom edits will be lost.', function(ok) {
+        if (!ok) return;
+        resetPortfolioData();
+        data = loadData();
+        location.reload();
+      });
+    });
     resetPortfolioData();
     data = loadData();
     location.reload();
@@ -1589,6 +1833,8 @@ CREATE POLICY "Admin update portfolio_data"
     renderExperience();
     renderLearningMilestones();
     updateCloudStatus();
+    updateSidebarCounts();
+    updateStatusBar('saved');
   }
 
   // ─── Auto sign in check ────────────────────
