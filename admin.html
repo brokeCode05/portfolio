@@ -130,6 +130,12 @@
         </span>
         <span>Experience</span>
       </button>
+      <button class="admin-nav-btn" data-section="learning">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2M8 18l4 4 4-4M8 6l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
+        </span>
+        <span>Learning</span>
+      </button>
       <button class="admin-nav-btn" data-section="cloud">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
@@ -276,6 +282,17 @@
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="experience-add">+ Add Experience</button>
           <button class="btn btn-primary" id="experience-save">Save All Experience</button>
+        </div>
+      </div>
+
+      <!-- ===== LEARNING JOURNEY SECTION ===== -->
+      <div class="admin-section" id="section-learning">
+        <h2 class="admin-section-title">Learning Journey</h2>
+        <p class="admin-section-desc">Key milestones in your academic and self-directed learning path.</p>
+        <div id="learning-list"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="learning-add">+ Add Milestone</button>
+          <button class="btn btn-primary" id="learning-save">Save All Milestones</button>
         </div>
       </div>
 
@@ -1354,6 +1371,85 @@ CREATE POLICY "Admin update portfolio_data"
     showToast('All experience saved!', 'success');
   });
 
+  // ─── Learning Journey ────────────────────
+  function renderLearningMilestones() {
+    var d = readData();
+    var container = document.getElementById('learning-list');
+    if (!d.learning || !d.learning.length) {
+      container.innerHTML = '<div class="empty-state">No milestones yet.</div>';
+      return;
+    }
+    container.innerHTML = d.learning.map(function(item, idx) {
+      return '<div class="admin-card" data-lidx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<h4>' + escapeHtml(item.title) + ' (' + escapeHtml(item.year) + ')</h4>' +
+          '<button class="btn btn-sm btn-danger learn-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Year</label>' +
+            '<input type="text" class="learn-year" value="' + escapeHtml(item.year) + '" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Title</label>' +
+            '<input type="text" class="learn-title" value="' + escapeHtml(item.title) + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-group">' +
+          '<label>Description</label>' +
+          '<textarea class="learn-desc" rows="3">' + escapeHtml(item.description) + '</textarea>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.querySelectorAll('.learn-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!confirm('Remove this milestone?')) return;
+        var d = readData();
+        d.learning.splice(parseInt(this.dataset.idx), 1);
+        writeData();
+        renderLearningMilestones();
+        showToast('Milestone removed', 'success');
+      });
+    });
+
+    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.lidx);
+        var d = readData();
+        if (!d.learning[idx]) return;
+        d.learning[idx].year = card.querySelector('.learn-year').value;
+        d.learning[idx].title = card.querySelector('.learn-title').value;
+        d.learning[idx].description = card.querySelector('.learn-desc').value;
+        writeData();
+      });
+    });
+  }
+
+  document.getElementById('learning-add').addEventListener('click', function() {
+    var d = readData();
+    if (!d.learning) d.learning = [];
+    d.learning.push({ year: '2026', title: 'New Milestone', description: 'Description of what I learned.' });
+    writeData();
+    renderLearningMilestones();
+    showToast('New milestone added', 'success');
+  });
+
+  document.getElementById('learning-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('learning-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.lidx);
+      if (isNaN(idx) || !d.learning[idx]) return;
+      d.learning[idx].year = card.querySelector('.learn-year').value;
+      d.learning[idx].title = card.querySelector('.learn-title').value;
+      d.learning[idx].description = card.querySelector('.learn-desc').value;
+    });
+    writeData();
+    showToast('All milestones saved!', 'success');
+  });
+
   // ─── JSON Export/Import ────────────────────
   document.getElementById('admin-export-btn').addEventListener('click', function() {
     exportDataJSON();
@@ -1451,6 +1547,7 @@ CREATE POLICY "Admin update portfolio_data"
     renderProjects();
     renderCerts();
     renderExperience();
+    renderLearningMilestones();
     updateCloudStatus();
   }
 

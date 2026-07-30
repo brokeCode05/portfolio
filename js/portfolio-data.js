@@ -121,7 +121,8 @@ function loadData() {
     currently: [],
     projects: [],
     certifications: [],
-    experience: []
+    experience: [],
+    learning: []
   };
 }
 
@@ -301,6 +302,20 @@ function renderExperience(data) {
           '<time class="timeline-date">' + escapeHtml(exp.company) + '</time>' +
         '</div>' +
         '<ul class="timeline-bullets">' + bullets + '</ul>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderLearningJourney(data) {
+  if (!data || !data.learning) return '';
+  return data.learning.map(function(item, idx) {
+    return '<div class="timeline-item" data-reveal data-reveal-delay="' + (100 + idx * 100) + '">' +
+      '<div class="timeline-marker" aria-hidden="true"></div>' +
+      '<div class="timeline-content">' +
+        '<time class="timeline-date" datetime="' + escapeHtml(item.year) + '">' + escapeHtml(item.year) + '</time>' +
+        '<h3 class="timeline-title">' + escapeHtml(item.title) + '</h3>' +
+        '<p class="timeline-description">' + escapeHtml(item.description) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');

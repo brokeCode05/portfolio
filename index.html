@@ -1610,7 +1610,7 @@
         <p>Key milestones in my academic and self-directed learning path.</p>
       </div>
       <div class="timeline">
-        <!-- Populated by portfolio-data.js renderExperience() -->
+        <!-- Populated by portfolio-data.js renderLearningJourney() -->
       </div>
 
     </div>
@@ -2440,6 +2440,12 @@
         var certsGrid = document.querySelector('.certs-grid');
         if (certsGrid) {
           certsGrid.innerHTML = renderCerts(data);
+        }
+
+        // ─── Learning Journey ────────────────────
+        var learningContainer = document.querySelector('#learning .timeline');
+        if (learningContainer) {
+          learningContainer.innerHTML = renderLearningJourney(data);
         }
 
         // ─── Experience ───────────────────────────
