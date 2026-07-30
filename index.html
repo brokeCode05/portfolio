@@ -892,11 +892,10 @@
       width: 32px;
       height: 32px;
       display: block;
-      color: var(--color-text-secondary);
-      transition: color var(--transition-fast), transform var(--transition-fast);
+      transition: transform var(--transition-fast);
+      /* Brand color comes from SVG fill attribute */
     }
     .tech-logo:hover .tech-logo-icon-inline svg {
-      color: var(--color-accent);
       transform: scale(1.2);
     }
     .tech-logo-fallback svg {
