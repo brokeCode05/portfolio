@@ -386,7 +386,6 @@ CREATE POLICY "Admin update portfolio_data"
   var verifyOtpBtn = document.getElementById('verify-otp-btn');
   var verifyOtpText = document.getElementById('verify-otp-text');
   var verifyOtpSpinner = document.getElementById('verify-otp-spinner');
-  var changeEmailBtn = document.getElementById('change-email-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
 
@@ -541,14 +540,6 @@ CREATE POLICY "Admin update portfolio_data"
 
   otpInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') verifyOtpCode();
-  });
-
-  changeEmailBtn.addEventListener('click', function() {
-    loginStepOtp.style.display = 'none';
-    loginStepEmail.style.display = 'block';
-    loginSentMsg.style.display = 'none';
-    loginError.textContent = '';
-    otpError.textContent = '';
   });
 
   signOutBtn.addEventListener('click', signOut);
