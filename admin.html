@@ -16,24 +16,37 @@
 <div id="login-screen" class="admin-login">
   <div class="admin-login-box">
     <h1>🔐 Portfolio Dashboard</h1>
-    <p id="login-subtitle">Sign in with your email — a magic link will be sent to your inbox</p>
+    <p id="login-subtitle">Sign in with your email — a 6-digit code will be sent to your inbox</p>
 
-    <!-- Login: Email + Send Link -->
+    <!-- Login: Email + Send Code -->
     <div id="login-step-email">
       <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" placeholder="Your email" autocomplete="email" />
       <div class="login-error" id="login-error"></div>
       <button class="btn btn-primary" id="auth-send-otp-btn" style="width:100%;justify-content:center">
-        <span id="auth-send-text">Send Magic Link</span>
+        <span id="auth-send-text">Send OTP Code</span>
         <span id="auth-send-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
       </button>
       <div id="login-sent-msg" style="display:none;margin-top:1rem;padding:0.75rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:6px">
         <p style="color:var(--admin-accent);font-size:0.875rem;margin:0">
-          ✅ Magic link sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>
+          ✅ Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>
         </p>
         <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin:0.5rem 0 0">
-          Check your email and click the link to sign in. Then come back here.
+          Check your email for the 6-digit code.
         </p>
       </div>
+    </div>
+
+    <!-- Login: OTP Verification -->
+    <div id="login-step-otp" style="display:none">
+      <div class="otp-input-wrap">
+        <input type="text" id="otp-input" maxlength="6" placeholder="Enter 6-digit code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" />
+      </div>
+      <div class="login-error" id="otp-error"></div>
+      <button class="btn btn-primary" id="verify-otp-btn" style="width:100%;justify-content:center">
+        <span id="verify-otp-text">Verify &amp; Sign In</span>
+        <span id="verify-otp-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
+      </button>
+      <button class="btn btn-sm" id="change-email-btn" style="width:100%;justify-content:center;margin-top:0.5rem;opacity:0.7">← Change email</button>
     </div>
   </div>
 </div>
@@ -357,13 +370,20 @@ CREATE POLICY "Admin update portfolio_data"
   var loginScreen = document.getElementById('login-screen');
   var adminApp = document.getElementById('admin-app');
   var loginStepEmail = document.getElementById('login-step-email');
+  var loginStepOtp = document.getElementById('login-step-otp');
   var authEmailInput = document.getElementById('auth-email-input');
   var authEmailDisplay = document.getElementById('auth-email-display');
   var loginError = document.getElementById('login-error');
+  var otpError = document.getElementById('otp-error');
+  var otpInput = document.getElementById('otp-input');
   var loginSentMsg = document.getElementById('login-sent-msg');
   var sendOtpBtn = document.getElementById('auth-send-otp-btn');
   var sendText = document.getElementById('auth-send-text');
   var sendSpinner = document.getElementById('auth-send-spinner');
+  var verifyOtpBtn = document.getElementById('verify-otp-btn');
+  var verifyOtpText = document.getElementById('verify-otp-text');
+  var verifyOtpSpinner = document.getElementById('verify-otp-spinner');
+  var changeEmailBtn = document.getElementById('change-email-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
 
@@ -387,8 +407,10 @@ CREATE POLICY "Admin update portfolio_data"
     loginScreen.style.display = 'flex';
     adminApp.style.display = 'none';
     loginStepEmail.style.display = 'block';
+    loginStepOtp.style.display = 'none';
     loginSentMsg.style.display = 'none';
     loginError.textContent = '';
+    otpError.textContent = '';
   }
 
   function showDashboard(email) {
@@ -414,10 +436,11 @@ CREATE POLICY "Admin update portfolio_data"
 
   function clearAllErrors() {
     loginError.textContent = '';
+    otpError.textContent = '';
   }
 
-  // Send Magic Link
-  function sendMagicLink() {
+  // Send OTP Code (6-digit code to email)
+  function sendOtpCode() {
     clearAllErrors();
     if (!supabaseClient) {
       loginError.textContent = 'Supabase is not initialized';
@@ -434,13 +457,12 @@ CREATE POLICY "Admin update portfolio_data"
     }
 
     setLoading(sendOtpBtn, sendText, sendSpinner, true);
-    loginError.textContent = '⏳ Sending magic link to your email...';
+    loginError.textContent = '⏳ Sending OTP code to your email...';
 
     supabaseClient.auth.signInWithOtp({
       email: email,
       options: {
-        shouldCreateUser: true,
-        emailRedirectTo: 'https://brokecode05.github.io/portfolio/admin.html'
+        shouldCreateUser: true
       }
     }).then(function(result) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
@@ -448,14 +470,47 @@ CREATE POLICY "Admin update portfolio_data"
         loginError.textContent = 'Failed: ' + result.error.message;
         return;
       }
-      // ✅ Show success message
+      // ✅ Show success + OTP input
       loginError.textContent = '';
       loginSentMsg.style.display = 'block';
       authEmailDisplay.textContent = email;
-      showToast('✅ Magic link sent to ' + email + ' — click it to sign in!', 'success');
+      loginStepEmail.style.display = 'none';
+      loginStepOtp.style.display = 'block';
+      otpInput.value = '';
+      otpError.textContent = '';
+      otpInput.focus();
+      showToast('✅ OTP code sent to ' + email + ' — check your inbox!', 'success');
     }).catch(function(err) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
       loginError.textContent = 'Could not send. ' + (err.message || '');
+    });
+  }
+
+  // Verify 6-digit OTP code
+  function verifyOtpCode() {
+    clearAllErrors();
+    var code = otpInput.value.trim();
+    if (!code || code.length !== 6) {
+      otpError.textContent = 'Please enter the full 6-digit code from your email.';
+      return;
+    }
+    var email = authEmailInput.value.trim();
+    setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, true);
+    supabaseClient.auth.verifyOtp({
+      email: email,
+      token: code,
+      type: 'email'
+    }).then(function(result) {
+      setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
+      if (result.error) {
+        otpError.textContent = '❌ ' + result.error.message;
+        return;
+      }
+      showToast('✅ Signed in!', 'success');
+      showDashboard(email);
+    }).catch(function(err) {
+      setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
+      otpError.textContent = 'Verification failed: ' + (err.message || '');
     });
   }
 
@@ -473,10 +528,24 @@ CREATE POLICY "Admin update portfolio_data"
 
   // ─── Auth Event Listeners ─────────────────
 
-  sendOtpBtn.addEventListener('click', sendMagicLink);
+  sendOtpBtn.addEventListener('click', sendOtpCode);
 
   authEmailInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') sendMagicLink();
+    if (e.key === 'Enter') sendOtpCode();
+  });
+
+  verifyOtpBtn.addEventListener('click', verifyOtpCode);
+
+  otpInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyOtpCode();
+  });
+
+  changeEmailBtn.addEventListener('click', function() {
+    loginStepOtp.style.display = 'none';
+    loginStepEmail.style.display = 'block';
+    loginSentMsg.style.display = 'none';
+    loginError.textContent = '';
+    otpError.textContent = '';
   });
 
   signOutBtn.addEventListener('click', signOut);
