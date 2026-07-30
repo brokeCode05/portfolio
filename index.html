@@ -1448,21 +1448,13 @@
     <div class="container">
       <div class="hero-layout">
         <!-- Left: Content -->
-        <div class="hero-content">
-          <div class="hero-badge">BSIT Student &amp; Lifelong Learner</div>
-          <div class="hero-status" aria-label="Currently working on cybersecurity">
+        <div class="hero-content">          <div class="hero-badge"></div>
+          <div class="hero-status" aria-label="">
             <span class="hero-status-dot" aria-hidden="true"></span>
-            <span class="hero-status-text">Currently studying: Google Cybersecurity Certificate</span>
+            <span class="hero-status-text"></span>
           </div>
-          <h1 class="hero-title">
-            Learning infrastructure,<br />
-            one lab at a time.
-          </h1>
-          <p class="hero-description">
-            BSIT student with a growing interest in web development, networking,
-            and cybersecurity. Always tinkering, always learning — building
-            hands-on projects to turn curiosity into real skills.
-          </p>
+          <h1 class="hero-title"></h1>
+          <p class="hero-description"></p>
           <div class="hero-actions">
             <a href="#projects" class="btn btn-primary">View Projects</a>
             <a href="#contact" class="btn btn-ghost">Get in Touch</a>
@@ -1530,18 +1522,8 @@
       <div class="section-header" data-reveal>
         <h2>About</h2>
       </div>
-      <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
-        <div class="about-text">
-          <p>
-            I'm a BSIT student who's always been drawn to how things work
-            under the hood. I started with web development, got into networking,
-            and now I'm diving deep into cybersecurity. I have so much interest
-            in this field — I just really love to learn.
-            Whether I'm building something in my home lab, reading about security,
-            or tinkering with Linux configs, I'm always exploring something new.
-            Every project teaches me something, and that's what keeps me going.
-          </p>
-
+      <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">        <div class="about-text">
+          <p></p>
         </div>
         <div class="about-terminal" aria-hidden="true">
           <div class="terminal-window">
@@ -2594,16 +2576,16 @@
         var titleEl = document.querySelector('.hero-title');
         var descEl = document.querySelector('.hero-description');
 
-        if (badgeEl && data.hero.badge) badgeEl.textContent = data.hero.badge;
-        if (statusTextEl && data.hero.status) statusTextEl.textContent = data.hero.status;
-        if (titleEl && data.hero.title) {
-          titleEl.innerHTML = data.hero.title.replace(/\n/g, '<br />');
+        if (badgeEl) badgeEl.textContent = data.hero.badge || '';
+        if (statusTextEl) statusTextEl.textContent = data.hero.status || '';
+        if (titleEl) {
+          titleEl.innerHTML = (data.hero.title || '').replace(/\n/g, '<br />');
         }
-        if (descEl && data.hero.description) descEl.textContent = data.hero.description;
+        if (descEl) descEl.textContent = data.hero.description || '';
 
         // ─── About ────────────────────────────────
         var aboutParagraph = document.querySelector('.about-text p');
-        if (aboutParagraph && data.about.bio) aboutParagraph.textContent = data.about.bio;
+        if (aboutParagraph) aboutParagraph.textContent = data.about.bio || '';
 
         // Terminal JSON
         var terminalBody = document.querySelector('.about-terminal .terminal-body');
