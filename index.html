@@ -665,6 +665,11 @@
       justify-content: center;
       transition: opacity 0.6s ease, visibility 0.6s ease;
     }
+    /* Scroll lock: prevents bg scrolling when modals/menus are open */
+    body.modal-open {
+      overflow: hidden;
+    }
+
     #loader.loaded {
       opacity: 0;
       visibility: hidden;
@@ -2161,13 +2166,22 @@
 
         if (!hamburger || !overlay || !menu) return;
 
-        function openMenu() {
+        function lockScroll() {
+        window._scrollLock = (window._scrollLock || 0) + 1;
+        document.body.classList.add('modal-open');
+      }
+      function unlockScroll() {
+        window._scrollLock = Math.max(0, (window._scrollLock || 0) - 1);
+        if (window._scrollLock === 0) document.body.classList.remove('modal-open');
+      }
+
+      function openMenu() {
           hamburger.classList.add('active');
           hamburger.setAttribute('aria-expanded', 'true');
           hamburger.setAttribute('aria-label', 'Close menu');
           overlay.classList.add('open');
           menu.classList.add('open');
-          body.style.overflow = 'hidden';
+          lockScroll();
         }
 
         function closeMenu() {
@@ -2176,7 +2190,7 @@
           hamburger.setAttribute('aria-label', 'Open menu');
           overlay.classList.remove('open');
           menu.classList.remove('open');
-          body.style.overflow = '';
+          unlockScroll();
         }
 
         hamburger.addEventListener('click', function() {
@@ -2401,7 +2415,7 @@
         modal.removeAttribute('hidden');
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
+        lockScroll();
         showCert(index);
         // Focus the close button for accessibility
         setTimeout(function() {
@@ -2416,7 +2430,7 @@
         }
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+        unlockScroll();
         modal.setAttribute('hidden', '');
         cmdLine.innerHTML = '';
         certImg.classList.remove('loaded');
