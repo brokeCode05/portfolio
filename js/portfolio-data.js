@@ -6,122 +6,7 @@
 const STORAGE_KEY = 'portfolio_data';
 const ADMIN_PASSWORD_KEY = 'portfolio_admin_pw';
 
-// ─── Default Data ────────────────────────────────────
-
-const DEFAULT_DATA = {
-  hero: {
-    badge: 'BSIT Student & Lifelong Learner',
-    status: 'Currently studying: Google Cybersecurity Certificate',
-    title: 'Learning infrastructure, one lab at a time.',
-    description: "BSIT student with a growing interest in web development, networking, and cybersecurity. Always tinkering, always learning — building hands-on projects to turn curiosity into real skills."
-  },
-  about: {
-    bio: "I'm a BSIT student who's always been drawn to how things work under the hood. I started with web development, got into networking, and now I'm diving deep into cybersecurity. I have so much interest in this field — I just really love to learn. Whether I'm building something in my home lab, reading about security, or tinkering with Linux configs, I'm always exploring something new. Every project teaches me something, and that's what keeps me going.",
-    terminal: {
-      role: 'BSIT Student',
-      path: ['Web Dev', 'Networking', 'Security'],
-      philosophy: 'Just love to learn.',
-      status: 'Exploring'
-    }
-  },
-  techStack: [
-    // Programming Languages (0-6)
-    { name: 'HTML5', icon: 'code', cat: 'Programming', brand: 'html5' },
-    { name: 'CSS3', icon: 'layout', cat: 'Programming', brand: 'css3' },
-    { name: 'JavaScript', icon: 'js', cat: 'Programming', brand: 'javascript' },
-    { name: 'Java', icon: 'coffee', cat: 'Programming', brand: 'java' },
-    { name: 'Python', icon: 'terminal', cat: 'Programming', brand: 'python' },
-    { name: 'C#', icon: 'hash', cat: 'Programming', brand: 'csharp' },
-    { name: 'VB.NET', icon: 'code', cat: 'Programming', brand: 'visualbasic' },
-    // Web Technologies (7-8)
-    { name: 'Node.js', icon: 'code', cat: 'Web', brand: 'nodedotjs' },
-    { name: 'npm', icon: 'package', cat: 'Web', brand: 'npm' },
-    // Databases (9-10)
-    { name: 'MongoDB', icon: 'code', cat: 'Database', brand: 'mongodb' },
-    { name: 'MS SQL', icon: 'code', cat: 'Database', brand: 'microsoftsqlserver' },
-    // Version Control (11-12)
-    { name: 'Git', icon: 'git-branch', cat: 'VCS', brand: 'git' },
-    { name: 'GitHub', icon: 'code', cat: 'VCS', brand: 'github' },
-    // Developer Tools (13-16)
-    { name: 'VS Code', icon: 'tool', cat: 'DevTools', brand: 'visualstudiocode' },
-    { name: 'Termius', icon: 'terminal', cat: 'DevTools', brand: 'iterm2' },
-    { name: 'Figma', icon: 'tool', cat: 'DevTools', brand: 'figma' },
-    { name: 'Chrome DevTools', icon: 'tool', cat: 'DevTools', brand: 'googlechrome' },
-    // Networking & Remote (17-20)
-    { name: 'SSH', icon: 'lock', cat: 'Networking', brand: 'openssh' },
-    { name: 'SFTP', icon: 'activity', cat: 'Networking' },
-    { name: 'Tailscale', icon: 'activity', cat: 'Networking', brand: 'tailscale' },
-    { name: 'OpenSSH', icon: 'lock', cat: 'Networking', brand: 'openssh' },
-    // Operating Systems (21-22)
-    { name: 'Windows 11', icon: 'terminal', cat: 'OS', brand: 'windows' },
-    { name: 'Linux Mint', icon: 'terminal', cat: 'OS', brand: 'linuxmint' }
-  ],
-  currently: [
-    'Linux Administration',
-    'Cybersecurity',
-    'Ethical Hacking',
-    'Advanced Networking',
-    'System Administration',
-    'Home Lab Development',
-    'The Practice of Network Security Monitoring',
-    'Google Cybersecurity Certificate'
-  ],
-  projects: [
-    {
-      id: 'proj-portfolio',
-      title: 'Personal Portfolio',
-      description: 'A terminal-themed developer portfolio built with vanilla HTML, CSS, and JavaScript. Features include a premium hero section with parallax portrait, animated skill progress bars with tooltips, certificate viewer modal, dark/light theme toggle, and responsive design.',
-      tags: ['HTML', 'CSS', 'JavaScript'],
-      links: {
-        live: 'https://brokeCode05.github.io/portfolio/',
-        repo: 'https://github.com/brokeCode05/portfolio'
-      }
-    },
-    {
-      id: 'proj-stonerich',
-      title: 'Stonerich Granite Construction & Supply',
-      description: 'A production-ready business website built for a granite and construction supply company. 11 routes with 28 static pages, product catalog with 9 categories, service pages, masonry gallery, quotation form, and SEO optimization.',
-      tags: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
-      links: {
-        live: 'https://stonerich-website.vercel.app',
-        repo: 'https://github.com/brokeCode05/stonerich-website'
-      }
-    }
-  ],
-  certifications: [
-    { id: 'cert-java', name: 'Java Fundamentals', issuer: 'Oracle', date: '2024', path: 'img/certs/certificate.jpg' },
-    { id: 'cert-web', name: 'Web Development Basics', issuer: 'IBM', date: '2025', path: 'img/certs/certificate.jpg' },
-    { id: 'cert-cyber', name: 'Introduction to Cybersecurity', issuer: 'Cisco Net Academy', date: '2026', path: 'img/certs/certificate.jpg' }
-  ],
-  experience: [
-    {
-      id: 'exp-csr',
-      role: 'Customer Service Representative',
-      company: 'VXI Philippines',
-      date: '2023',
-      bullets: [
-        'Assisted customers with technical support, financial/account-related inquiries, and sales concerns through phone-based customer service.',
-        'Diagnosed and resolved customer issues while providing accurate information and effective solutions.',
-        'Maintained clear and professional communication to ensure a positive customer experience.',
-        'Followed company procedures to document customer interactions and resolve cases efficiently.',
-        'Developed strong problem-solving, communication, and customer service skills in a fast-paced BPO environment.'
-      ]
-    },
-    {
-      id: 'exp-proctor',
-      role: 'Exam Proctor',
-      company: 'CLAD Asia',
-      date: '2024',
-      bullets: [
-        'Facilitated and supervised onsite and online examinations while ensuring compliance with testing policies and procedures.',
-        'Verified candidate identities and monitored examinations to maintain test integrity.',
-        'Assisted examinees with exam instructions and resolved basic technical or procedural concerns during testing.',
-        'Coordinated with the examination team to ensure smooth and organized exam operations.',
-        'Maintained accurate records and reported any incidents encountered during examination sessions.'
-      ]
-    }
-  ]
-};
+// (Hardcoded defaults removed — admin panel + cloud sync manage all data)
 
 // ─── LocalStorage CRUD ────────────────────────────────
 
@@ -226,29 +111,18 @@ async function pushToSupabase(data) {
 function loadData() {
   var saved = getPortfolioData();
   if (saved) {
-    var changed = false;
-    // Migration 1: replace old flat tech stack with organized categories
-    if (saved.techStack && saved.techStack[0] && saved.techStack[0].name === 'Linux' && saved.techStack.length <= 15) {
-      saved.techStack = JSON.parse(JSON.stringify(DEFAULT_DATA.techStack));
-      changed = true;
-    } else if (!saved.techStack) {
-      saved.techStack = JSON.parse(JSON.stringify(DEFAULT_DATA.techStack));
-      changed = true;
-    } else {
-      // Migration 2: add brand fields to existing tech items if missing
-      saved.techStack.forEach(function(item, idx) {
-        if (!item.brand && DEFAULT_DATA.techStack[idx] && DEFAULT_DATA.techStack[idx].brand) {
-          item.brand = DEFAULT_DATA.techStack[idx].brand;
-          changed = true;
-        }
-      });
-    }
-    if (changed) {
-      savePortfolioData(saved);
-    }
     return saved;
   }
-  return DEFAULT_DATA;
+  // Return empty data structure — admin panel populates via cloud sync
+  return {
+    hero: { badge: '', status: '', title: '', description: '' },
+    about: { bio: '', terminal: { role: '', path: [], philosophy: '', status: '' } },
+    techStack: [],
+    currently: [],
+    projects: [],
+    certifications: [],
+    experience: []
+  };
 }
 
 var BRAND_LOGOS = {
