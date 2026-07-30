@@ -15,41 +15,59 @@
 <!-- ============ LOGIN ============ -->
 <div id="login-screen" class="admin-login">
   <div class="admin-login-box">
-    <h1>🔐 Portfolio Dashboard</h1>
-    <p id="login-subtitle">Sign in with your email — an 8-digit code will be sent to your inbox</p>
-
-    <!-- Login: Email + Send Code -->
-    <div id="login-step-email">
-      <div style="position:relative">
-        <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" readonly style="background:rgba(255,255,255,0.04);cursor:default" />
-        <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.5" title="Only this email can access the dashboard">🔒</span>
-      </div>
-      <div class="login-error" id="login-error"></div>
-      <button class="btn btn-primary" id="auth-send-otp-btn" style="width:100%;justify-content:center">
-        <span id="auth-send-text">Send OTP Code</span>
-        <span id="auth-send-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
-      </button>
-      <div id="login-sent-msg" style="display:none;margin-top:1rem;padding:0.75rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:6px">
-        <p style="color:var(--admin-accent);font-size:0.875rem;margin:0">
-          ✅ Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>
-        </p>
-        <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin:0.5rem 0 0">
-          Check your email for the 8-digit code.
-        </p>
-      </div>
+    
+    <!-- Terminal-style header bar -->
+    <div class="login-terminal-bar">
+      <span class="login-terminal-dot"></span>
+      <span class="login-terminal-dot"></span>
+      <span class="login-terminal-dot"></span>
+      <span class="terminal-title">admin-sign-in</span>
+      <span class="login-terminal-path">~/dashboard</span>
     </div>
 
-    <!-- Login: OTP Verification -->
-    <div id="login-step-otp" style="display:none">
-      <div class="otp-input-wrap">
-        <input type="text" id="otp-input" maxlength="8" placeholder="Enter 8-digit code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" />
+    <div class="login-body">
+      <h1 class="login-title">Portfolio Dashboard</h1>
+      <p class="login-subtitle">Sign in to manage your portfolio content. An access code will be sent to your inbox.</p>
+
+      <!-- Step 1: Email (read-only) + Send -->
+      <div id="login-step-email">
+        <div class="login-field-group">
+          <label class="login-field-label">Email <span class="field-hint">(authorized account)</span></label>
+          <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" readonly />
+        </div>
+        <div class="login-error" id="login-error"></div>
+        
+        <button class="login-btn" id="auth-send-otp-btn">
+          <span id="auth-send-text">Send Access Code</span>
+          <span class="login-spinner" id="auth-send-spinner"></span>
+        </button>
       </div>
-      <div class="login-error" id="otp-error"></div>
-      <button class="btn btn-primary" id="verify-otp-btn" style="width:100%;justify-content:center">
-        <span id="verify-otp-text">Verify &amp; Sign In</span>
-        <span id="verify-otp-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
-      </button>
-      <p style="font-size:0.75rem;color:var(--admin-text-secondary);text-align:center;margin-top:0.5rem">Only <strong>jhnbryn05@gmail.com</strong> can access this dashboard</p>
+
+      <!-- Sent confirmation -->
+      <div class="login-sent-msg" id="login-sent-msg">
+        <p>Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>.</p>
+        <p>Check your email and enter the 8-digit code below.</p>
+      </div>
+
+      <!-- Step 2: OTP Verification -->
+      <div id="login-step-otp" style="display:none">
+        <div class="login-field-group" style="margin-bottom:0.75rem">
+          <label class="login-field-label">Access Code</label>
+          <input type="text" id="otp-input" maxlength="8" placeholder="00000000" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" />
+        </div>
+        <div class="login-error" id="otp-error"></div>
+        
+        <button class="login-btn" id="verify-otp-btn">
+          <span id="verify-otp-text">Verify &amp; Sign In</span>
+          <span class="login-spinner" id="verify-otp-spinner"></span>
+        </button>
+        
+        <button class="login-btn-secondary" id="back-to-email-btn">Use a different email</button>
+      </div>
+
+      <div class="login-authorized">
+        Authorized account &mdash; <code>jhnbryn05@gmail.com</code>
+      </div>
     </div>
   </div>
 </div>
@@ -386,6 +404,7 @@ CREATE POLICY "Admin update portfolio_data"
   var verifyOtpBtn = document.getElementById('verify-otp-btn');
   var verifyOtpText = document.getElementById('verify-otp-text');
   var verifyOtpSpinner = document.getElementById('verify-otp-spinner');
+  var backToEmailBtn = document.getElementById('back-to-email-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
 
@@ -540,6 +559,14 @@ CREATE POLICY "Admin update portfolio_data"
 
   otpInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') verifyOtpCode();
+  });
+
+  backToEmailBtn.addEventListener('click', function() {
+    loginStepOtp.style.display = 'none';
+    loginStepEmail.style.display = 'block';
+    loginSentMsg.style.display = 'none';
+    loginError.textContent = '';
+    otpError.textContent = '';
   });
 
   signOutBtn.addEventListener('click', signOut);

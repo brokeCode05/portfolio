@@ -37,28 +37,107 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background decoration */
+.admin-login::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(74, 222, 128, 0.015) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .admin-login-box {
+  position: relative;
   width: 100%;
-  max-width: 380px;
-  padding: 2.5rem 2rem;
+  max-width: 400px;
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
-  border-radius: var(--admin-radius);
-  text-align: center;
+  border-radius: 12px;
+  text-align: left;
+  overflow: hidden;
+  animation: login-fade-in 0.4s ease;
 }
 
-.admin-login-box h1 {
-  font-size: 1.25rem;
+@keyframes login-fade-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Terminal-style header bar */
+.login-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1.25rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--admin-border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+}
+
+.login-terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.login-terminal-dot:nth-child(1) { background: #F87171; }
+.login-terminal-dot:nth-child(2) { background: #FBBF24; }
+.login-terminal-dot:nth-child(3) { background: var(--admin-accent); }
+
+.login-terminal-path {
+  margin-left: auto;
+  opacity: 0.5;
+  font-size: 0.6875rem;
+}
+
+.login-body {
+  padding: 2rem 1.75rem 1.75rem;
+}
+
+.login-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.01em;
 }
 
-.admin-login-box p {
+.login-subtitle {
   font-size: 0.8125rem;
   color: var(--admin-text-secondary);
   margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.login-field-group {
+  margin-bottom: 1rem;
+}
+
+.login-field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+  margin-bottom: 0.375rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.login-field-label .field-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.6;
 }
 
 .admin-login-box input {
@@ -70,20 +149,152 @@ body {
   color: var(--admin-text);
   font-size: 0.875rem;
   font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 0.75rem;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .admin-login-box input:focus {
   border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.08);
 }
 
-.admin-login-box .login-error {
+.admin-login-box input[readonly] {
+  cursor: default;
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.admin-login-box input[readonly]:focus {
+  border-color: var(--admin-border);
+  box-shadow: none;
+}
+
+/* OTP input special styling */
+#otp-input {
+  font-size: 1.375rem;
+  letter-spacing: 10px;
+  text-align: center;
+  padding: 0.75rem;
+  font-weight: 500;
+}
+
+.login-error {
   font-size: 0.8125rem;
   color: var(--admin-danger);
   margin-bottom: 0.75rem;
   min-height: 1.25rem;
+  line-height: 1.4;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 0.6875rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: 1px solid var(--admin-accent);
+  border-radius: var(--admin-radius-sm);
+  background: var(--admin-accent);
+  color: #0F1115;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 40px;
+}
+
+.login-btn:hover {
+  background: var(--admin-accent-dim);
+  border-color: var(--admin-accent-dim);
+  transform: translateY(-1px);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-btn-secondary {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  border: none;
+  border-radius: var(--admin-radius-sm);
+  background: transparent;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.login-btn-secondary:hover {
+  color: var(--admin-text);
+}
+
+/* Spinner */
+.login-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(15, 17, 21, 0.2);
+  border-top-color: #0F1115;
+  border-radius: 50%;
+  animation: login-spin 0.6s linear infinite;
+}
+
+@keyframes login-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sent message */
+.login-sent-msg {
+  display: none;
+  padding: 0.75rem;
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.15);
+  border-radius: var(--admin-radius-sm);
+  margin-bottom: 1rem;
+  animation: login-fade-in 0.3s ease;
+}
+
+.login-sent-msg p {
+  font-size: 0.8125rem;
+  color: var(--admin-text-secondary);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+.login-sent-msg strong {
+  color: var(--admin-text);
+  font-weight: 500;
+}
+
+.login-authorized {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--admin-border);
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.login-authorized code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6875rem;
+  color: var(--admin-accent);
+  opacity: 0.8;
 }
 
 /* ─── Layout ───────────────────────────────── */
