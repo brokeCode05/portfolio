@@ -598,9 +598,13 @@
       flex-direction: column;
       padding: calc(var(--nav-height) + var(--space-lg)) var(--space-lg) var(--space-lg);
       gap: var(--space-xs);
+      pointer-events: none;
+      visibility: hidden;
     }
     .nav-menu-mobile.open {
       transform: translateX(0);
+      pointer-events: auto;
+      visibility: visible;
     }
     .nav-menu-mobile .nav-link {
       display: block;
@@ -2177,6 +2181,7 @@
       };
 
       function openMenu() {
+          if (menu.classList.contains('open')) return;
           hamburger.classList.add('active');
           hamburger.setAttribute('aria-expanded', 'true');
           hamburger.setAttribute('aria-label', 'Close menu');
@@ -2411,6 +2416,7 @@
       });
 
       function openModal(index) {
+        if (overlay.classList.contains('open')) return;
         refreshCertData();
         if (index < 0 || index >= certData.length) return;
         modal.removeAttribute('hidden');
