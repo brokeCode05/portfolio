@@ -39,7 +39,7 @@
     <!-- Login: OTP Verification -->
     <div id="login-step-otp" style="display:none">
       <div class="otp-input-wrap">
-        <input type="text" id="otp-input" maxlength="6" placeholder="Enter 6-digit code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" />
+        <input type="text" id="otp-input" maxlength="8" placeholder="Enter 8-digit code" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" style="font-size:1.5rem;letter-spacing:8px;text-align:center;font-family:monospace" />
       </div>
       <div class="login-error" id="otp-error"></div>
       <button class="btn btn-primary" id="verify-otp-btn" style="width:100%;justify-content:center">
@@ -490,8 +490,8 @@ CREATE POLICY "Admin update portfolio_data"
   function verifyOtpCode() {
     clearAllErrors();
     var code = otpInput.value.trim();
-    if (!code || code.length !== 6) {
-      otpError.textContent = 'Please enter the full 6-digit code from your email.';
+    if (!code || code.length !== 8) {
+      otpError.textContent = 'Please enter the full 8-digit code from your email.';
       return;
     }
     var email = authEmailInput.value.trim();
