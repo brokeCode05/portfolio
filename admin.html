@@ -371,7 +371,7 @@ CREATE POLICY "Admin update portfolio_data"
 
   var currentSection = 'hero';
   var data = loadData();
-  var supabase = null;
+  var supabaseClient = null;
 
   // ─── Supabase Auth Setup ──────────────────
   var ADMIN_EMAIL = 'jhnbryn05@gmail.com';
@@ -379,8 +379,9 @@ CREATE POLICY "Admin update portfolio_data"
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
 
   try {
-    var { createClient } = supabase;
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
   } catch(e) {
     console.error('Failed to initialize Supabase:', e);
   }
@@ -409,8 +410,8 @@ CREATE POLICY "Admin update portfolio_data"
   // ─── Auth Functions ────────────────────────
 
   function checkSession() {
-    if (!supabase) return false;
-    supabase.auth.getSession().then(function(result) {
+    if (!supabaseClient) return false;
+    supabaseClient.auth.getSession().then(function(result) {
       var session = result.data.session;
       if (session && session.user && session.user.email === ADMIN_EMAIL) {
         showDashboard(session.user.email);
@@ -461,7 +462,7 @@ CREATE POLICY "Admin update portfolio_data"
   // Send OTP
   function sendOtp() {
     clearAllErrors();
-    if (!supabase) {
+    if (!supabaseClient) {
       loginError.textContent = 'Supabase is not initialized. Check console for errors.';
       return;
     }
@@ -477,7 +478,7 @@ CREATE POLICY "Admin update portfolio_data"
 
     setLoading(sendOtpBtn, sendText, sendSpinner, true);
 
-    supabase.auth.signInWithOtp({
+    supabaseClient.auth.signInWithOtp({
       email: email,
       options: { shouldCreateUser: true }
     }).then(function(result) {
@@ -500,7 +501,7 @@ CREATE POLICY "Admin update portfolio_data"
   // Verify OTP
   function verifyOtp() {
     clearAllErrors();
-    if (!supabase) {
+    if (!supabaseClient) {
       otpError.textContent = 'Supabase is not initialized.';
       return;
     }
@@ -513,7 +514,7 @@ CREATE POLICY "Admin update portfolio_data"
 
     setLoading(verifyBtn, verifyText, verifySpinner, true);
 
-    supabase.auth.verifyOtp({
+    supabaseClient.auth.verifyOtp({
       email: email,
       token: token,
       type: 'email'
@@ -532,8 +533,8 @@ CREATE POLICY "Admin update portfolio_data"
 
   // Sign Out
   function signOut() {
-    if (!supabase) return;
-    supabase.auth.signOut().then(function() {
+    if (!supabaseClient) return;
+    supabaseClient.auth.signOut().then(function() {
       showLogin();
     }).catch(function() {
       showLogin();
@@ -580,8 +581,8 @@ CREATE POLICY "Admin update portfolio_data"
   signOutBtn.addEventListener('click', signOut);
 
   // Listen for auth state changes
-  if (supabase) {
-    supabase.auth.onAuthStateChange(function(event, session) {
+  if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange(function(event, session) {
       if (event === 'SIGNED_OUT') {
         showLogin();
       }
