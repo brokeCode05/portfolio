@@ -425,16 +425,16 @@ CREATE POLICY "Admin update portfolio_data"
 
   function showLogin() {
     loginScreen.style.display = 'flex';
-    adminApp.style.display = 'none';
+    adminApp.style.display = \'none\';
     loginStepEmail.style.display = 'block';
-    loginStepOtp.style.display = 'none';
+    loginStepOtp.style.display = \'none\';
     authOtpInput.value = '';
     loginError.textContent = '';
     otpError.textContent = '';
   }
 
   function showDashboard(email) {
-    loginScreen.style.display = 'none';
+    loginScreen.style.display = \'none\';
     adminApp.style.display = 'flex';
     if (authEmailFooter) {
       authEmailFooter.textContent = 'Signed in as ' + email;
@@ -444,12 +444,12 @@ CREATE POLICY "Admin update portfolio_data"
 
   function setLoading(btn, textEl, spinnerEl, loading) {
     if (loading) {
-      textEl.style.display = 'none';
+      textEl.style.display = \'none\';
       spinnerEl.style.display = 'inline-block';
       btn.disabled = true;
     } else {
       textEl.style.display = 'inline';
-      spinnerEl.style.display = 'none';
+      spinnerEl.style.display = \'none\';
       btn.disabled = false;
     }
   }
@@ -490,7 +490,7 @@ CREATE POLICY "Admin update portfolio_data"
       }
       // ✅ Show success + transition to OTP step
       loginError.textContent = '';
-      loginStepEmail.style.display = 'none';
+      loginStepEmail.style.display = \'none\';
       loginStepOtp.style.display = 'block';
       authEmailDisplay.textContent = email;
       authOtpInput.focus();
@@ -571,13 +571,13 @@ CREATE POLICY "Admin update portfolio_data"
   });
 
   resendBtn.addEventListener('click', function() {
-    loginStepOtp.style.display = 'none';
+    loginStepOtp.style.display = \'none\';
     loginStepEmail.style.display = 'block';
     sendOtp();
   });
 
   changeEmailBtn.addEventListener('click', function() {
-    loginStepOtp.style.display = 'none';
+    loginStepOtp.style.display = \'none\';
     loginStepEmail.style.display = 'block';
     loginError.textContent = '';
   });
@@ -925,7 +925,7 @@ CREATE POLICY "Admin update portfolio_data"
       btn.addEventListener('click', function() {
         delete techTempLogo['new'];
         var preview = this.closest('.inline-add-preview');
-        preview.style.display = 'none';
+        preview.style.display = \'none\';
       });
     });
   }
@@ -1112,7 +1112,7 @@ CREATE POLICY "Admin update portfolio_data"
       var previewHtml = '';
       if (cert.path) {
         previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
-          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display='none'" />' +
+          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display=\'none\'" />' +
           '<button class="btn btn-sm cert-upload-clear" data-idx="' + idx + '" style="padding:2px 6px;font-size:10px;margin-left:6px" title="Remove image">×</button>' +
         '</div>';
       }
