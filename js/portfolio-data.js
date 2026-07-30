@@ -142,11 +142,11 @@ function resetPortfolioData() {
 }
 
 function getAdminPassword() {
-  return localStorage.getItem(ADMIN_PASSWORD_KEY) || 'admin123';
+  try { return localStorage.getItem(ADMIN_PASSWORD_KEY) || ''; } catch(e) { return ''; }
 }
 
 function setAdminPassword(pw) {
-  localStorage.setItem(ADMIN_PASSWORD_KEY, pw);
+  try { localStorage.setItem(ADMIN_PASSWORD_KEY, pw); } catch(e) {}
 }
 
 // ─── Supabase Cloud Sync (Secure) ─────────────────────

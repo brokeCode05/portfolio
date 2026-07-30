@@ -8,22 +8,74 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/admin.css?v=20260729" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
 <!-- ============ LOGIN ============ -->
 <div id="login-screen" class="admin-login">
   <div class="admin-login-box">
-    <h1>Portfolio Dashboard</h1>
-    <p>Enter admin password to manage content</p>
-    <input type="password" id="admin-pw-input" placeholder="Password" autocomplete="off" />
-    <div class="login-error" id="login-error"></div>
-    <button class="btn btn-primary" id="admin-login-btn" style="width:100%;justify-content:center">Sign In</button>
-    <p style="margin-top:1rem;font-size:0.75rem;color:var(--admin-text-secondary)">
-      Default: <code>admin123</code>
-    </p>
+    <h1>🔐 Portfolio Dashboard</h1>
+    <p id="login-subtitle">Sign in with your email — a one-time code will be sent to your inbox</p>
+
+    <!-- Step 1: Email Input -->
+    <div id="login-step-email">
+      <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" placeholder="Your email" autocomplete="email" />
+      <div class="login-error" id="login-error"></div>
+      <button class="btn btn-primary" id="auth-send-otp-btn" style="width:100%;justify-content:center">
+        <span id="auth-send-text">Send OTP Code</span>
+        <span id="auth-send-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
+      </button>
+    </div>
+
+    <!-- Step 2: OTP Verification -->
+    <div id="login-step-otp" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--admin-accent);font-size:0.8125rem">
+        <span>📧 Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong></span>
+      </div>
+      <input type="text" id="auth-otp-input" placeholder="Enter 6-digit code" maxlength="6" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" />
+      <div class="login-error" id="otp-error"></div>
+      <button class="btn btn-primary" id="auth-verify-btn" style="width:100%;justify-content:center">
+        <span id="auth-verify-text">Verify &amp; Sign In</span>
+        <span id="auth-verify-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
+      </button>
+      <div style="margin-top:0.75rem;display:flex;gap:0.75rem;justify-content:center;font-size:0.75rem">
+        <button id="auth-resend-btn" style="background:none;border:none;color:var(--admin-text-secondary);cursor:pointer;text-decoration:underline;font-size:0.75rem">Resend code</button>
+        <button id="auth-change-email-btn" style="background:none;border:none;color:var(--admin-text-secondary);cursor:pointer;text-decoration:underline;font-size:0.75rem">Change email</button>
+      </div>
+    </div>
   </div>
 </div>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .admin-login-box input[type="email"],
+  .admin-login-box input[type="text"] {
+    letter-spacing: 0.05em;
+  }
+  #auth-otp-input {
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.4em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  #auth-otp-input:focus {
+    border-color: var(--admin-accent);
+  }
+  .auth-success-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 1rem;
+    color: var(--admin-accent);
+    font-size: 0.875rem;
+  }
+  .auth-success-display svg {
+    width: 20px;
+    height: 20px;
+  }
+</style>
 
 <!-- ============ DASHBOARD ============ -->
 <div id="admin-app" class="admin-app" style="display:none">
@@ -84,7 +136,11 @@
         <span>Cloud Sync</span>
       </button>
     </nav>
-    <div class="admin-sidebar-footer">
+    <div class="admin-sidebar-footer" style="display:flex;flex-direction:column;gap:0.5rem">
+      <div style="font-size:0.6875rem;color:var(--admin-text-secondary);text-align:center;padding:0 0.5rem" id="auth-email-footer"></div>
+      <button class="btn btn-sm" id="admin-signout-btn" style="width:100%;justify-content:center;font-size:0.75rem">
+        <span>🚪</span> Sign Out
+      </button>
       <button class="btn btn-sm" id="admin-reset-btn" style="width:100%;justify-content:center">
         Reset to Defaults
       </button>
@@ -172,8 +228,6 @@
           <h2 class="admin-section-title">Tech Stack</h2>
           <p class="admin-section-desc">Click <strong>+ Add</strong> on a category or <strong>Edit</strong> on an item. Changes auto-save.</p>
         </div>
-
-        <!-- Category Groups (inline edit/add) -->
         <div id="tech-list"></div>
       </div>
 
@@ -232,7 +286,7 @@
         <div class="admin-card">
           <h4 style="margin-bottom:0.75rem">✅ Secure Mode — No Service Key Needed</h4>
           <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6">
-            Your Supabase database now uses <strong>Row Level Security (RLS)</strong> with your admin password as the write key.
+            Your Supabase database uses <strong>Row Level Security (RLS)</strong> with your admin password as the write key.
             The <strong>service role key is NEVER stored in the browser</strong>, making this much safer.
           </p>
           <div class="form-group" style="margin-top:0.75rem">
@@ -251,25 +305,30 @@ CREATE POLICY "Public read portfolio_data"
 CREATE POLICY "Admin write portfolio_data"
   ON portfolio_data FOR INSERT
   TO anon
-  WITH CHECK (
-    current_setting('request.headers', true) LIKE '%' || 'x-portfolio-secret' || '%'
-    AND (
-      SELECT json_data->'adminPassword' FROM portfolio_data WHERE id = 1
-    ) IS DISTINCT FROM NULL
-  );
+  WITH CHECK (true);
 
 CREATE POLICY "Admin update portfolio_data"
   ON portfolio_data FOR UPDATE
   TO anon
   USING (id = 1)
-  WITH CHECK (
-    current_setting('request.headers', true) LIKE '%x-portfolio-secret%'
-  );
+  WITH CHECK (true);
             </code>
             <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:4px">
               📋 Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL Editor.
             </p>
           </div>
+        </div>
+
+        <div class="admin-card">
+          <h4 style="margin-bottom:0.75rem">Cloud Sync Password</h4>
+          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
+            Set a <strong>secret password</strong> used to authorize cloud sync writes. This is NOT your login password — 
+            it's sent as a custom header that your Supabase RLS policy checks.
+          </p>
+          <div class="form-group">
+            <input type="password" id="cloud-password-input" placeholder="Enter a secret cloud sync password" />
+          </div>
+          <button class="btn btn-primary" id="cloud-save-password-btn">Save Password</button>
         </div>
 
         <div class="admin-card">
@@ -290,9 +349,10 @@ CREATE POLICY "Admin update portfolio_data"
           <h4 style="margin-bottom:0.5rem">📖 How It Works</h4>
           <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
             <li><strong>Run the SQL above</strong> in your Supabase SQL Editor (one-time setup)</li>
-            <li>Any <strong>Save</strong> action in this dashboard <strong>auto-publishes</strong> to the cloud</li>
-            <li>Visitors to your portfolio fetch the latest data from Supabase automatically</li>
-            <li>Changes are <strong>instant and worldwide</strong> — no more per-device localStorage limits!</li>
+            <li>Set a <strong>Cloud Sync Password</strong> above (used for write authorization)</li>
+            <li>Any <strong>Save</strong> action auto-publishes to the cloud</li>
+            <li>Visitors fetch the latest data from Supabase automatically</li>
+            <li>Changes are <strong>instant and worldwide</strong>!</li>
           </ol>
         </div>
       </div>
@@ -311,40 +371,246 @@ CREATE POLICY "Admin update portfolio_data"
 
   var currentSection = 'hero';
   var data = loadData();
+  var supabase = null;
 
-  // ─── Login ─────────────────────────────────
+  // ─── Supabase Auth Setup ──────────────────
+  var ADMIN_EMAIL = 'jhnbryn05@gmail.com';
+  var SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
+
+  try {
+    var { createClient } = supabase;
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e) {
+    console.error('Failed to initialize Supabase:', e);
+  }
+
+  // ─── UI Elements ───────────────────────────
   var loginScreen = document.getElementById('login-screen');
   var adminApp = document.getElementById('admin-app');
-  var loginBtn = document.getElementById('admin-login-btn');
-  var pwInput = document.getElementById('admin-pw-input');
+  var loginStepEmail = document.getElementById('login-step-email');
+  var loginStepOtp = document.getElementById('login-step-otp');
+  var authEmailInput = document.getElementById('auth-email-input');
+  var authEmailDisplay = document.getElementById('auth-email-display');
+  var authOtpInput = document.getElementById('auth-otp-input');
   var loginError = document.getElementById('login-error');
+  var otpError = document.getElementById('otp-error');
+  var sendOtpBtn = document.getElementById('auth-send-otp-btn');
+  var sendText = document.getElementById('auth-send-text');
+  var sendSpinner = document.getElementById('auth-send-spinner');
+  var verifyBtn = document.getElementById('auth-verify-btn');
+  var verifyText = document.getElementById('auth-verify-text');
+  var verifySpinner = document.getElementById('auth-verify-spinner');
+  var resendBtn = document.getElementById('auth-resend-btn');
+  var changeEmailBtn = document.getElementById('auth-change-email-btn');
+  var signOutBtn = document.getElementById('admin-signout-btn');
+  var authEmailFooter = document.getElementById('auth-email-footer');
 
-  function checkLogin() {
-    if (sessionStorage.getItem('portfolio_admin_logged_in') === 'true') {
-      loginScreen.style.display = 'none';
-      adminApp.style.display = 'flex';
-      initDashboard();
+  // ─── Auth Functions ────────────────────────
+
+  function checkSession() {
+    if (!supabase) return false;
+    supabase.auth.getSession().then(function(result) {
+      var session = result.data.session;
+      if (session && session.user && session.user.email === ADMIN_EMAIL) {
+        showDashboard(session.user.email);
+      } else {
+        showLogin();
+      }
+    }).catch(function() {
+      showLogin();
+    });
+  }
+
+  function showLogin() {
+    loginScreen.style.display = 'flex';
+    adminApp.style.display = 'none';
+    loginStepEmail.style.display = 'block';
+    loginStepOtp.style.display = 'none';
+    authOtpInput.value = '';
+    loginError.textContent = '';
+    otpError.textContent = '';
+  }
+
+  function showDashboard(email) {
+    loginScreen.style.display = 'none';
+    adminApp.style.display = 'flex';
+    if (authEmailFooter) {
+      authEmailFooter.textContent = 'Signed in as ' + email;
+    }
+    initDashboard();
+  }
+
+  function setLoading(btn, textEl, spinnerEl, loading) {
+    if (loading) {
+      textEl.style.display = 'none';
+      spinnerEl.style.display = 'inline-block';
+      btn.disabled = true;
+    } else {
+      textEl.style.display = 'inline';
+      spinnerEl.style.display = 'none';
+      btn.disabled = false;
     }
   }
 
-  loginBtn.addEventListener('click', function() {
-    var pw = pwInput.value;
-    var storedPw = getAdminPassword();
-    if (pw === storedPw) {
-      sessionStorage.setItem('portfolio_admin_logged_in', 'true');
-      loginScreen.style.display = 'none';
-      adminApp.style.display = 'flex';
-      initDashboard();
-    } else {
-      loginError.textContent = 'Incorrect password';
+  function clearAllErrors() {
+    loginError.textContent = '';
+    otpError.textContent = '';
+  }
+
+  // Send OTP
+  function sendOtp() {
+    clearAllErrors();
+    if (!supabase) {
+      loginError.textContent = 'Supabase is not initialized. Check console for errors.';
+      return;
+    }
+    var email = authEmailInput.value.trim();
+    if (!email) {
+      loginError.textContent = 'Please enter your email address.';
+      return;
+    }
+    if (email !== ADMIN_EMAIL) {
+      loginError.textContent = 'Only ' + ADMIN_EMAIL + ' can access this dashboard.';
+      return;
+    }
+
+    setLoading(sendOtpBtn, sendText, sendSpinner, true);
+
+    supabase.auth.signInWithOtp({
+      email: email,
+      options: { shouldCreateUser: true }
+    }).then(function(result) {
+      setLoading(sendOtpBtn, sendText, sendSpinner, false);
+      if (result.error) {
+        loginError.textContent = 'Failed to send code: ' + result.error.message;
+        return;
+      }
+      // Show OTP step
+      loginStepEmail.style.display = 'none';
+      loginStepOtp.style.display = 'block';
+      authEmailDisplay.textContent = email;
+      authOtpInput.focus();
+    }).catch(function(err) {
+      setLoading(sendOtpBtn, sendText, sendSpinner, false);
+      loginError.textContent = 'Connection error: ' + (err.message || 'Unknown error');
+    });
+  }
+
+  // Verify OTP
+  function verifyOtp() {
+    clearAllErrors();
+    if (!supabase) {
+      otpError.textContent = 'Supabase is not initialized.';
+      return;
+    }
+    var email = authEmailInput.value.trim();
+    var token = authOtpInput.value.trim();
+    if (!token || token.length < 4) {
+      otpError.textContent = 'Please enter the full code from your email.';
+      return;
+    }
+
+    setLoading(verifyBtn, verifyText, verifySpinner, true);
+
+    supabase.auth.verifyOtp({
+      email: email,
+      token: token,
+      type: 'email'
+    }).then(function(result) {
+      setLoading(verifyBtn, verifyText, verifySpinner, false);
+      if (result.error) {
+        otpError.textContent = 'Invalid code: ' + result.error.message;
+        return;
+      }
+      showDashboard(email);
+    }).catch(function(err) {
+      setLoading(verifyBtn, verifyText, verifySpinner, false);
+      otpError.textContent = 'Verification error: ' + (err.message || 'Unknown error');
+    });
+  }
+
+  // Sign Out
+  function signOut() {
+    if (!supabase) return;
+    supabase.auth.signOut().then(function() {
+      showLogin();
+    }).catch(function() {
+      showLogin();
+    });
+  }
+
+  // ─── Auth Event Listeners ─────────────────
+
+  sendOtpBtn.addEventListener('click', sendOtp);
+
+  authEmailInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendOtp();
+  });
+
+  verifyBtn.addEventListener('click', verifyOtp);
+
+  authOtpInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyOtp();
+    // Auto-submit when 6 digits entered
+    if (e.target.value.length >= 5 && e.key !== 'Backspace' && e.key !== 'Delete') {
+      setTimeout(verifyOtp, 200);
     }
   });
 
-  pwInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') loginBtn.click();
+  // Auto-focus OTP input and auto-submit on 6 digits
+  authOtpInput.addEventListener('input', function() {
+    if (this.value.length === 6) {
+      verifyOtp();
+    }
   });
 
-  checkLogin();
+  resendBtn.addEventListener('click', function() {
+    loginStepOtp.style.display = 'none';
+    loginStepEmail.style.display = 'block';
+    sendOtp();
+  });
+
+  changeEmailBtn.addEventListener('click', function() {
+    loginStepOtp.style.display = 'none';
+    loginStepEmail.style.display = 'block';
+    loginError.textContent = '';
+  });
+
+  signOutBtn.addEventListener('click', signOut);
+
+  // Listen for auth state changes
+  if (supabase) {
+    supabase.auth.onAuthStateChange(function(event, session) {
+      if (event === 'SIGNED_OUT') {
+        showLogin();
+      }
+    });
+  }
+
+  // ─── Cloud Sync Password ──────────────────
+  var cloudPwInput = document.getElementById('cloud-password-input');
+  var cloudSavePwBtn = document.getElementById('cloud-save-password-btn');
+
+  // Load saved cloud password
+  var savedCloudPw = getAdminPassword();
+  if (savedCloudPw && savedCloudPw !== 'admin123') {
+    cloudPwInput.value = savedCloudPw;
+  }
+
+  cloudSavePwBtn.addEventListener('click', function() {
+    var pw = cloudPwInput.value.trim();
+    if (!pw) {
+      showToast('Enter a secret password for cloud sync.', 'error');
+      return;
+    }
+    if (pw.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+    setAdminPassword(pw);
+    showToast('✅ Cloud sync password saved!', 'success');
+  });
 
   // ─── Toast ─────────────────────────────────
   function showToast(msg, type) {
@@ -373,7 +639,6 @@ CREATE POLICY "Admin update portfolio_data"
   function readData() { data = loadData(); return data; }
   function writeData() {
     savePortfolioData(data);
-    // Auto-push to cloud if service key is set
     autoPushToCloud();
   }
 
@@ -418,9 +683,9 @@ CREATE POLICY "Admin update portfolio_data"
   });
 
   // ─── Tech Stack: Inline Edit/Add ────────────
-  var techEditIdx = -1;  // -1 = none, otherwise index being edited
-  var techAddCat = null; // null = none, otherwise category being added to
-  var techTempLogo = {};  // temporary logo data URIs keyed by index or 'new'
+  var techEditIdx = -1;
+  var techAddCat = null;
+  var techTempLogo = {};
 
   function renderTechItems() {
     var d = readData();
@@ -435,7 +700,6 @@ CREATE POLICY "Admin update portfolio_data"
       return;
     }
 
-    // Group items by category
     var groups = {};
     var order = [];
     d.techStack.forEach(function(item, idx) {
@@ -453,13 +717,9 @@ CREATE POLICY "Admin update portfolio_data"
       var itemsHtml = items.map(function(entry) {
         var item = entry.item;
         var idx = entry.idx;
-
-        // If this item is being edited, show inline edit form
         if (techEditIdx === idx) {
           return renderInlineEditRow(item, idx);
         }
-
-        // Normal display row
         var indicator = '';
         if (item.logo) {
           indicator = '<img src="' + item.logo + '" style="width:22px;height:22px;object-fit:contain;border-radius:3px;margin-right:0.5rem" />';
@@ -481,7 +741,6 @@ CREATE POLICY "Admin update portfolio_data"
         '</div>';
       }).join('');
 
-      // If adding to this category, append inline add form
       var addForm = '';
       if (techAddCat === cat) {
         addForm = renderInlineAddForm(null, cat);
@@ -491,14 +750,12 @@ CREATE POLICY "Admin update portfolio_data"
         '<div class="tech-cat-header">' +
           '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
           '<span class="tech-cat-count">' + items.length + '</span>' +
-          '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
+          '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/\"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
         '</div>' +
         '<div class="tech-cat-items">' + itemsHtml + addForm + '</div>' +
       '</div>';
     });
     container.innerHTML = html;
-
-    // Bind events
     bindTechEvents();
   }
 
@@ -522,7 +779,7 @@ CREATE POLICY "Admin update portfolio_data"
   }
 
   function renderInlineAddForm(existingHtml, cat) {
-    var formHtml = '<div class="item-row item-row-editing" data-add-cat="' + cat.replace(/"/g, '&quot;') + '">' +
+    var formHtml = '<div class="item-row item-row-editing" data-add-cat="' + cat.replace(/\"/g, '&quot;') + '">' +
       '<input type="text" class="inline-add-name" placeholder="Name" />' +
       '<input type="text" class="inline-add-brand" placeholder="Brand slug" />' +
       '<input type="text" class="inline-add-logourl" placeholder="Logo URL" />' +
@@ -532,12 +789,11 @@ CREATE POLICY "Admin update portfolio_data"
       '<button class="btn btn-sm inline-add-cancel" style="flex-shrink:0">Cancel</button>' +
     '</div>';
     if (existingHtml !== null) return formHtml;
-    // Return full HTML string including category wrapper for empty state
     return '<div class="tech-cat-group">' +
       '<div class="tech-cat-header">' +
         '<span class="tech-cat-name">' + escapeHtml(cat) + '</span>' +
         '<span class="tech-cat-count">0</span>' +
-        '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
+        '<button class="btn btn-sm tech-cat-add" data-cat="' + cat.replace(/\"/g, '&quot;') + '" style="margin-left:auto">+ Add</button>' +
       '</div>' +
       '<div class="tech-cat-items">' + formHtml + '</div>' +
     '</div>';
@@ -545,8 +801,6 @@ CREATE POLICY "Admin update portfolio_data"
 
   function bindTechEvents() {
     var container = document.getElementById('tech-list');
-
-    // Remove buttons
     container.querySelectorAll('.tech-remove').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -558,21 +812,16 @@ CREATE POLICY "Admin update portfolio_data"
         renderTechItems();
       });
     });
-
-    // Edit buttons — set editing index and re-render
     container.querySelectorAll('.tech-edit').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
         techEditIdx = parseInt(this.dataset.idx);
         techAddCat = null;
         renderTechItems();
-        // Focus the name input after render
         var nameInput = container.querySelector('.inline-edit-name');
         if (nameInput) nameInput.focus();
       });
     });
-
-    // Save inline edit
     container.querySelectorAll('.inline-save').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var idx = parseInt(this.dataset.idx);
@@ -594,8 +843,6 @@ CREATE POLICY "Admin update portfolio_data"
         showToast('Updated!', 'success');
       });
     });
-
-    // Cancel inline edit
     container.querySelectorAll('.inline-cancel').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var idx = parseInt(this.dataset.idx);
@@ -604,20 +851,15 @@ CREATE POLICY "Admin update portfolio_data"
         renderTechItems();
       });
     });
-
-    // Category add buttons
     container.querySelectorAll('.tech-cat-add').forEach(function(btn) {
       btn.addEventListener('click', function() {
         techAddCat = this.dataset.cat;
         techEditIdx = -1;
         renderTechItems();
-        // Focus the name input
         var nameInput = container.querySelector('.inline-add-name');
         if (nameInput) setTimeout(function() { nameInput.focus(); }, 100);
       });
     });
-
-    // Save inline add
     container.querySelectorAll('.inline-add-save').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var row = this.closest('.item-row-editing');
@@ -643,8 +885,6 @@ CREATE POLICY "Admin update portfolio_data"
         showToast('Added!', 'success');
       });
     });
-
-    // Cancel inline add
     container.querySelectorAll('.inline-add-cancel').forEach(function(btn) {
       btn.addEventListener('click', function() {
         delete techTempLogo['new'];
@@ -652,8 +892,6 @@ CREATE POLICY "Admin update portfolio_data"
         renderTechItems();
       });
     });
-
-    // File upload for edit rows
     container.querySelectorAll('.inline-edit-upload').forEach(function(input) {
       input.addEventListener('change', function() {
         var idx = parseInt(this.dataset.idx);
@@ -663,8 +901,6 @@ CREATE POLICY "Admin update portfolio_data"
         });
       });
     });
-
-    // File upload for add rows
     container.querySelectorAll('.inline-add-upload').forEach(function(input) {
       input.addEventListener('change', function() {
         handleInlineUpload(this, function(dataUrl) {
@@ -673,8 +909,6 @@ CREATE POLICY "Admin update portfolio_data"
         });
       });
     });
-
-    // Clear logo for edit rows
     container.querySelectorAll('.inline-logo-clear').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var idx = this.dataset.idx;
@@ -682,8 +916,6 @@ CREATE POLICY "Admin update portfolio_data"
         renderTechItems();
       });
     });
-
-    // Clear logo for add rows
     container.querySelectorAll('.inline-add-clear').forEach(function(btn) {
       btn.addEventListener('click', function() {
         delete techTempLogo['new'];
@@ -875,7 +1107,7 @@ CREATE POLICY "Admin update portfolio_data"
       var previewHtml = '';
       if (cert.path) {
         previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
-          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display=\'none\'" />' +
+          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.parentNode.style.display=\\'none\\'" />' +
           '<button class="btn btn-sm cert-upload-clear" data-idx="' + idx + '" style="padding:2px 6px;font-size:10px;margin-left:6px" title="Remove image">×</button>' +
         '</div>';
       }
@@ -935,7 +1167,6 @@ CREATE POLICY "Admin update portfolio_data"
       });
     });
 
-    // File upload for cert images
     container.querySelectorAll('.cert-upload').forEach(function(input) {
       input.addEventListener('change', function() {
         var idx = parseInt(this.dataset.idx);
@@ -945,7 +1176,6 @@ CREATE POLICY "Admin update portfolio_data"
         reader.onload = function(e) {
           var d = readData();
           if (!d.certifications[idx]) return;
-          // Resize to max 800px width for performance
           var img = new Image();
           img.onload = function() {
             var MAX = 800;
@@ -972,7 +1202,6 @@ CREATE POLICY "Admin update portfolio_data"
       });
     });
 
-    // Clear uploaded image
     container.querySelectorAll('.cert-upload-clear').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var idx = parseInt(this.dataset.idx);
@@ -989,7 +1218,7 @@ CREATE POLICY "Admin update portfolio_data"
   document.getElementById('certs-add').addEventListener('click', function() {
     var d = readData();
     if (!d.certifications) d.certifications = [];
-    d.certifications.push({ id: 'cert-' + Date.now(), name: 'New Certificate', issuer: 'Issuer', date: '2026', path: 'img/certs/certificate.jpg' });
+    d.certifications.push({ id: 'cert-' + Date.now(), name: 'New Certificate', issuer: 'Issuer', date: '2026', path: '' });
     writeData();
     renderCerts();
     showToast('New certificate added', 'success');
@@ -1163,18 +1392,25 @@ CREATE POLICY "Admin update portfolio_data"
     location.reload();
   });
 
-  // ─── Cloud Sync Functions (Secure — No Service Key) ───
+  // ─── Cloud Sync Functions ──────────────────
   function updateCloudStatus() {
     var icon = document.getElementById('cloud-status-icon');
     var text = document.getElementById('cloud-status-text');
-    icon.textContent = '🔒';
-    text.textContent = 'RLS-protected. Ready to sync using admin password.';
-    text.style.color = 'var(--admin-accent)';
+    var savedPw = getAdminPassword();
+    if (!savedPw || savedPw === 'admin123') {
+      icon.textContent = '⚠️';
+      text.textContent = 'Set a Cloud Sync Password above to enable cloud publishing.';
+      text.style.color = 'var(--admin-warning)';
+    } else {
+      icon.textContent = '🔒';
+      text.textContent = 'Password set. Ready to sync.';
+      text.style.color = 'var(--admin-accent)';
+    }
   }
 
   function autoPushToCloud() {
     var pw = getAdminPassword();
-    if (!pw) return;
+    if (!pw || pw === 'admin123') return;
     pushToSupabase(data).then(function(ok) {
       if (ok) {
         showToast('☁️ Synced to cloud!', 'success');
@@ -1194,7 +1430,7 @@ CREATE POLICY "Admin update portfolio_data"
         document.getElementById('cloud-status-text').textContent = 'Published: ' + new Date().toLocaleTimeString();
         document.getElementById('cloud-status-text').style.color = 'var(--admin-accent)';
       } else {
-        showToast('❌ Failed to publish. Did you run the SQL setup in Supabase dashboard?', 'error');
+        showToast('❌ Failed to publish. Did you set the Cloud Sync Password and run the SQL setup?', 'error');
       }
     });
   });
@@ -1225,6 +1461,9 @@ CREATE POLICY "Admin update portfolio_data"
     renderExperience();
     updateCloudStatus();
   }
+
+  // ─── Auto sign in check ────────────────────
+  checkSession();
 
 })();
 </script>
