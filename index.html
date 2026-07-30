@@ -2435,6 +2435,11 @@
           clearInterval(typingTimer);
           typingTimer = null;
         }
+        // Cancel any pending open timer (e.g. if user closes during pulse animation)
+        if (window._certTimer) {
+          clearTimeout(window._certTimer);
+          window._certTimer = null;
+        }
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         if (typeof window._unlockScroll === 'function') window._unlockScroll();
@@ -2448,6 +2453,11 @@
       // Global function called by onclick on cert cards
       window.openCertViewer = function(card) {
         if (!card || !overlay || !modal) return;
+        // Cancel any previous pending open timer (prevents stale callbacks)
+        if (window._certTimer) {
+          clearTimeout(window._certTimer);
+          window._certTimer = null;
+        }
         // Read index directly from data attribute (most reliable)
         var idx = parseInt(card.getAttribute('data-cert-index'), 10);
         if (isNaN(idx) || idx < 0) return; // bounds check done in showCert() with live data
@@ -2456,7 +2466,8 @@
         void card.offsetWidth;
         card.classList.add('pulsing');
         // Open modal after pulse finishes
-        setTimeout(function() {
+        window._certTimer = setTimeout(function() {
+          window._certTimer = null;
           openModal(idx);
         }, 420);
       };
