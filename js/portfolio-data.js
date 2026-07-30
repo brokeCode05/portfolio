@@ -298,7 +298,7 @@ function renderTechStack(data) {
       var logoHtml;
       if (tech.logoUrl) {
         var fallbackSvgUrl = (BRAND_LOGOS[tech.icon] || BRAND_LOGOS.terminal);
-        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.querySelector(\'.tech-logo-fallback\').style.display=\'flex\'" />' +
+        logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logoUrl) + '" alt="' + escapeHtml(tech.name) + '" loading="lazy" onerror="this.remove()" />' +
           '<span class="tech-logo-fallback" aria-hidden="true" style="display:none">' + fallbackSvgUrl + '</span>';
       } else if (tech.logo) {
         logoHtml = '<img class="tech-logo-img" src="' + escapeHtml(tech.logo) + '" alt="' + escapeHtml(tech.name) + '" />';
