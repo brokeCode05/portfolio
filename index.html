@@ -124,7 +124,7 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 0.5rem 0.75rem;
+      padding: 0.625rem 1rem;
       font-size: var(--text-sm, 0.875rem);
       font-weight: 500;
       font-family: var(--font-code, monospace);
@@ -134,6 +134,7 @@
       border-radius: 8px;
       transition: all 0.2s ease;
       cursor: pointer;
+      word-break: break-all;
     }
     .contact-link:hover {
       color: var(--color-text-primary, #E8EAED);
@@ -1206,13 +1207,15 @@
     .cert-card {
       cursor: pointer;
       user-select: none;
+      position: relative;
     }
     /* Entire card is clickable — let clicks pass through children */
     .cert-card-badge,
     .cert-card-body {
       pointer-events: none;
     }
-    .cert-card-badge svg {
+    .cert-card-badge svg,
+    .cert-card-body * {
       pointer-events: none;
     }
     .cert-card:active {
@@ -1250,6 +1253,11 @@
     }
 
     /* ===== About Section Responsive Fix ===== */
+    /* Performance: render sections only when near viewport */
+    section {
+      content-visibility: auto;
+      contain-intrinsic-size: 500px;
+    }
     .about-grid {
       max-width: 100%;
     }
@@ -1485,6 +1493,7 @@
             <img
               src="img/johnbryan.jpg"
               alt="John Bryan Capellan"
+              fetchpriority="high"
               onerror="this.closest('.hero-media').style.display='none'"
             />
           </div>
@@ -2392,6 +2401,7 @@
       });
 
       function openModal(index) {
+        refreshCertData();
         if (index < 0 || index >= certData.length) return;
         modal.removeAttribute('hidden');
         overlay.classList.add('open');
@@ -2569,26 +2579,23 @@
         var techGrid = document.getElementById('tech-stack-grid');
         if (techGrid && data.techStack && data.techStack.length) {
           techGrid.innerHTML = renderTechStack(data);
-          var toggleBtn = document.getElementById('tech-toggle-btn');
-          if (toggleBtn) {
-            var toggling = false;
-            toggleBtn.addEventListener('click', function() {
-              if (toggling) return;
-              toggling = true;
-              var self = this;
-              var grid = document.getElementById('tech-stack-grid');
-              if (!grid) { toggling = false; return; }
-              var expanded = self.classList.toggle('expanded');
+          // Event delegation on the grid container — persists across re-renders
+          if (!techGrid._toggleReady) {
+            techGrid._toggleReady = true;
+            techGrid.addEventListener('click', function(e) {
+              var btn = e.target.closest('#tech-toggle-btn');
+              if (!btn) return;
+              var grid = this;
+              var expanded = btn.classList.toggle('expanded');
               grid.classList.toggle('expanded', expanded);
-              self.setAttribute('aria-expanded', expanded);
-              var count = self.dataset.hidden || '4';
-              var textEl = self.querySelector('.tech-toggle-text');
+              btn.setAttribute('aria-expanded', expanded);
+              var count = btn.dataset.hidden || '4';
+              var textEl = btn.querySelector('.tech-toggle-text');
               if (textEl) {
                 textEl.innerHTML = expanded
                   ? 'Hide <span class="tech-toggle-count">' + count + '</span> categories'
                   : 'Show <span class="tech-toggle-count">' + count + '</span> more categories';
               }
-              setTimeout(function() { toggling = false; }, 450);
             });
           }
         }
