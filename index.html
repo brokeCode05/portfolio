@@ -1569,14 +1569,7 @@
           Topics, courses, and resources I'm actively exploring.
         </p>
         <div class="learning-list">
-          <span class="learning-tag">Linux Administration</span>
-          <span class="learning-tag">Cybersecurity</span>
-          <span class="learning-tag">Ethical Hacking</span>
-          <span class="learning-tag">Advanced Networking</span>
-          <span class="learning-tag">System Administration</span>
-          <span class="learning-tag">Home Lab Development</span>
-          <span class="learning-tag">The Practice of Network Security Monitoring</span>
-          <span class="learning-tag">Google Cybersecurity Certificate</span>
+          <!-- Populated by portfolio-data.js renderCurrently() -->
         </div>
       </div>
 
@@ -1591,92 +1584,7 @@
         <p>Home lab projects focused on security monitoring and system administration.</p>
       </div>
       <div class="projects-grid grid grid-cols-2">
-        
-        <article class="project-card" data-reveal data-reveal-delay="100">
-          <div class="project-card-header">
-            <div class="project-card-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <h3 class="project-card-title">Home SOC</h3>
-          </div>
-          <p class="project-card-description">
-            A web-based security monitoring platform that provides real-time visibility
-            into a home lab environment. Monitors Linux and Windows hosts, tracks system
-            health, collects logs, displays security events, monitors SSH activity, and
-            provides alerts through a centralized dashboard.
-          </p>
-          <div class="project-card-tech flex flex-wrap gap-sm">
-            <span class="tech-tag">Python</span>
-            <span class="tech-tag">Linux Mint</span>
-            <span class="tech-tag">Windows 11</span>
-            <span class="tech-tag">SSH</span>
-            <span class="tech-tag">SQLite</span>
-            <span class="tech-tag">UFW</span>
-            <span class="tech-tag">psutil</span>
-            <span class="tech-tag">journalctl</span>
-          </div>
-        </article>
-
-        <article class="project-card" data-reveal data-reveal-delay="200">
-          <div class="project-card-header">
-            <div class="project-card-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="4 17 10 11 4 5"/>
-                <line x1="12" y1="19" x2="20" y2="19"/>
-              </svg>
-            </div>
-            <h3 class="project-card-title">SSH Management System</h3>
-          </div>
-          <p class="project-card-description">
-            A secure command-line application for managing multiple Linux machines over
-            SSH. Stores server profiles, establishes encrypted connections, executes
-            administrative commands, transfers files via SFTP, and maintains logs of
-            all sessions.
-          </p>
-          <div class="project-card-tech flex flex-wrap gap-sm">
-            <span class="tech-tag">Python</span>
-            <span class="tech-tag">Paramiko</span>
-            <span class="tech-tag">Rich</span>
-            <span class="tech-tag">OpenSSH</span>
-            <span class="tech-tag">SFTP</span>
-            <span class="tech-tag">SQLite</span>
-            <span class="tech-tag">Linux Mint</span>
-          </div>
-        </article>
-
-        <article class="project-card" data-reveal data-reveal-delay="300">
-          <div class="project-card-header">
-            <div class="project-card-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-              </svg>
-            </div>
-            <h3 class="project-card-title">Stonerich Website</h3>
-          </div>
-          <p class="project-card-description">
-            A premium, production-ready website built for Stonerich Granite Construction
-            and Supply. Features 28 static pages, product catalog with 9 categories,
-            service pages, masonry gallery with lightbox, Google Maps integration,
-            request-a-quote form, and full SEO optimization. Deployed via Vercel with
-            auto-deploy from GitHub.
-          </p>
-          <div class="project-card-links flex gap-sm" style="margin-bottom: var(--space-md);">
-            <a href="https://stonerich-website.vercel.app" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 0.375rem 0.875rem; font-size: var(--text-xs);">Live Demo</a>
-            <a href="https://github.com/brokeCode05/stonerich-website" target="_blank" rel="noopener noreferrer" class="btn btn-ghost" style="padding: 0.375rem 0.875rem; font-size: var(--text-xs);">GitHub</a>
-          </div>
-          <div class="project-card-tech flex flex-wrap gap-sm">
-            <span class="tech-tag">Next.js 16</span>
-            <span class="tech-tag">TypeScript</span>
-            <span class="tech-tag">Tailwind CSS</span>
-            <span class="tech-tag">Vercel</span>
-            <span class="tech-tag">SSG</span>
-            <span class="tech-tag">SEO</span>
-            <span class="tech-tag">Google Maps</span>
-          </div>
-        </article>
-
+        <!-- Populated by portfolio-data.js renderProjects() -->
       </div>
     </div>
   </section>
@@ -1689,57 +1597,7 @@
         <p>Foundational certifications in programming, web development, and cybersecurity.</p>
       </div>
       <div class="certs-grid grid grid-cols-2">
-        <div class="cert-card" data-reveal data-reveal-delay="100"
-             data-cert-path="img/certs/certificate.jpg"
-             data-cert-name="Java Fundamentals"
-             data-cert-issuer="Oracle"
-             data-cert-date="2024"
-             data-cert-key="java"
-             data-cert-index="0"
-             onclick="openCertViewer(this)"
-             onkeydown="if(event.key===' '){event.preventDefault();openCertViewer(this)}"
-             tabindex="0" role="button">
-          <div class="cert-card-badge" aria-hidden="true">JVA</div>
-          <div class="cert-card-body">
-            <h3 class="cert-card-title">Java Fundamentals</h3>
-            <p class="cert-card-issuer">Oracle</p>
-            <p class="cert-card-date">Issued 2024</p>
-          </div>
-        </div>
-        <div class="cert-card" data-reveal data-reveal-delay="200"
-             data-cert-path="img/certs/certificate.jpg"
-             data-cert-name="Web Development Basics"
-             data-cert-issuer="IBM"
-             data-cert-date="2025"
-             data-cert-key="web"
-             data-cert-index="1"
-             onclick="openCertViewer(this)"
-             onkeydown="if(event.key===' '){event.preventDefault();openCertViewer(this)}"
-             tabindex="0" role="button">
-          <div class="cert-card-badge" aria-hidden="true">WEB</div>
-          <div class="cert-card-body">
-            <h3 class="cert-card-title">Web Development Basics</h3>
-            <p class="cert-card-issuer">IBM</p>
-            <p class="cert-card-date">Issued 2025</p>
-          </div>
-        </div>
-        <div class="cert-card" data-reveal data-reveal-delay="300"
-             data-cert-path="img/certs/certificate.jpg"
-             data-cert-name="Introduction to Cybersecurity"
-             data-cert-issuer="Cisco Net Academy"
-             data-cert-date="2026"
-             data-cert-key="sec"
-             data-cert-index="2"
-             onclick="openCertViewer(this)"
-             onkeydown="if(event.key===' '){event.preventDefault();openCertViewer(this)}"
-             tabindex="0" role="button">
-          <div class="cert-card-badge" aria-hidden="true">SEC</div>
-          <div class="cert-card-body">
-            <h3 class="cert-card-title">Introduction to Cybersecurity</h3>
-            <p class="cert-card-issuer">Cisco Net Academy</p>
-            <p class="cert-card-date">Issued 2026</p>
-          </div>
-        </div>
+        <!-- Populated by portfolio-data.js renderCerts() -->
       </div>
     </div>
   </section>
@@ -1752,38 +1610,7 @@
         <p>Key milestones in my academic and self-directed learning path.</p>
       </div>
       <div class="timeline">
-        <div class="timeline-item" data-reveal data-reveal-delay="100">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <time class="timeline-date" datetime="2026">2026</time>
-            <h3 class="timeline-title">Cybersecurity, Networking &amp; Mobile Development</h3>
-            <p class="timeline-description">Studying cybersecurity fundamentals, ethical hacking, and advanced networking concepts while exploring Android development with Android Studio.</p>
-          </div>
-        </div>
-        <div class="timeline-item" data-reveal data-reveal-delay="200">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <time class="timeline-date" datetime="2025">2025</time>
-            <h3 class="timeline-title">Web Development, Networking &amp; Database Management</h3>
-            <p class="timeline-description">Studied web development, networking fundamentals, and database management with MySQL and MongoDB. Gained hands-on experience building full-stack applications and designing relational and NoSQL database schemas.</p>
-          </div>
-        </div>
-        <div class="timeline-item" data-reveal data-reveal-delay="300">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <time class="timeline-date" datetime="2024">2024</time>
-            <h3 class="timeline-title">UI/UX Design</h3>
-            <p class="timeline-description">Learned user interface and user experience design principles using Figma. Created wireframes, prototypes, and design systems.</p>
-          </div>
-        </div>
-        <div class="timeline-item" data-reveal data-reveal-delay="350">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <time class="timeline-date" datetime="2023">2023</time>
-            <h3 class="timeline-title">Programming</h3>
-            <p class="timeline-description">Started learning programming fundamentals with Java and C#. Built foundational knowledge in object-oriented programming, data structures, and basic application development.</p>
-          </div>
-        </div>
+        <!-- Populated by portfolio-data.js renderExperience() -->
       </div>
 
     </div>
@@ -1797,38 +1624,7 @@
         <p>Professional background in customer service and exam administration.</p>
       </div>
       <div class="timeline">
-        <div class="timeline-item" data-reveal data-reveal-delay="100">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <div class="timeline-meta flex items-center justify-between mb-sm">
-              <h3 class="timeline-title">Customer Service Representative</h3>
-              <time class="timeline-date">VXI Philippines</time>
-            </div>
-            <ul class="timeline-bullets">
-              <li>Assisted customers with technical support, financial/account-related inquiries, and sales concerns through phone-based customer service.</li>
-              <li>Diagnosed and resolved customer issues while providing accurate information and effective solutions.</li>
-              <li>Maintained clear and professional communication to ensure a positive customer experience.</li>
-              <li>Followed company procedures to document customer interactions and resolve cases efficiently.</li>
-              <li>Developed strong problem-solving, communication, and customer service skills in a fast-paced BPO environment.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="timeline-item" data-reveal data-reveal-delay="200">
-          <div class="timeline-marker" aria-hidden="true"></div>
-          <div class="timeline-content">
-            <div class="timeline-meta flex items-center justify-between mb-sm">
-              <h3 class="timeline-title">Exam Proctor</h3>
-              <time class="timeline-date">CLAD Asia</time>
-            </div>
-            <ul class="timeline-bullets">
-              <li>Facilitated and supervised onsite and online examinations while ensuring compliance with testing policies and procedures.</li>
-              <li>Verified candidate identities and monitored examinations to maintain test integrity.</li>
-              <li>Assisted examinees with exam instructions and resolved basic technical or procedural concerns during testing.</li>
-              <li>Coordinated with the examination team to ensure smooth and organized exam operations.</li>
-              <li>Maintained accurate records and reported any incidents encountered during examination sessions.</li>
-            </ul>
-          </div>
-        </div>
+        <!-- Populated by portfolio-data.js renderExperience() -->
       </div>
     </div>
   </section>
@@ -2630,25 +2426,25 @@
 
         // ─── Currently ────────────────────────────
         var learningList = document.querySelector('.skill-learning .learning-list');
-        if (learningList && data.currently && data.currently.length) {
+        if (learningList) {
           learningList.innerHTML = renderCurrently(data);
         }
 
         // ─── Projects ─────────────────────────────
         var projectsGrid = document.querySelector('.projects-grid');
-        if (projectsGrid && data.projects && data.projects.length) {
+        if (projectsGrid) {
           projectsGrid.innerHTML = renderProjects(data);
         }
 
         // ─── Certs ────────────────────────────────
         var certsGrid = document.querySelector('.certs-grid');
-        if (certsGrid && data.certifications && data.certifications.length) {
+        if (certsGrid) {
           certsGrid.innerHTML = renderCerts(data);
         }
 
         // ─── Experience ───────────────────────────
         var experienceContainer = document.querySelector('#experience .timeline');
-        if (experienceContainer && data.experience && data.experience.length) {
+        if (experienceContainer) {
           experienceContainer.innerHTML = renderExperience(data);
         }
 
