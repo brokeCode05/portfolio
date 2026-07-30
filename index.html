@@ -2166,14 +2166,15 @@
 
         if (!hamburger || !overlay || !menu) return;
 
-        function lockScroll() {
+        // Shared scroll-lock helpers (on window so both hamburger + cert modal IIFEs can use them)
+      window._lockScroll = function() {
         window._scrollLock = (window._scrollLock || 0) + 1;
         document.body.classList.add('modal-open');
-      }
-      function unlockScroll() {
+      };
+      window._unlockScroll = function() {
         window._scrollLock = Math.max(0, (window._scrollLock || 0) - 1);
         if (window._scrollLock === 0) document.body.classList.remove('modal-open');
-      }
+      };
 
       function openMenu() {
           hamburger.classList.add('active');
@@ -2181,7 +2182,7 @@
           hamburger.setAttribute('aria-label', 'Close menu');
           overlay.classList.add('open');
           menu.classList.add('open');
-          lockScroll();
+          window._lockScroll();
         }
 
         function closeMenu() {
@@ -2190,7 +2191,7 @@
           hamburger.setAttribute('aria-label', 'Open menu');
           overlay.classList.remove('open');
           menu.classList.remove('open');
-          unlockScroll();
+          window._unlockScroll();
         }
 
         hamburger.addEventListener('click', function() {
@@ -2415,7 +2416,7 @@
         modal.removeAttribute('hidden');
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden', 'false');
-        lockScroll();
+        if (typeof window._lockScroll === 'function') window._lockScroll();
         showCert(index);
         // Focus the close button for accessibility
         setTimeout(function() {
@@ -2430,7 +2431,7 @@
         }
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
-        unlockScroll();
+        if (typeof window._unlockScroll === 'function') window._unlockScroll();
         modal.setAttribute('hidden', '');
         cmdLine.innerHTML = '';
         certImg.classList.remove('loaded');
