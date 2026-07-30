@@ -350,6 +350,20 @@ CREATE POLICY "Admin update portfolio_data"
         </div>
 
         <div class="admin-card">
+          <h4 style="margin-bottom:0.75rem">GitHub API Token</h4>
+          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
+            Add a <strong>GitHub personal access token</strong> (public repo scope) to raise API rate limits
+            from 60 to 5,000 requests/hour. Get one from
+            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" style="color:var(--admin-accent)">GitHub Settings → Tokens</a>.
+            Stored in your browser only — never shared.
+          </p>
+          <div class="form-group">
+            <input type="password" id="github-token-input" placeholder="ghp_... or github_pat_..." />
+          </div>
+          <button class="btn btn-primary" id="github-token-save-btn">Save Token</button>
+        </div>
+
+        <div class="admin-card">
           <h4 style="margin-bottom:0.75rem">Cloud Status</h4>
           <div id="cloud-status">
             <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
@@ -620,6 +634,32 @@ CREATE POLICY "Admin update portfolio_data"
     setAdminPassword(pw);
     showToast('✅ Cloud sync password saved!', 'success');
   });
+
+  // ─── GitHub Token ─────────────────────────
+  var githubTokenInput = document.getElementById('github-token-input');
+  var githubTokenSaveBtn = document.getElementById('github-token-save-btn');
+
+  if (githubTokenInput) {
+    var savedToken = getGitHubToken();
+    if (savedToken) githubTokenInput.value = savedToken;
+  }
+
+  if (githubTokenSaveBtn) {
+    githubTokenSaveBtn.addEventListener('click', function() {
+      var token = githubTokenInput.value.trim();
+      if (!token) {
+        setGitHubToken('');
+        showToast('GitHub token cleared.', 'success');
+        return;
+      }
+      if (token.length < 10) {
+        showToast('Token looks too short. Did you paste the full token?', 'error');
+        return;
+      }
+      setGitHubToken(token);
+      showToast('✅ GitHub token saved! Now stats will use authenticated requests (5,000 req/hr).', 'success');
+    });
+  }
 
   // ─── Toast ─────────────────────────────────
   function showToast(msg, type) {

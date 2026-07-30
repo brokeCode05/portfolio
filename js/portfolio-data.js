@@ -5,6 +5,7 @@
 
 const STORAGE_KEY = 'portfolio_data';
 const ADMIN_PASSWORD_KEY = 'portfolio_admin_pw';
+const GITHUB_TOKEN_KEY = 'portfolio_github_token';
 
 // (Hardcoded defaults removed — admin panel + cloud sync manage all data)
 
@@ -34,6 +35,14 @@ function getAdminPassword() {
 
 function setAdminPassword(pw) {
   try { localStorage.setItem(ADMIN_PASSWORD_KEY, pw); } catch(e) {}
+}
+
+function getGitHubToken() {
+  try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ''; } catch(e) { return ''; }
+}
+
+function setGitHubToken(token) {
+  try { localStorage.setItem(GITHUB_TOKEN_KEY, token); } catch(e) {}
 }
 
 // ─── Supabase Cloud Sync (Secure) ─────────────────────

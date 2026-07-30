@@ -1871,13 +1871,24 @@
       };
 
       // ---- GitHub Stats (repos, followers, stars) via API ----
+      function getGitHubAuthHeaders() {
+        var token = '';
+        try { token = localStorage.getItem('portfolio_github_token') || ''; } catch(e) {}
+        if (token) {
+          console.log('[github] Using authenticated requests (token length: ' + token.length + ')');
+          return { 'Authorization': 'Bearer ' + token };
+        }
+        return {};
+      }
+
       function fetchGitHubStats() {
+        var headers = getGitHubAuthHeaders();
         var userUrl = 'https://api.github.com/users/' + GH_USER;
         var reposUrl = 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&page=1';
         var totalStars = 0;
 
         // Fetch user profile
-        fetch(userUrl)
+        fetch(userUrl, { headers: headers })
           .then(function(r) { return r.json(); })
           .then(function(user) {
             if (user.message) return;
@@ -1891,7 +1902,7 @@
           .catch(function() {});
 
         // Fetch repos to count total stars
-        fetch(reposUrl)
+        fetch(reposUrl, { headers: headers })
           .then(function(r) { return r.json(); })
           .then(function(repos) {
             if (!Array.isArray(repos)) return;
