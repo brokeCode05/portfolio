@@ -163,27 +163,37 @@ function setSupabaseServiceKey(key) {
 }
 
 async function fetchFromSupabase() {
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
     var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data?id=eq.1&select=json_data', {
+      signal: controller.signal,
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
       }
     });
+    clearTimeout(timeoutId);
     if (!resp.ok) return null;
     var rows = await resp.json();
     if (rows && rows.length > 0 && rows[0].json_data) {
       return rows[0].json_data;
     }
-  } catch(e) {}
+  } catch(e) {
+    console.log('[cloud-sync] Fetch error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+  }
+  clearTimeout(timeoutId);
   return null;
 }
 
 async function pushToSupabase(data) {
   var serviceKey = getSupabaseServiceKey();
   if (!serviceKey) return false;
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
     var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data', {
+      signal: controller.signal,
       method: 'POST',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -197,8 +207,12 @@ async function pushToSupabase(data) {
         updated_at: new Date().toISOString()
       })
     });
+    clearTimeout(timeoutId);
     return resp.ok;
-  } catch(e) {}
+  } catch(e) {
+    console.log('[cloud-sync] Push error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+  }
+  clearTimeout(timeoutId);
   return false;
 }
 
