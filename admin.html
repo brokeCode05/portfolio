@@ -16,32 +16,23 @@
 <div id="login-screen" class="admin-login">
   <div class="admin-login-box">
     <h1>🔐 Portfolio Dashboard</h1>
-    <p id="login-subtitle">Sign in with your email — a one-time code will be sent to your inbox</p>
+    <p id="login-subtitle">Sign in with your email — a magic link will be sent to your inbox</p>
 
-    <!-- Step 1: Email Input -->
+    <!-- Login: Email + Send Link -->
     <div id="login-step-email">
       <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" placeholder="Your email" autocomplete="email" />
       <div class="login-error" id="login-error"></div>
       <button class="btn btn-primary" id="auth-send-otp-btn" style="width:100%;justify-content:center">
-        <span id="auth-send-text">Send OTP Code</span>
+        <span id="auth-send-text">Send Magic Link</span>
         <span id="auth-send-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
       </button>
-    </div>
-
-    <!-- Step 2: OTP Verification -->
-    <div id="login-step-otp" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--admin-accent);font-size:0.8125rem">
-        <span>📧 Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong></span>
-      </div>
-      <input type="text" id="auth-otp-input" placeholder="Enter 6-digit code" maxlength="6" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" />
-      <div class="login-error" id="otp-error"></div>
-      <button class="btn btn-primary" id="auth-verify-btn" style="width:100%;justify-content:center">
-        <span id="auth-verify-text">Verify &amp; Sign In</span>
-        <span id="auth-verify-spinner" style="display:none;width:16px;height:16px;border:2px solid #0F1115;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite"></span>
-      </button>
-      <div style="margin-top:0.75rem;display:flex;gap:0.75rem;justify-content:center;font-size:0.75rem">
-        <button id="auth-resend-btn" style="background:none;border:none;color:var(--admin-text-secondary);cursor:pointer;text-decoration:underline;font-size:0.75rem">Resend code</button>
-        <button id="auth-change-email-btn" style="background:none;border:none;color:var(--admin-text-secondary);cursor:pointer;text-decoration:underline;font-size:0.75rem">Change email</button>
+      <div id="login-sent-msg" style="display:none;margin-top:1rem;padding:0.75rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:6px">
+        <p style="color:var(--admin-accent);font-size:0.875rem;margin:0">
+          ✅ Magic link sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>
+        </p>
+        <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin:0.5rem 0 0">
+          Check your email and click the link to sign in. Then come back here.
+        </p>
       </div>
     </div>
   </div>
@@ -49,32 +40,8 @@
 
 <style>
   @keyframes spin { to { transform: rotate(360deg); } }
-  .admin-login-box input[type="email"],
-  .admin-login-box input[type="text"] {
-    letter-spacing: 0.05em;
-  }
-  #auth-otp-input {
-    font-size: 1.5rem;
-    text-align: center;
-    letter-spacing: 0.4em;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  #auth-otp-input:focus {
-    border-color: var(--admin-accent);
-  }
-  .auth-success-display {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 1rem;
-    color: var(--admin-accent);
-    font-size: 0.875rem;
-  }
-  .auth-success-display svg {
-    width: 20px;
-    height: 20px;
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  #login-sent-msg { animation: fadeIn 0.3s ease; }
 </style>
 
 <!-- ============ DASHBOARD ============ -->
@@ -390,20 +357,13 @@ CREATE POLICY "Admin update portfolio_data"
   var loginScreen = document.getElementById('login-screen');
   var adminApp = document.getElementById('admin-app');
   var loginStepEmail = document.getElementById('login-step-email');
-  var loginStepOtp = document.getElementById('login-step-otp');
   var authEmailInput = document.getElementById('auth-email-input');
   var authEmailDisplay = document.getElementById('auth-email-display');
-  var authOtpInput = document.getElementById('auth-otp-input');
   var loginError = document.getElementById('login-error');
-  var otpError = document.getElementById('otp-error');
+  var loginSentMsg = document.getElementById('login-sent-msg');
   var sendOtpBtn = document.getElementById('auth-send-otp-btn');
   var sendText = document.getElementById('auth-send-text');
   var sendSpinner = document.getElementById('auth-send-spinner');
-  var verifyBtn = document.getElementById('auth-verify-btn');
-  var verifyText = document.getElementById('auth-verify-text');
-  var verifySpinner = document.getElementById('auth-verify-spinner');
-  var resendBtn = document.getElementById('auth-resend-btn');
-  var changeEmailBtn = document.getElementById('auth-change-email-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
 
@@ -427,10 +387,8 @@ CREATE POLICY "Admin update portfolio_data"
     loginScreen.style.display = 'flex';
     adminApp.style.display = 'none';
     loginStepEmail.style.display = 'block';
-    loginStepOtp.style.display = 'none';
-    authOtpInput.value = '';
+    loginSentMsg.style.display = 'none';
     loginError.textContent = '';
-    otpError.textContent = '';
   }
 
   function showDashboard(email) {
@@ -459,8 +417,8 @@ CREATE POLICY "Admin update portfolio_data"
     otpError.textContent = '';
   }
 
-  // Send OTP
-  function sendOtp() {
+  // Send Magic Link
+  function sendMagicLink() {
     clearAllErrors();
     if (!supabaseClient) {
       loginError.textContent = 'Supabase is not initialized';
@@ -477,63 +435,32 @@ CREATE POLICY "Admin update portfolio_data"
     }
 
     setLoading(sendOtpBtn, sendText, sendSpinner, true);
-    loginError.textContent = '⏳ Sending code to your email...';
+    loginError.textContent = '⏳ Sending magic link to your email...';
 
     supabaseClient.auth.signInWithOtp({
       email: email,
-      options: { shouldCreateUser: true }
+      options: {
+        shouldCreateUser: true,
+        emailRedirectTo: 'https://brokecode05.github.io/portfolio/admin.html'
+      }
     }).then(function(result) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
       if (result.error) {
         loginError.textContent = 'Failed: ' + result.error.message;
         return;
       }
-      // ✅ Show success + transition to OTP step
+      // ✅ Show success message
       loginError.textContent = '';
-      loginStepEmail.style.display = 'none';
-      loginStepOtp.style.display = 'block';
+      loginSentMsg.style.display = 'block';
       authEmailDisplay.textContent = email;
-      authOtpInput.focus();
-      // Show a toast confirmation too
-      showToast('✅ Code sent to ' + email + ' — check your inbox (and spam!)', 'success');
+      showToast('✅ Magic link sent to ' + email + ' — click it to sign in!', 'success');
     }).catch(function(err) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
-      loginError.textContent = 'Could not send code. ' + (err.message || '');
+      loginError.textContent = 'Could not send. ' + (err.message || '');
     });
   }
 
-  // Verify OTP
-  function verifyOtp() {
-    clearAllErrors();
-    if (!supabaseClient) {
-      otpError.textContent = 'Supabase is not initialized.';
-      return;
-    }
-    var email = authEmailInput.value.trim();
-    var token = authOtpInput.value.trim();
-    if (!token || token.length < 4) {
-      otpError.textContent = 'Please enter the full code from your email.';
-      return;
-    }
 
-    setLoading(verifyBtn, verifyText, verifySpinner, true);
-
-    supabaseClient.auth.verifyOtp({
-      email: email,
-      token: token,
-      type: 'email'
-    }).then(function(result) {
-      setLoading(verifyBtn, verifyText, verifySpinner, false);
-      if (result.error) {
-        otpError.textContent = 'Invalid code: ' + result.error.message;
-        return;
-      }
-      showDashboard(email);
-    }).catch(function(err) {
-      setLoading(verifyBtn, verifyText, verifySpinner, false);
-      otpError.textContent = 'Verification error: ' + (err.message || 'Unknown error');
-    });
-  }
 
   // Sign Out
   function signOut() {
@@ -547,39 +474,10 @@ CREATE POLICY "Admin update portfolio_data"
 
   // ─── Auth Event Listeners ─────────────────
 
-  sendOtpBtn.addEventListener('click', sendOtp);
+  sendOtpBtn.addEventListener('click', sendMagicLink);
 
   authEmailInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') sendOtp();
-  });
-
-  verifyBtn.addEventListener('click', verifyOtp);
-
-  authOtpInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') verifyOtp();
-    // Auto-submit when 6 digits entered
-    if (e.target.value.length >= 5 && e.key !== 'Backspace' && e.key !== 'Delete') {
-      setTimeout(verifyOtp, 200);
-    }
-  });
-
-  // Auto-focus OTP input and auto-submit on 6 digits
-  authOtpInput.addEventListener('input', function() {
-    if (this.value.length === 6) {
-      verifyOtp();
-    }
-  });
-
-  resendBtn.addEventListener('click', function() {
-    loginStepOtp.style.display = 'none';
-    loginStepEmail.style.display = 'block';
-    sendOtp();
-  });
-
-  changeEmailBtn.addEventListener('click', function() {
-    loginStepOtp.style.display = 'none';
-    loginStepEmail.style.display = 'block';
-    loginError.textContent = '';
+    if (e.key === 'Enter') sendMagicLink();
   });
 
   signOutBtn.addEventListener('click', signOut);
