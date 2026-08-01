@@ -116,14 +116,13 @@ Then visit `http://localhost:8080`.
 
 ## 🌐 Deployment (GitHub Pages)
 
-This site is designed to be deployed via **GitHub Pages**:
+This site is deployed via **GitHub Pages** from the `main` branch (which is also the repo's default branch):
 
-1. Push to your GitHub repo (`brokeCode05/portfolio`)
-2. Go to **Settings → Pages**
-3. Set **Source** to `Deploy from a branch` → `main` → `/ (root)`
-4. Your site will be live at `https://brokeCode05.github.io`
+1. Push to your GitHub repo: `git push origin main`
+2. Go to **Settings → Pages** and confirm **Source** is `Deploy from a branch` → `main` → `/ (root)`
+3. Your site will be live at `https://brokeCode05.github.io/portfolio`
 
-> The `robots.txt` and `sitemap.xml` are pre-configured for custom domains. If using `brokeCode05.github.io/portfolio`, update `sitemap.xml` accordingly.
+> The `robots.txt` and `sitemap.xml` are pre-configured for this repository URL (`brokeCode05.github.io/portfolio`). If you later add a custom domain, update them accordingly.
 
 ---
 
