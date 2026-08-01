@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260729" />
+  <link rel="stylesheet" href="css/admin.css?v=20260801" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -394,6 +394,14 @@ CREATE POLICY "Admin update portfolio_data"
 
     </div>
   </div>
+
+  <!-- Save Status Bar (only visible inside dashboard) -->
+  <div class="admin-statusbar" id="admin-statusbar">
+    <span class="statusbar-dot" id="statusbar-dot"></span>
+    <span class="statusbar-text" id="statusbar-text">Ready</span>
+    <span class="statusbar-section" id="statusbar-section"></span>
+    <span class="statusbar-shortcut">Ctrl+S</span>
+  </div>
 </div>
 
 <!-- Confirmation Modal -->
@@ -420,18 +428,10 @@ CREATE POLICY "Admin update portfolio_data"
   </div>
 </div>
 
-<!-- Save Status Bar -->
-<div class="admin-statusbar" id="admin-statusbar">
-  <span class="statusbar-dot" id="statusbar-dot"></span>
-  <span class="statusbar-text" id="statusbar-text">Ready</span>
-  <span class="statusbar-section" id="statusbar-section"></span>
-  <span class="statusbar-shortcut">Ctrl+S</span>
-</div>
-
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260729"></script>
+<script src="js/portfolio-data.js?v=20260801"></script>
 <script>
 (function(){
   'use strict';
@@ -473,6 +473,7 @@ CREATE POLICY "Admin update portfolio_data"
   var backToEmailBtn = document.getElementById('back-to-email-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
+  var statusBar = document.getElementById('admin-statusbar');
 
   // ─── Auth Functions ────────────────────────
 
@@ -493,6 +494,7 @@ CREATE POLICY "Admin update portfolio_data"
   function showLogin() {
     loginScreen.style.display = 'flex';
     adminApp.style.display = 'none';
+    if (statusBar) statusBar.style.display = 'none';
     loginStepEmail.style.display = 'block';
     loginStepOtp.style.display = 'none';
     loginSentMsg.style.display = 'none';
@@ -503,6 +505,7 @@ CREATE POLICY "Admin update portfolio_data"
   function showDashboard(email) {
     loginScreen.style.display = 'none';
     adminApp.style.display = 'flex';
+    if (statusBar) statusBar.style.display = 'flex';
     if (authEmailFooter) {
       authEmailFooter.textContent = 'Signed in as ' + email;
     }
