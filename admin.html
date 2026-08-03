@@ -144,6 +144,13 @@
         <span>Learning</span>
         <span class="nav-count"></span>
       </button>
+      <button class="admin-nav-btn" data-section="contact">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </span>
+        <span>Contact</span>
+        <span class="nav-count"></span>
+      </button>
       <button class="admin-nav-btn" data-section="cloud">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
@@ -300,6 +307,17 @@
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="learning-add">+ Add Milestone</button>
           <button class="btn btn-primary" id="learning-save">Save All Milestones</button>
+        </div>
+      </div>
+
+      <!-- ===== DIRECT CONTACT SECTION ===== -->
+      <div class="admin-section" id="section-contact">
+        <h2 class="admin-section-title">Direct Contact</h2>
+        <p class="admin-section-desc">Links shown in the Contact section (Email, GitHub, LinkedIn, etc.).</p>
+        <div id="contact-links-list"></div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn" id="contact-links-add">+ Add Link</button>
+          <button class="btn btn-primary" id="contact-links-save">Save All Links</button>
         </div>
       </div>
 
@@ -774,7 +792,8 @@ CREATE POLICY "Admin update portfolio_data"
       projects: (d.projects || []).length,
       certs: (d.certifications || []).length,
       experience: (d.experience || []).length,
-      learning: (d.learning || []).length
+      learning: (d.learning || []).length,
+      contact: (d.contactLinks || []).length
     };
     document.querySelectorAll('.admin-nav-btn').forEach(function(btn) {
       var section = btn.dataset.section;
@@ -1734,6 +1753,131 @@ CREATE POLICY "Admin update portfolio_data"
     showToast('All milestones saved!', 'success');
   });
 
+  // ─── Direct Contact Links ─────────────────
+  function renderContactLinksList() {
+    var d = readData();
+    var container = document.getElementById('contact-links-list');
+    if (!d.contactLinks || !d.contactLinks.length) {
+      container.innerHTML = '<div class="empty-state">Email and GitHub show by default until you add your own links.</div>';
+      return;
+    }
+    container.innerHTML = d.contactLinks.map(function(link, idx) {
+      return '<div class="admin-card" data-cidx="' + idx + '">' +
+        '<div class="admin-card-header">' +
+          '<div class="admin-card-actions">' +
+            '<button class="reorder-btn contact-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
+            '<button class="reorder-btn contact-move-down" data-idx="' + idx + '"' + (idx === d.contactLinks.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
+          '</div>' +
+          '<h4>' + escapeHtml(link.label || 'New Link') + '</h4>' +
+          '<button class="btn btn-sm btn-danger contact-remove" data-idx="' + idx + '">Remove</button>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group">' +
+            '<label>Label</label>' +
+            '<input type="text" class="contact-label" value="' + escapeHtml(link.label || '') + '" placeholder="e.g. LinkedIn" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Display Text</label>' +
+            '<input type="text" class="contact-value" value="' + escapeHtml(link.value || '') + '" placeholder="e.g. linkedin.com/in/username" />' +
+          '</div>' +
+        '</div>' +
+        '<div class="form-row">' +
+          '<div class="form-group" style="flex:2">' +
+            '<label>URL</label>' +
+            '<input type="text" class="contact-url" value="' + escapeHtml(link.url || '') + '" placeholder="https://linkedin.com/in/username" />' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label>Icon</label>' +
+            '<select class="contact-icon">' +
+              '<option value="email"' + (link.icon === 'email' ? ' selected' : '') + '>Email</option>' +
+              '<option value="github"' + (link.icon === 'github' ? ' selected' : '') + '>GitHub</option>' +
+              '<option value="linkedin"' + (link.icon === 'linkedin' ? ' selected' : '') + '>LinkedIn</option>' +
+              '<option value="generic"' + (link.icon === 'generic' ? ' selected' : '') + '>Link</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.querySelectorAll('.contact-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        showConfirm('Remove this contact link?', function(ok) {
+          if (!ok) return;
+          var d = readData();
+          d.contactLinks.splice(parseInt(this.dataset.idx), 1);
+          writeData();
+          renderContactLinksList();
+          showToast('Link removed', 'success');
+        });
+      });
+    });
+
+    container.querySelectorAll('.admin-card input, .admin-card select').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.cidx);
+        var d = readData();
+        if (!d.contactLinks[idx]) return;
+        d.contactLinks[idx].label = card.querySelector('.contact-label').value;
+        d.contactLinks[idx].value = card.querySelector('.contact-value').value;
+        d.contactLinks[idx].url = card.querySelector('.contact-url').value;
+        d.contactLinks[idx].icon = card.querySelector('.contact-icon').value;
+        writeData();
+      });
+    });
+
+    // ─── Contact Reorder ─────────────────────
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.contact-move-up, .contact-move-down');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.idx);
+      var d = readData();
+      if (btn.classList.contains('contact-move-up')) {
+        if (idx === 0) return;
+        var tmp = d.contactLinks[idx];
+        d.contactLinks[idx] = d.contactLinks[idx - 1];
+        d.contactLinks[idx - 1] = tmp;
+      } else {
+        if (idx >= d.contactLinks.length - 1) return;
+        var tmp = d.contactLinks[idx];
+        d.contactLinks[idx] = d.contactLinks[idx + 1];
+        d.contactLinks[idx + 1] = tmp;
+      }
+      writeData();
+      renderContactLinksList();
+    });
+  }
+
+  document.getElementById('contact-links-add').addEventListener('click', function() {
+    var d = readData();
+    if (!d.contactLinks) d.contactLinks = [];
+    // Seed the Email/GitHub defaults on first add so they are never lost
+    if (!d.contactLinks.length) {
+      d.contactLinks = DEFAULT_CONTACT_LINKS.map(function(l) {
+        return { label: l.label, value: l.value, url: l.url, icon: l.icon };
+      });
+    }
+    d.contactLinks.push({ label: 'LinkedIn', value: 'linkedin.com/in/username', url: 'https://linkedin.com/in/username', icon: 'linkedin' });
+    writeData();
+    renderContactLinksList();
+    showToast('New contact link added', 'success');
+  });
+
+  document.getElementById('contact-links-save').addEventListener('click', function() {
+    var d = readData();
+    var container = document.getElementById('contact-links-list');
+    container.querySelectorAll('.admin-card').forEach(function(card) {
+      var idx = parseInt(card.dataset.cidx);
+      if (isNaN(idx) || !d.contactLinks[idx]) return;
+      d.contactLinks[idx].label = card.querySelector('.contact-label').value;
+      d.contactLinks[idx].value = card.querySelector('.contact-value').value;
+      d.contactLinks[idx].url = card.querySelector('.contact-url').value;
+      d.contactLinks[idx].icon = card.querySelector('.contact-icon').value;
+    });
+    writeData();
+    showToast('All contact links saved!', 'success');
+  });
+
   // ─── JSON Export/Import ────────────────────
   document.getElementById('admin-export-btn').addEventListener('click', function() {
     exportDataJSON();
@@ -1839,6 +1983,7 @@ CREATE POLICY "Admin update portfolio_data"
     renderCerts();
     renderExperience();
     renderLearningMilestones();
+    renderContactLinksList();
     updateCloudStatus();
     updateSidebarCounts();
     updateStatusBar('saved');

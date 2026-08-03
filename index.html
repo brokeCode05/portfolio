@@ -105,45 +105,289 @@
     .btn-ghost:active {
       transform: scale(0.97);
     }
-    .btn-resume {
-      padding: 0.75rem 1.5rem;
-      font-size: var(--text-base, 1rem);
-    }
     .btn svg {
       flex-shrink: 0;
       width: 18px;
       height: 18px;
     }
-    .btn-resume svg {
-      width: 20px;
-      height: 20px;
-    }
 
     /* ===== Contact Links ===== */
-    .contact-link {
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+    .contact-item-label {
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      font-weight: 500;
+      text-transform: lowercase;
+      letter-spacing: 0.02em;
+      color: var(--color-text-secondary, #A0A5B0);
+    }
+    .contact-item-label::before {
+      content: "$ cat ";
+      color: var(--color-accent-dim, #2DA05A);
+      font-weight: 600;
+    }
+    .contact-item-label::after {
+      content: ".txt";
+      color: var(--color-text-secondary, #A0A5B0);
+    }
+    .contact-item-value {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 0.625rem 1rem;
-      font-size: var(--text-sm, 0.875rem);
-      font-weight: 500;
+      gap: 8px;
       font-family: var(--font-code, monospace);
-      color: var(--color-text-secondary, #A0A5B0);
-      text-decoration: none;
-      border: 1px solid var(--color-border, #2A2D35);
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-    .contact-link:hover {
+      font-size: var(--text-sm, 0.875rem);
       color: var(--color-text-primary, #E8EAED);
-      background-color: var(--color-surface-hover, #2A2D35);
-      border-color: var(--color-border-hover, #3A3D45);
+      text-decoration: none;
+      transition: color var(--transition-fast, 150ms ease), transform var(--transition-fast, 150ms ease);
     }
-    .contact-link svg {
+    .contact-item-value:hover {
+      color: var(--color-accent, #4ADE80);
+      transform: translateX(2px);
+    }
+    .contact-item-value svg {
       flex-shrink: 0;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
+    }
+    .contact-group-label {
+      margin: 0;
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-secondary, #A0A5B0);
+    }
+    .contact-links {
+      align-items: flex-start;
+    }
+
+    /* ===== Contact: Form ===== */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 13fr);
+      gap: var(--space-2xl, 3rem);
+      align-items: start;
+    }
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl, 2rem);
+    }
+    .contact-aside {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl, 2rem);
+    }
+    .contact-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm, 0.5rem);
+    }
+    .contact-text {
+      border-left: 2px solid var(--color-border, #2A2D35);
+      padding-left: var(--space-md, 1rem);
+    }
+    .contact-group-label::before {
+      content: "# ";
+      color: var(--color-accent-dim, #2DA05A);
+      font-weight: 600;
+    }
+    .contact-terminal {
+      max-width: 100%;
+    }
+    .contact-terminal .terminal-body {
+      padding: var(--space-lg, 1.5rem);
+    }
+    .contact-terminal:focus-within {
+      border-color: var(--color-accent, #4ADE80);
+      box-shadow: 0 0 0 3px var(--color-accent-subtle, rgba(74,222,128,0.12));
+      transition: border-color var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease);
+    }
+    .contact-prompt {
+      margin: 0 0 var(--space-md, 1rem);
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      color: var(--color-text-secondary, #A0A5B0);
+    }
+    .contact-prompt .prompt {
+      color: var(--color-accent, #4ADE80);
+      font-weight: 600;
+    }
+    .contact-prompt .contact-cursor {
+      display: inline-block;
+      width: 0.55em;
+      height: 1.05em;
+      margin-left: 2px;
+      background-color: var(--color-accent, #4ADE80);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs, 0.25rem);
+    }
+    .form-label {
+      font-size: var(--text-sm, 0.875rem);
+      font-weight: 600;
+      color: var(--color-text-primary, #E8EAED);
+    }
+    .form-required {
+      color: var(--color-accent, #4ADE80);
+    }
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      font-family: var(--font-code, 'JetBrains Mono', monospace);
+      font-size: var(--text-base, 1rem);
+      color: var(--color-text-primary, #E8EAED);
+      caret-color: var(--color-accent, #4ADE80);
+      background-color: var(--color-bg, #0F1115);
+      border: 1px solid var(--color-border, #2A2D35);
+      border-radius: var(--border-radius, 6px);
+      transition: border-color var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease);
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--color-text-secondary, #A0A5B0);
+      opacity: 0.6;
+    }
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-accent, #4ADE80);
+      box-shadow: 0 0 0 3px var(--color-accent-subtle, rgba(74,222,128,0.12));
+    }
+    .form-textarea {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .form-input.is-invalid,
+    .form-textarea.is-invalid {
+      border-color: var(--color-danger, #F87171);
+    }
+    .form-input.is-invalid:focus,
+    .form-textarea.is-invalid:focus {
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.15);
+    }
+    .form-error {
+      font-size: var(--text-xs, 0.75rem);
+      color: var(--color-danger, #F87171);
+      min-height: 1rem;
+      margin: 0;
+    }
+    .form-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm, 0.5rem);
+      align-items: flex-start;
+    }
+    .form-submit {
+      width: 100%;
+      max-width: 50%;
+      justify-content: center;
+    }
+    .form-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .form-submit-spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: form-spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    .form-submit.is-sending .form-submit-spinner {
+      display: inline-block;
+    }
+    .form-submit.is-error {
+      background-color: transparent;
+      color: var(--color-danger, #F87171);
+      border-color: var(--color-danger, #F87171);
+    }
+    .form-submit.is-success {
+      background-color: var(--color-accent-subtle, rgba(74,222,128,0.08));
+      border-color: var(--color-accent, #4ADE80);
+    }
+    @keyframes form-spin {
+      to { transform: rotate(360deg); }
+    }
+    .form-status {
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-sm, 0.875rem);
+      color: var(--color-text-secondary, #A0A5B0);
+      margin: 0;
+      min-height: 1.25rem;
+    }
+    .terminal-log {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-height: 1.25rem;
+    }
+    .log-line {
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      line-height: 1.6;
+      color: var(--color-text-secondary, #A0A5B0);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .log-line .log-cmd { color: var(--color-accent, #4ADE80); }
+    .log-line .log-ok { color: var(--color-accent, #4ADE80); }
+    .log-line .log-err { color: var(--color-danger, #F87171); }
+    .log-line .log-dim { color: var(--color-text-secondary, #A0A5B0); }
+    .log-line .log-cursor {
+      display: inline-block;
+      width: 0.5em;
+      height: 0.95em;
+      margin-left: 2px;
+      background-color: var(--color-accent, #4ADE80);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    .form-char-count {
+      align-self: flex-end;
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      color: var(--color-text-secondary, #A0A5B0);
+      margin: 0;
+    }
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2xl, 3rem);
+      }
+      .form-submit {
+        max-width: 100%;
+      }
+    }
+    @media (max-width: 480px) {
+      .contact-form .form-input,
+      .contact-form .form-textarea {
+        padding: 0.5625rem 0.625rem;
+      }
+      .contact-terminal .terminal-body {
+        padding: var(--space-md, 1rem);
+      }
     }
 
     /* ===== Hero: Premium Portrait ===== */
@@ -1295,6 +1539,49 @@
       min-width: 0;
       max-width: 100%;
     }
+    .about-terminal .about-type-cursor {
+      display: inline-block;
+      width: 0.55em;
+      height: 1.05em;
+      margin-left: 2px;
+      background-color: var(--color-accent, #4ADE80);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    .gh-terminal {
+      max-width: 100%;
+    }
+    .gh-terminal .terminal-body {
+      padding: var(--space-md, 1rem);
+    }
+    .gh-prompt {
+      margin: 0 0 var(--space-md, 1rem);
+      font-family: var(--font-code, monospace);
+      font-size: var(--text-xs, 0.75rem);
+      color: var(--color-text-secondary, #A0A5B0);
+    }
+    .gh-prompt .prompt {
+      color: var(--color-accent, #4ADE80);
+      font-weight: 600;
+    }
+    .gh-prompt .gh-cursor {
+      display: inline-block;
+      width: 0.55em;
+      height: 1.05em;
+      margin-left: 2px;
+      background-color: var(--color-accent, #4ADE80);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    .gh-stat-item .gh-value-cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 0.8em;
+      margin-left: 3px;
+      background-color: var(--color-accent, #4ADE80);
+      vertical-align: baseline;
+      animation: blink 1s step-end infinite;
+    }
     .terminal-window {
       max-width: 100%;
     }
@@ -1637,24 +1924,32 @@
         <p>Open source activity and contributions.</p>
       </div>
       <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
-        <div class="github-card">
-          <h3 class="github-card-title">Stats</h3>
-          <div class="gh-stats-grid" id="gh-stats-container">
-            <div class="gh-stat-item">
-              <span class="gh-stat-value" id="gh-repos">—</span>
-              <span class="gh-stat-label">Repos</span>
-            </div>
-            <div class="gh-stat-item">
-              <span class="gh-stat-value" id="gh-followers">—</span>
-              <span class="gh-stat-label">Followers</span>
-            </div>
-            <div class="gh-stat-item">
-              <span class="gh-stat-value" id="gh-following">—</span>
-              <span class="gh-stat-label">Following</span>
-            </div>
-            <div class="gh-stat-item">
-              <span class="gh-stat-value" id="gh-stars">—</span>
-              <span class="gh-stat-label">Stars</span>
+        <div class="terminal-window gh-terminal">
+          <div class="terminal-header">
+            <span class="terminal-dot"></span>
+            <span class="terminal-dot"></span>
+            <span class="terminal-dot"></span>
+            <span class="terminal-title">~/github — zsh</span>
+          </div>
+          <div class="terminal-body">
+            <p class="gh-prompt" aria-hidden="true"><span class="prompt">$</span> <span id="gh-cmd">gh stats --user=brokeCode05</span><span class="gh-cursor" id="gh-cursor"></span></p>
+            <div class="gh-stats-grid" id="gh-stats-container">
+              <div class="gh-stat-item">
+                <span class="gh-stat-value" id="gh-repos">—</span>
+                <span class="gh-stat-label">Repos</span>
+              </div>
+              <div class="gh-stat-item">
+                <span class="gh-stat-value" id="gh-followers">—</span>
+                <span class="gh-stat-label">Followers</span>
+              </div>
+              <div class="gh-stat-item">
+                <span class="gh-stat-value" id="gh-following">—</span>
+                <span class="gh-stat-label">Following</span>
+              </div>
+              <div class="gh-stat-item">
+                <span class="gh-stat-value" id="gh-stars">—</span>
+                <span class="gh-stat-label">Stars</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1686,49 +1981,72 @@
         <h2>Contact</h2>
         <p>Get in touch for collaboration, opportunities, or questions.</p>
       </div>
-      <div class="contact-content flex flex-col items-start gap-lg" data-reveal data-reveal-delay="100">
-        <p class="contact-text">
-          I'm always open to connecting with fellow learners, discussing
-          IT and cybersecurity, or exploring opportunities to collaborate.
-          Feel free to reach out.
-        </p>
-        <div class="contact-buttons flex flex-col gap-sm">
-        <a href="resume.pdf" class="btn btn-primary btn-resume" download>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-          Download Resume (PDF)
-        </a>
-        <a href="img/johnbryan.jpg" class="btn btn-ghost btn-resume" download="johnbryan.jpg">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          Download Photo (JPG)
-        </a>
-        </div>
-        <div class="contact-links flex flex-wrap gap-lg">
-          <a href="mailto:jhnbryn05@gmail.com" class="contact-link" aria-label="Send email">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-              <polyline points="22,6 12,13 2,6"/>
-            </svg>
-            jhnbryn05@gmail.com
-          </a>
-          <a href="https://github.com/brokeCode05" class="contact-link" aria-label="GitHub profile" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            github.com/brokeCode05
-          </a>
+      <div class="contact-grid" data-reveal data-reveal-delay="100">
+        <div class="contact-info">
+          <div class="contact-group">
+            <p class="contact-group-label">About / Introduction</p>
+            <p class="contact-text">
+              I'm always open to connecting with fellow learners, discussing
+              IT and cybersecurity, or exploring opportunities to collaborate.
+              If you have a project in mind, an opportunity to share, or just a
+              question, feel free to reach out.
+            </p>
+          </div>
 
+          <div class="contact-group">
+            <p class="contact-group-label">Direct Contact</p>
+            <div class="contact-links flex flex-col gap-md" id="contact-links">
+              <!-- Populated by portfolio-data.js renderContactLinks() -->
+            </div>
+          </div>
         </div>
 
+        <div class="contact-aside">
+          <div class="contact-group">
+            <p class="contact-group-label">Send a Message</p>
+            <div class="terminal-window contact-terminal" id="contact-terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-title">~/portfolio/contact — zsh</span>
+              </div>
+              <div class="terminal-body contact-terminal-body">
+                <p class="contact-prompt" aria-hidden="true"><span class="prompt">$</span> <span class="contact-cmd" id="contact-cmd">./send_message.sh --to=jhnbryn05</span><span class="contact-cursor" id="contact-cursor"></span></p>
+                <form class="contact-form" id="contact-form" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="contact-name">Name <span class="form-required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="contact-name" name="name" placeholder="Your name" required aria-required="true" autocomplete="name" aria-describedby="contact-name-error" />
+            <small class="form-error" id="contact-name-error" aria-live="polite"></small>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="contact-email">Email <span class="form-required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="email" id="contact-email" name="email" placeholder="you@example.com" required aria-required="true" autocomplete="email" aria-describedby="contact-email-error" />
+            <small class="form-error" id="contact-email-error" aria-live="polite"></small>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="contact-subject">Subject <span class="form-required" aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="contact-subject" name="subject" placeholder="What is this about?" required aria-required="true" aria-describedby="contact-subject-error" />
+            <small class="form-error" id="contact-subject-error" aria-live="polite"></small>
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="contact-message">Message <span class="form-required" aria-hidden="true">*</span></label>
+            <textarea class="form-textarea" id="contact-message" name="message" rows="5" maxlength="5000" placeholder="Write your message..." required aria-required="true" aria-describedby="contact-message-error"></textarea>
+            <small class="form-error" id="contact-message-error" aria-live="polite"></small>
+            <small class="form-char-count" id="contact-message-count">bytes: 0/5000</small>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary form-submit" id="contact-submit">
+              <span class="form-submit-spinner" aria-hidden="true"></span>
+              <span id="contact-submit-label">Send Message</span>
+            </button>
+            <div class="form-status terminal-log" id="contact-form-status" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1922,8 +2240,107 @@
         if (el) el.src = ghImages.graph[t];
       }
 
+      // ---- GitHub stats typewriter (matches About/Contact terminals) ----
+      var ghTyped = false;
+      var ghTypeObserver = null;
+      var ghTypeTimer = null;
+      var ghTypePoll = null;
+
+      function typeGhPrompt() {
+        var cmdEl = document.getElementById('gh-cmd');
+        if (!cmdEl) return;
+        var full = cmdEl.textContent;
+        var reduced = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) return;
+        cmdEl.textContent = '';
+        var i = 0;
+        ghTypeTimer = setInterval(function() {
+          i++;
+          cmdEl.textContent = full.substring(0, i);
+          if (i >= full.length) {
+            clearInterval(ghTypeTimer);
+            ghTypeTimer = null;
+            typeGhValues();
+          }
+        }, 26);
+      }
+
+      function typeGhValues() {
+        var order = ['gh-repos', 'gh-followers', 'gh-following', 'gh-stars'];
+        var idx = 0;
+        var attempts = 0;
+        var reduced = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function typeNext() {
+          if (idx >= order.length) return;
+          var el = document.getElementById(order[idx++]);
+          if (!el) { typeNext(); return; }
+          var text = el.textContent;
+          if (reduced) { typeNext(); return; }
+          el.textContent = '';
+          var cursor = document.createElement('span');
+          cursor.className = 'gh-value-cursor';
+          cursor.setAttribute('aria-hidden', 'true');
+          el.appendChild(cursor);
+          var i = 0;
+          var timer = setInterval(function() {
+            i++;
+            el.textContent = text.substring(0, i);
+            el.appendChild(cursor);
+            if (i >= text.length) {
+              clearInterval(timer);
+              cursor.remove();
+              setTimeout(typeNext, 220);
+            }
+          }, 34);
+        }
+
+        // Wait for async stats to arrive (up to ~12s), then type real numbers
+        function waitForData() {
+          var allLoaded = order.every(function(id) {
+            var el = document.getElementById(id);
+            return el && el.textContent && el.textContent !== '—';
+          });
+          if (allLoaded) { typeNext(); return; }
+          attempts++;
+          if (attempts > 40) { typeNext(); return; }
+          ghTypePoll = setTimeout(waitForData, 300);
+        }
+        waitForData();
+      }
+
+      function initGhTypewriter() {
+        var grid = document.getElementById('gh-stats-container');
+        if (!grid) return;
+        if (ghTypeTimer) { clearInterval(ghTypeTimer); ghTypeTimer = null; }
+        if (ghTypePoll) { clearTimeout(ghTypePoll); ghTypePoll = null; }
+        if (ghTyped) return;
+        var reduced = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) return;
+        if (ghTypeObserver) ghTypeObserver.disconnect();
+        if (!('IntersectionObserver' in window)) {
+          ghTyped = true;
+          typeGhPrompt();
+          return;
+        }
+        ghTypeObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(en) {
+            if (en.isIntersecting) {
+              ghTypeObserver.disconnect();
+              ghTyped = true;
+              typeGhPrompt();
+            }
+          });
+        }, { threshold: 0.3 });
+        ghTypeObserver.observe(grid);
+      }
+
       displayGitHub();
       fetchGitHubStats();
+      initGhTypewriter();
 
       var observer = new MutationObserver(function(m) {
         for (var i = 0; i < m.length; i++) {
@@ -2376,6 +2793,99 @@
       var localStorageData = loadData();
       var resolved = false;
 
+      // ─── About terminal typewriter (matches Contact) ───
+      var aboutTyped = false;
+      var aboutTypeObserver = null;
+      var aboutTypeTimer = null;
+
+      function typeAboutTerminal(body) {
+        var lines = [];
+        var children = body.querySelectorAll('.line');
+        Array.prototype.forEach.call(children, function(line) {
+          if (line.classList.contains('cursor-line')) return;
+          var prompt = line.querySelector('.prompt');
+          lines.push({
+            cls: line.className,
+            isCmd: prompt !== null,
+            text: line.textContent.replace(/^\$\s*/, '')
+          });
+        });
+        if (!lines.length) return;
+        aboutTyped = true;
+
+        body.innerHTML = '';
+        var li = 0;
+
+        function finish() {
+          var fin = document.createElement('span');
+          fin.className = 'line cursor-line';
+          fin.innerHTML = '<span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span>';
+          body.appendChild(fin);
+        }
+
+        function typeLine() {
+          if (li >= lines.length) { finish(); return; }
+          var line = lines[li++];
+          var el = document.createElement('span');
+          el.className = line.cls;
+          var typeSpan = document.createElement('span');
+          if (line.isCmd) {
+            var prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.textContent = '$';
+            el.appendChild(prompt);
+            el.appendChild(document.createTextNode(' '));
+            el.appendChild(typeSpan);
+          } else {
+            el.appendChild(typeSpan);
+          }
+          var cursor = document.createElement('span');
+          cursor.className = 'about-type-cursor';
+          cursor.setAttribute('aria-hidden', 'true');
+          el.appendChild(cursor);
+          body.appendChild(el);
+
+          var text = line.text;
+          var i = 0;
+          aboutTypeTimer = setInterval(function() {
+            i++;
+            typeSpan.textContent = text.substring(0, i);
+            if (i >= text.length) {
+              clearInterval(aboutTypeTimer);
+              aboutTypeTimer = null;
+              cursor.remove();
+              setTimeout(typeLine, 140);
+            }
+          }, 24);
+        }
+        typeLine();
+      }
+
+      function initAboutTypewriter() {
+        var terminal = document.querySelector('.about-terminal');
+        var body = terminal ? terminal.querySelector('.terminal-body') : null;
+        if (!terminal || !body) return;
+        if (aboutTypeTimer) { clearInterval(aboutTypeTimer); aboutTypeTimer = null; }
+        if (aboutTyped) return;
+        var reducedMotion = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) return;
+        if (aboutTypeObserver) aboutTypeObserver.disconnect();
+        if (!('IntersectionObserver' in window)) {
+          typeAboutTerminal(body);
+          return;
+        }
+        aboutTypeObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              aboutTypeObserver.disconnect();
+              typeAboutTerminal(body);
+            }
+          });
+        }, { threshold: 0.2 });
+        aboutTypeObserver.observe(terminal);
+      }
+
       function renderPortfolio(data) {
         // ─── Hero ─────────────────────────────────
         var badgeEl = document.querySelector('.hero-badge');
@@ -2465,6 +2975,12 @@
           experienceContainer.innerHTML = renderExperience(data);
         }
 
+        // ─── Direct Contact ─────────────────────
+        var contactLinksContainer = document.getElementById('contact-links');
+        if (contactLinksContainer) {
+          contactLinksContainer.innerHTML = renderContactLinks(data);
+        }
+
         // ─── Re-observe new [data-reveal] elements ───
         (function(){
           var reducedMotion = window.matchMedia &&
@@ -2482,6 +2998,8 @@
           }, { rootMargin: '0px 0px -60px 0px', threshold: 0.1 });
           freshReveals.forEach(function(el) { observer.observe(el); });
         })();
+
+        initAboutTypewriter();
       }
 
       // Render with local data immediately (so user sees content fast)
@@ -2540,6 +3058,214 @@
       }
 
     })();
+  })();
+  </script>
+
+  <!-- Contact form: frontend-only validation + demo states (no backend yet) -->
+  <script>
+  (function(){
+    'use strict';
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+
+    var fields = {
+      name: document.getElementById('contact-name'),
+      email: document.getElementById('contact-email'),
+      subject: document.getElementById('contact-subject'),
+      message: document.getElementById('contact-message')
+    };
+    var errors = {
+      name: document.getElementById('contact-name-error'),
+      email: document.getElementById('contact-email-error'),
+      subject: document.getElementById('contact-subject-error'),
+      message: document.getElementById('contact-message-error')
+    };
+    var submitBtn = document.getElementById('contact-submit');
+    var submitLabel = document.getElementById('contact-submit-label');
+    var statusEl = document.getElementById('contact-form-status');
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setError(name, message) {
+      var input = fields[name];
+      var error = errors[name];
+      if (message) {
+        error.textContent = message;
+        input.setAttribute('aria-invalid', 'true');
+        input.classList.add('is-invalid');
+      } else {
+        error.textContent = '';
+        input.removeAttribute('aria-invalid');
+        input.classList.remove('is-invalid');
+      }
+    }
+
+    function validateField(name) {
+      var input = fields[name];
+      if (!input) return '';
+      var val = (input.value || '').trim();
+      if (name === 'email') {
+        if (!val) return 'Please enter your email address.';
+        if (!EMAIL_RE.test(val)) return "That email address doesn't look right.";
+        return '';
+      }
+      return val ? '' : 'Please fill in this field.';
+    }
+
+    function validateAll() {
+      var ok = true;
+      Object.keys(fields).forEach(function(name){
+        var msg = validateField(name);
+        setError(name, msg);
+        if (msg) ok = false;
+      });
+      return ok;
+    }
+
+    // Clear/re-validate a field as the visitor types
+    Object.keys(fields).forEach(function(name){
+      fields[name].addEventListener('input', function(){
+        if (errors[name].textContent) {
+          setError(name, validateField(name));
+        }
+      });
+    });
+
+    var reducedMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Terminal log: types out [ OK ]/[ ERR ] lines with a block cursor
+    var logTimer = null;
+    function writeLog(lines) {
+      if (logTimer) clearInterval(logTimer);
+      statusEl.innerHTML = '';
+      statusEl.className = 'form-status terminal-log';
+      var li = 0;
+      function typeLine(){
+        if (li >= lines.length) return;
+        var line = lines[li++];
+        var div = document.createElement('div');
+        div.className = 'log-line';
+        var tag = document.createElement('span');
+        tag.className = line.cls;
+        tag.textContent = line.tag + ' ';
+        var text = document.createElement('span');
+        var cursor = document.createElement('span');
+        cursor.className = 'log-cursor';
+        div.appendChild(tag);
+        div.appendChild(text);
+        div.appendChild(cursor);
+        statusEl.appendChild(div);
+        if (reducedMotion) {
+          text.textContent = line.text;
+          cursor.remove();
+          typeLine();
+          return;
+        }
+        var i = 0;
+        var timer = setInterval(function(){
+          logTimer = timer;
+          i++;
+          text.textContent = line.text.substring(0, i);
+          if (i >= line.text.length) {
+            clearInterval(timer);
+            logTimer = null;
+            cursor.remove();
+            setTimeout(typeLine, 180);
+          }
+        }, 12);
+      }
+      typeLine();
+    }
+
+    // Message byte counter
+    var msgField = fields.message;
+    var countEl = document.getElementById('contact-message-count');
+    function updateByteCount(){
+      if (countEl) countEl.textContent = 'bytes: ' + msgField.value.length + '/5000';
+    }
+    if (msgField && countEl) {
+      msgField.addEventListener('input', updateByteCount);
+      updateByteCount();
+    }
+
+    // Prompt typewriter — types the command when the terminal scrolls into view
+    (function(){
+      var terminal = document.getElementById('contact-terminal');
+      var cmdEl = document.getElementById('contact-cmd');
+      var cursorEl = document.getElementById('contact-cursor');
+      if (!terminal || !cmdEl || !cursorEl) return;
+      var full = cmdEl.textContent;
+      var started = false;
+      function type(){
+        if (started) return;
+        started = true;
+        if (reducedMotion) return;
+        cmdEl.textContent = '';
+        var i = 0;
+        var timer = setInterval(function(){
+          i++;
+          cmdEl.textContent = full.substring(0, i);
+          if (i >= full.length) clearInterval(timer);
+        }, 32);
+      }
+      if (!reducedMotion && 'IntersectionObserver' in window) {
+        var obs = new IntersectionObserver(function(entries){
+          entries.forEach(function(en){
+            if (en.isIntersecting) { obs.disconnect(); type(); }
+          });
+        }, { threshold: 0.25 });
+        obs.observe(terminal);
+      } else {
+        type();
+      }
+    })();
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      submitBtn.classList.remove('is-success');
+      submitBtn.classList.remove('is-error');
+      statusEl.textContent = '';
+      statusEl.className = 'form-status';
+
+      if (!validateAll()) {
+        submitBtn.classList.add('is-error');
+        var missing = Object.keys(fields).filter(function(n){
+          return fields[n].classList.contains('is-invalid');
+        });
+        var errLines = [{ tag: '$', cls: 'log-cmd', text: './send_message.sh --check' }];
+        if (missing.length) {
+          errLines.push({
+            tag: '[ERR]',
+            cls: 'log-err',
+            text: missing.length + ' required field' + (missing.length > 1 ? 's' : '') + ' missing'
+          });
+          missing.forEach(function(n){
+            errLines.push({ tag: ' -', cls: 'log-dim', text: n });
+          });
+        }
+        writeLog(errLines);
+        var firstInvalid = form.querySelector('.is-invalid');
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      // Demo-only state machine — no message is actually sent
+      submitBtn.classList.add('is-sending');
+      submitBtn.disabled = true;
+      submitLabel.textContent = 'Sending...';
+
+      setTimeout(function(){
+        submitBtn.classList.remove('is-sending');
+        submitBtn.classList.add('is-success');
+        submitBtn.disabled = false;
+        submitLabel.textContent = 'Send Message';
+        writeLog([
+          { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+          { tag: '[ OK ]', cls: 'log-ok', text: 'message staged — demo mode' },
+          { tag: '[..]', cls: 'log-dim', text: 'no delivery service connected, nothing was sent' }
+        ]);
+      }, 1200);
+    });
   })();
   </script>
 
