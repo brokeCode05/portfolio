@@ -97,3 +97,162 @@ CREATE POLICY "Admin delete contact_messages"
   FOR DELETE
   TO authenticated
   USING (true);
+
+-- ===================================================
+--   Contact Messages — Spam Protection (Phase 3.1)
+--   Run this section after Steps 5-10
+--   ===================================================
+
+-- Step 11: Store the Turnstile challenge token on each message (for audit; the
+-- Edge Function verifies it before insert when configured). Nullable so direct
+-- REST inserts keep working when the Edge Function is not deployed.
+ALTER TABLE contact_messages
+  ADD COLUMN IF NOT EXISTS turnstile_token text;
+
+-- Step 12: Flood guard — block repeat sends from the same email within 10 minutes.
+-- This is enforced by the database itself, so it works even if a bot clears
+-- browser storage or posts directly to the REST API.
+CREATE OR REPLACE FUNCTION contact_messages_flood_guard()
+RETURNS trigger AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM contact_messages
+    WHERE email = NEW.email
+      AND created_at > now() - interval '10 minutes'
+  ) THEN
+    RAISE EXCEPTION 'Too many messages from this email recently';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS contact_messages_flood_guard_trigger ON contact_messages;
+CREATE TRIGGER contact_messages_flood_guard_trigger
+  BEFORE INSERT ON contact_messages
+  FOR EACH ROW
+  EXECUTE FUNCTION contact_messages_flood_guard();
+
+-- ===================================================
+--   Contact Messages — Email Notifications (Phase 3.2)
+--   Run this section after Steps 5-12
+--   ===================================================
+
+-- Step 13: Email the owner when a new message arrives.
+-- Uses Supabase's built-in pg_net extension so the email fires on ANY insert,
+-- whether the message came via direct REST, the `contact` edge function, or
+-- the admin panel. The notify edge function (supabase/functions/notify) does
+-- the actual sending via Resend.
+
+-- 13a. Enable pg_net (standard Supabase extension).
+create extension if not exists pg_net;
+
+-- 13b. Config table holds the notify function URL + shared secret.
+--     IMPORTANT: replace the two values below before running!
+--       - function_url: your Supabase project ref
+--       - secret:       the SAME value you set with `supabase secrets set NOTIFY_SECRET=...`
+create table if not exists contact_notify_config (
+  id int primary key default 1,
+  function_url text not null,
+  secret text not null,
+  check (id = 1)
+);
+
+insert into contact_notify_config (function_url, secret)
+values (
+  'https://YOUR_PROJECT_REF.supabase.co/functions/v1/notify',
+  'REPLACE_WITH_YOUR_NOTIFY_SECRET'
+)
+on conflict (id) do update
+  set function_url = excluded.function_url,
+      secret = excluded.secret;
+
+-- 13b2. Lock the config table down: RLS on with no anon/authenticated policies.
+-- The notify trigger is SECURITY DEFINER (owner = postgres), so it bypasses RLS
+-- and notifications keep working — but the public can no longer read the secret
+-- or redirect function_url to an attacker-controlled server.
+alter table contact_notify_config enable row level security;
+
+-- 13c. Trigger function: fire-and-forget POST to the notify edge function.
+create or replace function contact_messages_notify()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  cfg contact_notify_config%rowtype;
+  payload jsonb;
+begin
+  select * into cfg from contact_notify_config where id = 1;
+  if not found then
+    return new;
+  end if;
+
+  payload := jsonb_build_object(
+    'name', new.name,
+    'email', new.email,
+    'subject', new.subject,
+    'message', new.message,
+    'created_at', new.created_at
+  );
+
+  -- Fire-and-forget: pg_net runs the request in the background; the insert
+  -- never blocks or fails because the email is delayed or down.
+  perform net.http_post(
+    url := cfg.function_url,
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-notify-secret', cfg.secret
+    ),
+    body := payload
+  );
+  return new;
+end;
+$$;
+
+-- 13d. Attach the trigger.
+drop trigger if exists contact_messages_notify_trigger on contact_messages;
+create trigger contact_messages_notify_trigger
+  after insert on contact_messages
+  for each row
+  execute function contact_messages_notify();
+
+-- ===================================================
+--   Contact Messages — In-App Replies (Phase 3.3)
+--   Run this section after Steps 5-13
+--   ===================================================
+
+-- Step 14: Reply threads.
+-- The admin replies from the dashboard; the reply edge function
+-- (supabase/functions/reply) sends the email via Resend AND stores the reply
+-- here so the full conversation shows inside the message card.
+
+-- 14a. Timestamp on the message so the inbox shows which ones you answered.
+alter table contact_messages
+  add column if not exists replied_at timestamptz;
+
+-- 14b. Replies table (thread history), one row per reply you send.
+create table if not exists contact_replies (
+  id uuid primary key default gen_random_uuid(),
+  message_id uuid not null references contact_messages(id) on delete cascade,
+  body text not null,
+  created_at timestamptz not null default now(),
+  constraint contact_replies_length_check check (
+    char_length(body) between 1 and 10000
+  )
+);
+
+-- 14c. Fast thread loading.
+create index if not exists contact_replies_message_idx
+  on contact_replies (message_id, created_at);
+
+-- 14d. RLS: the signed-in admin can read replies to show the thread.
+-- Inserts only happen via the reply edge function (service role, bypasses RLS),
+-- so no insert policy is needed — this keeps the table locked down.
+alter table contact_replies enable row level security;
+
+create policy "Admin read contact_replies"
+  on contact_replies
+  for select
+  to authenticated
+  using (true);

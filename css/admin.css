@@ -1374,3 +1374,94 @@ body {
   background-color: var(--admin-danger, #F87171);
   color: var(--admin-bg, #171A21);
 }
+
+/* ── Message thread + reply compose (Phase 3.3) ────────────── */
+.admin-message-replied {
+  display: inline-block;
+  margin-left: auto;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-accent, #4ADE80);
+  border: 1px solid var(--admin-accent, #4ADE80);
+  border-radius: 999px;
+  padding: 0.125rem 0.5rem;
+}
+
+.admin-thread {
+  margin: 0.75rem 0 0.25rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--admin-border, #2A2F3E);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.admin-thread-item {
+  background: rgba(74, 222, 128, 0.05);
+  border: 1px solid var(--admin-border, #2A2F3E);
+  border-radius: 6px;
+  padding: 0.625rem 0.75rem;
+}
+
+.admin-thread-item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--admin-accent, #4ADE80);
+  margin-bottom: 0.25rem;
+}
+
+.admin-thread-item-head .admin-message-date {
+  color: var(--admin-text-secondary, #9CA3AF);
+}
+
+.admin-thread-item-body {
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--admin-text, #E5E7EB);
+  white-space: pre-wrap;
+}
+
+.msg-compose {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--admin-border, #2A2F3E);
+}
+
+.msg-compose-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--admin-text-secondary, #9CA3AF);
+  margin-bottom: 0.375rem;
+}
+
+.msg-compose-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--admin-bg, #171A21);
+  border: 1px solid var(--admin-border, #2A2F3E);
+  border-radius: 6px;
+  color: var(--admin-text, #E5E7EB);
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.625rem;
+  resize: vertical;
+}
+
+.msg-compose-input:focus {
+  outline: none;
+  border-color: var(--admin-accent, #4ADE80);
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+}
+
+.msg-compose-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

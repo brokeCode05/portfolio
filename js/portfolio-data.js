@@ -118,19 +118,31 @@ async function pushToSupabase(data) {
 // ─── Contact Messages (Phase 3) ──────────────────────
 // Public visitors submit via the contact form (RLS allows anon INSERT).
 // The admin reads/marks them via their authenticated Supabase session.
+// Optional: Supabase Edge Function that verifies the Turnstile token server-side
+// before inserting the message (deploy: supabase/functions/contact). Leave empty
+// to keep the direct REST insert (token stored for audit, not verified).
+var CONTACT_FUNCTION_URL = '';
+
 async function submitContactMessage(msg) {
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
-    var resp = await fetch(SUPABASE_URL + '/rest/v1/contact_messages', {
+    var headers = {
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    };
+    var endpoint;
+    if (CONTACT_FUNCTION_URL) {
+      endpoint = CONTACT_FUNCTION_URL;
+    } else {
+      endpoint = SUPABASE_URL + '/rest/v1/contact_messages';
+      headers['apikey'] = SUPABASE_ANON_KEY;
+      headers['Authorization'] = 'Bearer ' + SUPABASE_ANON_KEY;
+    }
+    var resp = await fetch(endpoint, {
       signal: controller.signal,
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
+      headers: headers,
       body: JSON.stringify(msg)
     });
     clearTimeout(timeoutId);

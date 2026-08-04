@@ -379,6 +379,13 @@
       overflow: hidden;
       opacity: 0;
     }
+    .contact-captcha {
+      display: none;
+      margin-bottom: var(--space-md, 1rem);
+    }
+    .contact-captcha.is-active {
+      display: block;
+    }
     @media (max-width: 768px) {
       .contact-grid {
         grid-template-columns: 1fr;
@@ -2047,6 +2054,10 @@
             <label class="form-label" for="contact-website">Website</label>
             <input class="form-input" type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
           </div>
+          <div class="form-field contact-captcha" id="contact-captcha-field">
+            <div id="contact-turnstile"></div>
+            <small class="form-error" id="contact-captcha-error" aria-live="polite"></small>
+          </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary form-submit" id="contact-submit">
               <span class="form-submit-spinner" aria-hidden="true"></span>
@@ -3097,6 +3108,84 @@
     var statusEl = document.getElementById('contact-form-status');
     var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    // ---- Spam protection: client-side rate limiter ----
+    var RATE_KEY = 'portfolio_contact_rate';
+    var RATE_MIN_MS = 60000;   // minimum 60s between sends
+    var RATE_DAILY_CAP = 5;    // maximum 5 sends per calendar day
+    function rateTodayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+    function getRateState() {
+      try {
+        var s = JSON.parse(localStorage.getItem(RATE_KEY) || 'null');
+        if (s && s.day === rateTodayKey()) return s;
+      } catch (e) {}
+      return { day: rateTodayKey(), last: 0, count: 0 };
+    }
+    function checkRateLimit() {
+      var s = getRateState();
+      var now = Date.now();
+      if (now - s.last < RATE_MIN_MS) {
+        return { ok: false, wait: Math.ceil((RATE_MIN_MS - (now - s.last)) / 1000) };
+      }
+      if (s.count >= RATE_DAILY_CAP) {
+        return { ok: false, daily: true };
+      }
+      return { ok: true, state: s };
+    }
+    function stampRateLimit() {
+      var s = getRateState();
+      s.last = Date.now();
+      s.count += 1;
+      try { localStorage.setItem(RATE_KEY, JSON.stringify(s)); } catch (e) {}
+    }
+
+    // ---- Spam protection: Cloudflare Turnstile (optional) ----
+    // Paste your Cloudflare Turnstile site key here to enable the invisible
+    // challenge. Leave empty to skip it — rate limit + honeypot still apply.
+    var CONTACT_TURNSTILE_SITEKEY = '';
+    var turnstileToken = '';
+    var turnstileFallback = false; // soft-fail if the challenge can't complete
+    function initTurnstile() {
+      var holder = document.getElementById('contact-turnstile');
+      var field = document.getElementById('contact-captcha-field');
+      if (!CONTACT_TURNSTILE_SITEKEY || !holder) return;
+      if (typeof window.turnstile === 'undefined') return;
+      try {
+        if (field) field.classList.add('is-active');
+        window.turnstile.render(holder, {
+          sitekey: CONTACT_TURNSTILE_SITEKEY,
+          theme: 'dark',
+          callback: function(token) { turnstileToken = token; },
+          'expired-callback': function() { turnstileToken = ''; },
+          'error-callback': function() {
+            turnstileToken = '';
+            turnstileFallback = true;
+          }
+        });
+      } catch (e) {
+        turnstileToken = '';
+        turnstileFallback = true;
+      }
+    }
+    if (CONTACT_TURNSTILE_SITEKEY) {
+      var ts = document.createElement('script');
+      ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      ts.async = true;
+      ts.onload = initTurnstile;
+      ts.onerror = function() { turnstileFallback = true; };
+      document.head.appendChild(ts);
+      // Soft-fail: if no token arrives within 10s (script blocked/offline), don't
+      // lock out real visitors — the other layers still protect against spam.
+      setTimeout(function() {
+        if (!turnstileToken) {
+          turnstileFallback = true;
+          var err = document.getElementById('contact-captcha-error');
+          if (err) err.textContent = 'Security check unavailable — sending anyway.';
+        }
+      }, 10000);
+    }
+
     function setError(name, message) {
       var input = fields[name];
       var error = errors[name];
@@ -3272,6 +3361,32 @@
         return;
       }
 
+      // Rate limit: block rapid-fire or excessive sends
+      var rate = checkRateLimit();
+      if (!rate.ok) {
+        submitBtn.classList.add('is-error');
+        writeLog([
+          { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+          { tag: '[ERR]', cls: 'log-err', text: rate.daily
+              ? 'daily send limit reached — please try again tomorrow'
+              : 'please wait ' + rate.wait + 's before sending again' },
+          { tag: '[..]', cls: 'log-dim', text: 'nothing was sent — spam guard active' }
+        ]);
+        return;
+      }
+
+      // Turnstile: if configured and working, a valid challenge token is required.
+      // Falls back gracefully if the challenge can't complete (script blocked).
+      if (CONTACT_TURNSTILE_SITEKEY && !turnstileToken && !turnstileFallback) {
+        submitBtn.classList.add('is-error');
+        writeLog([
+          { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+          { tag: '[ERR]', cls: 'log-err', text: 'security check pending — please try again' },
+          { tag: '[..]', cls: 'log-dim', text: 'the invisible challenge has not completed yet' }
+        ]);
+        return;
+      }
+
       // Send to Supabase (Phase 3) — honest fallback if not configured
       submitBtn.classList.add('is-sending');
       submitBtn.disabled = true;
@@ -3281,7 +3396,8 @@
         name: fields.name.value.trim(),
         email: fields.email.value.trim(),
         subject: fields.subject.value.trim(),
-        message: fields.message.value.trim()
+        message: fields.message.value.trim(),
+        turnstile_token: turnstileToken || null
       };
 
       var sendPromise = (typeof submitContactMessage === 'function')
@@ -3294,6 +3410,7 @@
         submitBtn.disabled = false;
         submitLabel.textContent = 'Send Message';
         if (ok) {
+          stampRateLimit();
           form.reset();
           Object.keys(fields).forEach(function(n){ setError(n, ''); });
           if (typeof updateByteCount === 'function') updateByteCount();

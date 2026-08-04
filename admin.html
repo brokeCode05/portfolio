@@ -487,6 +487,9 @@ CREATE POLICY "Admin update portfolio_data"
   // ─── Supabase Auth Setup ──────────────────
   var ADMIN_EMAIL = 'jhnbryn05@gmail.com';
   var SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
+  // In-app reply endpoint. Set this after deploying the `reply` edge function
+  // (supabase/functions/reply). Leave empty to keep the mailto Reply fallback.
+  var REPLY_FUNCTION_URL = '';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
 
   try {
@@ -829,18 +832,43 @@ CREATE POLICY "Admin update portfolio_data"
   // ─── Contact Messages Inbox ───────────────
   function renderMessageCard(m) {
     var date = new Date(m.created_at).toLocaleString();
+    var replies = (m.contact_replies || []).slice().sort(function(a, b) {
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+    var thread = replies.length ?
+      '<div class="admin-thread">' +
+        replies.map(function(r) {
+          return '<div class="admin-thread-item">' +
+            '<div class="admin-thread-item-head">' +
+              '<span>You replied</span>' +
+              '<span class="admin-message-date">' + new Date(r.created_at).toLocaleString() + '</span>' +
+            '</div>' +
+            '<div class="admin-thread-item-body">' + escapeHtml(r.body) + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' : '';
     return '<div class="admin-message" data-id="' + escapeHtml(m.id) + '" data-read="' + (m.read ? '1' : '0') + '">' +
       '<div class="admin-message-head">' +
         '<strong>' + escapeHtml(m.name) + '</strong>' +
         '<span class="admin-message-email">&lt;' + escapeHtml(m.email) + '&gt;</span>' +
         '<span class="admin-message-date">' + date + '</span>' +
+        (m.replied_at ? '<span class="admin-message-replied">Replied</span>' : '') +
       '</div>' +
       '<div class="admin-message-subject">' + escapeHtml(m.subject) + '</div>' +
       '<p class="admin-message-body">' + escapeHtml(m.message) + '</p>' +
+      thread +
       '<div class="admin-message-actions">' +
-        '<a class="btn btn-sm" href="mailto:' + escapeHtml(m.email) + '?subject=Re: ' + encodeURIComponent(m.subject) + '">Reply</a>' +
+        '<button class="btn btn-sm msg-reply" data-id="' + escapeHtml(m.id) + '">' + (replies.length ? 'Reply Again' : 'Reply') + '</button>' +
         '<button class="btn btn-sm msg-toggle-read" data-id="' + escapeHtml(m.id) + '">' + (m.read ? 'Mark Unread' : 'Mark Read') + '</button>' +
         '<button class="btn btn-sm btn-danger-ghost msg-delete" data-id="' + escapeHtml(m.id) + '">Delete</button>' +
+      '</div>' +
+      '<div class="msg-compose" hidden>' +
+        '<label class="msg-compose-label" for="msg-reply-' + escapeHtml(m.id) + '">Reply to &lt;' + escapeHtml(m.email) + '&gt;</label>' +
+        '<textarea class="msg-compose-input" id="msg-reply-' + escapeHtml(m.id) + '" rows="4" placeholder="Write your reply…" maxlength="10000"></textarea>' +
+        '<div class="msg-compose-actions">' +
+          '<button class="btn btn-sm msg-send-reply" data-id="' + escapeHtml(m.id) + '" data-email="' + escapeHtml(m.email) + '">Send Reply</button>' +
+          '<button class="btn btn-sm btn-danger-ghost msg-cancel-reply">Cancel</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }
@@ -854,7 +882,7 @@ CREATE POLICY "Admin update portfolio_data"
     }
     inbox.innerHTML = '<p style="color:var(--admin-text-secondary)">Loading messages…</p>';
     supabaseClient.from('contact_messages')
-      .select('*')
+      .select('*, contact_replies(id, body, created_at)')
       .order('created_at', { ascending: false })
       .then(function(result) {
         if (result.error) {
@@ -900,10 +928,108 @@ CREATE POLICY "Admin update portfolio_data"
               });
           });
         });
+        inbox.querySelectorAll('.msg-reply').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.admin-message');
+            if (!card) return;
+            var compose = card.querySelector('.msg-compose');
+            if (compose) {
+              compose.hidden = !compose.hidden;
+              if (!compose.hidden) {
+                var ta = compose.querySelector('textarea');
+                if (ta) ta.focus();
+              }
+            }
+          });
+        });
+        inbox.querySelectorAll('.msg-cancel-reply').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var compose = btn.closest('.msg-compose');
+            if (compose) compose.hidden = true;
+          });
+        });
+        inbox.querySelectorAll('.msg-send-reply').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.admin-message');
+            if (!card) return;
+            var compose = card.querySelector('.msg-compose');
+            var ta = compose ? compose.querySelector('textarea') : null;
+            if (!ta) return;
+            var body = ta.value.trim();
+            if (!body) {
+              showToast('Reply is empty', 'error');
+              return;
+            }
+            sendReply({
+              message_id: btn.dataset.id,
+              body: body,
+              to: btn.dataset.email || '',
+              subject: (card.querySelector('.admin-message-subject') || {}).textContent || ''
+            }, ta, btn);
+          });
+        });
       })
       .catch(function(err) {
         inbox.innerHTML = '<p style="color:var(--admin-danger,#F87171)">Could not load messages: ' + escapeHtml(err.message || err) + '</p>';
       });
+  }
+
+  function sendReply(payload, textarea, sendBtn) {
+    if (!supabaseClient) {
+      showToast('Supabase is not available', 'error');
+      return;
+    }
+    if (!REPLY_FUNCTION_URL) {
+      // Edge function not deployed yet — fall back to mailto with the typed reply.
+      var subject = 'Re: ' + payload.subject;
+      var link = 'mailto:' + payload.to + '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(payload.body);
+      window.location.href = link;
+      showToast('Edge function not deployed — opened your email app instead', '');
+      return;
+    }
+    textarea.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
+    function reenable() {
+      textarea.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+    supabaseClient.auth.getSession().then(function(sessionResult) {
+      var token = sessionResult && sessionResult.data && sessionResult.data.session
+        ? sessionResult.data.session.access_token : null;
+      if (!token) {
+        showToast('Please sign in first', 'error');
+        reenable();
+        return;
+      }
+      fetch(REPLY_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) {
+          return { ok: resp.ok, data: data };
+        }); })
+        .then(function(result) {
+          reenable();
+          if (result.ok) {
+            showToast('Reply sent', 'success');
+            loadMessages();
+          } else {
+            showToast(result.data && result.data.error ? result.data.error : 'Reply failed', 'error');
+          }
+        })
+        .catch(function(err) {
+          reenable();
+          showToast('Reply failed: ' + (err.message || err), 'error');
+        });
+    }).catch(function() {
+      reenable();
+      showToast('Could not verify your session', 'error');
+    });
   }
 
   var messagesRefreshBtn = document.getElementById('messages-refresh');
