@@ -43,3 +43,57 @@ CREATE POLICY "Admin update portfolio_data"
 SELECT tablename, rowsecurity 
 FROM pg_tables 
 WHERE schemaname = 'public' AND tablename = 'portfolio_data';
+
+/* ===================================================
+   Contact Messages (Phase 3)
+   Run this in your Supabase Dashboard → SQL Editor
+   =================================================== */
+
+-- Step 5: Create the contact messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL,
+  subject text NOT NULL,
+  message text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  read boolean NOT NULL DEFAULT false,
+  CONSTRAINT contact_messages_length_check CHECK (
+    char_length(name) <= 200 AND
+    char_length(email) <= 320 AND
+    char_length(subject) <= 300 AND
+    char_length(message) <= 5000
+  )
+);
+
+-- Step 6: Enable RLS
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Step 7: Allow public insert — anyone can submit the contact form
+CREATE POLICY "Public insert contact_messages"
+  ON contact_messages
+  FOR INSERT
+  TO anon
+  WITH CHECK (true);
+
+-- Step 8: Only the signed-in admin (Supabase Auth OTP session) can read messages
+CREATE POLICY "Admin read contact_messages"
+  ON contact_messages
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Step 9: Only the signed-in admin can mark messages read/unread
+CREATE POLICY "Admin update contact_messages"
+  ON contact_messages
+  FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Step 10: Only the signed-in admin can delete messages
+CREATE POLICY "Admin delete contact_messages"
+  ON contact_messages
+  FOR DELETE
+  TO authenticated
+  USING (true);

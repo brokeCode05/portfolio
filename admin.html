@@ -151,6 +151,13 @@
         <span>Contact</span>
         <span class="nav-count"></span>
       </button>
+      <button class="admin-nav-btn" data-section="messages">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </span>
+        <span>Messages</span>
+        <span class="nav-count" id="messages-nav-count"></span>
+      </button>
       <button class="admin-nav-btn" data-section="cloud">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
@@ -318,6 +325,21 @@
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="contact-links-add">+ Add Link</button>
           <button class="btn btn-primary" id="contact-links-save">Save All Links</button>
+        </div>
+      </div>
+
+      <!-- ===== MESSAGES SECTION ===== -->
+      <div class="admin-section" id="section-messages">
+        <h2 class="admin-section-title">Contact Messages</h2>
+        <p class="admin-section-desc">Messages submitted through the Contact form on your site. Requires the contact_messages table (see docs/supabase-rls.sql).</p>
+        <div class="admin-card">
+          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h4>Inbox</h4>
+            <button class="btn btn-sm" id="messages-refresh">↻ Refresh</button>
+          </div>
+          <div id="messages-inbox" style="display:flex;flex-direction:column;gap:0.75rem">
+            <p style="color:var(--admin-text-secondary);font-size:0.875rem">Loading messages…</p>
+          </div>
         </div>
       </div>
 
@@ -804,6 +826,91 @@ CREATE POLICY "Admin update portfolio_data"
     });
   }
 
+  // ─── Contact Messages Inbox ───────────────
+  function renderMessageCard(m) {
+    var date = new Date(m.created_at).toLocaleString();
+    return '<div class="admin-message" data-id="' + escapeHtml(m.id) + '" data-read="' + (m.read ? '1' : '0') + '">' +
+      '<div class="admin-message-head">' +
+        '<strong>' + escapeHtml(m.name) + '</strong>' +
+        '<span class="admin-message-email">&lt;' + escapeHtml(m.email) + '&gt;</span>' +
+        '<span class="admin-message-date">' + date + '</span>' +
+      '</div>' +
+      '<div class="admin-message-subject">' + escapeHtml(m.subject) + '</div>' +
+      '<p class="admin-message-body">' + escapeHtml(m.message) + '</p>' +
+      '<div class="admin-message-actions">' +
+        '<a class="btn btn-sm" href="mailto:' + escapeHtml(m.email) + '?subject=Re: ' + encodeURIComponent(m.subject) + '">Reply</a>' +
+        '<button class="btn btn-sm msg-toggle-read" data-id="' + escapeHtml(m.id) + '">' + (m.read ? 'Mark Unread' : 'Mark Read') + '</button>' +
+        '<button class="btn btn-sm btn-danger-ghost msg-delete" data-id="' + escapeHtml(m.id) + '">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function loadMessages() {
+    var inbox = document.getElementById('messages-inbox');
+    if (!inbox) return;
+    if (!supabaseClient) {
+      inbox.innerHTML = '<p style="color:var(--admin-text-secondary)">Supabase is not available. Check your connection or the CDN script.</p>';
+      return;
+    }
+    inbox.innerHTML = '<p style="color:var(--admin-text-secondary)">Loading messages…</p>';
+    supabaseClient.from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(function(result) {
+        if (result.error) {
+          inbox.innerHTML = '<p style="color:var(--admin-danger,#F87171)">Could not load messages: ' + escapeHtml(result.error.message) + '</p>';
+          return;
+        }
+        var rows = result.data || [];
+        var unread = rows.filter(function(m) { return !m.read; }).length;
+        var badge = document.getElementById('messages-nav-count');
+        if (badge) badge.textContent = unread ? '(' + unread + ')' : '';
+        if (!rows.length) {
+          inbox.innerHTML = '<p style="color:var(--admin-text-secondary)">No messages yet. They will appear here when someone uses the Contact form.</p>';
+          return;
+        }
+        inbox.innerHTML = rows.map(renderMessageCard).join('');
+        inbox.querySelectorAll('.msg-toggle-read').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.admin-message');
+            if (!card || !supabaseClient) return;
+            var id = card.dataset.id;
+            var read = card.dataset.read === '1';
+            supabaseClient.from('contact_messages')
+              .update({ read: !read })
+              .eq('id', id)
+              .then(function(result) {
+                if (result.error) showToast('Failed to update message', 'error');
+                loadMessages();
+              });
+          });
+        });
+        inbox.querySelectorAll('.msg-delete').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var card = btn.closest('.admin-message');
+            if (!card || !supabaseClient) return;
+            if (!confirm('Delete this message?')) return;
+            var id = card.dataset.id;
+            supabaseClient.from('contact_messages')
+              .delete()
+              .eq('id', id)
+              .then(function(result) {
+                if (result.error) showToast('Failed to delete message', 'error');
+                loadMessages();
+              });
+          });
+        });
+      })
+      .catch(function(err) {
+        inbox.innerHTML = '<p style="color:var(--admin-danger,#F87171)">Could not load messages: ' + escapeHtml(err.message || err) + '</p>';
+      });
+  }
+
+  var messagesRefreshBtn = document.getElementById('messages-refresh');
+  if (messagesRefreshBtn) {
+    messagesRefreshBtn.addEventListener('click', loadMessages);
+  }
+
   // ─── Ctrl+S Shortcut ──────────────────────
   document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -821,6 +928,7 @@ CREATE POLICY "Admin update portfolio_data"
     currentSection = id;
     document.querySelectorAll('.admin-section').forEach(function(el) { el.classList.remove('active'); });
     document.getElementById('section-' + id).classList.add('active');
+    if (id === 'messages') loadMessages();
     document.querySelectorAll('.admin-nav-btn').forEach(function(el) { el.classList.remove('active'); });
     document.querySelector('.admin-nav-btn[data-section="' + id + '"]').classList.add('active');
     document.getElementById('section-title').textContent =
@@ -1986,6 +2094,7 @@ CREATE POLICY "Admin update portfolio_data"
     renderContactLinksList();
     updateCloudStatus();
     updateSidebarCounts();
+    loadMessages();
     updateStatusBar('saved');
   }
 

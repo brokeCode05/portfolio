@@ -371,6 +371,14 @@
       color: var(--color-text-secondary, #A0A5B0);
       margin: 0;
     }
+    .hp-field {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+    }
     @media (max-width: 768px) {
       .contact-grid {
         grid-template-columns: 1fr;
@@ -2035,6 +2043,10 @@
             <small class="form-error" id="contact-message-error" aria-live="polite"></small>
             <small class="form-char-count" id="contact-message-count">bytes: 0/5000</small>
           </div>
+          <div class="form-field hp-field" aria-hidden="true">
+            <label class="form-label" for="contact-website">Website</label>
+            <input class="form-input" type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
+          </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary form-submit" id="contact-submit">
               <span class="form-submit-spinner" aria-hidden="true"></span>
@@ -3249,22 +3261,55 @@
         return;
       }
 
-      // Demo-only state machine — no message is actually sent
+      // Honeypot: bots fill hidden fields — silently ignore the submission
+      var hpField = document.getElementById('contact-website');
+      if (hpField && hpField.value && hpField.value.trim() !== '') {
+        submitBtn.classList.add('is-success');
+        writeLog([
+          { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+          { tag: '[ OK ]', cls: 'log-ok', text: 'message delivered — thanks!' }
+        ]);
+        return;
+      }
+
+      // Send to Supabase (Phase 3) — honest fallback if not configured
       submitBtn.classList.add('is-sending');
       submitBtn.disabled = true;
       submitLabel.textContent = 'Sending...';
 
-      setTimeout(function(){
+      var payload = {
+        name: fields.name.value.trim(),
+        email: fields.email.value.trim(),
+        subject: fields.subject.value.trim(),
+        message: fields.message.value.trim()
+      };
+
+      var sendPromise = (typeof submitContactMessage === 'function')
+        ? submitContactMessage(payload)
+        : Promise.resolve(false);
+
+      sendPromise.then(function(ok){
         submitBtn.classList.remove('is-sending');
-        submitBtn.classList.add('is-success');
+        submitBtn.classList.add(ok ? 'is-success' : 'is-error');
         submitBtn.disabled = false;
         submitLabel.textContent = 'Send Message';
-        writeLog([
-          { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
-          { tag: '[ OK ]', cls: 'log-ok', text: 'message staged — demo mode' },
-          { tag: '[..]', cls: 'log-dim', text: 'no delivery service connected, nothing was sent' }
-        ]);
-      }, 1200);
+        if (ok) {
+          form.reset();
+          Object.keys(fields).forEach(function(n){ setError(n, ''); });
+          if (typeof updateByteCount === 'function') updateByteCount();
+          writeLog([
+            { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+            { tag: '[ OK ]', cls: 'log-ok', text: 'message delivered — thanks!' },
+            { tag: '[..]', cls: 'log-dim', text: 'I usually reply within a day or two.' }
+          ]);
+        } else {
+          writeLog([
+            { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
+            { tag: '[ERR]', cls: 'log-err', text: 'delivery failed — is the contact table set up?' },
+            { tag: '[..]', cls: 'log-dim', text: 'no table created or no network — nothing was sent' }
+          ]);
+        }
+      });
     });
   })();
   </script>

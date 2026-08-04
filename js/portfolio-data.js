@@ -115,6 +115,33 @@ async function pushToSupabase(data) {
   return false;
 }
 
+// ─── Contact Messages (Phase 3) ──────────────────────
+// Public visitors submit via the contact form (RLS allows anon INSERT).
+// The admin reads/marks them via their authenticated Supabase session.
+async function submitContactMessage(msg) {
+  var controller = new AbortController();
+  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+  try {
+    var resp = await fetch(SUPABASE_URL + '/rest/v1/contact_messages', {
+      signal: controller.signal,
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(msg)
+    });
+    clearTimeout(timeoutId);
+    return resp.ok;
+  } catch(e) {
+    console.log('[contact] Submit error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+  }
+  clearTimeout(timeoutId);
+  return false;
+}
+
 // ─── Data Getters (with fallback) ────────────────────
 
 function loadData() {
