@@ -1093,6 +1093,20 @@ CREATE POLICY "Admin update portfolio_data"
         renderFaqList();
       });
     });
+
+    // Sync edits into the data object as the admin types, so Move/Remove/Save
+    // never lose unsaved text (matches the Learning Journey editor pattern).
+    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var card = this.closest('.admin-card');
+        var idx = parseInt(card.dataset.fidx);
+        var d = readData();
+        if (isNaN(idx) || !d.chatFaq[idx]) return;
+        d.chatFaq[idx].topic = card.querySelector('.faq-topic').value;
+        d.chatFaq[idx].keywords = card.querySelector('.faq-keywords').value;
+        d.chatFaq[idx].answer = card.querySelector('.faq-answer').value;
+      });
+    });
   }
 
   document.getElementById('faq-add').addEventListener('click', function() {

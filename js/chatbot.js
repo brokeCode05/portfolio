@@ -254,9 +254,12 @@
         return f && String(f.keywords || '').trim() && String(f.answer || '').trim();
       })
       .map(function(f) {
+        var kws = String(f.keywords).split(/[,\s]+/).map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean);
         return {
-          topic: (f.topic && String(f.topic).trim()) || 'custom',
-          keywords: String(f.keywords).split(',').map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean),
+          // Topic falls back to the first keyword (or 'custom') so Chat Insights
+          // can group untitled entries usefully.
+          topic: (f.topic && String(f.topic).trim()) || kws[0] || 'custom',
+          keywords: kws,
           answer: String(f.answer)
         };
       });
