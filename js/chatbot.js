@@ -466,7 +466,8 @@
         .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { status: resp.status, ok: resp.ok, data: data }; }); })
         .then(function(result) {
           if (result.ok && result.data && result.data.text) {
-            logChat(text, 'ai', true, false);
+            // Topic comes from the AI's own classification (falls back to 'ai').
+            logChat(text, result.data.topic || 'ai', true, false);
             typeBot(String(result.data.text).slice(0, 900), showChips);
           } else if (result.status === 429) {
             // Daily AI quota exhausted — log it distinctly so Chat Insights

@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
     'If the question is not about Bryan or you cannot answer from the profile, be honest and suggest the contact form.',
     'If you suggest contacting Bryan, end your reply with the exact line: [[CONTACT]]',
     '',
+    'Reply in strict JSON only, with exactly two fields: {"topic": "...", "answer": "..."}',
+    'topic: one short lowercase phrase describing the subject (e.g. skills, projects, pricing, availability, coffee, contact).',
+    'answer: your reply to the visitor.',
+    'Do not use markdown code fences. Do not add any text outside the JSON object.',
+    '',
     'PROFILE:',
     context || '(empty profile)',
     '',
@@ -114,6 +119,26 @@ Deno.serve(async (req) => {
     return json({ error: 'AI returned no answer' }, 502)
   }
 
+  // The model is asked to reply as JSON {"topic", "answer"}; parse it leniently
+  // (it may come back as plain text or wrapped in fences) and fall back to the
+  // raw text with no topic.
+  const raw = String(text).trim()
+  let topic = null
+  let answerText = raw
+  const open = raw.indexOf('{')
+  const close = raw.lastIndexOf('}')
+  if (open !== -1 && close > open) {
+    try {
+      const parsed = JSON.parse(raw.slice(open, close + 1))
+      if (parsed && parsed.answer && String(parsed.answer).trim()) {
+        answerText = String(parsed.answer).trim()
+        topic = parsed.topic ? String(parsed.topic).trim().slice(0, 40) : null
+      }
+    } catch (e) {
+      // not valid JSON — keep the raw text
+    }
+  }
+
   // ── Count the request (upsert today's row) ─────────────────
   const upsertResult = await admin.from('chat_ai_usage').upsert(
     { usage_date: today, request_count: (usageRow ? usageRow.request_count : 0) + 1 },
@@ -123,8 +148,8 @@ Deno.serve(async (req) => {
     console.error('chat_ai_usage upsert failed:', upsertResult.error.message)
   }
 
-  console.log(`AI answered for question: ${question.slice(0, 80)}`)
-  return json({ ok: true, text: String(text).trim().slice(0, 900) }, 200)
+  console.log(`AI answered (topic: ${topic || 'ai'}) for question: ${question.slice(0, 80)}`)
+  return json({ ok: true, text: answerText.slice(0, 900), topic }, 200)
 })
 
 function json(data, status) {
