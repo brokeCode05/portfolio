@@ -1588,15 +1588,6 @@
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
     }
-    .gh-stat-item .gh-value-cursor {
-      display: inline-block;
-      width: 0.6em;
-      height: 0.8em;
-      margin-left: 3px;
-      background-color: var(--color-accent, #4ADE80);
-      vertical-align: baseline;
-      animation: blink 1s step-end infinite;
-    }
     .terminal-window {
       max-width: 100%;
     }
@@ -1617,7 +1608,7 @@
     }
   </style>
   <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805g" />
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805h" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -2255,11 +2246,11 @@
           .then(function(user) {
             if (user.message) return;
             var el = document.getElementById('gh-repos');
-            if (el) el.textContent = user.public_repos || '—';
+            if (el) el.textContent = (typeof user.public_repos === 'number') ? user.public_repos : '—';
             el = document.getElementById('gh-followers');
-            if (el) el.textContent = user.followers || '—';
+            if (el) el.textContent = (typeof user.followers === 'number') ? user.followers : '—';
             el = document.getElementById('gh-following');
-            if (el) el.textContent = user.following || '—';
+            if (el) el.textContent = (typeof user.following === 'number') ? user.following : '—';
           })
           .catch(function() {});
 
@@ -2270,7 +2261,7 @@
             if (!Array.isArray(repos)) return;
             repos.forEach(function(repo) { totalStars += repo.stargazers_count || 0; });
             var el = document.getElementById('gh-stars');
-            if (el) el.textContent = totalStars || '—';
+            if (el) el.textContent = (typeof totalStars === 'number') ? totalStars : '—';
           })
           .catch(function() {});
       }
@@ -2317,39 +2308,53 @@
         var reduced = window.matchMedia &&
           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        function typeNext() {
-          if (idx >= order.length) return;
-          var el = document.getElementById(order[idx++]);
-          if (!el) { typeNext(); return; }
-          var text = el.textContent;
-          if (reduced) { typeNext(); return; }
-          el.textContent = '';
-          var cursor = document.createElement('span');
-          cursor.className = 'gh-value-cursor';
-          cursor.setAttribute('aria-hidden', 'true');
-          el.appendChild(cursor);
-          var i = 0;
-          var timer = setInterval(function() {
-            i++;
-            el.textContent = text.substring(0, i);
-            el.appendChild(cursor);
-            if (i >= text.length) {
-              clearInterval(timer);
-              cursor.remove();
-              setTimeout(typeNext, 220);
+        function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
+
+        function countUp(el, target, dur) {
+          if (reduced || target <= 0) {
+            el.textContent = String(target);
+            setTimeout(countNext, 160);
+            return;
+          }
+          var start = null;
+          el.classList.add('gh-counting');
+          function frame(ts) {
+            if (start === null) start = ts;
+            var p = Math.min(1, (ts - start) / dur);
+            el.textContent = String(Math.round(easeOutQuad(p) * target));
+            if (p < 1) { requestAnimationFrame(frame); }
+            else {
+              el.textContent = String(target);
+              el.classList.remove('gh-counting');
+              setTimeout(countNext, 160);
             }
-          }, 34);
+          }
+          requestAnimationFrame(frame);
         }
 
-        // Wait for async stats to arrive (up to ~12s), then type real numbers
+        function countNext() {
+          if (idx >= order.length) return;
+          var el = document.getElementById(order[idx++]);
+          if (!el) { countNext(); return; }
+          var text = (el.textContent || '').trim();
+          var target = parseInt(text, 10);
+          if (isNaN(target)) {
+            el.textContent = text || '—';
+            setTimeout(countNext, 160);
+            return;
+          }
+          countUp(el, target, 900);
+        }
+
+        // Wait for async stats to arrive (up to ~12s), then count up real numbers
         function waitForData() {
           var allLoaded = order.every(function(id) {
             var el = document.getElementById(id);
             return el && el.textContent && el.textContent !== '—';
           });
-          if (allLoaded) { typeNext(); return; }
+          if (allLoaded) { countNext(); return; }
           attempts++;
-          if (attempts > 40) { typeNext(); return; }
+          if (attempts > 40) { countNext(); return; }
           ghTypePoll = setTimeout(waitForData, 300);
         }
         waitForData();

@@ -139,6 +139,17 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   100% { transform: scale(1); }
 }
 
+/* GitHub stat values: soft glow while the count-up is running. The
+   transition lives on the base class so removing .gh-counting fades the
+   glow out (otherwise the transition declaration disappears in the same
+   style change and it snaps). */
+.gh-stat-value {
+  transition: text-shadow 0.4s ease;
+}
+.gh-stat-value.gh-counting {
+  text-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
 /* Learning tags stagger naturally via existing delay attrs */
 
 /* ════════════════════════════════════════════════════════════
