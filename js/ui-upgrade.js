@@ -89,6 +89,44 @@
     }, { passive: true });
   }
 
+  // ── Cert card 3D tilt ─────────────────────────────────────
+  // Pure: normalized cursor offset (-0.5..0.5) → tilt degrees.
+  // px/py are the cursor position within the card as fractions
+  // (0..1); result clamps to ±max degrees on each axis.
+  function tiltDegrees(px, py, max) {
+    max = max || 6;
+    return {
+      rx: Math.max(-max, Math.min(max, Math.round((0.5 - py) * 2 * max * 100) / 100)),
+      ry: Math.max(-max, Math.min(max, Math.round((px - 0.5) * 2 * max * 100) / 100))
+    };
+  }
+
+  // Drives --rx/--ry on revealed .cert-card elements (delegated so it
+  // survives data-driven re-renders). Reset happens when the cursor leaves
+  // the card or the window blurs; skipped on touch/reduced-motion.
+  function certTilt() {
+    if (!finePointer() || reducedMotion()) return;
+    var current = null;
+    function reset() {
+      if (!current) return;
+      current.style.setProperty('--rx', '0deg');
+      current.style.setProperty('--ry', '0deg');
+      current = null;
+    }
+    document.addEventListener('mousemove', function (e) {
+      var card = e.target && e.target.closest ? e.target.closest('.cert-card') : null;
+      if (!card || !card.classList.contains('revealed')) { reset(); return; }
+      if (card !== current) { reset(); current = card; }
+      var r = card.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width;
+      var py = (e.clientY - r.top) / r.height;
+      var t = tiltDegrees(px, py, 6);
+      card.style.setProperty('--rx', t.rx + 'deg');
+      card.style.setProperty('--ry', t.ry + 'deg');
+    }, { passive: true });
+    window.addEventListener('blur', reset, { passive: true });
+  }
+
   // ── Filter helpers (pure — exported for tests) ────────────
   function parseTags(s) {
     return String(s || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
@@ -592,6 +630,7 @@
   function init() {
     createCursorGlow();
     cardSpotlight();
+    certTilt();
     heroRoles(document.getElementById('hero-roles-text'), ROLES);
     heroStats(document.getElementById('hero-stats'),
       typeof global.loadData === 'function' ? global.loadData() : null);
@@ -620,7 +659,8 @@
       parseTags: parseTags,
       matchesFilter: matchesFilter,
       aboutCommand: aboutCommand,
-      timelineProgress: timelineProgress
+      timelineProgress: timelineProgress,
+      tiltDegrees: tiltDegrees
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

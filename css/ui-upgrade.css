@@ -14,6 +14,7 @@
   --ui-spotlight-2: rgba(34, 211, 238, 0.07);
   --ui-surface-alt: rgba(23, 26, 33, 0.55);
   --ui-ring: rgba(74, 222, 128, 0.28);
+  --ui-shine: rgba(255, 255, 255, 0.30);
 }
 [data-theme="light"] {
   --color-accent-2: #0E7490;
@@ -24,6 +25,7 @@
   --ui-spotlight-2: rgba(14, 116, 144, 0.04);
   --ui-surface-alt: rgba(255, 255, 255, 0.55);
   --ui-ring: rgba(5, 150, 105, 0.20);
+  --ui-shine: rgba(5, 150, 105, 0.12);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -224,6 +226,41 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .github-graph-wrap > * {
   position: relative;
   z-index: 1;
+}
+
+/* ── Cert cards: 3D tilt + shine sweep ────────────────────────
+   Tilt vars (--rx/--ry deg) are set by JS while the cursor is over
+   a revealed card; the transform composes with the reveal so the
+   entrance animation is untouched. Hover applies a short transform
+   transition so tilt tracks the cursor; release returns gently via
+   the base 400ms transition. overflow:hidden keeps the sweep inside. */
+.cert-card {
+  overflow: hidden;
+}
+.certs-grid .cert-card[data-reveal].revealed:hover {
+  transform: translateY(0) scale(1) perspective(800px)
+    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    opacity var(--transition-slow),
+    transform 0.16s ease-out;
+}
+.cert-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 55%;
+  height: 100%;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--ui-shine), transparent);
+  transform: translateX(-160%);
+  transition: transform 0.75s ease;
+}
+.cert-card:hover::after {
+  transform: translateX(320%);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -547,6 +584,14 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .certs-grid .cert-card[data-reveal],
   .timeline-item[data-reveal] {
     transform: none !important;
+  }
+  /* Cert cards: no tilt, no shine sweep */
+  .certs-grid .cert-card[data-reveal].revealed:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+  .cert-card::after {
+    display: none !important;
   }
   /* Timeline: static full line + fully visible markers */
   .timeline::before {
