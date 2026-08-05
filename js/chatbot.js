@@ -453,25 +453,42 @@
         return;
       }
       try { localStorage.setItem('chat_ai_last', String(now)); } catch (e) {}
+
+      // Timeout so a slow/hung AI never leaves the typing indicator spinning.
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
       fetch(CHAT_AI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({ question: String(text).slice(0, 500), context: buildAiContext() })
       })
-        .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { status: resp.status, ok: resp.ok, data: data }; }); })
         .then(function(result) {
           if (result.ok && result.data && result.data.text) {
             logChat(text, 'ai', true, false);
             typeBot(String(result.data.text).slice(0, 900), showChips);
+          } else if (result.status === 429) {
+            // Daily AI quota exhausted — log it distinctly so Chat Insights
+            // shows why instead of a generic unanswered question.
+            escalate(text, 'ai-limit');
           } else {
-            escalate(text);
+            escalate(text, null);
           }
         })
-        .catch(function() { escalate(text); });
+        .catch(function(err) {
+          if (err && err.name === 'AbortError') {
+            logChat(text, 'ai-timeout', false, true);
+            typeBot('That one took too long — ask me again or use the contact form. [[CONTACT]]', showChips);
+            return;
+          }
+          escalate(text, null);
+        })
+        .then(function() { clearTimeout(timeoutId); });
     }
 
-    function escalate(text) {
-      logChat(text, null, false, true);
+    function escalate(text, topic) {
+      logChat(text, topic || null, false, true);
       typeBot(UNANSWERED, showChips);
     }
 
