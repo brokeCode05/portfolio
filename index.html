@@ -2769,7 +2769,9 @@
         certData = getCertCards();
       }
 
-      function showCert(index) {
+      // keepZoom=true is used when navigating prev/next so the zoom level
+      // carries across certs; opening the modal fresh resets it (default).
+      function showCert(index, keepZoom) {
         refreshCertData();
         if (index < 0 || index >= certData.length) return;
         currentIndex = index;
@@ -2794,8 +2796,8 @@
         var oldPlaceholder = document.querySelector('.cert-image-wrap .cert-error-placeholder');
         if (oldPlaceholder) oldPlaceholder.remove();
 
-        // Reset zoom + status + download for the new cert
-        resetZoom();
+        // Reset zoom (unless navigating prev/next) + status + download
+        if (!keepZoom) resetZoom();
         clearStatus();
         if (downloadBtn) {
           downloadBtn.classList.toggle('disabled', !cert.path);
@@ -2910,12 +2912,12 @@
         }, 420);
       };
 
-      // Prev/Next
+      // Prev/Next — keep the current zoom level when moving between certs
       prevBtn.addEventListener('click', function() {
-        if (currentIndex > 0) showCert(currentIndex - 1);
+        if (currentIndex > 0) showCert(currentIndex - 1, true);
       });
       nextBtn.addEventListener('click', function() {
-        if (currentIndex < certData.length - 1) showCert(currentIndex + 1);
+        if (currentIndex < certData.length - 1) showCert(currentIndex + 1, true);
       });
 
       // Keyboard navigation
@@ -2924,9 +2926,9 @@
         if (e.key === 'Escape') {
           closeModal();
         } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
-          showCert(currentIndex - 1);
+          showCert(currentIndex - 1, true);
         } else if (e.key === 'ArrowRight' && currentIndex < certData.length - 1) {
-          showCert(currentIndex + 1);
+          showCert(currentIndex + 1, true);
         } else if (e.key === '+' || e.key === '=') {
           setZoom(zoomLevel + ZOOM_STEP);
         } else if (e.key === '-' || e.key === '_') {
