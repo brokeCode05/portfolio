@@ -254,7 +254,7 @@ function renderTechStack(data) {
     if (isExtra) extraCount++;
     var extraAttr = isExtra ? ' data-extra="true" style="animation-delay:' + ((ri - 3) * 0.06).toFixed(2) + 's"' : '';
     
-    html += '<div class="tech-marquee-row ' + dir + '"' + extraAttr + '>' +
+    html += '<div class="tech-marquee-row ' + dir + '" data-cat="' + escapeHtml(cat) + '"' + extraAttr + '>' +
       '<span class="tech-marquee-label">' +
         '<span class="tech-marquee-dot" aria-hidden="true"></span>' +
         escapeHtml(label) +
@@ -301,7 +301,8 @@ function renderProjects(data) {
       if (proj.links.repo) links += '<a href="' + escapeHtml(proj.links.repo) + '" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">GitHub</a>';
     }
     var tags = (proj.tags || []).map(function(t) { return '<span class="tech-tag">' + escapeHtml(t) + '</span>'; }).join('');
-    return '<article class="project-card" data-reveal data-reveal-delay="' + (100 + idx * 100) + '">' +
+    var tagsAttr = 'data-tags="' + escapeHtml((proj.tags || []).join(',')) + '"';
+    return '<article class="project-card" ' + tagsAttr + ' data-reveal data-reveal-delay="' + (100 + idx * 100) + '">' +
       '<div class="project-card-header">' +
         '<div class="project-card-icon" aria-hidden="true">' +
           '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconPath + '</svg>' +

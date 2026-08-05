@@ -358,7 +358,80 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 
 /* ════════════════════════════════════════════════════════════
-   10. RESPONSIVE
+   10. FILTER CHIPS (skills categories + project tags)
+   ════════════════════════════════════════════════════════════ */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+.filter-bar-label {
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-accent-2);
+  margin-right: var(--space-xs);
+  letter-spacing: 0.06em;
+}
+.filter-chip {
+  padding: 0.35rem 0.85rem;
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast),
+              background-color var(--transition-fast), transform var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+.filter-chip:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+.filter-chip.active {
+  color: var(--color-bg);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px var(--ui-ring);
+}
+.filter-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Filter hide animation — keep the card's existing hover transitions intact */
+.tech-marquee-row {
+  transition: opacity 0.24s ease;
+}
+.project-card {
+  transition: opacity 0.24s ease, border-color var(--transition-fast),
+              transform var(--transition-base), box-shadow var(--transition-base);
+}
+.tech-marquee-row.ui-hide,
+.project-card.ui-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.project-card.ui-hide {
+  transform: scale(0.97);
+}
+.filter-empty {
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+/* ════════════════════════════════════════════════════════════
+   11. RESPONSIVE
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .hero-stats { grid-template-columns: repeat(2, 1fr); }

@@ -89,6 +89,131 @@
     }, { passive: true });
   }
 
+  // ── Filter helpers (pure — exported for tests) ────────────
+  function parseTags(s) {
+    return String(s || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+  }
+  function matchesFilter(tags, key) {
+    return key === 'all' || tags.indexOf(key) !== -1;
+  }
+
+  // ── Filter chip UI (skills categories + project tags) ──────
+  var FILTER_MS = 240;
+  function toggleEl(el, show) {
+    if (show) {
+      el.style.display = '';
+      void el.offsetWidth; // restart the CSS transition from the hidden state
+      el.classList.remove('ui-hide');
+      return;
+    }
+    el.classList.add('ui-hide');
+    // Reduced-motion fades are instant — collapse immediately so nothing
+    // occupies space invisibly for FILTER_MS.
+    if (reducedMotion()) { el.style.display = 'none'; return; }
+    setTimeout(function () {
+      if (el.classList.contains('ui-hide')) el.style.display = 'none';
+    }, FILTER_MS);
+  }
+
+  function buildFilterBar(labels, opts) {
+    var bar = document.createElement('div');
+    bar.className = 'filter-bar';
+    bar.setAttribute('role', 'group');
+    bar.setAttribute('aria-label', (opts && opts.ariaLabel) || 'Filter');
+    if (opts && opts.label) {
+      var lab = document.createElement('span');
+      lab.className = 'filter-bar-label';
+      lab.setAttribute('aria-hidden', 'true');
+      lab.textContent = opts.label;
+      bar.appendChild(lab);
+    }
+    labels.forEach(function (item, i) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'filter-chip' + (i === 0 ? ' active' : '');
+      chip.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      chip.textContent = item.label;
+      chip.addEventListener('click', function () {
+        if (chip.classList.contains('active')) return;
+        Array.prototype.forEach.call(bar.querySelectorAll('.filter-chip'), function (c) {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
+        chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
+        if (opts && opts.onPick) opts.onPick(item.key);
+      });
+      bar.appendChild(chip);
+    });
+    return bar;
+  }
+
+  // Skill category chips — filter the marquee rows by data-cat.
+  function skillFilters() {
+    var grid = document.getElementById('tech-stack-grid');
+    if (!grid) return;
+    var rows = Array.prototype.slice.call(grid.querySelectorAll('.tech-marquee-row'));
+    if (!rows.length) return;
+    var seen = {}, cats = [];
+    rows.forEach(function (r) {
+      var c = r.getAttribute('data-cat') || 'Other';
+      if (!seen[c]) { seen[c] = true; cats.push(c); }
+    });
+    var labels = cats.map(function (c) {
+      var row = rows.filter(function (r) { return r.getAttribute('data-cat') === c; })[0];
+      var lab = row && row.querySelector('.tech-marquee-label');
+      return { key: c, label: lab ? lab.textContent.trim() : c };
+    });
+    var toggleBtn = grid.querySelector('.tech-marquee-toggle');
+    var bar = buildFilterBar([{ key: 'all', label: 'All' }].concat(labels), {
+      label: '~/filter',
+      ariaLabel: 'Filter technologies by category',
+      onPick: function (key) {
+        var showAll = key === 'all';
+        rows.forEach(function (r) {
+          toggleEl(r, showAll || r.getAttribute('data-cat') === key);
+        });
+        // A category filter overrides the "show more" toggle — hide it while
+        // filtering, restore it on All so the default behavior returns.
+        if (toggleBtn) toggleBtn.style.display = showAll ? '' : 'none';
+      }
+    });
+    grid.parentNode.insertBefore(bar, grid);
+  }
+
+  // Project tech-tag chips — filter the project cards.
+  function projectFilters() {
+    var grid = document.querySelector('.projects-grid');
+    if (!grid) return;
+    grid.setAttribute('aria-live', 'polite');
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.project-card'));
+    if (!cards.length) return;
+    var tags = {};
+    cards.forEach(function (c) {
+      parseTags(c.getAttribute('data-tags')).forEach(function (t) { tags[t] = true; });
+    });
+    var tagList = Object.keys(tags).sort();
+    if (!tagList.length) return;
+    var empty = document.createElement('p');
+    empty.className = 'filter-empty';
+    empty.textContent = '// no projects match this filter';
+    grid.parentNode.insertBefore(empty, grid);
+    var bar = buildFilterBar([{ key: 'all', label: 'All' }].concat(tagList.map(function (t) { return { key: t, label: t }; })), {
+      label: '~/filter',
+      ariaLabel: 'Filter projects by technology',
+      onPick: function (key) {
+        var visible = 0;
+        cards.forEach(function (c) {
+          var match = matchesFilter(parseTags(c.getAttribute('data-tags')), key);
+          toggleEl(c, match);
+          if (match) visible++;
+        });
+        empty.style.display = (key === 'all' || visible > 0) ? 'none' : 'block';
+      }
+    });
+    grid.parentNode.insertBefore(bar, grid);
+  }
+
   // ── Hero role rotator (type / hold / delete cycle) ─────────
   function heroRoles(textEl, roles) {
     if (!textEl || !roles || !roles.length) return;
@@ -232,6 +357,8 @@
       typeof global.loadData === 'function' ? global.loadData() : null);
     parallax();
     backToTop();
+    skillFilters();
+    projectFilters();
   }
 
   if (global && typeof global.document !== 'undefined') {
@@ -247,7 +374,9 @@
     module.exports = {
       easeOutQuad: easeOutQuad,
       statTargets: statTargets,
-      nextRole: nextRole
+      nextRole: nextRole,
+      parseTags: parseTags,
+      matchesFilter: matchesFilter
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);
