@@ -1616,6 +1616,8 @@
       }
     }
   </style>
+  <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805c" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -1757,10 +1759,16 @@
           </div>
           <h1 class="hero-title"></h1>
           <p class="hero-description"></p>
+          <div class="hero-roles">
+            <span class="hero-roles-prompt">~/role</span>
+            <span id="hero-roles-text"></span>
+            <span class="hero-roles-caret" aria-hidden="true">▊</span>
+          </div>
           <div class="hero-actions">
             <a href="#projects" class="btn btn-primary">View Projects</a>
             <a href="#contact" class="btn btn-ghost">Get in Touch</a>
           </div>
+          <div class="hero-stats" id="hero-stats" data-reveal data-reveal-delay="200" aria-label="Portfolio stats"></div>
           <div class="hero-terminal" aria-hidden="true">
             <div class="terminal-line">
               <span class="prompt">$</span>
@@ -1816,12 +1824,15 @@
         </div>
       </div>
     </div>
+    <a href="#about" class="hero-scroll-indicator" aria-label="Scroll to About">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
   </section>
 
   <!-- ============ ABOUT ============ -->
   <section id="about" class="about section" aria-label="About me">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="about">
         <h2>About</h2>
       </div>
       <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">        <div class="about-text">
@@ -1855,7 +1866,7 @@
   <!-- ============ TECH STACK ============ -->
   <section id="skills" class="skills section" aria-label="Tech Stack">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="tech-stack">
         <h2>Tech Stack</h2>
         <p>Technologies and tools I work with regularly.</p>
       </div>
@@ -1881,7 +1892,7 @@
   <!-- ============ PROJECTS ============ -->
   <section id="projects" class="projects section" aria-label="Projects">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="projects">
         <h2>Featured Projects</h2>
         <p>Home lab projects focused on security monitoring and system administration.</p>
       </div>
@@ -1894,7 +1905,7 @@
   <!-- ============ CERTIFICATIONS ============ -->
   <section id="certifications" class="certifications section" aria-label="Certifications">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="certifications">
         <h2>Certifications</h2>
         <p>Foundational certifications in programming, web development, and cybersecurity.</p>
       </div>
@@ -1907,7 +1918,7 @@
   <!-- ============ LEARNING JOURNEY ============ -->
   <section id="learning" class="learning section" aria-label="Learning journey">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="learning">
         <h2>Learning Journey</h2>
         <p>Key milestones in my academic and self-directed learning path.</p>
       </div>
@@ -1921,7 +1932,7 @@
   <!-- ============ EXPERIENCE ============ -->
   <section id="experience" class="experience section" aria-label="Experience">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="experience">
         <h2>Experience</h2>
         <p>Professional background in customer service and exam administration.</p>
       </div>
@@ -1934,7 +1945,7 @@
   <!-- ============ GITHUB ============ -->
   <section id="github" class="github section" aria-label="GitHub Activity">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="github">
         <h2>GitHub Activity</h2>
         <p>Open source activity and contributions.</p>
       </div>
@@ -1992,7 +2003,7 @@
   <!-- ============ CONTACT ============ -->
   <section id="contact" class="contact section" aria-label="Contact">
     <div class="container">
-      <div class="section-header" data-reveal>
+      <div class="section-header" data-reveal data-label="contact">
         <h2>Contact</h2>
         <p>Get in touch for collaboration, opportunities, or questions.</p>
       </div>
@@ -2807,6 +2818,7 @@
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
   <script src="js/portfolio-data.js?v=20260729"></script>
+  <script src="js/ui-upgrade.js?v=20260805c" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
   (function(){
