@@ -226,12 +226,13 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   z-index: 1;
 }
 
-/* ── Cert cards: CRT scan-reveal on hover ─────────────────────
-   Instead of flipping, the certificate image scans down the card
-   like a terminal refresh: the back face wipes in top-to-bottom
-   (clip-path) with a travelling accent scan bar, while the front
-   text dims and lifts. The cursor tilt stays on the outer card,
-   so tilt + scan compose. No-image certs reveal the placeholder. */
+/* ── Cert cards: CRT glitch / RGB-split reveal on hover ────────
+   On hover the certificate snaps in like screen tearing on an old
+   CRT: the image glitches in with horizontal slice displacement
+   (clip-path) + red/cyan RGB channel split (layered drop-shadows),
+   then settles clean. The front text dims and lifts, and the cursor
+   tilt stays on the outer card so tilt + glitch compose.
+   No-image certs reveal the placeholder. */
 .cert-card {
   display: block;
   padding: 0;
@@ -270,13 +271,11 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   background-image: radial-gradient(130% 100% at 50% 35%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.38));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 0 26px rgba(0, 0, 0, 0.4);
   opacity: 0;
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease 0.05s;
+  transition: opacity 0.12s ease;
 }
 .cert-card:hover .cert-card-back,
 .cert-card:focus-visible .cert-card-back {
   opacity: 1;
-  clip-path: inset(0 0 0 0);
 }
 .cert-card-img {
   width: 100%;
@@ -289,6 +288,30 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   display: block;
   border-radius: 2px;
   filter: saturate(0.92) contrast(1.04);
+}
+/* Glitch-in: screen-tear slice jumps + RGB channel split, then settle.
+   steps(1, end) makes each slice jump snap instead of sliding — the
+   stuttery cut is what reads as real screen-tearing. */
+.cert-card:hover .cert-card-img,
+.cert-card:focus-visible .cert-card-img {
+  animation: cert-glitch-in 0.55s steps(1, end) forwards;
+}
+@keyframes cert-glitch-in {
+  0%   { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0, 0) skewX(0); }
+  8%   { opacity: 1; clip-path: inset(0 0 88% 0); transform: translate(-3px, 1px) skewX(-1.5deg);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(3px 0 0 rgba(255, 45, 85, 0.65)) drop-shadow(-3px 0 0 rgba(0, 225, 255, 0.65)); }
+  18%  { clip-path: inset(14% 0 68% 0); transform: translate(3px, -2px) skewX(1deg);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(4px 0 0 rgba(255, 45, 85, 0.6)) drop-shadow(-4px 0 0 rgba(0, 225, 255, 0.6)); }
+  28%  { clip-path: inset(44% 0 40% 0); transform: translate(-2px, 2px) skewX(-0.5deg);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(-3px 0 0 rgba(255, 45, 85, 0.6)) drop-shadow(3px 0 0 rgba(0, 225, 255, 0.6)); }
+  38%  { clip-path: inset(70% 0 10% 0); transform: translate(2px, 1px) skewX(0.5deg);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(2px 0 0 rgba(255, 45, 85, 0.55)) drop-shadow(-2px 0 0 rgba(0, 225, 255, 0.55)); }
+  50%  { clip-path: inset(24% 0 58% 0); transform: translate(-1px, 0) skewX(0);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(2px 0 0 rgba(255, 45, 85, 0.45)) drop-shadow(-2px 0 0 rgba(0, 225, 255, 0.45)); }
+  62%  { clip-path: inset(8% 0 74% 0); transform: translate(1px, -1px) skewX(-0.5deg);
+         filter: saturate(0.92) contrast(1.04) drop-shadow(1px 0 0 rgba(255, 45, 85, 0.35)) drop-shadow(-1px 0 0 rgba(0, 225, 255, 0.35)); }
+  100% { opacity: 1; clip-path: inset(0 0 0 0); transform: translate(0, 0) skewX(0);
+         filter: saturate(0.92) contrast(1.04); }
 }
 /* Broken-image fallback: renderCerts adds this class on img error */
 .cert-card-back.cert-card-back-empty::before {
@@ -324,32 +347,9 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
 }
 
-/* Travelling scan bar (runs down the card during the reveal) */
-.cert-card-back::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 3px;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-  opacity: 0;
-}
-.cert-card:hover .cert-card-back::after,
-.cert-card:focus-visible .cert-card-back::after {
-  animation: cert-scan 0.55s ease-out forwards;
-}
-@keyframes cert-scan {
-  0%   { top: 0; opacity: 1; }
-  85%  { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-/* Cursor tilt stays on the outer card (flip is on the inner), so
-   the two effects compose: the card tilts toward the cursor AND
-   flips to reveal the certificate. */
+/* Cursor tilt stays on the outer card (the glitch is on the inner
+   back face), so the two effects compose: the card tilts toward the
+   cursor AND glitches in the certificate. */
 .certs-grid .cert-card[data-reveal].revealed:hover {
   transform: translateY(0) scale(1) perspective(800px)
     rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
@@ -681,7 +681,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .timeline-item[data-reveal] {
     transform: none !important;
   }
-  /* Cert cards: no tilt, no scan reveal, front stays as-is */
+  /* Cert cards: no tilt, no glitch reveal, front stays as-is */
   .certs-grid .cert-card[data-reveal].revealed:hover {
     transform: none !important;
     transition: none !important;
@@ -695,11 +695,11 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .cert-card:hover .cert-card-back,
   .cert-card:focus-visible .cert-card-back {
     opacity: 0 !important;
-    clip-path: inset(0 0 100% 0) !important;
     transition: none !important;
   }
-  .cert-card-back::after {
-    display: none !important;
+  .cert-card:hover .cert-card-img,
+  .cert-card:focus-visible .cert-card-img {
+    animation: none !important;
   }
   /* Timeline: static full line + fully visible markers */
   .timeline::before {
