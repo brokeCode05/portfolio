@@ -254,7 +254,9 @@
         return f && String(f.keywords || '').trim() && String(f.answer || '').trim();
       })
       .map(function(f) {
-        var kws = String(f.keywords).split(/[,\s]+/).map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean);
+        // Keywords are comma-separated (a comma segment can be a multi-word
+        // phrase like "how much" — splitting on spaces would break that).
+        var kws = String(f.keywords).split(',').map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean);
         return {
           // Topic falls back to the first keyword (or 'custom') so Chat Insights
           // can group untitled entries usefully.
