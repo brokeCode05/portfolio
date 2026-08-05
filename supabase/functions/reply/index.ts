@@ -26,10 +26,15 @@
 // Requires Step 14 in docs/supabase-rls.sql (contact_replies table).
 //
 // EmailJS 'reply' template should use these template params:
-//   To:        {{to_email}}   (the visitor)
-//   Reply-To:  {{reply_to}}   (your admin email, so their reply comes back to you)
-//   Subject:   {{subject}}    (Re: <original subject>)
-//   Body:      {{reply}} with the quoted {{original}} message
+//   To:        {{to_email}}      (the visitor)
+//   Reply-To:  {{reply_to}}      (your admin email, so their reply comes back to you)
+//   Subject:   {{subject}}       (Re: <original subject>)
+//   Body:      use the *_html variants ({{reply_html}}, {{original_html}},
+//              {{name_html}}) — EmailJS does not escape params and these
+//              values come from the visitor (or quote their message).
+//
+// EmailJS does NOT HTML-escape template params, so values are escaped here and
+// passed both raw and as *_html variants.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -136,6 +141,14 @@ Deno.serve(async (req) => {
     return json({ error: 'server not configured — EmailJS secrets missing' }, 500)
   }
 
+  const esc = (s) =>
+    String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+
   const res = await fetch(EMAILJS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -151,6 +164,10 @@ Deno.serve(async (req) => {
         name: msg.name,
         reply: replyBody,
         original: msg.message || '',
+        name_html: esc(msg.name),
+        subject_html: esc(msg.subject || '(no subject)'),
+        reply_html: esc(replyBody),
+        original_html: esc(msg.message || ''),
       },
     }),
   })

@@ -28,10 +28,15 @@
 // keeps random people from spamming your inbox via this endpoint.
 //
 // EmailJS 'notify' template should use these template params:
-//   To:        {{to_email}}   (your email)
-//   Reply-To:  {{email}}      (the visitor, so you can just hit Reply)
+//   To:        {{to_email}}     (your email)
+//   Reply-To:  {{email}}        (the visitor, so you can just hit Reply)
 //   Subject:   New contact message: {{subject}}
-//   Body:      {{name}} / {{email}} / {{subject}} / {{message}} / {{created_at}}
+//   Body:      use the *_html variants ({{name_html}}, {{email_html}},
+//              {{subject_html}}, {{message_html}}) — EmailJS does not escape
+//              params and these values come from visitors. {{created_at}} is safe.
+//
+// EmailJS does NOT HTML-escape template params, so visitor-controlled values
+// are escaped here and passed both raw and as *_html variants.
 
 const EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send'
 
@@ -75,6 +80,14 @@ Deno.serve(async (req) => {
     return json({ error: 'server not configured' }, 500)
   }
 
+  const esc = (s) =>
+    String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+
   const res = await fetch(EMAILJS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -90,6 +103,10 @@ Deno.serve(async (req) => {
         subject,
         message,
         created_at: createdAt,
+        name_html: esc(name),
+        email_html: esc(email),
+        subject_html: esc(subject),
+        message_html: esc(message),
       },
     }),
   })
@@ -97,7 +114,8 @@ Deno.serve(async (req) => {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     console.error('EmailJS error:', res.status, JSON.stringify(data))
-    return json({ error: 'email failed to send' }, 502)
+    const why = data && data.message ? ' ' + data.message : ''
+    return json({ error: 'email failed to send' + why }, 502)
   }
 
   console.log(`Notification email queued for ${to} (message from ${email})`)
