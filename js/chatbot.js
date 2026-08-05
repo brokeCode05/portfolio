@@ -57,7 +57,10 @@
       match: function(nq) {
         if (nq.length > 24) return false;
         var t = nq.split(' ').filter(Boolean);
-        return t.some(function(w) { return ['hi', 'hello', 'hey', 'yo', 'sup', 'goodmorning', 'goodafternoon', 'goodevening'].indexOf(w) !== -1; });
+        return t.some(function(w) { return ['hi', 'hello', 'hey', 'yo', 'sup'].indexOf(w) !== -1; }) ||
+          nq.indexOf('good morning') !== -1 ||
+          nq.indexOf('good afternoon') !== -1 ||
+          nq.indexOf('good evening') !== -1;
       },
       answer: function() {
         return 'Hey! I\'m the portfolio assistant. I can answer questions about Bryan\'s skills, projects, experience, certifications, and how to contact him.\n\nType `help` for the full list, or just ask away.';

@@ -296,3 +296,33 @@ create policy "Admin read chat logs"
   for select
   to authenticated
   using (true);
+
+create policy "Admin delete chat logs"
+  on chat_logs
+  for delete
+  to authenticated
+  using (true);
+
+-- 15d. Light flood guard: drop the same question from the same session within
+--      5 minutes. Keeps a stuck widget loop (or a bot) from flooding the log
+--      and polluting the insights, while legit repeat questions still count.
+create or replace function chat_logs_flood_guard()
+returns trigger as $$
+begin
+  if exists (
+    select 1 from chat_logs
+    where session_id = new.session_id
+      and question = new.question
+      and created_at > now() - interval '5 minutes'
+  ) then
+    return null;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists chat_logs_flood_guard_trigger on chat_logs;
+create trigger chat_logs_flood_guard_trigger
+  before insert on chat_logs
+  for each row
+  execute function chat_logs_flood_guard();

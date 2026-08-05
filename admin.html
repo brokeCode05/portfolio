@@ -1023,9 +1023,14 @@ CREATE POLICY "Admin update portfolio_data"
           return;
         }
         var rows = result.data || [];
-        var badge = document.getElementById('chats-nav-count');
-        if (badge) badge.textContent = rows.length ? '(' + rows.length + ')' : '';
         renderChatInsights(rows);
+      });
+    // Exact total for the sidebar badge (separate lightweight count query).
+    supabaseClient.from('chat_logs').select('id', { count: 'exact', head: true })
+      .then(function(countResult) {
+        var badge = document.getElementById('chats-nav-count');
+        if (badge && !countResult.error) badge.textContent = countResult.count ? '(' + countResult.count + ')' : '';
+      });
       });
   }
 
