@@ -379,9 +379,75 @@
     flushLog();
   }
 
+  // ── Reply feedback: subtle terminal blip + light vibration ─
+  // Sound is synthesized with the Web Audio API (no asset files). It only
+  // plays after the visitor has interacted (opened the chat / sent a message),
+  // which also satisfies browser autoplay policies. A header toggle mutes it.
+  var SOUND_KEY = 'portfolio_chat_sound_v1';
+  var SOUND_ON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+  var SOUND_OFF_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+  var soundEnabled = true;
+  try { soundEnabled = global.localStorage.getItem(SOUND_KEY) !== 'off'; } catch (e) {}
+  var audioCtx = null;
+
+  // Create/resume the AudioContext inside a user gesture (unlocks audio).
+  function ensureAudio() {
+    try {
+      if (!audioCtx) {
+        var AC = global.AudioContext || global.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+
+  // Short descending terminal blip — quiet and brief. Skips when the page or
+  // the chat window is hidden (a reply may finish typing after the user closes).
+  function blip() {
+    if (!soundEnabled || !audioCtx) return;
+    try {
+      if (global.document && global.document.hidden) return;
+      var win = global.document.getElementById(WIN_ID);
+      if (!win || win.hidden) return;
+      var t = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(990, t);
+      osc.frequency.exponentialRampToValueAtTime(660, t + 0.09);
+      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    } catch (e) {}
+  }
+
+  // Light tap on supporting phones (Android Chrome; iOS ignores it).
+  function haptic() {
+    if (!soundEnabled) return;
+    try {
+      if (global.document && global.document.hidden) return;
+      var win = global.document.getElementById(WIN_ID);
+      if (!win || win.hidden) return;
+      if (global.navigator && global.navigator.vibrate) global.navigator.vibrate(10);
+    } catch (e) {}
+  }
+
   // ── Widget UI ───────────────────────────────────────────────
   var LAUNCHER_ID = 'chatbot-launcher';
   var WIN_ID = 'chatbot-window';
+
+  // Human-feeling typewriter speed (ms per character). Shorter replies type
+  // deliberately (up to ~26ms/char), longer ones pick up the pace, and no
+  // single reply takes more than ~3.5s to type out. Exported for tests.
+  function typeDelayFor(len) {
+    len = Math.max(len || 0, 0);
+    var delay = Math.max(10, Math.min(26, 1200 / Math.max(len, 1)));
+    if (len > 0 && len * delay > 3500) delay = 3500 / len;
+    return delay;
+  }
 
   function el(tag, attrs, html) {
     var node = document.createElement(tag);
@@ -418,6 +484,7 @@
       '<div class="chatbot-header">' +
         '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
         '<span class="chatbot-title">bryan-bot:~$ ./assistant --help</span>' +
+        '<button type="button" id="chatbot-sound" aria-label="Mute reply sound" aria-pressed="true" title="Toggle reply sound">' + SOUND_ON_SVG + '</button>' +
         '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
       '</div>' +
       '<div class="chatbot-body" id="chatbot-body" role="log" aria-live="polite"></div>' +
@@ -454,18 +521,56 @@
       bodyEl.scrollTop = bodyEl.scrollHeight;
     }
 
+    // Types the reply out character-by-character (speed scaled to length) so
+    // the bot feels human. [[CONTACT]] and [label](url) tokens are hidden while
+    // typing (rendered button/link only appears at the end) so raw syntax never
+    // flashes on screen.
     function typeBot(text, done) {
       var line = el('div', { 'class': 'chat-msg bot' },
         '<span class="chat-prompt" aria-hidden="true">bryan-bot:~$</span>' +
-        '<span class="chat-text chat-typing">…<span class="cursor" aria-hidden="true"></span></span>');
+        '<span class="chat-text"></span>');
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
-      var delay = 350 + Math.min(600, text.length * 4);
-      setTimeout(function() {
-        line.innerHTML = '<span class="chat-prompt" aria-hidden="true">bryan-bot:~$</span><span class="chat-text">' + renderBotText(text) + '</span>';
+      var textEl = line.querySelector('.chat-text');
+      var raw = String(text == null ? '' : text);
+
+      function render() {
+        // Keep the blinking caret at the end of the finished reply (terminal-style).
+        textEl.innerHTML = renderBotText(raw) + '<span class="cursor" aria-hidden="true"></span>';
         bodyEl.scrollTop = bodyEl.scrollHeight;
+        blip();
+        haptic();
         if (done) done();
-      }, delay);
+      }
+
+      var reduced = false;
+      try { reduced = !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+      if (reduced || !raw) {
+        render();
+        return;
+      }
+
+      // Plain-text version for the typed phase: CTA and link tokens are masked.
+      var masked = raw
+        .replace(/\[\[CONTACT\]\]/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+      // Short "thinking" pause before typing starts (longer replies pause a beat).
+      var startDelay = 200 + Math.min(300, masked.length * 1.2);
+      var cursorHTML = '<span class="cursor" aria-hidden="true"></span>';
+      setTimeout(function() {
+        var i = 0;
+        var out = '';
+        (function tick() {
+          out += esc(masked.charAt(i)); // escape per char so entities never render half-broken
+          i++;
+          textEl.innerHTML = out + cursorHTML;
+          bodyEl.scrollTop = bodyEl.scrollHeight;
+          if (i >= masked.length) { render(); return; }
+          var jitter = 0.75 + Math.random() * 0.5;
+          setTimeout(tick, typeDelayFor(masked.length) * jitter);
+        })();
+      }, startDelay);
     }
 
     function showChips() {
@@ -562,6 +667,7 @@
     function send(text) {
       text = String(text || '').trim();
       if (!text) return;
+      ensureAudio();
       clearChips();
       addLine('user', esc(text));
       inputEl.value = '';
@@ -595,9 +701,27 @@
     }
 
     launcher.addEventListener('click', function() {
+      ensureAudio();
       if (windowEl.hidden) openChat(); else closeChat();
     });
     document.getElementById('chatbot-close').addEventListener('click', closeChat);
+
+    // ── Sound toggle (persisted per visitor) ─────────────────
+    var soundBtn = document.getElementById('chatbot-sound');
+    if (soundBtn) {
+      function paintSoundBtn() {
+        soundBtn.innerHTML = soundEnabled ? SOUND_ON_SVG : SOUND_OFF_SVG;
+        soundBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
+        soundBtn.setAttribute('aria-label', soundEnabled ? 'Mute reply sound' : 'Enable reply sound');
+      }
+      soundBtn.addEventListener('click', function() {
+        soundEnabled = !soundEnabled;
+        try { global.localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch (e) {}
+        paintSoundBtn();
+        if (soundEnabled) { ensureAudio(); blip(); }
+      });
+      paintSoundBtn();
+    }
     document.getElementById('chatbot-form').addEventListener('submit', function(e) {
       e.preventDefault();
       send(inputEl.value);
@@ -634,7 +758,8 @@
       matchRulesOnly: matchRulesOnly,
       normalize: normalize,
       faqRulesFromData: faqRulesFromData,
-      buildAiContext: buildAiContext
+      buildAiContext: buildAiContext,
+      typeDelayFor: typeDelayFor
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

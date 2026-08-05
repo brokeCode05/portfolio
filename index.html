@@ -3502,13 +3502,19 @@
       flex: 1; font-size: 0.72rem; color: var(--color-text-secondary, #A0A5B0);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em;
     }
-    #chatbot-close {
+    #chatbot-close,
+    #chatbot-sound {
       background: none; border: none; color: var(--color-text-secondary, #A0A5B0);
-      font-size: 1.15rem; line-height: 1; cursor: pointer; padding: 0.15rem 0.35rem;
-      border-radius: 4px; transition: color 0.15s, background-color 0.15s;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0.15rem 0.3rem; border-radius: 4px;
+      transition: color 0.15s, background-color 0.15s;
     }
+    #chatbot-close { font-size: 1.15rem; line-height: 1; }
     #chatbot-close:hover { color: var(--color-danger, #F87171); background: rgba(248,113,113,0.1); }
     #chatbot-close:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 1px; }
+    #chatbot-sound:hover { color: var(--color-accent, #4ADE80); background: rgba(74,222,128,0.12); }
+    #chatbot-sound:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 1px; }
+    #chatbot-sound[aria-pressed="false"] { opacity: 0.55; }
 
     .chatbot-body {
       flex: 1; min-height: 0; overflow-y: auto; padding: 0.8rem;
@@ -3540,8 +3546,8 @@
     }
     .chat-cta:hover { background: var(--color-accent, #4ADE80); color: var(--color-bg, #0A0C10); box-shadow: 0 0 10px var(--color-accent-subtle, rgba(74,222,128,0.3)); }
     .chat-cta:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; }
-    .chat-typing { color: var(--color-text-secondary, #A0A5B0); }
-    .chat-typing .cursor {
+    /* Blinking caret that stays at the end of every bot reply (terminal-style) */
+    .chat-text .cursor {
       display: inline-block; width: 0.5em; height: 1em; background: var(--color-accent, #4ADE80);
       margin-left: 2px; vertical-align: text-bottom; animation: chat-blink 1s step-end infinite;
     }
@@ -3592,23 +3598,50 @@
     [data-theme="light"] #chatbot-window { box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
     [data-theme="light"] #chatbot-launcher:hover { box-shadow: 0 0 14px var(--color-accent-subtle, rgba(74,222,128,0.3)); }
 
+    /* Mobile: the chat becomes a full-width bottom sheet sliding up from the
+       bottom (replaces the floating panel on phones). Close via × or Escape. */
     @media (max-width: 480px) {
-      #chatbot-window { width: calc(100vw - 1rem); right: 0.5rem; max-height: calc(100vh - 6.6rem); max-height: calc(100dvh - 6.6rem); }
+      #chatbot-window {
+        left: 0; right: 0; bottom: 0; width: auto;
+        height: 88vh;
+        height: min(88dvh, 100vh);
+        max-height: none;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+        transform-origin: bottom center;
+        animation: chat-sheet-in 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      @keyframes chat-sheet-in {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+      }
+      /* Grabber handle so it reads as a dismissible sheet */
+      #chatbot-window::before {
+        content: '';
+        position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+        width: 42px; height: 4px; border-radius: 2px;
+        background: var(--color-border-hover, #3A3D45); z-index: 1;
+      }
+      .chatbot-header { padding-top: 0.72rem; }
       #chatbot-launcher { right: 0.5rem; }
       .chat-chip { padding: 0.4rem 0.75rem; }
       #chatbot-send { padding: 0.3rem 0.65rem; }
+      /* Keep the send row clear of the iOS home indicator */
+      .chatbot-input-row { padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
     }
     @media (max-width: 360px) {
       .chatbot-title { max-width: 120px; }
-      .chatbot-header { padding: 0.5rem 0.65rem; }
+      /* Keep top clearance for the sheet grabber on small phones */
+      .chatbot-header { padding: 0.72rem 0.65rem 0.5rem; }
     }
-    /* Short screens / landscape — keep the panel fully visible above the launcher */
-    @media (max-height: 480px) {
+    /* Short desktop windows — keep the floating panel fully visible above the
+       launcher (mobile ≤480px already uses the full-height bottom sheet). */
+    @media (max-height: 480px) and (min-width: 481px) {
       #chatbot-window { max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); }
     }
     @media (prefers-reduced-motion: reduce) {
       #chatbot-window, .chat-chip { animation: none; }
-      .chatbot-launcher-dot, .chat-typing .cursor { animation: none; }
+      .chatbot-launcher-dot, .chat-text .cursor { animation: none; }
     }
   </style>
 
