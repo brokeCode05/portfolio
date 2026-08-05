@@ -456,6 +456,16 @@
     return node;
   }
 
+  // Protocol-less domain matcher, e.g. facebook.com/john.bryan.1217.
+  // The TLD must be 2+ alpha chars and NOT be followed by another dot-label
+  // (so version strings like 2.0.1 and names like john.bryan.1217 never match).
+  var BARE_DOMAIN = '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2,})(?!\\.[0-9])(?!\\w)(?::\\d+)?(?:\\/[^\\s<>()\\[\\]]*)?';
+  var BARE_DOMAIN_RE = new RegExp('^' + BARE_DOMAIN + '$', 'i');
+  // word.js / app.ts-style tokens are file extensions, not real sites — they
+  // are checked against the captured URL in the callbacks below.
+  var EXT_DOMAIN_RE = /\.(?:js|ts|jsx|tsx|vue|svelte|css|html|htm|py|rb|sh|md|txt|json|xml)(?:$|\/)/i;
+  var BARE_URL_RE = new RegExp('(^|[\\s(>[])((?:https?:\\/\\/|www\\.)[^\\s<>()\\[\\]]+|' + BARE_DOMAIN + ')', 'gi');
+
   function renderBotText(text) {
     var contactCTA = '<button type="button" class="chat-cta" data-action="contact">[ contact bryan ]</button>';
     var out = esc(text)
@@ -472,21 +482,31 @@
           // Relative / in-page anchor — jump to a section on this page.
           return '<a href="#' + url.replace(/^#/, '') + '">' + label + '</a>';
         }
+        if (BARE_DOMAIN_RE.test(url) && !EXT_DOMAIN_RE.test(url)) {
+          // Protocol-less domain — treat as an external link.
+          return '<a href="https://' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+        }
         return m;
       })
       .replace(/\n/g, '<br>');
 
-    // Auto-link bare URLs (http/https/www) so FAQ answers pasted without
-    // markdown still get clickable links. Existing <a> tags from the markdown
-    // step are parked first so nothing gets double-wrapped.
+    // Auto-link bare URLs (http/https/www and protocol-less domains like
+    // facebook.com/…) so answers pasted without markdown still get clickable
+    // links. Existing <a> tags from the markdown step are parked first so
+    // nothing gets double-wrapped.
     var anchors = [];
     out = out.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, function(a) {
       anchors.push(a);
       return '\u0000' + (anchors.length - 1) + '\u0000';
     });
-    out = out.replace(/(^|[\s(>[])((?:https?:\/\/|www\.)[^\s<>"'()\[\]]+)/gi, function(m, pre, url) {
+    out = out.replace(BARE_URL_RE, function(m, pre, url) {
       url = url.replace(/[.,;:!?]+$/, '');
-      var href = /^www\./i.test(url) ? 'https://' + url : url;
+      // file-extension-looking tokens (node.js, app.ts) are not real sites —
+      // leave them as plain text instead of linking to a squatting domain.
+      if (!/^https?:\/\//i.test(url) && !/^www\./i.test(url) && EXT_DOMAIN_RE.test(url)) {
+        return pre + url;
+      }
+      var href = /^https?:\/\//i.test(url) ? url : 'https://' + url;
       return pre + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
     });
     out = out.replace(/\u0000(\d+)\u0000/g, function(m, i) { return anchors[+i] || ''; });
