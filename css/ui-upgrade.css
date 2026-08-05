@@ -228,24 +228,95 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   z-index: 1;
 }
 
-/* ── Cert cards: 3D tilt + shine sweep ────────────────────────
-   Tilt vars (--rx/--ry deg) are set by JS while the cursor is over
-   a revealed card; the transform composes with the reveal so the
-   entrance animation is untouched. Hover applies a short transform
-   transition so tilt tracks the cursor; release returns gently via
-   the base 400ms transition. overflow:hidden keeps the sweep inside. */
+/* ── Cert cards: flip to certificate image on hover ───────────
+   The outer .cert-card keeps the tilt transform (--rx/--ry from JS)
+   and the reveal animation; the inner .cert-card-inner handles the
+   3D flip. Faces carry the layout/padding so both sides match the
+   card's border radius. overflow on faces clips shine + image. */
 .cert-card {
+  display: block;
+  padding: 0;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+.cert-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.cert-card:hover .cert-card-inner,
+.cert-card:focus-visible .cert-card-inner {
+  transform: rotateY(180deg);
+}
+.cert-card-front,
+.cert-card-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.cert-card-front {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-radius: inherit;
   overflow: hidden;
 }
-.certs-grid .cert-card[data-reveal].revealed:hover {
-  transform: translateY(0) scale(1) perspective(800px)
-    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: border-color var(--transition-fast),
-    box-shadow var(--transition-base),
-    opacity var(--transition-slow),
-    transform 0.16s ease-out;
+.cert-card-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  overflow: hidden;
+  transform: rotateY(180deg);
+  background-color: var(--color-surface-hover);
 }
-.cert-card::after {
+.cert-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+/* Broken-image fallback: renderCerts adds this class on img error */
+.cert-card-back.cert-card-back-empty::before {
+  content: "no image on file";
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.cert-card-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+}
+.cert-card-back-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.cert-card-back-empty svg {
+  color: var(--color-accent);
+}
+
+/* Front-face shine sweep (clipped by .cert-card-front overflow) */
+.cert-card-front::after {
   content: "";
   position: absolute;
   top: 0;
@@ -253,14 +324,25 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   width: 55%;
   height: 100%;
   z-index: 1;
-  border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(90deg, transparent, var(--ui-shine), transparent);
   transform: translateX(-160%);
   transition: transform 0.75s ease;
 }
-.cert-card:hover::after {
+.cert-card:hover .cert-card-front::after {
   transform: translateX(320%);
+}
+
+/* Cursor tilt stays on the outer card (flip is on the inner), so
+   the two effects compose: the card tilts toward the cursor AND
+   flips to reveal the certificate. */
+.certs-grid .cert-card[data-reveal].revealed:hover {
+  transform: translateY(0) scale(1) perspective(800px)
+    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    opacity var(--transition-slow),
+    transform 0.16s ease-out;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -585,12 +667,16 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .timeline-item[data-reveal] {
     transform: none !important;
   }
-  /* Cert cards: no tilt, no shine sweep */
+  /* Cert cards: no tilt, no flip, no shine sweep */
   .certs-grid .cert-card[data-reveal].revealed:hover {
     transform: none !important;
     transition: none !important;
   }
-  .cert-card::after {
+  .cert-card:hover .cert-card-inner,
+  .cert-card:focus-visible .cert-card-inner {
+    transform: none !important;
+  }
+  .cert-card-front::after {
     display: none !important;
   }
   /* Timeline: static full line + fully visible markers */

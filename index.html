@@ -1301,8 +1301,8 @@
       transform: translate(-50%, -50%) scale(0.92);
       opacity: 0;
       z-index: 201;
-      width: min(780px, calc(100vw - 2rem));
-      max-height: min(620px, calc(100vh - 2rem));
+      width: min(940px, calc(100vw - 2rem));
+      max-height: min(720px, calc(100vh - 2rem));
       background-color: #0F1115;
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius);
@@ -1350,6 +1350,36 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+    .cert-status-line {
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-accent);
+      min-height: 1.4em;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .cert-status-line.err {
+      color: #F87171;
+    }
+    .cert-zoom-hint {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      z-index: 3;
+      font-family: var(--font-code);
+      font-size: 10px;
+      color: #6B7280;
+      background: rgba(10, 12, 16, 0.7);
+      border: 1px solid #2A2D35;
+      border-radius: 4px;
+      padding: 3px 8px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .cert-image-wrap:hover .cert-zoom-hint {
+      opacity: 1;
     }
     .cert-command-line {
       font-family: var(--font-code);
@@ -1402,14 +1432,26 @@
       display: block;
       width: 100%;
       height: auto;
-      max-height: 340px;
+      max-height: 480px;
       object-fit: contain;
       border-radius: 2px;
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transform-origin: center;
+      transition: opacity 0.4s ease, transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      cursor: zoom-in;
     }
     .cert-image-wrap img.loaded {
       opacity: 1;
+    }
+    .cert-image-wrap img.zoomed {
+      cursor: zoom-out;
+    }
+    .cert-zoom-label {
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: #6B7280;
+      padding: 6px 4px;
+      white-space: nowrap;
     }
     .cert-image-wrap img {
       filter: saturate(0.9) contrast(1.05);
@@ -1457,6 +1499,34 @@
       font-size: var(--text-xs);
       color: #6B7280;
       padding: 0 4px;
+    }
+    .cert-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cert-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-accent);
+      background: transparent;
+      border: 1px solid #2A2D35;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+    }
+    .cert-download:hover {
+      color: var(--color-accent-dim);
+      border-color: var(--color-accent);
+      background-color: rgba(74, 222, 128, 0.06);
+    }
+    .cert-download.disabled {
+      opacity: 0.35;
+      pointer-events: none;
     }
     .cert-close-btn {
       display: inline-flex;
@@ -1516,7 +1586,7 @@
         padding: 12px 14px 10px;
       }
       .cert-image-wrap img {
-        max-height: 220px;
+        max-height: 300px;
       }
       .cert-modal-footer {
         flex-direction: column;
@@ -1524,6 +1594,10 @@
       }
       .cert-nav {
         justify-content: center;
+      }
+      .cert-tools {
+        justify-content: center;
+        flex-wrap: wrap;
       }
       .cert-close-btn {
         justify-content: center;
@@ -1608,7 +1682,7 @@
     }
   </style>
   <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805i" />
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805j" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -2192,9 +2266,11 @@
     </div>
     <div class="cert-modal-body">
       <div class="cert-command-line" id="cert-command-line"></div>
-      <div class="cert-image-wrap">
+      <div class="cert-status-line" id="cert-status-line" aria-live="polite"></div>
+      <div class="cert-image-wrap" id="cert-image-wrap">
         <img id="cert-modal-image" src="" alt="Certificate" loading="lazy" />
         <div class="scanlines" aria-hidden="true"></div>
+        <span class="cert-zoom-hint" id="cert-zoom-hint" aria-hidden="true">[click to zoom · scroll to adjust]</span>
       </div>
     </div>
     <div class="cert-modal-footer">
@@ -2203,7 +2279,11 @@
         <span class="cert-nav-counter" id="cert-counter"></span>
         <button class="cert-nav-btn" id="cert-next" aria-label="Next certificate">Next ▶</button>
       </div>
-      <button class="cert-close-btn" id="cert-close-btn">$ _ close <span class="key-hint">[ESC]</span></button>
+      <div class="cert-tools">
+        <a class="cert-download" id="cert-download" href="#" download>$ save</a>
+        <span class="cert-zoom-label" id="cert-zoom-label" aria-live="polite">[zoom 100%]</span>
+        <button class="cert-close-btn" id="cert-close-btn">$ _ close <span class="key-hint">[ESC]</span></button>
+      </div>
     </div>
   </div>
 
@@ -2577,6 +2657,10 @@
       var nextBtn = document.getElementById('cert-next');
       var counterEl = document.getElementById('cert-counter');
       var closeBtn = document.getElementById('cert-close-btn');
+      var statusLine = document.getElementById('cert-status-line');
+      var imgWrap = document.getElementById('cert-image-wrap');
+      var zoomLabel = document.getElementById('cert-zoom-label');
+      var downloadBtn = document.getElementById('cert-download');
 
       if (!overlay || !modal) return;
 
@@ -2621,6 +2705,65 @@
         }, 30);
       }
 
+      // ---- Zoom (click toggles 100% <-> 160%, wheel adjusts, + / - keys) ----
+      var zoomLevel = 1;
+      var ZOOM_STEP = 0.2;
+      var ZOOM_MAX = 3;
+      var ZOOM_MIN = 1;
+
+      function applyZoom() {
+        certImg.style.transform = 'scale(' + zoomLevel + ')';
+        certImg.classList.toggle('zoomed', zoomLevel > 1);
+        if (zoomLabel) {
+          zoomLabel.textContent = '[zoom ' + Math.round(zoomLevel * 100) + '%]';
+        }
+      }
+      function setZoom(v) {
+        zoomLevel = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(v * 10) / 10));
+        applyZoom();
+      }
+      function resetZoom() {
+        zoomLevel = 1;
+        applyZoom();
+      }
+      if (certImg) {
+        certImg.addEventListener('click', function(e) {
+          if (e.altKey) { resetZoom(); return; }
+          setZoom(zoomLevel > 1 ? 1 : 1.6);
+        });
+        if (imgWrap) {
+          imgWrap.addEventListener('wheel', function(e) {
+            if (zoomLevel > 1 || e.deltaY < 0) {
+              e.preventDefault();
+              setZoom(zoomLevel + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+            }
+          }, { passive: false });
+        }
+      }
+
+      // ---- Status line: types [ OK ] / [ ERR ] after the command ----
+      var statusTimer = null;
+      function typeStatus(text, ok) {
+        if (!statusLine) return;
+        if (statusTimer) { clearInterval(statusTimer); statusTimer = null; }
+        statusLine.className = 'cert-status-line' + (ok ? '' : ' err');
+        statusLine.textContent = '';
+        // Reduced motion: show instantly, like the About terminal does
+        var reduced = window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) { statusLine.textContent = text; return; }
+        var i = 0;
+        statusTimer = setInterval(function() {
+          i++;
+          statusLine.textContent = text.substring(0, i);
+          if (i >= text.length) { clearInterval(statusTimer); statusTimer = null; }
+        }, 20);
+      }
+      function clearStatus() {
+        if (statusTimer) { clearInterval(statusTimer); statusTimer = null; }
+        if (statusLine) statusLine.textContent = '';
+      }
+
       // Refresh certData from live DOM (solves stale cache after dynamic re-render)
       function refreshCertData() {
         certData = getCertCards();
@@ -2651,6 +2794,18 @@
         var oldPlaceholder = document.querySelector('.cert-image-wrap .cert-error-placeholder');
         if (oldPlaceholder) oldPlaceholder.remove();
 
+        // Reset zoom + status + download for the new cert
+        resetZoom();
+        clearStatus();
+        if (downloadBtn) {
+          downloadBtn.classList.toggle('disabled', !cert.path);
+          if (cert.path) {
+            downloadBtn.setAttribute('href', cert.path);
+          } else {
+            downloadBtn.removeAttribute('href');
+          }
+        }
+
         // Type the command
         var cmdText = filename;
         typeCommand(cmdText, function() {
@@ -2660,17 +2815,25 @@
           // After typing finishes, load the image
           certImg.style.display = '';
           certImg.src = cert.path;
+          if (!cert.path) {
+            typeStatus('[ ERR ] no image on file', false);
+          }
         });
       }
 
-      // When image loads, fade it in
+      // When image loads, fade it in + log [ OK ]
       certImg.addEventListener('load', function() {
+        // Guard against phantom loads from the temporary src='' reset
+        var path = currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : '';
+        if (!path) return;
         certImg.classList.add('loaded');
+        typeStatus('[ OK ] image loaded', true);
       });
       certImg.addEventListener('error', function() {
         // Check if this is a real error (non-empty path) or a phantom error from src=''
         var path = currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : '';
         if (!path) return; // Ignore phantom errors from certImg.src = ''
+        typeStatus('[ ERR ] image failed to load', false);
         // If image fails, show visible SVG placeholder
         certImg.style.display = 'none';
         var wrap = document.querySelector('.cert-image-wrap');
@@ -2720,6 +2883,8 @@
         cmdLine.innerHTML = '';
         certImg.classList.remove('loaded');
         certImg.src = '';
+        resetZoom();
+        clearStatus();
         currentIndex = -1;
       }
 
@@ -2762,6 +2927,12 @@
           showCert(currentIndex - 1);
         } else if (e.key === 'ArrowRight' && currentIndex < certData.length - 1) {
           showCert(currentIndex + 1);
+        } else if (e.key === '+' || e.key === '=') {
+          setZoom(zoomLevel + ZOOM_STEP);
+        } else if (e.key === '-' || e.key === '_') {
+          setZoom(zoomLevel - ZOOM_STEP);
+        } else if (e.key === '0') {
+          resetZoom();
         }
       });
 
@@ -2832,7 +3003,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260805"></script>
+  <script src="js/portfolio-data.js?v=20260805j"></script>
   <script src="js/ui-upgrade.js?v=20260805g" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>

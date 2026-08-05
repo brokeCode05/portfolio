@@ -320,14 +320,30 @@ function renderCerts(data) {
   if (!data || !data.certifications) return '';
   return data.certifications.map(function(cert, idx) {
     var path = escapeHtml(cert.path || '');
-    return '<div class="cert-card" data-cert-path="' + path + '" data-cert-name="' + escapeHtml(cert.name) + '" data-cert-issuer="' + escapeHtml(cert.issuer) + '" data-cert-date="' + escapeHtml(cert.date) + '" data-cert-key="' + escapeHtml(cert.id || 'cert-' + idx) + '" data-cert-index="' + idx + '" data-reveal onclick="openCertViewer(this)" onkeydown="if(event.key===\' \'||event.key===\'Enter\'){event.preventDefault();openCertViewer(this)}" tabindex="0" role="button">' +
-      '<div class="cert-card-badge" aria-hidden="true">' +
-        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
-      '</div>' +
-      '<div class="cert-card-body">' +
-        '<h3 class="cert-card-title">' + escapeHtml(cert.name) + '</h3>' +
-        '<p class="cert-card-issuer">' + escapeHtml(cert.issuer) + '</p>' +
-        '<span class="cert-card-date">' + cert.date + '</span>' +
+    var name = escapeHtml(cert.name);
+    var back;
+    if (path) {
+      back = '<img class="cert-card-img" src="' + path + '" alt="' + name + ' certificate" loading="lazy" onerror="this.remove();this.parentNode.classList.add(\'cert-card-back-empty\')" />' +
+        '<div class="cert-card-scanlines" aria-hidden="true"></div>';
+    } else {
+      back = '<div class="cert-card-back-empty" aria-hidden="true">' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
+        '<span>no image on file</span>' +
+        '</div>';
+    }
+    return '<div class="cert-card" data-cert-path="' + path + '" data-cert-name="' + name + '" data-cert-issuer="' + escapeHtml(cert.issuer) + '" data-cert-date="' + escapeHtml(cert.date) + '" data-cert-key="' + escapeHtml(cert.id || 'cert-' + idx) + '" data-cert-index="' + idx + '" data-reveal onclick="openCertViewer(this)" onkeydown="if(event.key===\' \'||event.key===\'Enter\'){event.preventDefault();openCertViewer(this)}" tabindex="0" role="button">' +
+      '<div class="cert-card-inner">' +
+        '<div class="cert-card-front">' +
+          '<div class="cert-card-badge" aria-hidden="true">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
+          '</div>' +
+          '<div class="cert-card-body">' +
+            '<h3 class="cert-card-title">' + name + '</h3>' +
+            '<p class="cert-card-issuer">' + escapeHtml(cert.issuer) + '</p>' +
+            '<span class="cert-card-date">' + cert.date + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="cert-card-back">' + back + '</div>' +
       '</div>' +
     '</div>';
   }).join('');
