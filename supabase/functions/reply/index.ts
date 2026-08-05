@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
   // Answer the browser's preflight OPTIONS request so fetch() from the admin
   // panel isn't blocked before it reaches this function.
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { status: 204, headers: CORS })
+    // Return 200, not 204: constructing a Response with status 204 and a body
+    // throws a TypeError in Deno, which turns the preflight into a 500.
+    return new Response('ok', { status: 200, headers: CORS })
   }
   if (req.method !== 'POST') {
     return json({ error: 'method not allowed' }, 405)
