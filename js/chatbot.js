@@ -15,6 +15,13 @@
 (function(global) {
   'use strict';
 
+  // ── AI config ───────────────────────────────────────────────
+  // Edge function URL for AI answers (supabase/functions/chat-ai). Set to ''
+  // to disable AI — the bot then falls back to escalating to the contact form.
+  // Prefilled for the deployed function; the fallback is graceful if it's not
+  // deployed yet.
+  var CHAT_AI_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co/functions/v1/chat-ai';
+
   // ── Session id (one per browser) ────────────────────────────
   var SESSION_KEY = 'portfolio_chat_session_v1';
   var sessionId = '';
@@ -45,6 +52,24 @@
 
   function normalize(s) {
     return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // ── Compact portfolio profile sent to the AI as grounding ──
+  function buildAiContext() {
+    var d = getData() || {};
+    var bits = [];
+    if (d.about && d.about.bio) bits.push('Bio: ' + String(d.about.bio).slice(0, 400));
+    var stack = (d.techStack || []).map(function(s) { return s.name; }).slice(0, 30);
+    if (stack.length) bits.push('Skills: ' + stack.join(', '));
+    var projs = (d.projects || []).slice(0, 8).map(function(p) {
+      return p.title + (p.description ? ' - ' + String(p.description).slice(0, 120) : '');
+    });
+    if (projs.length) bits.push('Projects: ' + projs.join(' | '));
+    var exp = (d.experience || []).slice(0, 5).map(function(x) {
+      return (x.role || x.title || '') + (x.company ? ' @ ' + x.company : '');
+    });
+    if (exp.length) bits.push('Experience: ' + exp.join(' | '));
+    return bits.join('\n').slice(0, 2000);
   }
 
   // ── Editable FAQ rules ──────────────────────────────────────
@@ -414,6 +439,42 @@
 
     function clearChips() { chipsEl.innerHTML = ''; }
 
+    function aiAnswer(text) {
+      if (!CHAT_AI_URL) {
+        escalate(text);
+        return;
+      }
+      // Client throttle: at most one AI call per 15s per visitor.
+      var now = Date.now();
+      var last = 0;
+      try { last = parseInt(localStorage.getItem('chat_ai_last') || '0', 10) || 0; } catch (e) {}
+      if (now - last < 15000) {
+        typeBot('Give me a moment — ask again in a few seconds.', showChips);
+        return;
+      }
+      try { localStorage.setItem('chat_ai_last', String(now)); } catch (e) {}
+      fetch(CHAT_AI_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: String(text).slice(0, 500), context: buildAiContext() })
+      })
+        .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { ok: resp.ok, data: data }; }); })
+        .then(function(result) {
+          if (result.ok && result.data && result.data.text) {
+            logChat(text, 'ai', true, false);
+            typeBot(String(result.data.text).slice(0, 900), showChips);
+          } else {
+            escalate(text);
+          }
+        })
+        .catch(function() { escalate(text); });
+    }
+
+    function escalate(text) {
+      logChat(text, null, false, true);
+      typeBot(UNANSWERED, showChips);
+    }
+
     function send(text) {
       text = String(text || '').trim();
       if (!text) return;
@@ -421,10 +482,12 @@
       addLine('user', esc(text));
       inputEl.value = '';
       var result = matchRule(text, getData());
-      logChat(text, result.topic, result.answered, !result.answered);
-      typeBot(result.text, function() {
-        if (result.answered) showChips();
-      });
+      if (result.answered) {
+        logChat(text, result.topic, true, false);
+        typeBot(result.text, showChips);
+      } else {
+        aiAnswer(text);
+      }
     }
 
     function openChat() {
@@ -477,6 +540,6 @@
 
   // ── Export for headless tests ───────────────────────────────
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { matchRule: matchRule, normalize: normalize, faqRulesFromData: faqRulesFromData };
+    module.exports = { matchRule: matchRule, normalize: normalize, faqRulesFromData: faqRulesFromData, buildAiContext: buildAiContext };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

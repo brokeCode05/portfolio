@@ -326,3 +326,19 @@ create trigger chat_logs_flood_guard_trigger
   before insert on chat_logs
   for each row
   execute function chat_logs_flood_guard();
+
+-- ===================================================
+--   Step 16: Chatbot AI daily usage cap.
+-- ===================================================
+-- The chat-ai edge function counts Gemini requests per day here and refuses
+-- once the daily limit is reached, so the free Gemini quota can't be drained
+-- by spam. Only the service role (used by the edge function) can access it.
+
+create table if not exists chat_ai_usage (
+  usage_date date primary key,
+  request_count integer not null default 0
+);
+
+alter table chat_ai_usage enable row level security;
+-- No policies: RLS is on with no anon/authenticated access, so only the
+-- service role (bypasses RLS) can read or update this table.
