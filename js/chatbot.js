@@ -244,10 +244,34 @@
 
   var UNANSWERED = 'Hmm, that one is beyond my FAQ knowledge — I\'m just the portfolio bot. Let me connect you with Bryan directly. [[CONTACT]]';
 
+  // ── Custom FAQ entries from portfolio data (admin-editable) ──
+  // Stored on data.chatFaq as { topic?, keywords: 'a, b, c', answer: '...' }.
+  // These are checked BEFORE the built-in rules so the admin's answers win.
+  function faqRulesFromData(data) {
+    var list = (data && data.chatFaq) || [];
+    return list
+      .filter(function(f) {
+        return f && String(f.keywords || '').trim() && String(f.answer || '').trim();
+      })
+      .map(function(f) {
+        return {
+          topic: (f.topic && String(f.topic).trim()) || 'custom',
+          keywords: String(f.keywords).split(',').map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean),
+          answer: String(f.answer)
+        };
+      });
+  }
+
   // ── Core matcher (pure — also exported for tests) ──────────
   function matchRule(text, data) {
     var nq = normalize(text);
     if (!nq) return null;
+    var custom = faqRulesFromData(data);
+    for (var c = 0; c < custom.length; c++) {
+      if (custom[c].keywords.some(function(k) { return nq.indexOf(k) !== -1; })) {
+        return { topic: custom[c].topic, answered: true, text: custom[c].answer };
+      }
+    }
     for (var i = 0; i < RULES.length; i++) {
       var rule = RULES[i];
       var hit = rule.match ? rule.match(nq) : rule.keywords.some(function(k) { return nq.indexOf(k) !== -1; });
@@ -448,6 +472,6 @@
 
   // ── Export for headless tests ───────────────────────────────
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { matchRule: matchRule, normalize: normalize };
+    module.exports = { matchRule: matchRule, normalize: normalize, faqRulesFromData: faqRulesFromData };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

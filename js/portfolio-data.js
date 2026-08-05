@@ -171,7 +171,8 @@ function loadData() {
     certifications: [],
     experience: [],
     learning: [],
-    contactLinks: []
+    contactLinks: [],
+    chatFaq: []
   };
 }
 
