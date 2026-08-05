@@ -411,12 +411,12 @@
       'aria-label': 'Open chat assistant',
       'aria-expanded': 'false',
       'aria-controls': WIN_ID
-    }, '<span class="chatbot-launcher-icon" aria-hidden="true">&gt;_</span><span class="chatbot-launcher-label">ask bryan</span>');
+    }, '<span class="chatbot-launcher-dot" aria-hidden="true"></span><span class="chatbot-launcher-icon" aria-hidden="true">&gt;_</span><span class="chatbot-launcher-label">ask bryan</span>');
 
     var windowEl = el('div', { 'id': WIN_ID, 'role': 'dialog', 'aria-label': 'Portfolio chat assistant', 'hidden': 'hidden' });
     windowEl.innerHTML =
       '<div class="chatbot-header">' +
-        '<span class="chatbot-dots" aria-hidden="true">...</span>' +
+        '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
         '<span class="chatbot-title">bryan-bot:~$ ./assistant --help</span>' +
         '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
       '</div>' +
