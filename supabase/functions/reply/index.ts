@@ -158,8 +158,10 @@ Deno.serve(async (req) => {
   const resendData = await res.json().catch(() => ({}))
   if (!res.ok) {
     console.error('Resend error:', res.status, JSON.stringify(resendData))
-    // Reply is stored but the email failed — tell the admin so they can retry.
-    return json({ error: 'email failed to send — reply saved, please retry' }, 502)
+    // Reply is stored but the email failed — surface Resend's reason so the
+    // admin knows exactly what to fix (e.g. verify a domain for the sender).
+    const why = resendData && resendData.message ? ' ' + resendData.message : ''
+    return json({ error: 'email failed to send — reply saved.' + why }, 502)
   }
 
   console.log(`Reply sent to ${msg.email} for message ${messageId}`)
