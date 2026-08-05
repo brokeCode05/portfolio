@@ -66,10 +66,26 @@
     });
     if (projs.length) bits.push('Projects: ' + projs.join(' | '));
     var exp = (d.experience || []).slice(0, 5).map(function(x) {
-      return (x.role || x.title || '') + (x.company ? ' @ ' + x.company : '');
+      return (x.role || x.title || '') + (x.company ? ' @ ' + x.company : '') +
+        ((x.period || x.date) ? ' (' + (x.period || x.date) + ')' : '');
     });
     if (exp.length) bits.push('Experience: ' + exp.join(' | '));
-    return bits.join('\n').slice(0, 2000);
+    var certs = (d.certifications || []).slice(0, 8).map(function(c) {
+      var parts = [c.title || c.issuer || 'Certification'];
+      if (c.issuer && c.title) parts.push(c.issuer);
+      if (c.date) parts.push(c.date);
+      return parts.join(' — ');
+    });
+    if (certs.length) bits.push('Certifications: ' + certs.join(' | '));
+    var learn = (d.learning || []).slice(0, 5).map(function(m) {
+      return (m.year ? m.year + ' ' : '') + (m.title || 'Milestone');
+    });
+    if (learn.length) bits.push('Learning: ' + learn.join(' | '));
+    var links = (d.contactLinks || []).slice(0, 8).map(function(l) {
+      return (l.label || 'Link') + ': ' + (l.value || l.url || '');
+    });
+    if (links.length) bits.push('Contact: ' + links.join(' | '));
+    return bits.join('\n').slice(0, 2200);
   }
 
   // ── Editable FAQ rules ──────────────────────────────────────
@@ -292,8 +308,9 @@
       });
   }
 
-  // ── Core matcher (pure — also exported for tests) ──────────
-  function matchRule(text, data) {
+  // ── Matchers (pure — also exported for tests) ──────────────
+  // Admin FAQ entries only (these win over the AI — hand-written answers).
+  function matchFaq(text, data) {
     var nq = normalize(text);
     if (!nq) return null;
     var custom = faqRulesFromData(data);
@@ -302,12 +319,25 @@
         return { topic: custom[c].topic, answered: true, text: custom[c].answer };
       }
     }
+    return null;
+  }
+
+  // Built-in rules only — used as the offline fallback when the AI fails.
+  function matchRulesOnly(text, data) {
+    var nq = normalize(text);
+    if (!nq) return null;
     for (var i = 0; i < RULES.length; i++) {
       var rule = RULES[i];
       var hit = rule.match ? rule.match(nq) : rule.keywords.some(function(k) { return nq.indexOf(k) !== -1; });
       if (hit) return { topic: rule.topic, answered: true, text: String(rule.answer(data) || '') };
     }
-    return { topic: null, answered: false, text: UNANSWERED };
+    return null;
+  }
+
+  // Combined FAQ-then-rules matcher (kept for tests / back-compat).
+  function matchRule(text, data) {
+    return matchFaq(text, data) || matchRulesOnly(text, data) ||
+      { topic: null, answered: false, text: UNANSWERED };
   }
 
   // ── Logging (fire-and-forget → Supabase chat_logs) ──────────
@@ -406,6 +436,15 @@
     var inputEl = document.getElementById('chatbot-input');
     var openState = false;
     var greeted = false;
+    // Session conversation (most recent last) — sent to the AI so follow-up
+    // questions ("what about projects?") make sense in context.
+    var conversation = [];
+    // Record a bot reply at DECISION time (not when the typing animation ends)
+    // so rapid back-and-forth keeps correct user→bot ordering in history.
+    function botRecord(text) {
+      conversation.push({ role: 'assistant', content: String(text) });
+      if (conversation.length > 20) conversation.splice(0, conversation.length - 20);
+    }
 
     function addLine(who, html) {
       var line = el('div', { 'class': 'chat-msg ' + who },
@@ -439,16 +478,32 @@
 
     function clearChips() { chipsEl.innerHTML = ''; }
 
+    // If the AI is unavailable (quota, timeout, network), fall back to the
+    // built-in rules before escalating — keeps the bot useful during outages.
+    function rulesFallback(text, aiTopic) {
+      var rule = matchRulesOnly(text, getData());
+      if (rule) {
+        logChat(text, rule.topic, true, false);
+        botRecord(rule.text);
+        typeBot(rule.text, showChips);
+      } else {
+        escalate(text, aiTopic);
+      }
+    }
+
     function aiAnswer(text) {
       if (!CHAT_AI_URL) {
-        escalate(text);
+        rulesFallback(text, null);
         return;
       }
-      // Client throttle: at most one AI call per 15s per visitor.
+      // Client throttle: at most one AI call per 5s per visitor (AI-first flow
+      // answers most questions, so keep the pause short). The server-side
+      // daily cap (chat_ai_usage) is the real quota guard.
       var now = Date.now();
       var last = 0;
       try { last = parseInt(localStorage.getItem('chat_ai_last') || '0', 10) || 0; } catch (e) {}
-      if (now - last < 15000) {
+      if (now - last < 5000) {
+        botRecord('Give me a moment — ask again in a few seconds.');
         typeBot('Give me a moment — ask again in a few seconds.', showChips);
         return;
       }
@@ -457,39 +512,50 @@
       // Timeout so a slow/hung AI never leaves the typing indicator spinning.
       var controller = new AbortController();
       var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
+      // Last ~6 turns as conversation context (markers stripped). Exclude the
+      // just-pushed current question (sent separately as `question`) so it
+      // isn't duplicated in the prompt.
+      var history = conversation.slice(-7, -1).map(function(m) {
+        return {
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: String(m.content || '').replace(/\[\[CONTACT\]\]/g, '').slice(0, 400)
+        };
+      });
       fetch(CHAT_AI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({ question: String(text).slice(0, 500), context: buildAiContext() })
+        body: JSON.stringify({ question: String(text).slice(0, 500), context: buildAiContext(), history: history })
       })
         .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { status: resp.status, ok: resp.ok, data: data }; }); })
         .then(function(result) {
           if (result.ok && result.data && result.data.text) {
             // Topic comes from the AI's own classification (falls back to 'ai').
+            var answerText = String(result.data.text).slice(0, 900);
             logChat(text, result.data.topic || 'ai', true, false);
-            typeBot(String(result.data.text).slice(0, 900), showChips);
+            botRecord(answerText);
+            typeBot(answerText, showChips);
           } else if (result.status === 429) {
             // Daily AI quota exhausted — log it distinctly so Chat Insights
             // shows why instead of a generic unanswered question.
-            escalate(text, 'ai-limit');
+            rulesFallback(text, 'ai-limit');
           } else {
-            escalate(text, null);
+            rulesFallback(text, null);
           }
         })
         .catch(function(err) {
           if (err && err.name === 'AbortError') {
-            logChat(text, 'ai-timeout', false, true);
-            typeBot('That one took too long — ask me again or use the contact form. [[CONTACT]]', showChips);
+            rulesFallback(text, 'ai-timeout');
             return;
           }
-          escalate(text, null);
+          rulesFallback(text, null);
         })
         .then(function() { clearTimeout(timeoutId); });
     }
 
     function escalate(text, topic) {
       logChat(text, topic || null, false, true);
+      botRecord(UNANSWERED);
       typeBot(UNANSWERED, showChips);
     }
 
@@ -499,10 +565,14 @@
       clearChips();
       addLine('user', esc(text));
       inputEl.value = '';
-      var result = matchRule(text, getData());
-      if (result.answered) {
-        logChat(text, result.topic, true, false);
-        typeBot(result.text, showChips);
+      conversation.push({ role: 'user', content: text });
+      // AI-first: admin FAQ wins (hand-written answers), then the AI, then the
+      // built-in rules as offline fallback, then escalate to the contact form.
+      var faq = matchFaq(text, getData());
+      if (faq) {
+        logChat(text, faq.topic, true, false);
+        botRecord(faq.text);
+        typeBot(faq.text, showChips);
       } else {
         aiAnswer(text);
       }
@@ -514,7 +584,7 @@
       if (!greeted) {
         greeted = true;
         var help = 'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), certifications, or how to [contact](contact) him.\n\nOr just type a question below.';
-        setTimeout(function() { typeBot(help, showChips); }, 150);
+        setTimeout(function() { botRecord(help); typeBot(help, showChips); }, 150);
       }
       setTimeout(function() { inputEl.focus(); }, 50);
     }
@@ -558,6 +628,13 @@
 
   // ── Export for headless tests ───────────────────────────────
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { matchRule: matchRule, normalize: normalize, faqRulesFromData: faqRulesFromData, buildAiContext: buildAiContext };
+    module.exports = {
+      matchRule: matchRule,
+      matchFaq: matchFaq,
+      matchRulesOnly: matchRulesOnly,
+      normalize: normalize,
+      faqRulesFromData: faqRulesFromData,
+      buildAiContext: buildAiContext
+    };
   }
 })(typeof window !== 'undefined' ? window : globalThis);
