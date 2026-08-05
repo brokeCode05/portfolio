@@ -458,7 +458,7 @@
 
   function renderBotText(text) {
     var contactCTA = '<button type="button" class="chat-cta" data-action="contact">[ contact bryan ]</button>';
-    return esc(text)
+    var out = esc(text)
       .split('[[CONTACT]]').join(contactCTA)
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, label, url) {
         url = String(url).trim();
@@ -475,6 +475,22 @@
         return m;
       })
       .replace(/\n/g, '<br>');
+
+    // Auto-link bare URLs (http/https/www) so FAQ answers pasted without
+    // markdown still get clickable links. Existing <a> tags from the markdown
+    // step are parked first so nothing gets double-wrapped.
+    var anchors = [];
+    out = out.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, function(a) {
+      anchors.push(a);
+      return '\u0000' + (anchors.length - 1) + '\u0000';
+    });
+    out = out.replace(/(^|[\s(>[])((?:https?:\/\/|www\.)[^\s<>"'()\[\]]+)/gi, function(m, pre, url) {
+      url = url.replace(/[.,;:!?]+$/, '');
+      var href = /^www\./i.test(url) ? 'https://' + url : url;
+      return pre + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+    });
+    out = out.replace(/\u0000(\d+)\u0000/g, function(m, i) { return anchors[+i] || ''; });
+    return out;
   }
 
   function buildWidget() {
