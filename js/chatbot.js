@@ -539,9 +539,13 @@
       var raw = String(text == null ? '' : text);
 
       function render() {
-        // Keep the blinking caret at the end of the finished reply (terminal-style).
-        textEl.innerHTML = renderBotText(raw) + '<span class="cursor" aria-hidden="true"></span>';
+        textEl.innerHTML = renderBotText(raw);
         bodyEl.scrollTop = bodyEl.scrollHeight;
+        // Blinking caret ONLY on the most recent message — older replies keep
+        // their text but drop the caret so the thread doesn't blink everywhere.
+        if (bodyEl.lastElementChild === line) {
+          textEl.insertAdjacentHTML('beforeend', '<span class="cursor" aria-hidden="true"></span>');
+        }
         blip();
         haptic();
         if (done) done();
@@ -568,7 +572,9 @@
         (function tick() {
           out += esc(masked.charAt(i)); // escape per char so entities never render half-broken
           i++;
-          textEl.innerHTML = out + cursorHTML;
+          // Caret only while this line is still the latest message (if the
+          // visitor sends a new question mid-type, the caret moves on).
+          textEl.innerHTML = out + (bodyEl.lastElementChild === line ? cursorHTML : '');
           bodyEl.scrollTop = bodyEl.scrollHeight;
           if (i >= masked.length) { render(); return; }
           var jitter = 0.75 + Math.random() * 0.5;
@@ -673,6 +679,8 @@
       if (!text) return;
       ensureAudio();
       clearChips();
+      // The visitor's message becomes the latest — drop the caret from earlier replies.
+      bodyEl.querySelectorAll('.chat-msg .chat-text .cursor').forEach(function(c) { c.remove(); });
       addLine('user', esc(text));
       inputEl.value = '';
       conversation.push({ role: 'user', content: text });
