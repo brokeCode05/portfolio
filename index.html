@@ -1617,7 +1617,7 @@
     }
   </style>
   <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805d" />
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805e" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -1838,7 +1838,7 @@
       <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">        <div class="about-text">
           <p></p>
         </div>
-        <div class="about-terminal" aria-hidden="true">
+        <div class="about-terminal">
           <div class="terminal-window">
             <div class="terminal-header">
               <span class="terminal-dot"></span>
@@ -1856,6 +1856,16 @@
               <span class="line output">}</span>
               <span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">▊</span></span>
             </div>
+          </div>
+          <!-- Interactive commands — wired by ui-upgrade.js -->
+          <div class="about-cmd-bar" role="group" aria-label="Terminal commands">
+            <span class="about-cmd-label" aria-hidden="true">~/cmd</span>
+            <button type="button" class="filter-chip" data-cmd="help">help</button>
+            <button type="button" class="filter-chip" data-cmd="skills">skills</button>
+            <button type="button" class="filter-chip" data-cmd="contact">contact</button>
+            <button type="button" class="filter-chip" data-cmd="status">status</button>
+            <button type="button" class="filter-chip" data-cmd="projects">projects</button>
+            <button type="button" class="filter-chip" data-cmd="clear">clear</button>
           </div>
         </div>
       </div>
@@ -2818,7 +2828,7 @@
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
   <script src="js/portfolio-data.js?v=20260805"></script>
-  <script src="js/ui-upgrade.js?v=20260805d" defer></script>
+  <script src="js/ui-upgrade.js?v=20260805f" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
   (function(){
@@ -2857,6 +2867,9 @@
           fin.className = 'line cursor-line';
           fin.innerHTML = '<span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span>';
           body.appendChild(fin);
+          // Stamp a marker so the upgrade layer (ui-upgrade.js) can take over
+          // even if it attaches after the intro has already finished typing.
+          body.setAttribute('data-about-typed', '1');
         }
 
         function typeLine() {

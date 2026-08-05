@@ -214,6 +214,203 @@
     grid.parentNode.insertBefore(bar, grid);
   }
 
+  // ── Interactive About terminal ─────────────────────────────
+  // Pure command resolver — returns { lines: [...], clear: bool }.
+  function aboutCommand(raw, data) {
+    var lines = [];
+    var cmd = String(raw || '').trim().toLowerCase();
+    var d = data || {};
+    if (cmd === 'help' || cmd === '?') {
+      lines.push('available: help, skills, contact, status, projects, clear, cat about.txt');
+    } else if (cmd === 'skills' || cmd === 'stack') {
+      var st = d.techStack || [];
+      if (!st.length) {
+        lines.push('no skills data yet');
+      } else {
+        var groups = {};
+        st.forEach(function (t) {
+          var k = t.cat || 'Other';
+          (groups[k] = groups[k] || []).push(t.name);
+        });
+        Object.keys(groups).forEach(function (k) {
+          lines.push('[' + k + ']');
+          lines.push('  ' + groups[k].join(', '));
+        });
+      }
+    } else if (cmd === 'contact') {
+      var links = (d.contactLinks && d.contactLinks.length) ? d.contactLinks
+        : [{ label: 'Email', value: 'jhnbryn05@gmail.com' }, { label: 'GitHub', value: 'github.com/brokeCode05' }];
+      links.forEach(function (l) {
+        lines.push((l.label || 'Link') + ': ' + (l.value || l.url || ''));
+      });
+    } else if (cmd === 'status') {
+      var status = d.about && d.about.terminal && d.about.terminal.status;
+      lines.push('status: ' + (status || 'unknown'));
+    } else if (cmd === 'projects') {
+      var pj = d.projects || [];
+      if (!pj.length) { lines.push('no projects yet'); }
+      else { pj.forEach(function (p) { lines.push('- ' + (p.title || 'untitled')); }); }
+    } else if (cmd === 'clear') {
+      return { lines: [], clear: true };
+    } else if (cmd === 'cat about.txt') {
+      var t = (d.about && d.about.terminal) || {};
+      lines.push('{');
+      lines.push('  "role": ' + JSON.stringify(t.role || ''));
+      lines.push('  "path": ' + JSON.stringify(t.path || []));
+      lines.push('  "philosophy": ' + JSON.stringify(t.philosophy || ''));
+      lines.push('  "status": ' + JSON.stringify(t.status || ''));
+      lines.push('}');
+    } else {
+      lines.push('zsh: command not found: ' + String(raw || '').trim());
+    }
+    return { lines: lines, clear: false };
+  }
+
+  function aboutTerminal() {
+    var terminal = document.querySelector('.about-terminal');
+    if (!terminal) return;
+    var body = terminal.querySelector('.terminal-body');
+    if (!body) return;
+    var ready = false, busy = false, input = null;
+    var history = [], histIdx = -1;
+
+    function makeInputLine() {
+      var form = document.createElement('form');
+      form.className = 'line about-term-form';
+      form.setAttribute('aria-label', 'Terminal command input');
+      var prompt = document.createElement('span');
+      prompt.className = 'prompt';
+      prompt.textContent = '$';
+      input = document.createElement('input');
+      input.className = 'about-term-input';
+      input.type = 'text';
+      input.autocomplete = 'off';
+      input.spellcheck = false;
+      input.setAttribute('aria-label', 'Type a terminal command and press Enter');
+      input.placeholder = 'type help';
+      form.appendChild(prompt);
+      form.appendChild(document.createTextNode(' '));
+      form.appendChild(input);
+      form.addEventListener('submit', function (e) { e.preventDefault(); runInput(); });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (history.length) {
+            histIdx = histIdx < 0 ? history.length - 1 : Math.max(0, histIdx - 1);
+            input.value = history[histIdx];
+          }
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (histIdx >= 0) {
+            histIdx++;
+            if (histIdx >= history.length) { histIdx = -1; input.value = ''; }
+            else { input.value = history[histIdx]; }
+          }
+        }
+      });
+      return form;
+    }
+
+    function appendLine(cls, node) {
+      var el = document.createElement('span');
+      el.className = 'line ' + cls;
+      el.appendChild(node);
+      body.appendChild(el);
+      body.scrollTop = body.scrollHeight;
+      return el;
+    }
+
+    function typeText(el, text, done) {
+      if (reducedMotion() || !text) { el.textContent = text; if (done) done(); return; }
+      var i = 0;
+      var timer = setInterval(function () {
+        i++;
+        el.textContent = text.substring(0, i);
+        if (i >= text.length) {
+          clearInterval(timer);
+          if (done) done();
+        }
+      }, 16);
+    }
+
+    function runCommand(raw) {
+      var res = aboutCommand(raw, typeof global.loadData === 'function' ? global.loadData() : null);
+      var inputForm = body.querySelector('.about-term-form');
+      // Echo the typed command right above the input line.
+      var echo = document.createElement('span');
+      echo.className = 'prompt';
+      echo.textContent = '$';
+      var echoLine = appendLine('', echo);
+      echoLine.appendChild(document.createTextNode(' ' + raw.trim()));
+      body.insertBefore(echoLine, inputForm);
+      if (res.clear) {
+        Array.prototype.forEach.call(body.children, function (n) {
+          if (n !== inputForm && n !== echoLine) n.remove();
+        });
+        if (input) input.focus();
+        return;
+      }
+      if (!res.lines.length) { if (input) input.focus(); return; }
+      busy = true;
+      var idx = 0;
+      function next() {
+        if (idx >= res.lines.length) { busy = false; if (input) input.focus(); return; }
+        var text = res.lines[idx++];
+        var out = document.createElement('span');
+        out.className = 'line output' + (text.charAt(0) === ' ' ? ' indent' : '');
+        body.insertBefore(out, inputForm);
+        body.scrollTop = body.scrollHeight;
+        typeText(out, text, function () { setTimeout(next, 90); });
+      }
+      next();
+    }
+
+    function runInput() {
+      var raw = input.value;
+      input.value = '';
+      histIdx = -1;
+      if (!raw.trim() || busy || !ready) return;
+      history.push(raw.trim());
+      if (history.length > 20) history.shift();
+      runCommand(raw);
+    }
+
+    function upgrade() {
+      if (ready) return;
+      ready = true;
+      var cl = body.querySelector('.cursor-line');
+      if (cl) cl.remove();
+      body.appendChild(makeInputLine());
+      terminal.querySelectorAll('.about-cmd-bar .filter-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          if (!ready) return;
+          input.value = chip.getAttribute('data-cmd') || '';
+          runInput();
+        });
+      });
+      setTimeout(function () { if (input) input.focus(); }, 350);
+    }
+
+    // Upgrade immediately if reduced motion (typewriter never runs, so the
+    // static cursor-line stays) OR the typewriter already finished before we
+    // attached (finish() stamps data-about-typed on the body). Otherwise wait
+    // for the typewriter's finish() line (a newly ADDED .cursor-line) before
+    // taking over, so the intro animation isn't disturbed.
+    if (reducedMotion() || body.getAttribute('data-about-typed')) {
+      upgrade();
+    } else {
+      var mo = new MutationObserver(function (muts) {
+        muts.forEach(function (m) {
+          if (m.type !== 'childList' || !m.addedNodes) return;
+          Array.prototype.forEach.call(m.addedNodes, function (n) {
+            if (n.nodeType === 1 && n.classList && n.classList.contains('cursor-line')) upgrade();
+          });
+        });
+      });
+      mo.observe(body, { childList: true });
+    }
+  }
+
   // ── Hero role rotator (type / hold / delete cycle) ─────────
   function heroRoles(textEl, roles) {
     if (!textEl || !roles || !roles.length) return;
@@ -359,6 +556,7 @@
     backToTop();
     skillFilters();
     projectFilters();
+    aboutTerminal();
   }
 
   if (global && typeof global.document !== 'undefined') {
@@ -376,7 +574,8 @@
       statTargets: statTargets,
       nextRole: nextRole,
       parseTags: parseTags,
-      matchesFilter: matchesFilter
+      matchesFilter: matchesFilter,
+      aboutCommand: aboutCommand
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);

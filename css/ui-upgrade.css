@@ -431,7 +431,51 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 
 /* ════════════════════════════════════════════════════════════
-   11. RESPONSIVE
+   11. INTERACTIVE ABOUT TERMINAL
+   ════════════════════════════════════════════════════════════ */
+.about-terminal .terminal-body {
+  max-height: 24rem;
+  overflow-y: auto;
+}
+.terminal-body .about-term-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: normal;
+}
+.about-term-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: var(--font-code);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  caret-color: var(--color-accent);
+}
+.about-term-input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+.about-cmd-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+.about-cmd-label {
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-accent-2);
+  letter-spacing: 0.06em;
+  margin-right: var(--space-xs);
+}
+
+/* ════════════════════════════════════════════════════════════
+   12. RESPONSIVE
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
