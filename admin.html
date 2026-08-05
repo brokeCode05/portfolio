@@ -364,7 +364,10 @@
         <div class="admin-card" style="margin-bottom:1rem">
           <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
             <h4>Overview</h4>
-            <button class="btn btn-sm" id="chats-refresh">↻ Refresh</button>
+            <div style="display:flex;gap:0.5rem">
+              <button class="btn btn-sm btn-danger-ghost" id="chats-clear" title="Delete all chat logs — wipes Chat Insights">Clear Logs</button>
+              <button class="btn btn-sm" id="chats-refresh">↻ Refresh</button>
+            </div>
           </div>
           <div id="chats-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin-top:0.75rem"></div>
         </div>
@@ -1289,6 +1292,44 @@ CREATE POLICY "Admin update portfolio_data"
   var chatsRefreshBtn = document.getElementById('chats-refresh');
   if (chatsRefreshBtn) {
     chatsRefreshBtn.addEventListener('click', loadChatInsights);
+  }
+
+  // ─── Clear Chat Logs ──────────────────────
+  // Wipes all chat_logs rows so test data doesn't pollute the insights.
+  // Relies on the "Admin delete chat logs" RLS policy (Step 15c in
+  // docs/supabase-rls.sql) — only the signed-in admin can do this.
+  var chatsClearBtn = document.getElementById('chats-clear');
+  if (chatsClearBtn) {
+    chatsClearBtn.addEventListener('click', function() {
+      if (!supabaseClient) {
+        showToast('Supabase is not connected.', 'error');
+        return;
+      }
+      showConfirm('Delete ALL chat logs? This permanently wipes Chat Insights — test data included — and cannot be undone.', function(ok) {
+        if (!ok) return;
+        chatsClearBtn.disabled = true;
+        chatsClearBtn.textContent = 'Clearing…';
+        // PostgREST refuses an unfiltered DELETE, so match every real uuid.
+        supabaseClient.from('chat_logs')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000')
+          .then(function(result) {
+            if (result.error) {
+              showToast('Failed to clear logs: ' + (result.error.message || 'error'), 'error');
+            } else {
+              showToast('Chat logs cleared', 'success');
+              loadChatInsights();
+            }
+            chatsClearBtn.disabled = false;
+            chatsClearBtn.textContent = 'Clear Logs';
+          })
+          .catch(function(err) {
+            showToast('Failed to clear logs: ' + (err.message || err), 'error');
+            chatsClearBtn.disabled = false;
+            chatsClearBtn.textContent = 'Clear Logs';
+          });
+      });
+    });
   }
 
   // ─── Ctrl+S Shortcut ──────────────────────
