@@ -411,6 +411,49 @@
     }
   }
 
+  // ── Timeline draw-on-scroll ───────────────────────────────
+  // Pure: fraction (0–1) of the timeline that has been scrolled past.
+  // Returns 0 when the timeline top is at the viewport bottom and 1 when
+  // its bottom clears the viewport top.
+  function timelineProgress(rect, vh) {
+    if (!rect || !vh) return 0;
+    var p = (vh - rect.top) / (rect.height + vh);
+    return Math.max(0, Math.min(1, p));
+  }
+
+  // Drives the .timeline::before gradient line by setting --tl-progress
+  // as a percentage on each timeline container while it scrolls through
+  // the viewport. rAF-throttled; skipped under reduced motion.
+  function timelineDraw() {
+    if (reducedMotion()) return;
+    var tls = document.querySelectorAll('.timeline');
+    if (!tls.length) return;
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      Array.prototype.forEach.call(tls, function (tl) {
+        // Skip zero-height rects: timelines are populated asynchronously, and
+        // an empty container would compute a misleading near-1 progress.
+        var rect = tl.getBoundingClientRect();
+        if (rect.height <= 0) return;
+        var p = timelineProgress(rect, vh);
+        tl.style.setProperty('--tl-progress', Math.round(p * 100) + '%');
+      });
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    // Recompute once after full load too — fonts/images/async data can shift
+    // layout without any scroll event.
+    window.addEventListener('load', update, { passive: true });
+    update();
+  }
+
   // ── Hero role rotator (type / hold / delete cycle) ─────────
   function heroRoles(textEl, roles) {
     if (!textEl || !roles || !roles.length) return;
@@ -557,6 +600,7 @@
     skillFilters();
     projectFilters();
     aboutTerminal();
+    timelineDraw();
   }
 
   if (global && typeof global.document !== 'undefined') {
@@ -575,7 +619,8 @@
       nextRole: nextRole,
       parseTags: parseTags,
       matchesFilter: matchesFilter,
-      aboutCommand: aboutCommand
+      aboutCommand: aboutCommand,
+      timelineProgress: timelineProgress
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);
