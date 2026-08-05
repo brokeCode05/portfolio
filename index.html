@@ -3485,6 +3485,18 @@
     }
     #chatbot-window[hidden] { display: none; }
 
+    /* Dimmed backdrop behind the mobile bottom sheet — tap it to dismiss.
+       Desktop keeps the floating panel, so it's switched off at 481px+. */
+    #chatbot-backdrop {
+      position: fixed; inset: 0; z-index: 998;
+      background: rgba(0,0,0,0.45);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    #chatbot-backdrop.is-open { opacity: 1; pointer-events: auto; }
+    @media (min-width: 481px) { #chatbot-backdrop { display: none; } }
+
     .chatbot-header {
       display: flex; align-items: center; gap: 0.5rem;
       padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--color-border, #2A2D35); background: var(--color-surface, #111418);
@@ -3642,6 +3654,7 @@
     @media (prefers-reduced-motion: reduce) {
       #chatbot-window, .chat-chip { animation: none; }
       .chatbot-launcher-dot, .chat-text .cursor { animation: none; }
+      #chatbot-backdrop { transition: none; }
     }
   </style>
 

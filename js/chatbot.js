@@ -495,6 +495,10 @@
         '<button type="submit" id="chatbot-send" aria-label="Send">↵</button>' +
       '</form>';
 
+    // Dimmed backdrop behind the mobile bottom sheet — tapping it dismisses
+    // the chat (desktop keeps the floating panel, so it's hidden there via CSS).
+    var backdropEl = el('div', { 'id': 'chatbot-backdrop', 'aria-hidden': 'true' });
+    document.body.appendChild(backdropEl);
     document.body.appendChild(launcher);
     document.body.appendChild(windowEl);
 
@@ -686,6 +690,11 @@
 
     function openChat() {
       windowEl.hidden = false;
+      backdropEl.classList.add('is-open');
+      // On mobile the sheet is a modal — lock page scroll like the other modals.
+      if (global.matchMedia && global.matchMedia('(max-width: 480px)').matches) {
+        global.document.body.classList.add('modal-open');
+      }
       launcher.setAttribute('aria-expanded', 'true');
       if (!greeted) {
         greeted = true;
@@ -697,6 +706,8 @@
 
     function closeChat() {
       windowEl.hidden = true;
+      backdropEl.classList.remove('is-open');
+      global.document.body.classList.remove('modal-open');
       launcher.setAttribute('aria-expanded', 'false');
     }
 
@@ -704,6 +715,7 @@
       ensureAudio();
       if (windowEl.hidden) openChat(); else closeChat();
     });
+    backdropEl.addEventListener('click', closeChat);
     document.getElementById('chatbot-close').addEventListener('click', closeChat);
 
     // ── Sound toggle (persisted per visitor) ─────────────────
