@@ -26,7 +26,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const RESEND_URL = 'https://api.resend.com/emails'
 
+// Browser calls come from brokeCode05.github.io — allow cross-origin requests
+// from any origin (the function itself checks the admin JWT, so an open CORS
+// policy only controls who can reach the endpoint, not who can use it).
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 Deno.serve(async (req) => {
+  // Answer the browser's preflight OPTIONS request so fetch() from the admin
+  // panel isn't blocked before it reaches this function.
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { status: 204, headers: CORS })
+  }
   if (req.method !== 'POST') {
     return json({ error: 'method not allowed' }, 405)
   }
@@ -153,6 +167,6 @@ Deno.serve(async (req) => {
 function json(data, status) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...CORS },
   })
 }
