@@ -14,7 +14,6 @@
   --ui-spotlight-2: rgba(34, 211, 238, 0.07);
   --ui-surface-alt: rgba(23, 26, 33, 0.55);
   --ui-ring: rgba(74, 222, 128, 0.28);
-  --ui-shine: rgba(255, 255, 255, 0.30);
 }
 [data-theme="light"] {
   --color-accent-2: #0E7490;
@@ -25,7 +24,6 @@
   --ui-spotlight-2: rgba(14, 116, 144, 0.04);
   --ui-surface-alt: rgba(255, 255, 255, 0.55);
   --ui-ring: rgba(5, 150, 105, 0.20);
-  --ui-shine: rgba(5, 150, 105, 0.12);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -228,32 +226,20 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   z-index: 1;
 }
 
-/* ── Cert cards: flip to certificate image on hover ───────────
-   The outer .cert-card keeps the tilt transform (--rx/--ry from JS)
-   and the reveal animation; the inner .cert-card-inner handles the
-   3D flip. Faces carry the layout/padding so both sides match the
-   card's border radius. overflow on faces clips shine + image. */
+/* ── Cert cards: CRT scan-reveal on hover ─────────────────────
+   Instead of flipping, the certificate image scans down the card
+   like a terminal refresh: the back face wipes in top-to-bottom
+   (clip-path) with a travelling accent scan bar, while the front
+   text dims and lifts. The cursor tilt stays on the outer card,
+   so tilt + scan compose. No-image certs reveal the placeholder. */
 .cert-card {
   display: block;
   padding: 0;
-  perspective: 1200px;
-  transform-style: preserve-3d;
 }
 .cert-card-inner {
   position: relative;
   width: 100%;
   height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.cert-card:hover .cert-card-inner,
-.cert-card:focus-visible .cert-card-inner {
-  transform: rotateY(180deg);
-}
-.cert-card-front,
-.cert-card-back {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 .cert-card-front {
   position: relative;
@@ -263,6 +249,12 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   padding: var(--space-lg);
   border-radius: inherit;
   overflow: hidden;
+  transition: opacity 0.3s ease, transform 0.35s ease;
+}
+.cert-card:hover .cert-card-front,
+.cert-card:focus-visible .cert-card-front {
+  opacity: 0.15;
+  transform: translateY(-10px);
 }
 .cert-card-back {
   position: absolute;
@@ -272,8 +264,16 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   justify-content: center;
   border-radius: inherit;
   overflow: hidden;
-  transform: rotateY(180deg);
+  pointer-events: none;
   background-color: var(--color-surface-hover);
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease 0.05s;
+}
+.cert-card:hover .cert-card-back,
+.cert-card:focus-visible .cert-card-back {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
 }
 .cert-card-img {
   width: 100%;
@@ -315,22 +315,27 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
 }
 
-/* Front-face shine sweep (clipped by .cert-card-front overflow) */
-.cert-card-front::after {
+/* Travelling scan bar (runs down the card during the reveal) */
+.cert-card-back::after {
   content: "";
   position: absolute;
-  top: 0;
   left: 0;
-  width: 55%;
-  height: 100%;
-  z-index: 1;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 3;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--ui-shine), transparent);
-  transform: translateX(-160%);
-  transition: transform 0.75s ease;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0;
 }
-.cert-card:hover .cert-card-front::after {
-  transform: translateX(320%);
+.cert-card:hover .cert-card-back::after,
+.cert-card:focus-visible .cert-card-back::after {
+  animation: cert-scan 0.55s ease-out forwards;
+}
+@keyframes cert-scan {
+  0%   { top: 0; opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
 }
 
 /* Cursor tilt stays on the outer card (flip is on the inner), so
@@ -667,16 +672,24 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .timeline-item[data-reveal] {
     transform: none !important;
   }
-  /* Cert cards: no tilt, no flip, no shine sweep */
+  /* Cert cards: no tilt, no scan reveal, front stays as-is */
   .certs-grid .cert-card[data-reveal].revealed:hover {
     transform: none !important;
     transition: none !important;
   }
-  .cert-card:hover .cert-card-inner,
-  .cert-card:focus-visible .cert-card-inner {
+  .cert-card:hover .cert-card-front,
+  .cert-card:focus-visible .cert-card-front {
+    opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
   }
-  .cert-card-front::after {
+  .cert-card:hover .cert-card-back,
+  .cert-card:focus-visible .cert-card-back {
+    opacity: 0 !important;
+    clip-path: inset(0 0 100% 0) !important;
+    transition: none !important;
+  }
+  .cert-card-back::after {
     display: none !important;
   }
   /* Timeline: static full line + fully visible markers */
