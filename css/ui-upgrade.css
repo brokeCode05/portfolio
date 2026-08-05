@@ -265,7 +265,10 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   border-radius: inherit;
   overflow: hidden;
   pointer-events: none;
+  /* CRT monitor backdrop — letterbox bars read as part of the frame */
   background-color: var(--color-surface-hover);
+  background-image: radial-gradient(130% 100% at 50% 35%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.38));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 0 26px rgba(0, 0, 0, 0.4);
   opacity: 0;
   clip-path: inset(0 0 100% 0);
   transition: clip-path 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease 0.05s;
@@ -278,8 +281,14 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .cert-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain shows the whole certificate (never cropped); padding gives
+     breathing room so it floats inside the monitor frame */
+  object-fit: contain;
+  padding: 10px;
+  box-sizing: border-box;
   display: block;
+  border-radius: 2px;
+  filter: saturate(0.92) contrast(1.04);
 }
 /* Broken-image fallback: renderCerts adds this class on img error */
 .cert-card-back.cert-card-back-empty::before {
