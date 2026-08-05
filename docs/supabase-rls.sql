@@ -141,7 +141,7 @@ CREATE TRIGGER contact_messages_flood_guard_trigger
 -- Uses Supabase's built-in pg_net extension so the email fires on ANY insert,
 -- whether the message came via direct REST, the `contact` edge function, or
 -- the admin panel. The notify edge function (supabase/functions/notify) does
--- the actual sending via Resend.
+-- the actual sending via EmailJS (the owner's connected Gmail account).
 
 -- 13a. Enable pg_net (standard Supabase extension).
 create extension if not exists pg_net;
@@ -224,7 +224,7 @@ create trigger contact_messages_notify_trigger
 
 -- Step 14: Reply threads.
 -- The admin replies from the dashboard; the reply edge function
--- (supabase/functions/reply) sends the email via Resend AND stores the reply
+-- (supabase/functions/reply) sends the email via EmailJS AND stores the reply
 -- here so the full conversation shows inside the message card.
 
 -- 14a. Timestamp on the message so the inbox shows which ones you answered.

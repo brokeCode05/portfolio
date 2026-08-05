@@ -2,16 +2,19 @@
 //
 // - Verifies the admin's Supabase Auth session (the OTP access token sent as
 //   `Authorization: Bearer <token>`) — only the signed-in admin can send replies.
-// - Sends the reply email to the visitor via Resend (same provider as notify).
+// - Sends the reply email to the visitor via EmailJS (delivers through the
+//   account owner's connected Gmail — no domain verification needed).
 // - Stores the reply in contact_replies (service role) and stamps
 //   contact_messages.replied_at so the inbox shows which messages you answered.
 //
 // Deploy (from repo root):
 //   npx supabase login
 //   npx supabase link --project-ref YOUR_PROJECT_REF
-//   npx supabase secrets set RESEND_API_KEY=re_xxx
+//   npx supabase secrets set EMAILJS_SERVICE_ID=service_xxx
+//   npx supabase secrets set EMAILJS_TEMPLATE_REPLY=template_xxx
+//   npx supabase secrets set EMAILJS_PUBLIC_KEY=your_public_key
+//   npx supabase secrets set EMAILJS_PRIVATE_KEY=your_private_key
 //   npx supabase secrets set ADMIN_EMAIL=jhnbryn05@gmail.com
-//   npx supabase secrets set RESEND_FROM="Portfolio <onboarding@resend.dev>"
 //   npx supabase functions deploy reply
 //
 // SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY are injected
@@ -21,10 +24,16 @@
 //   https://YOUR_PROJECT_REF.supabase.co/functions/v1/reply
 //
 // Requires Step 14 in docs/supabase-rls.sql (contact_replies table).
+//
+// EmailJS 'reply' template should use these template params:
+//   To:        {{to_email}}   (the visitor)
+//   Reply-To:  {{reply_to}}   (your admin email, so their reply comes back to you)
+//   Subject:   {{subject}}    (Re: <original subject>)
+//   Body:      {{reply}} with the quoted {{original}} message
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const RESEND_URL = 'https://api.resend.com/emails'
+const EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send'
 
 // Browser calls come from brokeCode05.github.io — allow cross-origin requests
 // from any origin (the function itself checks the admin JWT, so an open CORS
@@ -115,52 +124,43 @@ Deno.serve(async (req) => {
     .update({ replied_at: new Date().toISOString() })
     .eq('id', messageId)
 
-  // 5. Send the reply email via Resend.
-  const apiKey = Deno.env.get('RESEND_API_KEY')
-  const from = Deno.env.get('RESEND_FROM') || 'Portfolio <onboarding@resend.dev>'
-  if (!apiKey) {
-    console.error('RESEND_API_KEY is not set')
-    return json({ error: 'server not configured' }, 500)
+  // 5. Send the reply email via EmailJS (delivers through your connected Gmail —
+  // no domain needed). The 'reply' template renders the email from these params.
+  const serviceId = Deno.env.get('EMAILJS_SERVICE_ID')
+  const templateId = Deno.env.get('EMAILJS_TEMPLATE_REPLY')
+  const publicKey = Deno.env.get('EMAILJS_PUBLIC_KEY')
+  const privateKey = Deno.env.get('EMAILJS_PRIVATE_KEY')
+
+  if (!serviceId || !templateId || !publicKey || !privateKey) {
+    console.error('EmailJS secrets are not fully set')
+    return json({ error: 'server not configured — EmailJS secrets missing' }, 500)
   }
 
-  const esc = (s) =>
-    String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-
-  const html = `
-    <div style="font-family: system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
-      <div style="white-space: pre-wrap; line-height: 1.6;">${esc(replyBody)}</div>
-      ${msg.message ? `
-      <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0">
-      <p style="color:#6b7280; font-size:13px;">Your original message:</p>
-      <blockquote style="margin:0;padding-left:12px;border-left:3px solid #d1d5db;color:#6b7280;font-size:13px;white-space:pre-wrap;">${esc(msg.message)}</blockquote>` : ''}
-    </div>
-  `
-
-  const res = await fetch(RESEND_URL, {
+  const res = await fetch(EMAILJS_URL, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from,
-      to: [msg.email],
-      subject: `Re: ${msg.subject || '(no subject)'}`,
-      html,
-      reply_to: expectedAdmin,
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      accessToken: privateKey,
+      template_params: {
+        to_email: msg.email,
+        reply_to: expectedAdmin,
+        subject: `Re: ${msg.subject || '(no subject)'}`,
+        name: msg.name,
+        reply: replyBody,
+        original: msg.message || '',
+      },
     }),
   })
-  const resendData = await res.json().catch(() => ({}))
+
+  const emailjsData = await res.json().catch(() => ({}))
   if (!res.ok) {
-    console.error('Resend error:', res.status, JSON.stringify(resendData))
-    // Reply is stored but the email failed — surface Resend's reason so the
-    // admin knows exactly what to fix (e.g. verify a domain for the sender).
-    const why = resendData && resendData.message ? ' ' + resendData.message : ''
+    console.error('EmailJS error:', res.status, JSON.stringify(emailjsData))
+    // Reply is stored but the email failed — surface EmailJS's reason so the
+    // admin knows exactly what to fix.
+    const why = emailjsData && emailjsData.message ? ' ' + emailjsData.message : ''
     return json({ error: 'email failed to send — reply saved.' + why }, 502)
   }
 

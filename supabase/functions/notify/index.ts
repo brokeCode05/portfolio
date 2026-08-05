@@ -4,26 +4,36 @@
 // contact_messages, so it works for BOTH insert paths: the direct REST insert
 // (current default) and the optional `contact` edge function.
 //
+// It sends via EmailJS (https://www.emailjs.com), which delivers through the
+// account owner's connected Gmail — no domain verification needed.
+//
 // Deploy (from repo root):
 //   npx supabase login
 //   npx supabase link --project-ref YOUR_PROJECT_REF
-//   npx supabase secrets set RESEND_API_KEY=re_xxx
+//   npx supabase secrets set EMAILJS_SERVICE_ID=service_xxx
+//   npx supabase secrets set EMAILJS_TEMPLATE_NOTIFY=template_xxx
+//   npx supabase secrets set EMAILJS_PUBLIC_KEY=your_public_key
+//   npx supabase secrets set EMAILJS_PRIVATE_KEY=your_private_key
 //   npx supabase secrets set NOTIFY_SECRET=generate_a_long_random_string
 //   npx supabase secrets set NOTIFY_EMAIL=jhnbryn05@gmail.com
-//   npx supabase secrets set RESEND_FROM="Portfolio <onboarding@resend.dev>"
-//   npx supabase functions deploy notify
+//   npx supabase functions deploy notify --no-verify-jwt
+//
+// IMPORTANT: deploy with --no-verify-jwt — the DB trigger calls this function
+// with only the x-notify-secret header (no JWT), and the secret check below is
+// what protects the endpoint.
 //
 // Then run Step 13 in docs/supabase-rls.sql to create the trigger that calls it.
 //
-// Note: the trigger sends the SAME NOTIFY_SECRET in the x-notify-secret header.
-// The secret keeps random people from spamming your inbox via this endpoint.
+// The trigger sends the SAME NOTIFY_SECRET in the x-notify-secret header, which
+// keeps random people from spamming your inbox via this endpoint.
 //
-// Important: the default RESEND_FROM uses Resend's sandbox sender
-// (onboarding@resend.dev), which only delivers to the email you used to create
-// the Resend account. For production, verify a domain in Resend and set
-// RESEND_FROM to your own verified sender.
+// EmailJS 'notify' template should use these template params:
+//   To:        {{to_email}}   (your email)
+//   Reply-To:  {{email}}      (the visitor, so you can just hit Reply)
+//   Subject:   New contact message: {{subject}}
+//   Body:      {{name}} / {{email}} / {{subject}} / {{message}} / {{created_at}}
 
-const RESEND_URL = 'https://api.resend.com/emails'
+const EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send'
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -54,79 +64,45 @@ Deno.serve(async (req) => {
     return json({ error: 'missing required fields' }, 400)
   }
 
-  const apiKey = Deno.env.get('RESEND_API_KEY')
   const to = Deno.env.get('NOTIFY_EMAIL') || 'jhnbryn05@gmail.com'
-  const from = Deno.env.get('RESEND_FROM') || 'Portfolio <onboarding@resend.dev>'
+  const serviceId = Deno.env.get('EMAILJS_SERVICE_ID')
+  const templateId = Deno.env.get('EMAILJS_TEMPLATE_NOTIFY')
+  const publicKey = Deno.env.get('EMAILJS_PUBLIC_KEY')
+  const privateKey = Deno.env.get('EMAILJS_PRIVATE_KEY')
 
-  if (!apiKey) {
-    console.error('RESEND_API_KEY is not set')
+  if (!serviceId || !templateId || !publicKey || !privateKey) {
+    console.error('EmailJS secrets are not fully set')
     return json({ error: 'server not configured' }, 500)
   }
 
-  const html = buildEmailHtml({ name, email, subject, message, createdAt })
-
-  const res = await fetch(RESEND_URL, {
+  const res = await fetch(EMAILJS_URL, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from,
-      to: [to],
-      subject: `New contact message: ${subject}`,
-      html,
-      reply_to: email,
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      accessToken: privateKey,
+      template_params: {
+        to_email: to,
+        name,
+        email,
+        subject,
+        message,
+        created_at: createdAt,
+      },
     }),
   })
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    console.error('Resend error:', res.status, JSON.stringify(data))
+    console.error('EmailJS error:', res.status, JSON.stringify(data))
     return json({ error: 'email failed to send' }, 502)
   }
 
   console.log(`Notification email queued for ${to} (message from ${email})`)
   return json({ ok: true }, 200)
 })
-
-function buildEmailHtml({ name, email, subject, message, createdAt }) {
-  const esc = (s) =>
-    String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-  return `
-    <div style="font-family: system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
-      <h2 style="color: #16a34a; margin-bottom: 4px;">New contact message</h2>
-      <p style="margin-top: 0; color: #6b7280; font-size: 13px;">${esc(createdAt) || ''}</p>
-      <table style="border-collapse: collapse; width: 100%; font-size: 14px;">
-        <tr>
-          <td style="padding: 6px 0; color: #6b7280; width: 90px; vertical-align: top;">From</td>
-          <td style="padding: 6px 0; font-weight: 600;">${esc(name)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 0; color: #6b7280; vertical-align: top;">Email</td>
-          <td style="padding: 6px 0;"><a href="mailto:${esc(email)}" style="color: #16a34a;">${esc(email)}</a></td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 0; color: #6b7280; vertical-align: top;">Subject</td>
-          <td style="padding: 6px 0; font-weight: 600;">${esc(subject)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 6px 0; color: #6b7280; vertical-align: top;">Message</td>
-          <td style="padding: 6px 0; white-space: pre-wrap;">${esc(message)}</td>
-        </tr>
-      </table>
-      <p style="margin-top: 24px; font-size: 13px; color: #6b7280;">
-        Reply directly to this email to answer ${esc(name)}. Manage messages in your
-        <a href="https://brokeCode05.github.io/portfolio/admin.html" style="color: #16a34a;">admin panel</a>.
-      </p>
-    </div>
-  `
-}
 
 function json(data, status) {
   return new Response(JSON.stringify(data), {
