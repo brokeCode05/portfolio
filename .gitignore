@@ -22,3 +22,6 @@ vendor/
 # Local server
 *.pid
 *.log
+
+# Supabase CLI cache
+supabase/.temp/

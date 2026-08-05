@@ -330,8 +330,8 @@ create trigger chat_logs_flood_guard_trigger
 -- ===================================================
 --   Step 16: Chatbot AI daily usage cap.
 -- ===================================================
--- The chat-ai edge function counts Gemini requests per day here and refuses
--- once the daily limit is reached, so the free Gemini quota can't be drained
+-- The chat-ai edge function counts AI requests per day here and refuses
+-- once the daily limit is reached, so the free Groq quota can't be drained
 -- by spam. Only the service role (used by the edge function) can access it.
 
 create table if not exists chat_ai_usage (
