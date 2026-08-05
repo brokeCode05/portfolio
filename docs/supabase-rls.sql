@@ -256,3 +256,43 @@ create policy "Admin read contact_replies"
   for select
   to authenticated
   using (true);
+
+-- ===================================================
+--   Step 15: Chatbot logs + insights.
+-- ===================================================
+-- The terminal chat widget (js/chatbot.js) logs every visitor question here
+-- (fire-and-forget). The admin "Chat Insights" section reads these rows to show
+-- the most asked topics and the unanswered questions that should become FAQ
+-- entries. Anyone may insert a log row (public widget); only the admin can read.
+
+-- 15a. Log table.
+create table if not exists chat_logs (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null,
+  question text not null,
+  matched_topic text,
+  answered boolean not null default false,
+  escalated boolean not null default false,
+  created_at timestamptz not null default now(),
+  constraint chat_logs_question_length check (char_length(question) between 1 and 1000),
+  constraint chat_logs_session_length check (char_length(session_id) between 1 and 100)
+);
+
+-- 15b. Indexes for the insights queries.
+create index if not exists chat_logs_created_at_idx on chat_logs (created_at desc);
+create index if not exists chat_logs_question_idx on chat_logs (question text_pattern_ops);
+
+-- 15c. RLS: anon may only insert (the widget), authenticated (admin) may read.
+alter table chat_logs enable row level security;
+
+create policy "Anyone can log chatbot conversations"
+  on chat_logs
+  for insert
+  to anon
+  with check (true);
+
+create policy "Admin read chat logs"
+  on chat_logs
+  for select
+  to authenticated
+  using (true);

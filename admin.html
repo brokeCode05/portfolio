@@ -158,6 +158,13 @@
         <span>Messages</span>
         <span class="nav-count" id="messages-nav-count"></span>
       </button>
+      <button class="admin-nav-btn" data-section="chats">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </span>
+        <span>Chat Insights</span>
+        <span class="nav-count" id="chats-nav-count"></span>
+      </button>
       <button class="admin-nav-btn" data-section="cloud">
         <span class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
@@ -340,6 +347,31 @@
           <div id="messages-inbox" style="display:flex;flex-direction:column;gap:0.75rem">
             <p style="color:var(--admin-text-secondary);font-size:0.875rem">Loading messages…</p>
           </div>
+        </div>
+      </div>
+
+      <!-- ===== CHAT INSIGHTS SECTION ===== -->
+      <div class="admin-section" id="section-chats">
+        <h2 class="admin-section-title">Chat Insights</h2>
+        <p class="admin-section-desc">Every question visitors ask the terminal chatbot (js/chatbot.js). Unanswered questions are the best source for new FAQ entries.</p>
+        <div class="admin-card" style="margin-bottom:1rem">
+          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h4>Overview</h4>
+            <button class="btn btn-sm" id="chats-refresh">↻ Refresh</button>
+          </div>
+          <div id="chats-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin-top:0.75rem"></div>
+        </div>
+        <div class="admin-card" style="margin-bottom:1rem">
+          <h4 style="margin-bottom:0.75rem">Most asked topics</h4>
+          <div id="chats-topics"></div>
+        </div>
+        <div class="admin-card" style="margin-bottom:1rem">
+          <h4 style="margin-bottom:0.75rem">Unanswered questions — consider adding to the FAQ</h4>
+          <div id="chats-unanswered"></div>
+        </div>
+        <div class="admin-card">
+          <h4 style="margin-bottom:0.75rem">Recent chats</h4>
+          <div id="chats-recent"></div>
         </div>
       </div>
 
@@ -974,6 +1006,94 @@ CREATE POLICY "Admin update portfolio_data"
       });
   }
 
+  // ─── Chat Insights ─────────────────────────────
+  function loadChatInsights() {
+    if (!supabaseClient) return;
+    var wrap = document.getElementById('chats-stats');
+    if (!wrap) return;
+    wrap.innerHTML = '<p style="color:var(--admin-text-secondary);font-size:0.875rem">Loading chat logs…</p>';
+    supabaseClient.from('chat_logs')
+      .select('id, question, matched_topic, answered, escalated, created_at')
+      .order('created_at', { ascending: false })
+      .limit(500)
+      .then(function(result) {
+        if (result.error) {
+          wrap.innerHTML = '<p style="color:var(--admin-text-secondary);font-size:0.875rem">Could not load chats: ' +
+            (result.error.message || 'table may not exist yet — run Step 15 in docs/supabase-rls.sql') + '</p>';
+          return;
+        }
+        var rows = result.data || [];
+        var badge = document.getElementById('chats-nav-count');
+        if (badge) badge.textContent = rows.length ? '(' + rows.length + ')' : '';
+        renderChatInsights(rows);
+      });
+  }
+
+  function renderChatInsights(rows) {
+    var total = rows.length;
+    var answered = rows.filter(function(r) { return r.answered; }).length;
+    var escalated = rows.filter(function(r) { return r.escalated; }).length;
+
+    var stats = [
+      { label: 'Total questions', value: total },
+      { label: 'Answered', value: answered },
+      { label: 'Escalated to you', value: escalated },
+      { label: 'Escalation rate', value: total ? Math.round((escalated / total) * 100) + '%' : '—' }
+    ];
+    document.getElementById('chats-stats').innerHTML = stats.map(function(s) {
+      return '<div style="background:#1A1D27;border:1px solid #2A2D35;border-radius:8px;padding:0.75rem;text-align:center">' +
+        '<div style="font-size:1.35rem;font-weight:700;color:#4ADE80">' + s.value + '</div>' +
+        '<div style="font-size:0.7rem;color:var(--admin-text-secondary);margin-top:0.25rem">' + escapeHtml(s.label) + '</div></div>';
+    }).join('');
+
+    // Most-asked answered topics
+    var topicCounts = {};
+    rows.forEach(function(r) { if (r.matched_topic) topicCounts[r.matched_topic] = (topicCounts[r.matched_topic] || 0) + 1; });
+    var topics = Object.keys(topicCounts).sort(function(a, b) { return topicCounts[b] - topicCounts[a]; });
+    document.getElementById('chats-topics').innerHTML = topics.length
+      ? topics.map(function(t) {
+          var pct = Math.round((topicCounts[t] / total) * 100);
+          return '<div style="margin-bottom:0.6rem">' +
+            '<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.2rem"><span>' + escapeHtml(t) + '</span><span style="color:var(--admin-text-secondary)">' + topicCounts[t] + '×</span></div>' +
+            '<div style="height:6px;background:#2A2D35;border-radius:3px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#4ADE80;border-radius:3px"></div></div></div>';
+        }).join('')
+      : '<p style="color:var(--admin-text-secondary);font-size:0.875rem">No answered questions yet — try the chat on the live site.</p>';
+
+    // Unanswered (escalated) questions grouped by text
+    var unMap = {};
+    rows.forEach(function(r) {
+      if (r.escalated && r.question) {
+        var key = r.question.toLowerCase().trim();
+        if (!unMap[key]) unMap[key] = { text: r.question, n: 0 };
+        unMap[key].n++;
+      }
+    });
+    var unanswered = Object.keys(unMap).map(function(k) { return unMap[k]; }).sort(function(a, b) { return b.n - a.n; });
+    document.getElementById('chats-unanswered').innerHTML = unanswered.length
+      ? unanswered.slice(0, 20).map(function(u) {
+          return '<div style="display:flex;justify-content:space-between;gap:1rem;padding:0.5rem 0;border-bottom:1px solid #2A2D35;font-size:0.8rem">' +
+            '<span style="word-break:break-word">\u201C' + escapeHtml(u.text) + '\u201D</span><span style="color:var(--admin-text-secondary);flex-shrink:0">' + u.n + '×</span></div>';
+        }).join('')
+      : '<p style="color:var(--admin-text-secondary);font-size:0.875rem">No unanswered questions — great coverage.</p>';
+
+    // Recent chat log
+    document.getElementById('chats-recent').innerHTML = rows.length
+      ? '<table style="width:100%;border-collapse:collapse;font-size:0.78rem">' +
+        '<thead><tr style="text-align:left;color:var(--admin-text-secondary);border-bottom:1px solid #2A2D35">' +
+        '<th style="padding:0.4rem 0.5rem">When</th><th style="padding:0.4rem 0.5rem">Question</th><th style="padding:0.4rem 0.5rem">Topic</th><th style="padding:0.4rem 0.5rem">Status</th></tr></thead><tbody>' +
+        rows.slice(0, 15).map(function(r) {
+          var when = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+          var status = r.escalated ? 'Escalated' : (r.answered ? 'Answered' : '—');
+          var statusColor = r.escalated ? '#F59E0B' : '#4ADE80';
+          return '<tr style="border-bottom:1px solid #2A2D35">' +
+            '<td style="padding:0.4rem 0.5rem;white-space:nowrap;color:var(--admin-text-secondary)">' + escapeHtml(when) + '</td>' +
+            '<td style="padding:0.4rem 0.5rem;word-break:break-word">' + escapeHtml(r.question) + '</td>' +
+            '<td style="padding:0.4rem 0.5rem">' + escapeHtml(r.matched_topic || '—') + '</td>' +
+            '<td style="padding:0.4rem 0.5rem;color:' + statusColor + '">' + status + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<p style="color:var(--admin-text-secondary);font-size:0.875rem">No chat activity yet — open the chat on the live site and ask it something!</p>';
+  }
+
   function sendReply(payload, textarea, sendBtn) {
     if (!supabaseClient) {
       showToast('Supabase is not available', 'error');
@@ -1036,6 +1156,10 @@ CREATE POLICY "Admin update portfolio_data"
   if (messagesRefreshBtn) {
     messagesRefreshBtn.addEventListener('click', loadMessages);
   }
+  var chatsRefreshBtn = document.getElementById('chats-refresh');
+  if (chatsRefreshBtn) {
+    chatsRefreshBtn.addEventListener('click', loadChatInsights);
+  }
 
   // ─── Ctrl+S Shortcut ──────────────────────
   document.addEventListener('keydown', function(e) {
@@ -1055,6 +1179,7 @@ CREATE POLICY "Admin update portfolio_data"
     document.querySelectorAll('.admin-section').forEach(function(el) { el.classList.remove('active'); });
     document.getElementById('section-' + id).classList.add('active');
     if (id === 'messages') loadMessages();
+    if (id === 'chats') loadChatInsights();
     document.querySelectorAll('.admin-nav-btn').forEach(function(el) { el.classList.remove('active'); });
     document.querySelector('.admin-nav-btn[data-section="' + id + '"]').classList.add('active');
     document.getElementById('section-title').textContent =
@@ -2221,6 +2346,7 @@ CREATE POLICY "Admin update portfolio_data"
     updateCloudStatus();
     updateSidebarCounts();
     loadMessages();
+    loadChatInsights();
     updateStatusBar('saved');
   }
 
