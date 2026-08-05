@@ -304,8 +304,11 @@ create policy "Admin delete chat logs"
   using (true);
 
 -- 15d. Light flood guard: drop the same question from the same session within
---      5 minutes. Keeps a stuck widget loop (or a bot) from flooding the log
---      and polluting the insights, while legit repeat questions still count.
+--      5 minutes ONLY when the previous identical question was NOT answered
+--      (the stuck-widget-loop case this guard exists for). Legit repeat
+--      questions that WERE answered still log — so re-asking a question shows
+--      fresh topics in Chat Insights instead of a stale row hiding behind the
+--      flood guard.
 create or replace function chat_logs_flood_guard()
 returns trigger as $$
 begin
@@ -314,6 +317,7 @@ begin
     where session_id = new.session_id
       and question = new.question
       and created_at > now() - interval '5 minutes'
+      and answered = false
   ) then
     return null;
   end if;
