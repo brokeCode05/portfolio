@@ -462,8 +462,17 @@
       .split('[[CONTACT]]').join(contactCTA)
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, label, url) {
         url = String(url).trim();
-        if (!/^(https?:\/\/|mailto:|#)/i.test(url)) return m;
-        return '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + '</a>';
+        // label/url are already escaped by the esc(text) above, so inserting
+        // them directly is safe and avoids double-escaping (& in URLs).
+        if (/^(https?:\/\/|mailto:|tel:)/i.test(url)) {
+          // External / email link — open in a new tab.
+          return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+        }
+        if (/^(#|[a-z0-9][a-z0-9-]*(\/|$))/i.test(url) && !/^(javascript|data|vbscript):/i.test(url)) {
+          // Relative / in-page anchor — jump to a section on this page.
+          return '<a href="#' + url.replace(/^#/, '') + '">' + label + '</a>';
+        }
+        return m;
       })
       .replace(/\n/g, '<br>');
   }
@@ -750,6 +759,14 @@
       if (e.key === 'Escape' && !windowEl.hidden) { e.preventDefault(); closeChat(); }
     });
     bodyEl.addEventListener('click', function(e) {
+      // In-page anchors ([skills](skills) etc.) — close the chat first so the
+      // mobile scroll-lock releases, then let the default smooth-scroll jump
+      // to the section actually happen.
+      var anchor = e.target.closest('a[href^="#"]');
+      if (anchor && anchor.getAttribute('href').length > 1) {
+        closeChat();
+        return;
+      }
       var cta = e.target.closest('.chat-cta[data-action="contact"]');
       if (cta) {
         closeChat();
@@ -779,7 +796,8 @@
       normalize: normalize,
       faqRulesFromData: faqRulesFromData,
       buildAiContext: buildAiContext,
-      typeDelayFor: typeDelayFor
+      typeDelayFor: typeDelayFor,
+      renderBotText: renderBotText
     };
   }
 })(typeof window !== 'undefined' ? window : globalThis);
