@@ -498,7 +498,7 @@
       border-radius: 22px;
     }
 
-    /* ID badge — hangs on a lanyard, pendulum physics (JS) */
+    /* ID badge — realistic student ID on a lanyard, pendulum physics (JS) */
     .hero-badge-wrap {
       position: relative;
       z-index: 1;
@@ -523,91 +523,228 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 240px;
+      width: 260px;
       transform-origin: top center;
       will-change: transform;
     }
-    /* Lanyard strap — unreels on entrance */
+    /* Woven nylon lanyard strap — unreels on entrance */
     .hero-badge-strap {
-      width: 10px;
+      width: 14px;
       height: 96px;
-      border-radius: 5px;
-      background: linear-gradient(
-        180deg,
-        var(--color-accent-dim) 0%,
-        var(--color-accent) 45%,
-        var(--color-border-hover) 100%
-      );
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      border-radius: 7px;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          #1E2836 0 4px,
+          #2B3A52 4px 7px,
+          #232E40 7px 11px
+        ),
+        linear-gradient(180deg, #2B3A52, #1A2230);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.35), inset 0 0 3px rgba(255,255,255,0.08);
       transform-origin: top center;
       transform: scaleY(0);
       transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s;
       position: relative;
       flex-shrink: 0;
     }
+    /* Strap weave highlight line */
+    .hero-badge-strap::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      border-radius: 1px;
+      background: rgba(255,255,255,0.14);
+    }
+    /* Strap bottom clip-tab */
     .hero-badge-strap::after {
       content: '';
       position: absolute;
-      bottom: -3px;
+      bottom: -4px;
       left: 50%;
       transform: translateX(-50%);
-      width: 20px;
-      height: 8px;
+      width: 24px;
+      height: 9px;
       border-radius: 4px;
-      background: var(--color-accent-dim);
+      background: linear-gradient(180deg, #8FA0B5, #5C6B80);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
     }
     .hero-badge-wrap.hero-revealed .hero-badge-strap {
       transform: scaleY(1);
     }
-    /* Metal clip below the strap */
+    /* Brushed-metal clip below the strap — its tab passes through the
+       card's punch hole so the lanyard reads as physically connected */
     .hero-badge-clip {
-      width: 30px;
-      height: 12px;
-      margin-top: 6px;
-      border-radius: 3px;
-      background: linear-gradient(180deg, #9AA5B1, #5A6472);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      width: 34px;
+      height: 14px;
+      margin-top: 5px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #C9D2DC 0%, #8A97A8 55%, #67748A 100%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5);
+      position: relative;
+      z-index: 5;
       flex-shrink: 0;
     }
-    /* The ID card — counter-rotates in JS to stay upright */
+    .hero-badge-clip::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 7px;
+      border-radius: 3px;
+      background: #5A6B80;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.35);
+    }
+    /* Downward metal tab that dips into the card's punch hole */
+    .hero-badge-clip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 12px;
+      margin-top: -1px;
+      border-radius: 0 0 3px 3px;
+      background: linear-gradient(180deg, #8A97A8 0%, #5C6B80 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+    /* The PVC card shell — counter-rotates in JS to stay upright */
     .hero-badge-card {
+      position: relative;
       width: 100%;
-      margin-top: 4px;
-      border-radius: 12px;
-      overflow: hidden;
-      background-color: var(--color-surface);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow:
-        0 4px 24px rgba(0,0,0,0.12),
-        0 24px 48px rgba(0,0,0,0.08);
+      margin-top: 6px;
+      border-radius: 14px;
       cursor: grab;
       will-change: transform;
-      transition: box-shadow 0.4s ease;
+      transition: box-shadow 0.4s ease, filter 0.4s ease;
+      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.35));
     }
     .hero-badge-card:hover {
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.15),
-        0 32px 64px rgba(0,0,0,0.1);
+      filter: drop-shadow(0 18px 34px rgba(0,0,0,0.42));
     }
     .hero-badge-card.badge-grabbed {
       cursor: grabbing;
     }
+    /* Plastic card face — static 3D tilt, stays upright via card counter-rotation */
+    .hero-badge-face {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background:
+        linear-gradient(160deg, #FFFFFF 0%, #F2F4F7 45%, #E4E8EE 100%);
+      border: 1px solid rgba(20, 30, 48, 0.14);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.9),
+        inset 0 -18px 30px rgba(20, 30, 48, 0.05);
+      transform: perspective(900px) rotateX(4deg) rotateY(-3deg);
+      will-change: transform;
+    }
+    /* Punch hole at the top (lanyard loop) — sized so the clip tab sits in it */
+    .hero-badge-face::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #6B7A90 0%, #AEB9C6 45%, #E7EBF0 75%);
+      box-shadow:
+        inset 0 2px 4px rgba(20, 30, 48, 0.45),
+        0 1px 0 rgba(255,255,255,0.8);
+      z-index: 3;
+    }
+    /* Plastic sheen sweep */
+    .hero-badge-sheen {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      pointer-events: none;
+      z-index: 4;
+      background: linear-gradient(
+        115deg,
+        transparent 32%,
+        rgba(255,255,255,0.55) 44%,
+        rgba(255,255,255,0.12) 52%,
+        transparent 62%
+      );
+    }
+    /* Card header — school branding */
+    .hero-badge-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-badge-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: linear-gradient(160deg, #101826, #1F2B3E);
+      color: var(--color-accent);
+      font-family: var(--font-code);
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 1px 2px rgba(20, 30, 48, 0.25);
+    }
+    .hero-badge-school {
+      font-family: var(--font-code);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1E293B;
+      white-space: nowrap;
+    }
+    .hero-badge-school-sub {
+      margin-left: auto;
+      font-family: var(--font-code);
+      font-size: 8px;
+      color: #64748B;
+      letter-spacing: 0.04em;
+    }
+    /* Card body — photo + identity */
+    .hero-badge-body {
+      display: flex;
+      gap: 12px;
+      padding: 4px 14px 10px;
+      position: relative;
+      z-index: 2;
+    }
     .hero-badge-photo {
       position: relative;
-      aspect-ratio: 4 / 3.4;
+      width: 38%;
+      aspect-ratio: 3 / 3.6;
+      flex-shrink: 0;
+      border-radius: 8px;
       overflow: hidden;
-      background-color: var(--color-surface-hover);
+      background-color: #D8DEE7;
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(20, 30, 48, 0.25);
     }
     .hero-badge-photo img {
       display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: grayscale(30%) contrast(1.08);
+      filter: saturate(0.95) contrast(1.05);
       transition: filter 0.4s ease;
     }
     .hero-badge-card:hover .hero-badge-photo img {
-      filter: grayscale(10%) contrast(1.04);
+      filter: saturate(1.02) contrast(1.02);
     }
     .hero-badge-photo-fallback {
       position: absolute;
@@ -615,64 +752,117 @@
       display: none;
       align-items: center;
       justify-content: center;
+      padding: 4px;
+      text-align: center;
       font-family: var(--font-code);
-      font-size: var(--text-xs);
-      color: var(--color-text-secondary);
+      font-size: 8px;
+      color: #64748B;
+      background-color: #D8DEE7;
     }
     .hero-badge-info {
-      position: relative;
-      padding: 14px 16px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
       text-align: left;
     }
     .hero-badge-name {
       display: block;
       font-family: var(--font-heading);
-      font-size: var(--text-lg);
-      font-weight: 600;
-      color: var(--color-text-primary);
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
       line-height: 1.2;
+      letter-spacing: -0.01em;
     }
     .hero-badge-role {
       display: block;
-      margin-top: 4px;
       font-family: var(--font-code);
-      font-size: var(--text-xs);
-      color: var(--color-text-secondary);
+      font-size: 8px;
+      color: #475569;
+      line-height: 1.35;
     }
-    .hero-badge-chip {
-      position: absolute;
-      top: 14px;
-      right: 16px;
+    .hero-badge-idno {
+      display: block;
+      margin-top: 2px;
+      font-family: var(--font-code);
+      font-size: 8px;
+      color: #64748B;
+      letter-spacing: 0.05em;
+    }
+    .hero-badge-idno strong {
+      color: #1E293B;
+      font-weight: 600;
+    }
+    /* QR code (decorative) */
+    .hero-badge-qr {
+      position: relative;
       width: 26px;
-      height: 18px;
-      border-radius: 3px;
+      height: 26px;
+      margin-top: 5px;
+      flex-shrink: 0;
+      background:
+        conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
+      background-size: 4px 4px;
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
+    }
+    .hero-badge-qr .hero-badge-qr-c1,
+    .hero-badge-qr .hero-badge-qr-c2,
+    .hero-badge-qr .hero-badge-qr-c3 {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      background: #FFFFFF;
+      box-shadow: inset 0 0 0 2px #0F172A;
+    }
+    .hero-badge-qr .hero-badge-qr-c1 { top: 1px; left: 1px; }
+    .hero-badge-qr .hero-badge-qr-c2 { top: 1px; right: 1px; }
+    .hero-badge-qr .hero-badge-qr-c3 { bottom: 1px; left: 1px; }
+    /* Card footer — barcode + handle */
+    .hero-badge-foot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px 9px;
+      border-top: 1px solid rgba(20, 30, 48, 0.09);
+      position: relative;
+      z-index: 2;
+    }
+    .hero-badge-barcode {
+      flex: 1;
+      height: 14px;
       background: repeating-linear-gradient(
         90deg,
-        var(--color-accent) 0 2px,
-        transparent 2px 4px
+        #1E293B 0 2px,
+        transparent 2px 5px,
+        #1E293B 5px 6px,
+        transparent 6px 8px,
+        #1E293B 8px 11px,
+        transparent 11px 14px,
+        #1E293B 14px 15px,
+        transparent 15px 19px
       );
-      opacity: 0.5;
+      opacity: 0.85;
     }
-    /* Light theme */
+    .hero-badge-handle {
+      font-family: var(--font-code);
+      font-size: 8px;
+      color: #64748B;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+    /* Light theme — the PVC card stays light; soften the drop shadow */
     [data-theme="light"] .hero-badge-card {
-      border-color: rgba(0,0,0,0.06);
-      box-shadow:
-        0 4px 24px rgba(0,0,0,0.06),
-        0 24px 48px rgba(0,0,0,0.04);
+      filter: drop-shadow(0 12px 22px rgba(20, 30, 48, 0.16));
     }
     [data-theme="light"] .hero-badge-card:hover {
-      box-shadow:
-        0 8px 32px rgba(0,0,0,0.08),
-        0 32px 64px rgba(0,0,0,0.06);
+      filter: drop-shadow(0 16px 30px rgba(20, 30, 48, 0.22));
     }
     [data-theme="light"] .hero-media-glow {
       opacity: 0.04;
-    }
-    [data-theme="light"] .hero-badge-photo img {
-      filter: grayscale(20%) contrast(1.05);
-    }
-    [data-theme="light"] .hero-badge-card:hover .hero-badge-photo img {
-      filter: grayscale(0%) contrast(1);
     }
 
     /* ---- Decorative Developer Elements ---- */
@@ -1731,7 +1921,7 @@
     }
   </style>
   <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805r" />
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805s" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -1925,27 +2115,46 @@
             <span class="hero-deco-dot"></span>
           </div>
 
-          <!-- Interactive ID badge on a lanyard -->
+          <!-- Interactive student ID badge on a lanyard -->
           <div class="hero-badge-wrap" id="hero-badge-wrap">
             <div class="hero-badge" id="hero-badge">
               <div class="hero-badge-strap" id="hero-badge-strap" aria-hidden="true"></div>
               <div class="hero-badge-clip" aria-hidden="true"></div>
-              <div class="hero-badge-card" id="hero-badge-card" role="img" aria-label="Profile ID badge">
-                <div class="hero-badge-photo" id="hero-badge-photo">
-                  <img
-                    id="hero-badge-img"
-                    src="img/johnbryan.jpg"
-                    alt="Profile photo"
-                    fetchpriority="high"
-                    draggable="false"
-                    onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
-                  />
-                  <div class="hero-badge-photo-fallback" id="hero-badge-photo-fallback" aria-hidden="true">~/avatar — not found</div>
-                </div>
-                <div class="hero-badge-info">
-                  <span class="hero-badge-name" id="hero-badge-name"></span>
-                  <span class="hero-badge-role" id="hero-badge-role"></span>
-                  <span class="hero-badge-chip" aria-hidden="true"></span>
+              <div class="hero-badge-card" id="hero-badge-card" role="img" aria-label="Student ID badge — John Bryan Capellan">
+                <div class="hero-badge-face" id="hero-badge-face">
+                  <div class="hero-badge-head">
+                    <span class="hero-badge-logo" aria-hidden="true">~</span>
+                    <span class="hero-badge-school">Student ID</span>
+                    <span class="hero-badge-school-sub">brokeCode05.dev</span>
+                  </div>
+                  <div class="hero-badge-body">
+                    <div class="hero-badge-photo" id="hero-badge-photo">
+                      <img
+                        id="hero-badge-img"
+                        src="img/johnbryan.jpg"
+                        alt="Profile photo"
+                        fetchpriority="high"
+                        draggable="false"
+                        onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
+                      />
+                      <div class="hero-badge-photo-fallback" id="hero-badge-photo-fallback" aria-hidden="true">~/avatar — not found</div>
+                    </div>
+                    <div class="hero-badge-info">
+                      <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
+                      <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
+                      <span class="hero-badge-idno">ID No. <strong>IT-2024-0842</strong></span>
+                      <div class="hero-badge-qr" aria-hidden="true">
+                        <span class="hero-badge-qr-c1"></span>
+                        <span class="hero-badge-qr-c2"></span>
+                        <span class="hero-badge-qr-c3"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="hero-badge-foot">
+                    <span class="hero-badge-barcode" aria-hidden="true"></span>
+                    <span class="hero-badge-handle">github.com/brokeCode05</span>
+                  </div>
+                  <div class="hero-badge-sheen" aria-hidden="true"></div>
                 </div>
               </div>
             </div>
@@ -2999,6 +3208,7 @@
       var wrap = document.getElementById('hero-badge-wrap');
       var badge = document.getElementById('hero-badge');
       var card = document.getElementById('hero-badge-card');
+      var face = document.getElementById('hero-badge-face');
       if (!wrap || !badge || !card) return;
 
       var reducedMotion = window.matchMedia &&
@@ -3030,6 +3240,8 @@
       var L = 150;        // pendulum length (px) — updated on measure
       var damping = 1.35; // air resistance
       var maxSwing = 70 * DEG;
+      // Static 3D tilt of the card face (mirrors the CSS on .hero-badge-face)
+      var TILT_X = 4, TILT_Y = -3;
       var dragging = false;
       var raf = null;
       var lastT = 0, lastTheta = 0, lastDt = 0;
@@ -3044,6 +3256,13 @@
       function render() {
         badge.style.transform = 'rotate(' + (theta / DEG) + 'deg)';
         card.style.transform = 'rotate(' + (-theta / DEG) + 'deg)';
+        // Physical 3D feel: the card tilts slightly into the swing
+        if (face) {
+          var tilt = Math.max(-6, Math.min(6, omega * 1.4));
+          face.style.transform =
+            'perspective(900px) rotateX(' + (TILT_X + tilt * 0.25).toFixed(2) + 'deg) rotateY(' +
+            (TILT_Y + tilt).toFixed(2) + 'deg)';
+        }
       }
 
       function settle() {
@@ -3278,9 +3497,13 @@
           badgeImg.style.display = 'block';
         }
         var badgeName = document.getElementById('hero-badge-name');
-        if (badgeName) badgeName.textContent = data.hero.name || '';
+        if (badgeName) badgeName.textContent = data.hero.name || 'John Bryan Capellan';
         var badgeRole = document.getElementById('hero-badge-role');
-        if (badgeRole) badgeRole.textContent = data.hero.status || data.hero.badge || '';
+        if (badgeRole) badgeRole.textContent = data.hero.status || data.hero.badge || 'Information Technology Student';
+        var badgeCardEl = document.getElementById('hero-badge-card');
+        if (badgeCardEl) {
+          badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + (data.hero.name || 'John Bryan Capellan'));
+        }
         var badgeFallback = document.getElementById('hero-badge-photo-fallback');
         if (badgeFallback) badgeFallback.style.display = 'none';
 

@@ -468,8 +468,11 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
    7. HERO UPGRADES
    ════════════════════════════════════════════════════════════ */
 
-/* Entrance cascade (hero sits above the fold, so time-based) */
-.hero-badge,
+/* Entrance cascade (hero sits above the fold, so time-based).
+   NOTE: .hero-badge is deliberately excluded — the pendulum physics in
+   index.html sets inline transforms every frame, and this animation's
+   fill-mode would override them and freeze the swing. Its drop-in is
+   handled by .hero-badge-wrap's own reveal transition instead. */
 .hero-status,
 .hero-title,
 .hero-roles,
@@ -770,7 +773,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .hero-roles-caret,
   .btn-primary::after,
   #back-to-top,
-  .hero-badge, .hero-status, .hero-title, .hero-roles,
+  .hero-status, .hero-title, .hero-roles,
   .hero-description, .hero-actions, .hero-terminal {
     animation: none !important;
     transition: none !important;
