@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260802" />
+  <link rel="stylesheet" href="css/admin.css?v=20260803" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -248,6 +248,38 @@
           <div class="form-group">
             <label>Description</label>
             <textarea id="hero-desc" rows="4"></textarea>
+          </div>
+          <div class="form-group">
+            <label>ID Badge Back — Live Preview</label>
+            <p class="form-hint">Updates as you type here and in Direct Contact links. Mirrors the back of the badge on your portfolio.</p>
+            <div class="id-back-preview" id="id-back-preview">
+              <div class="idp-card">
+                <div class="idp-head">
+                  <span class="idp-logo" aria-hidden="true">~</span>
+                  <span class="idp-school">Student ID</span>
+                  <span class="idp-sub">brokeCode05.dev</span>
+                </div>
+                <div class="idp-body">
+                  <div class="idp-scan">
+                    <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
+                    <div class="idp-qr" id="idp-qr" aria-hidden="true">
+                      <span class="idp-qr-c1"></span>
+                      <span class="idp-qr-c2"></span>
+                      <span class="idp-qr-c3"></span>
+                      <span class="idp-qr-target" id="idp-qr-target">QR</span>
+                    </div>
+                  </div>
+                  <div class="idp-info">
+                    <span class="idp-name" id="idp-name">John Bryan Capellan</span>
+                    <span class="idp-links" id="idp-links"></span>
+                  </div>
+                </div>
+                <div class="idp-foot">
+                  <span class="idp-stamp" aria-hidden="true">VERIFIED</span>
+                  <span class="idp-id" id="idp-id">IT-2024-0842</span>
+                </div>
+              </div>
+            </div>
           </div>
           <button class="btn btn-primary" id="hero-save">Save Hero</button>
         </div>
@@ -1434,6 +1466,12 @@ CREATE POLICY "Admin update portfolio_data"
     showToast('Hero saved!', 'success');
   });
 
+  // Live ID-back preview — refresh as hero fields are typed
+  ['hero-name', 'hero-idno', 'hero-qrlink'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateIdPreview);
+  });
+
   // Profile photo upload (resize to keep data lean, like cert uploads)
   var heroPhotoInput = document.getElementById('hero-photo-upload');
   if (heroPhotoInput) {
@@ -1495,6 +1533,71 @@ CREATE POLICY "Admin update portfolio_data"
       renderHeroPhotoPreview('');
       showToast('Profile photo removed', 'success');
     });
+  }
+
+  // ─── ID Badge Back — Live Preview ─────────
+  // Mirrors the back of the portfolio ID badge. Reads the hero form fields
+  // AND the Direct Contact link editor live (before saving) so the admin
+  // sees exactly what the badge will show.
+  function updateIdPreview() {
+    var preview = document.getElementById('id-back-preview');
+    if (!preview) return;
+
+    var nameEl = document.getElementById('idp-name');
+    var idEl = document.getElementById('idp-id');
+    var scanLabelEl = document.getElementById('idp-scan-label');
+    var qrTargetEl = document.getElementById('idp-qr-target');
+    var linksEl = document.getElementById('idp-links');
+    if (!nameEl || !idEl || !scanLabelEl || !qrTargetEl || !linksEl) return;
+
+    // Hero fields (live from the form)
+    var name = document.getElementById('hero-name').value || 'John Bryan Capellan';
+    var idno = document.getElementById('hero-idno').value || 'IT-2024-0842';
+    var qrRaw = document.getElementById('hero-qrlink').value.trim();
+    var qrTarget = qrRaw;
+    if (qrTarget && !/^[a-z][a-z0-9+.-]*:/i.test(qrTarget)) qrTarget = 'https://' + qrTarget;
+
+    // Friendly brand for the scan label + QR box
+    var brand = '';
+    var host = '';
+    if (qrTarget) {
+      try { host = new URL(qrTarget).hostname; } catch (e) { host = qrTarget; }
+      if (host.indexOf('github.com') > -1) brand = 'GitHub';
+      else if (host.indexOf('linkedin.com') > -1) brand = 'LinkedIn';
+      else if (host.indexOf('facebook.com') > -1) brand = 'Facebook';
+      else if (host.indexOf('instagram.com') > -1) brand = 'Instagram';
+      else if (host.indexOf('t.me') > -1 || host.indexOf('telegram') > -1) brand = 'Telegram';
+      else if (host.indexOf('twitter.com') > -1 || host.indexOf('x.com') > -1) brand = 'X / Twitter';
+      else brand = host.replace(/^www\./, '');
+    }
+
+    nameEl.textContent = name;
+    idEl.textContent = idno;
+    scanLabelEl.textContent = brand ? 'Scan to connect on ' + brand : 'Scan to connect';
+    qrTargetEl.textContent = brand || (qrTarget || 'QR');
+
+    // Contact chips — live from the Direct Contact editor DOM, falling back
+    // to saved/default links when nothing is on screen yet
+    var links = [];
+    var container = document.getElementById('contact-links-list');
+    if (container) {
+      container.querySelectorAll('.admin-card').forEach(function(card) {
+        var label = card.querySelector('.contact-label');
+        var value = card.querySelector('.contact-value');
+        var url = card.querySelector('.contact-url');
+        if (label && value && url) {
+          links.push({ label: label.value, value: value.value, url: url.value });
+        }
+      });
+    }
+    if (!links.length) {
+      var d = readData();
+      links = (d.contactLinks && d.contactLinks.length) ? d.contactLinks : DEFAULT_CONTACT_LINKS;
+    }
+    linksEl.innerHTML = links.slice(0, 4).map(function(link) {
+      return '<span class="idp-link" title="' + escapeHtml(link.label || '') + '">' +
+        escapeHtml(link.value || link.url || link.label || '') + '</span>';
+    }).join('');
   }
 
   // ─── About ─────────────────────────────────
@@ -2393,6 +2496,7 @@ CREATE POLICY "Admin update portfolio_data"
     var container = document.getElementById('contact-links-list');
     if (!d.contactLinks || !d.contactLinks.length) {
       container.innerHTML = '<div class="empty-state">Email and GitHub show by default until you add your own links.</div>';
+      updateIdPreview();
       return;
     }
     container.innerHTML = d.contactLinks.map(function(link, idx) {
@@ -2479,8 +2583,15 @@ CREATE POLICY "Admin update portfolio_data"
       }
       writeData();
       renderContactLinksList();
+      updateIdPreview();
     });
+
+    updateIdPreview();
   }
+
+  // Live ID-back preview — delegated so it works across link re-renders
+  var linksListEl = document.getElementById('contact-links-list');
+  if (linksListEl) linksListEl.addEventListener('input', updateIdPreview);
 
   document.getElementById('contact-links-add').addEventListener('click', function() {
     var d = readData();
@@ -2611,6 +2722,7 @@ CREATE POLICY "Admin update portfolio_data"
   function initDashboard() {
     loadHero();
     loadAbout();
+    updateIdPreview();
     renderTechItems();
     loadCurrently();
     renderProjects();
@@ -2618,6 +2730,7 @@ CREATE POLICY "Admin update portfolio_data"
     renderExperience();
     renderLearningMilestones();
     renderContactLinksList();
+    updateIdPreview();
     renderFaqList();
     updateCloudStatus();
     updateSidebarCounts();
