@@ -572,10 +572,9 @@
     });
   }
 
-  // ── Hero portrait parallax + hover tilt ────────────────────
+  // ── Hero media parallax (badge physics lives in index.html) ──
   function parallax() {
     var media = document.getElementById('hero-media');
-    var portrait = document.getElementById('hero-portrait');
     if (!media) return;
     if (reducedMotion()) return;
     var ticking = false;
@@ -589,20 +588,6 @@
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
-    if (finePointer() && portrait) {
-      // Tilt the IMAGE, not the container: the container carries the
-      // hero-floating animation, and CSS animations override inline styles.
-      var imgEl = portrait.querySelector('img') || portrait;
-      media.addEventListener('mousemove', function (e) {
-        var r = media.getBoundingClientRect();
-        var rx = ((e.clientY - r.top) / r.height - 0.5) * -5;
-        var ry = ((e.clientX - r.left) / r.width - 0.5) * 5;
-        imgEl.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
-      });
-      media.addEventListener('mouseleave', function () {
-        imgEl.style.transform = '';
-      });
-    }
   }
 
   // ── Back-to-top with circular progress ring ────────────────

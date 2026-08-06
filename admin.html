@@ -214,8 +214,22 @@
             <input type="text" id="hero-badge" />
           </div>
           <div class="form-group">
+            <label>Name (shown on ID badge)</label>
+            <input type="text" id="hero-name" placeholder="John Bryan" />
+          </div>
+          <div class="form-group">
             <label>Status Text</label>
             <input type="text" id="hero-status" />
+          </div>
+          <div class="form-group">
+            <label>Profile Photo</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">📁 Upload Photo<input type="file" id="hero-photo-upload" accept="image/*" style="display:none" /></label>
+              <div id="hero-photo-preview" style="display:none;align-items:center;gap:6px">
+                <img src="" alt="" style="width:52px;height:68px;object-fit:cover;border-radius:6px;border:1px solid var(--color-border)" />
+                <button type="button" class="btn btn-sm" id="hero-photo-clear" title="Remove photo">×</button>
+              </div>
+            </div>
           </div>
           <div class="form-group">
             <label>Headline Title</label>
@@ -1378,20 +1392,87 @@ CREATE POLICY "Admin update portfolio_data"
   function loadHero() {
     var d = readData();
     document.getElementById('hero-badge').value = d.hero.badge || '';
+    document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-status').value = d.hero.status || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
+    renderHeroPhotoPreview(d.hero.photo || '');
+  }
+
+  function renderHeroPhotoPreview(photo) {
+    var preview = document.getElementById('hero-photo-preview');
+    if (!preview) return;
+    if (photo) {
+      preview.style.display = 'flex';
+      preview.querySelector('img').src = photo;
+    } else {
+      preview.style.display = 'none';
+    }
   }
 
   document.getElementById('hero-save').addEventListener('click', function() {
     var d = readData();
     d.hero.badge = document.getElementById('hero-badge').value;
+    d.hero.name = document.getElementById('hero-name').value;
     d.hero.status = document.getElementById('hero-status').value;
     d.hero.title = document.getElementById('hero-title').value;
     d.hero.description = document.getElementById('hero-desc').value;
     writeData();
     showToast('Hero saved!', 'success');
   });
+
+  // Profile photo upload (resize to keep data lean, like cert uploads)
+  var heroPhotoInput = document.getElementById('hero-photo-upload');
+  if (heroPhotoInput) {
+    heroPhotoInput.addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var MAX = 800;
+          var w = img.width, h = img.height;
+          var canvas = document.createElement('canvas');
+          if (w > MAX || h > MAX) {
+            var ratio = Math.min(MAX / w, MAX / h);
+            canvas.width = Math.round(w * ratio);
+            canvas.height = Math.round(h * ratio);
+          } else {
+            canvas.width = w;
+            canvas.height = h;
+          }
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          // Merge current form values so unsaved hero text isn't dropped
+          var d = readData();
+          d.hero.badge = document.getElementById('hero-badge').value;
+          d.hero.name = document.getElementById('hero-name').value;
+          d.hero.status = document.getElementById('hero-status').value;
+          d.hero.title = document.getElementById('hero-title').value;
+          d.hero.description = document.getElementById('hero-desc').value;
+          d.hero.photo = canvas.toDataURL('image/jpeg', 0.85);
+          writeData();
+          renderHeroPhotoPreview(d.hero.photo);
+          showToast('Profile photo uploaded!', 'success');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      this.value = '';
+    });
+  }
+
+  var heroPhotoClear = document.getElementById('hero-photo-clear');
+  if (heroPhotoClear) {
+    heroPhotoClear.addEventListener('click', function() {
+      var d = readData();
+      d.hero.photo = '';
+      writeData();
+      renderHeroPhotoPreview('');
+      showToast('Profile photo removed', 'success');
+    });
+  }
 
   // ─── About ─────────────────────────────────
   function loadAbout() {
