@@ -226,21 +226,34 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   z-index: 1;
 }
 
-/* ── Cert cards: CRT glitch / RGB-split reveal on hover ────────
-   On hover the certificate snaps in like screen tearing on an old
-   CRT: the image glitches in with horizontal slice displacement
-   (clip-path) + red/cyan RGB channel split (layered drop-shadows),
-   then settles clean. The front text dims and lifts, and the cursor
-   tilt stays on the outer card so tilt + glitch compose.
-   No-image certs reveal the placeholder. */
+/* ── Cert cards: terminal focus frame on hover ───────────────
+   No image reveal — the certificate only shows in the click-to-view
+   modal. On hover the card reads as a focused terminal window:
+   the border lights up with an accent glow, a blinking block cursor
+   appears after the title, and a "$ open --view" hint fades into
+   the corner. The cursor tilt stays on the outer card so the tilt
+   and the focus frame compose. */
 .cert-card {
   display: block;
   padding: 0;
+  /* opacity keeps the scroll-reveal fade working (equal specificity,
+     ui-upgrade loads later, so omit it here and the fade snaps) */
+  transition: opacity var(--transition-slow),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
-.cert-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.cert-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+/* Focus keeps the site's clear keyboard ring AND adds the glow */
+.cert-card:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 .cert-card-front {
   position: relative;
@@ -249,107 +262,45 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   gap: var(--space-md);
   padding: var(--space-lg);
   border-radius: inherit;
-  overflow: hidden;
-  transition: opacity 0.3s ease, transform 0.35s ease;
 }
-.cert-card:hover .cert-card-front,
-.cert-card:focus-visible .cert-card-front {
-  opacity: 0.15;
-  transform: translateY(-10px);
+/* Blinking block cursor after the title, like a caret in a terminal */
+.cert-card:hover .cert-card-title::after,
+.cert-card:focus-visible .cert-card-title::after {
+  content: "█";
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--color-accent);
+  animation: blink 1s step-end infinite;
 }
-.cert-card-back {
+/* "$ open --view" hint in the corner, types in like a command hint */
+.cert-card-front::after {
+  content: "$ open --view";
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-  /* CRT monitor backdrop — letterbox bars read as part of the frame */
-  background-color: var(--color-surface-hover);
-  background-image: radial-gradient(130% 100% at 50% 35%, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.38));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 0 26px rgba(0, 0, 0, 0.4);
+  top: var(--space-sm);
+  right: var(--space-md);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
   opacity: 0;
-  transition: opacity 0.12s ease;
-}
-.cert-card:hover .cert-card-back,
-.cert-card:focus-visible .cert-card-back {
-  opacity: 1;
-}
-.cert-card-img {
-  width: 100%;
-  height: 100%;
-  /* contain shows the whole certificate (never cropped); padding gives
-     breathing room so it floats inside the monitor frame */
-  object-fit: contain;
-  padding: 10px;
-  box-sizing: border-box;
-  display: block;
-  border-radius: 2px;
-  filter: saturate(0.92) contrast(1.04);
-}
-/* Glitch-in: screen-tear slice jumps + RGB channel split, then settle.
-   steps(1, end) makes each slice jump snap instead of sliding — the
-   stuttery cut is what reads as real screen-tearing. */
-.cert-card:hover .cert-card-img,
-.cert-card:focus-visible .cert-card-img {
-  animation: cert-glitch-in 0.55s steps(1, end) forwards;
-}
-@keyframes cert-glitch-in {
-  0%   { opacity: 0; clip-path: inset(0 0 0 0); transform: translate(0, 0) skewX(0); }
-  8%   { opacity: 1; clip-path: inset(0 0 88% 0); transform: translate(-3px, 1px) skewX(-1.5deg);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(3px 0 0 rgba(255, 45, 85, 0.65)) drop-shadow(-3px 0 0 rgba(0, 225, 255, 0.65)); }
-  18%  { clip-path: inset(14% 0 68% 0); transform: translate(3px, -2px) skewX(1deg);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(4px 0 0 rgba(255, 45, 85, 0.6)) drop-shadow(-4px 0 0 rgba(0, 225, 255, 0.6)); }
-  28%  { clip-path: inset(44% 0 40% 0); transform: translate(-2px, 2px) skewX(-0.5deg);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(-3px 0 0 rgba(255, 45, 85, 0.6)) drop-shadow(3px 0 0 rgba(0, 225, 255, 0.6)); }
-  38%  { clip-path: inset(70% 0 10% 0); transform: translate(2px, 1px) skewX(0.5deg);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(2px 0 0 rgba(255, 45, 85, 0.55)) drop-shadow(-2px 0 0 rgba(0, 225, 255, 0.55)); }
-  50%  { clip-path: inset(24% 0 58% 0); transform: translate(-1px, 0) skewX(0);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(2px 0 0 rgba(255, 45, 85, 0.45)) drop-shadow(-2px 0 0 rgba(0, 225, 255, 0.45)); }
-  62%  { clip-path: inset(8% 0 74% 0); transform: translate(1px, -1px) skewX(-0.5deg);
-         filter: saturate(0.92) contrast(1.04) drop-shadow(1px 0 0 rgba(255, 45, 85, 0.35)) drop-shadow(-1px 0 0 rgba(0, 225, 255, 0.35)); }
-  100% { opacity: 1; clip-path: inset(0 0 0 0); transform: translate(0, 0) skewX(0);
-         filter: saturate(0.92) contrast(1.04); }
-}
-/* Broken-image fallback: renderCerts adds this class on img error */
-.cert-card-back.cert-card-back-empty::before {
-  content: "no image on file";
-  font-family: var(--font-code);
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-}
-.cert-card-scanlines {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast) 0.12s,
+    transform var(--transition-fast) 0.12s;
   pointer-events: none;
-  opacity: 0.5;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.12) 2px,
-    rgba(0, 0, 0, 0.12) 4px
-  );
 }
-.cert-card-back-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-sm);
-  font-family: var(--font-code);
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
+.cert-card:hover .cert-card-front::after,
+.cert-card:focus-visible .cert-card-front::after {
+  opacity: 1;
+  transform: translateY(0);
 }
-.cert-card-back-empty svg {
+/* Title brightens to accent while the frame is focused */
+.cert-card:hover .cert-card-title,
+.cert-card:focus-visible .cert-card-title {
   color: var(--color-accent);
 }
 
-/* Cursor tilt stays on the outer card (the glitch is on the inner
-   back face), so the two effects compose: the card tilts toward the
-   cursor AND glitches in the certificate. */
+/* Cursor tilt stays on the outer card, so tilt + focus frame compose:
+   the card tilts toward the cursor and lights up like a focused
+   terminal window at the same time. */
 .certs-grid .cert-card[data-reveal].revealed:hover {
   transform: translateY(0) scale(1) perspective(800px)
     rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
@@ -681,25 +632,22 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .timeline-item[data-reveal] {
     transform: none !important;
   }
-  /* Cert cards: no tilt, no glitch reveal, front stays as-is */
+  /* Cert cards: no tilt, no cursor blink, hint shows statically */
   .certs-grid .cert-card[data-reveal].revealed:hover {
     transform: none !important;
     transition: none !important;
   }
-  .cert-card:hover .cert-card-front,
-  .cert-card:focus-visible .cert-card-front {
-    opacity: 1 !important;
-    transform: none !important;
+  .cert-card:hover,
+  .cert-card:focus-visible {
+    box-shadow: none !important;
     transition: none !important;
   }
-  .cert-card:hover .cert-card-back,
-  .cert-card:focus-visible .cert-card-back {
-    opacity: 0 !important;
-    transition: none !important;
-  }
-  .cert-card:hover .cert-card-img,
-  .cert-card:focus-visible .cert-card-img {
+  .cert-card:hover .cert-card-title::after,
+  .cert-card:focus-visible .cert-card-title::after {
     animation: none !important;
+  }
+  .cert-card-front::after {
+    transition: none !important;
   }
   /* Timeline: static full line + fully visible markers */
   .timeline::before {
