@@ -573,17 +573,12 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   50%      { transform: translateY(6px); }
 }
 
-/* Portrait float, glow pulse and deco drift already animate via the site's
-   own inline styles (hero-floating / hero-glow-pulse / hero-deco-float) —
-   kept here only as needed. .hero needs relative for the scroll indicator. */
+/* .hero needs relative for the scroll indicator; the badge physics live in
+   index.html (hero-badge-wrap/hero-badge), so only the parallax hint is
+   kept here. */
 .hero { position: relative; }
 .hero-media[data-parallax] {
   will-change: transform;
-}
-/* The tilt targets the portrait image — keep ITS transform snappy (the
-   container owns the float animation, which would override inline styles). */
-.hero-portrait img {
-  transition: filter 0.4s ease, transform 0.15s ease-out;
 }
 
 /* ════════════════════════════════════════════════════════════

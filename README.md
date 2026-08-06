@@ -39,7 +39,6 @@ The site serves as both a **resume showcase** and a **technical sandbox** for ex
 | **📜 Scroll Animations** | Sections fade in as they enter the viewport using IntersectionObserver. |
 | **📈 GitHub Integration** | Live stats (repos, followers, stars) and contribution graph fetched via the GitHub API. |
 | **🔍 SEO & Accessibility** | Semantic HTML, ARIA labels, skip-to-content link, structured data (JSON-LD), Open Graph / Twitter Card meta tags. |
-| **📄 Resume Download** | One-click PDF resume download. |
 
 ---
 
@@ -66,7 +65,6 @@ portfolio/
 │   └── main.min.js     # Minified JavaScript (scroll, theme, typing, reveal)
 ├── img/
 │   └── profile.png     # Profile photo (replace with yours)
-├── resume.pdf          # Downloadable resume
 ├── README.md           # You're here!
 ├── robots.txt          # Search engine crawling rules
 ├── sitemap.xml         # XML sitemap for SEO
@@ -109,7 +107,6 @@ Then visit `http://localhost:8080`.
 - **Personal info** — Edit `index.html` (name, bio, email, GitHub username)
 - **Skills** — Update the skill items and progress percentages in the Skills section
 - **Projects** — Add/remove project cards in the Projects section
-- **Resume** — Replace `resume.pdf` with your own
 - **Theme colors** — Adjust CSS custom properties in the `:root` and `[data-theme="light"]` blocks
 
 ---

@@ -256,7 +256,7 @@
       topic: 'resume',
       keywords: ['resume', 'cv', 'curriculum', 'download resume', 'download pdf', 'portfolio pdf', 'photo download'],
       answer: function() {
-        return 'You can grab Bryan\'s resume (and photo) from the download buttons in the Contact section of this page. [[CONTACT]]';
+        return 'Bryan\'s resume isn\'t available as a download on this site — but you can ask him directly for a copy (or any other details) via the contact form. [[CONTACT]]';
       }
     },
     {
