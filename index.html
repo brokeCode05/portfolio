@@ -2244,7 +2244,7 @@
                     </div>
                     <div class="hero-badge-back-body">
                       <div class="hero-badge-scan">
-                        <span class="hero-badge-scan-label">Scan to connect</span>
+                        <span class="hero-badge-scan-label" id="hero-badge-scan-label">Scan to connect</span>
                         <img
                           id="hero-badge-qr-real"
                           class="hero-badge-qr-real"
@@ -2259,10 +2259,7 @@
                       </div>
                       <div class="hero-badge-back-info">
                         <span class="hero-badge-back-name" id="hero-badge-back-name">John Bryan Capellan</span>
-                        <span class="hero-badge-back-links">
-                          <a class="hero-badge-back-link" id="hero-badge-back-email" href="mailto:jhnbryn05@gmail.com">jhnbryn05@gmail.com</a>
-                          <a class="hero-badge-back-link" id="hero-badge-back-github" href="https://github.com/brokeCode05" target="_blank" rel="noopener">github.com/brokeCode05</a>
-                        </span>
+                        <span class="hero-badge-back-links" id="hero-badge-back-links"></span>
                       </div>
                     </div>
                     <div class="hero-badge-back-foot">
@@ -3576,6 +3573,7 @@
         // QR link on the ID back — admin-set target overrides the site default
         var badgeQr = document.getElementById('hero-badge-qr-real');
         var qrTarget = (data.hero.qrLink || '').trim();
+        var qrLabel = ''; // human-readable target for the scan label / flip hint
         if (badgeQr && qrTarget) {
           if (!/^[a-z][a-z0-9+.-]*:/i.test(qrTarget)) qrTarget = 'https://' + qrTarget;
           badgeQr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=' +
@@ -3584,6 +3582,46 @@
           badgeQr.style.display = 'block';
           var qrFallback = document.getElementById('hero-badge-qr-fallback');
           if (qrFallback) qrFallback.style.display = 'none';
+          // Friendly brand for the scan label + flip hint
+          var host = '';
+          try { host = new URL(qrTarget).hostname; } catch (e) { host = qrTarget; }
+          if (host.indexOf('github.com') > -1) qrLabel = 'GitHub';
+          else if (host.indexOf('linkedin.com') > -1) qrLabel = 'LinkedIn';
+          else if (host.indexOf('facebook.com') > -1) qrLabel = 'Facebook';
+          else if (host.indexOf('instagram.com') > -1) qrLabel = 'Instagram';
+          else if (host.indexOf('t.me') > -1 || host.indexOf('telegram') > -1) qrLabel = 'Telegram';
+          else if (host.indexOf('twitter.com') > -1 || host.indexOf('x.com') > -1) qrLabel = 'X / Twitter';
+          else qrLabel = host.replace(/^www\./, '');
+        }
+        var badgeScanLabel = document.getElementById('hero-badge-scan-label');
+        if (badgeScanLabel) {
+          badgeScanLabel.textContent = qrLabel ? 'Scan to connect on ' + qrLabel : 'Scan to connect';
+        }
+        var badgeFlipHint = document.querySelector('.hero-badge-flip-hint');
+        if (badgeFlipHint) {
+          // Only name the target when it's a recognizable brand — a raw hostname
+          // is too long for the 8px caption.
+          var knownBrands = ['GitHub', 'LinkedIn', 'Facebook', 'Instagram', 'Telegram', 'X / Twitter'];
+          badgeFlipHint.textContent =
+            (knownBrands.indexOf(qrLabel) > -1) ? 'click to flip — scan my ' + qrLabel : 'click to flip';
+        }
+
+        // Back-side contact chips — driven by the admin Direct Contact links
+        // (Email, GitHub, LinkedIn, etc.). Falls back to Email + GitHub.
+        var badgeBackLinks = document.getElementById('hero-badge-back-links');
+        if (badgeBackLinks) {
+          var links = (data.contactLinks && data.contactLinks.length)
+            ? data.contactLinks
+            : DEFAULT_CONTACT_LINKS;
+          // Keep the card readable — an ID back fits ~4 contact lines
+          badgeBackLinks.innerHTML = links.slice(0, 4).map(function(link) {
+            var url = link.url || '#';
+            var external = url.indexOf('mailto:') !== 0 && url.indexOf('tel:') !== 0;
+            return '<a class="hero-badge-back-link" href="' + escapeHtml(url) + '"' +
+              (external ? ' target="_blank" rel="noopener"' : '') +
+              ' title="' + escapeHtml(link.label || '') + '">' +
+              escapeHtml(link.value || link.url || link.label || '') + '</a>';
+          }).join('');
         }
 
         // ─── About ────────────────────────────────
