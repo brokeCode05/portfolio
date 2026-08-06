@@ -426,7 +426,9 @@
           runInput();
         });
       });
-      setTimeout(function () { if (input) input.focus(); }, 350);
+      // preventScroll: focusing the input when the typewriter finishes must
+      // not yank the page back to About if the visitor already scrolled away.
+      setTimeout(function () { if (input) input.focus({ preventScroll: true }); }, 350);
     }
 
     // Upgrade immediately if reduced motion (typewriter never runs, so the
