@@ -390,6 +390,70 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
 }
 
+/* ── Project cards: terminal focus frame on hover ────────────
+   Same treatment as the cert + GitHub cards: accent border glow,
+   a blinking block cursor after the title, and a git clone hint
+   in the corner. The card is a flex column, so position: relative
+   anchors the hint; the lift is the base hover's translateY. */
+.project-card {
+  position: relative;
+  /* opacity keeps the scroll-reveal fade working */
+  transition: opacity var(--transition-slow),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+.project-card:hover,
+.project-card:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  transform: translateY(-2px);
+}
+/* Focus keeps the site's clear keyboard ring AND adds the glow */
+.project-card:focus-visible {
+  box-shadow: var(--focus-ring),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+/* Blinking block cursor after the title, like a caret in a terminal */
+.project-card:hover .project-card-title::after,
+.project-card:focus-visible .project-card-title::after {
+  content: "█";
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--color-accent);
+  /* don't inherit the title's letter-spacing/uppercase on the caret */
+  letter-spacing: 0;
+  text-transform: none;
+  animation: blink 1s step-end infinite;
+}
+/* git clone hint in the corner */
+.project-card::after {
+  content: "$ git clone";
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-md);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast) 0.12s,
+    transform var(--transition-fast) 0.12s;
+  pointer-events: none;
+}
+.project-card:hover::after,
+.project-card:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Title brightens to accent while the frame is focused */
+.project-card:hover .project-card-title,
+.project-card:focus-visible .project-card-title {
+  color: var(--color-accent);
+}
+
 /* ════════════════════════════════════════════════════════════
    7. HERO UPGRADES
    ════════════════════════════════════════════════════════════ */
@@ -747,6 +811,20 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   }
   .github-card::after,
   .github-graph-wrap::after {
+    transition: none !important;
+  }
+  /* Project cards: no glow/lift, cursor + hint show statically */
+  .project-card:hover,
+  .project-card:focus-visible {
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .project-card:hover .project-card-title::after,
+  .project-card:focus-visible .project-card-title::after {
+    animation: none !important;
+  }
+  .project-card::after {
     transition: none !important;
   }
   /* Timeline: static full line + fully visible markers */
