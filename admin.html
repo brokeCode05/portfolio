@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260801" />
+  <link rel="stylesheet" href="css/admin.css?v=20260802" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -220,6 +220,11 @@
           <div class="form-group">
             <label>ID Number (shown on ID badge)</label>
             <input type="text" id="hero-idno" placeholder="IT-2024-0842" />
+          </div>
+          <div class="form-group">
+            <label>QR Code Link (back of ID badge — leave empty to point at your site)</label>
+            <input type="url" id="hero-qrlink" placeholder="https://github.com/brokeCode05" />
+            <small class="form-hint">What the scannable QR on the ID back opens. Any URL works — GitHub, LinkedIn, etc.</small>
           </div>
           <div class="form-group">
             <label>Status Text</label>
@@ -546,7 +551,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260802"></script>
+<script src="js/portfolio-data.js?v=20260803"></script>
 <script>
 (function(){
   'use strict';
@@ -1398,6 +1403,7 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-badge').value = d.hero.badge || '';
     document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-idno').value = d.hero.idNumber || '';
+    document.getElementById('hero-qrlink').value = d.hero.qrLink || '';
     document.getElementById('hero-status').value = d.hero.status || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
@@ -1420,6 +1426,7 @@ CREATE POLICY "Admin update portfolio_data"
     d.hero.badge = document.getElementById('hero-badge').value;
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
+    d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
     d.hero.status = document.getElementById('hero-status').value;
     d.hero.title = document.getElementById('hero-title').value;
     d.hero.description = document.getElementById('hero-desc').value;
@@ -1455,6 +1462,7 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.badge = document.getElementById('hero-badge').value;
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
+          d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
           d.hero.status = document.getElementById('hero-status').value;
           d.hero.title = document.getElementById('hero-title').value;
           d.hero.description = document.getElementById('hero-desc').value;
@@ -1478,6 +1486,7 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.badge = document.getElementById('hero-badge').value;
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
+      d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
       d.hero.status = document.getElementById('hero-status').value;
       d.hero.title = document.getElementById('hero-title').value;
       d.hero.description = document.getElementById('hero-desc').value;
