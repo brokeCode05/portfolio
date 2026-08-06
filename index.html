@@ -498,7 +498,7 @@
       border-radius: 22px;
     }
 
-    /* ID badge — realistic student ID on a lanyard, pendulum physics (JS) */
+    /* ID badge — realistic student ID on a lanyard, 3D tilt + click-to-flip (JS) */
     .hero-badge-wrap {
       position: relative;
       z-index: 1;
@@ -620,18 +620,31 @@
       width: 100%;
       margin-top: 6px;
       border-radius: 14px;
-      cursor: grab;
+      cursor: pointer;
+      /* Resting 3D pose — visible before any pointer interaction, on touch
+         devices, and under reduced-motion. The JS tilt overrides this with an
+         inline transform once the card starts following the cursor. */
+      transform: perspective(900px) rotateX(4deg) rotateY(-3deg);
+      transform-style: preserve-3d;
       will-change: transform;
-      transition: box-shadow 0.4s ease, filter 0.4s ease;
-      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.35));
+      outline: none;
     }
-    .hero-badge-card:hover {
-      filter: drop-shadow(0 18px 34px rgba(0,0,0,0.42));
+    .hero-badge-card:focus-visible {
+      outline: none;
+      border-radius: 14px;
+      box-shadow: var(--focus-ring, 0 0 0 2px rgba(74, 222, 128, 0.5));
     }
-    .hero-badge-card.badge-grabbed {
-      cursor: grabbing;
+    /* Flip stage — rotates 180° on click; the faces swap via backface-visibility */
+    .hero-badge-flip {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
+      will-change: transform;
     }
-    /* Plastic card face — static 3D tilt, stays upright via card counter-rotation */
+    .hero-badge-card.flipped .hero-badge-flip {
+      transform: rotateY(180deg);
+    }
+    /* Plastic card face (front) — backface hidden so the back shows when flipped */
     .hero-badge-face {
       position: relative;
       border-radius: 14px;
@@ -642,8 +655,37 @@
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.9),
         inset 0 -18px 30px rgba(20, 30, 48, 0.05);
-      transform: perspective(900px) rotateX(4deg) rotateY(-3deg);
+      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.35));
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transition: filter 0.4s ease;
       will-change: transform;
+    }
+    .hero-badge-card:hover .hero-badge-face {
+      filter: drop-shadow(0 18px 34px rgba(0,0,0,0.42));
+    }
+    /* Back face — mirrors the front; pre-rotated so it faces the viewer when flipped */
+    .hero-badge-back {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(160deg, #FFFFFF 0%, #F2F4F7 45%, #E4E8EE 100%);
+      border: 1px solid rgba(20, 30, 48, 0.14);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.9),
+        inset 0 -18px 30px rgba(20, 30, 48, 0.05);
+      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.35));
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transition: filter 0.4s ease;
+    }
+    .hero-badge-card:hover .hero-badge-back {
+      filter: drop-shadow(0 18px 34px rgba(0,0,0,0.42));
     }
     /* Punch hole at the top (lanyard loop) — sized so the clip tab sits in it */
     .hero-badge-face::before {
@@ -661,7 +703,7 @@
         0 1px 0 rgba(255,255,255,0.8);
       z-index: 3;
     }
-    /* Plastic sheen sweep */
+    /* Plastic sheen sweep — glides across on hover (reduced-motion disables) */
     .hero-badge-sheen {
       position: absolute;
       inset: 0;
@@ -670,11 +712,17 @@
       z-index: 4;
       background: linear-gradient(
         115deg,
-        transparent 32%,
-        rgba(255,255,255,0.55) 44%,
-        rgba(255,255,255,0.12) 52%,
-        transparent 62%
+        transparent 30%,
+        rgba(255,255,255,0.5) 42%,
+        rgba(255,255,255,0.14) 50%,
+        transparent 60%
       );
+      background-size: 220% 220%;
+      background-position: 100% 100%;
+      transition: background-position 0.9s ease;
+    }
+    .hero-badge-card:hover .hero-badge-sheen {
+      background-position: 0% 0%;
     }
     /* Card header — school branding */
     .hero-badge-head {
@@ -854,11 +902,152 @@
       white-space: nowrap;
       letter-spacing: 0.03em;
     }
+
+    /* ---- ID card back face ---- */
+    .hero-badge-back-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px 8px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-badge-back-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 14px 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-badge-scan {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .hero-badge-scan-label {
+      font-family: var(--font-code);
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748B;
+    }
+    .hero-badge-qr-real {
+      display: block;
+      width: 104px;
+      height: 104px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(20, 30, 48, 0.18);
+    }
+    .hero-badge-qr-fallback {
+      display: none;
+      width: 104px;
+      height: 104px;
+      border-radius: 6px;
+      background:
+        conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
+      background-size: 6px 6px;
+      box-shadow: 0 2px 6px rgba(20, 30, 48, 0.18);
+    }
+    .hero-badge-back-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .hero-badge-back-name {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 700;
+      color: #0F172A;
+      line-height: 1.2;
+    }
+    .hero-badge-back-links {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hero-badge-back-link {
+      font-family: var(--font-code);
+      font-size: 8px;
+      color: #475569;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+    .hero-badge-back-link:hover {
+      color: var(--color-accent-dim);
+    }
+    .hero-badge-back-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 14px 9px;
+      border-top: 1px solid rgba(20, 30, 48, 0.09);
+      position: relative;
+      z-index: 2;
+    }
+    .hero-badge-stamp {
+      font-family: var(--font-code);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent-dim);
+      border: 1.5px solid var(--color-accent-dim);
+      border-radius: 4px;
+      padding: 2px 7px;
+      opacity: 0.85;
+      transform: rotate(-3deg);
+    }
+    .hero-badge-back-id {
+      font-family: var(--font-code);
+      font-size: 8px;
+      color: #64748B;
+      letter-spacing: 0.05em;
+    }
+
+    /* Flip hint caption below the card */
+    .hero-badge-flip-hint {
+      margin-top: 10px;
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+    .hero-badge-card:hover ~ .hero-badge-flip-hint,
+    .hero-badge-card:focus-visible ~ .hero-badge-flip-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (pointer: coarse) {
+      .hero-badge-flip-hint {
+        opacity: 0.6;
+        transform: none;
+      }
+    }
+
     /* Light theme — the PVC card stays light; soften the drop shadow */
-    [data-theme="light"] .hero-badge-card {
+    [data-theme="light"] .hero-badge-face,
+    [data-theme="light"] .hero-badge-back {
       filter: drop-shadow(0 12px 22px rgba(20, 30, 48, 0.16));
     }
-    [data-theme="light"] .hero-badge-card:hover {
+    [data-theme="light"] .hero-badge-card:hover .hero-badge-face,
+    [data-theme="light"] .hero-badge-card:hover .hero-badge-back {
       filter: drop-shadow(0 16px 30px rgba(20, 30, 48, 0.22));
     }
     [data-theme="light"] .hero-media-glow {
@@ -1004,7 +1193,11 @@
         transform: scaleY(1);
         transition: none;
       }
-      .hero-badge-card {
+      .hero-badge-card,
+      .hero-badge-flip,
+      .hero-badge-face,
+      .hero-badge-back,
+      .hero-badge-sheen {
         transition: none;
       }
       .hero-media-glow {
@@ -2120,43 +2313,81 @@
             <div class="hero-badge" id="hero-badge">
               <div class="hero-badge-strap" id="hero-badge-strap" aria-hidden="true"></div>
               <div class="hero-badge-clip" aria-hidden="true"></div>
-              <div class="hero-badge-card" id="hero-badge-card" role="img" aria-label="Student ID badge — John Bryan Capellan">
-                <div class="hero-badge-face" id="hero-badge-face">
-                  <div class="hero-badge-head">
-                    <span class="hero-badge-logo" aria-hidden="true">~</span>
-                    <span class="hero-badge-school">Student ID</span>
-                    <span class="hero-badge-school-sub">brokeCode05.dev</span>
-                  </div>
-                  <div class="hero-badge-body">
-                    <div class="hero-badge-photo" id="hero-badge-photo">
-                      <img
-                        id="hero-badge-img"
-                        src="img/johnbryan.jpg"
-                        alt="Profile photo"
-                        fetchpriority="high"
-                        draggable="false"
-                        onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
-                      />
-                      <div class="hero-badge-photo-fallback" id="hero-badge-photo-fallback" aria-hidden="true">~/avatar — not found</div>
+              <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip." aria-pressed="false">
+                <div class="hero-badge-flip" id="hero-badge-flip">
+                  <div class="hero-badge-face" id="hero-badge-face">
+                    <div class="hero-badge-head">
+                      <span class="hero-badge-logo" aria-hidden="true">~</span>
+                      <span class="hero-badge-school">Student ID</span>
+                      <span class="hero-badge-school-sub">brokeCode05.dev</span>
                     </div>
-                    <div class="hero-badge-info">
-                      <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
-                      <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
-                      <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
-                      <div class="hero-badge-qr" aria-hidden="true">
-                        <span class="hero-badge-qr-c1"></span>
-                        <span class="hero-badge-qr-c2"></span>
-                        <span class="hero-badge-qr-c3"></span>
+                    <div class="hero-badge-body">
+                      <div class="hero-badge-photo" id="hero-badge-photo">
+                        <img
+                          id="hero-badge-img"
+                          src="img/johnbryan.jpg"
+                          alt="Profile photo"
+                          fetchpriority="high"
+                          draggable="false"
+                          onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
+                        />
+                        <div class="hero-badge-photo-fallback" id="hero-badge-photo-fallback" aria-hidden="true">~/avatar — not found</div>
+                      </div>
+                      <div class="hero-badge-info">
+                        <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
+                        <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
+                        <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
+                        <div class="hero-badge-qr" aria-hidden="true">
+                          <span class="hero-badge-qr-c1"></span>
+                          <span class="hero-badge-qr-c2"></span>
+                          <span class="hero-badge-qr-c3"></span>
+                        </div>
                       </div>
                     </div>
+                    <div class="hero-badge-foot">
+                      <span class="hero-badge-barcode" aria-hidden="true"></span>
+                      <span class="hero-badge-handle">github.com/brokeCode05</span>
+                    </div>
+                    <div class="hero-badge-sheen" aria-hidden="true"></div>
                   </div>
-                  <div class="hero-badge-foot">
-                    <span class="hero-badge-barcode" aria-hidden="true"></span>
-                    <span class="hero-badge-handle">github.com/brokeCode05</span>
+
+                  <div class="hero-badge-back" id="hero-badge-back" aria-hidden="true">
+                    <div class="hero-badge-back-head">
+                      <span class="hero-badge-logo" aria-hidden="true">~</span>
+                      <span class="hero-badge-school">Student ID</span>
+                      <span class="hero-badge-school-sub">brokeCode05.dev</span>
+                    </div>
+                    <div class="hero-badge-back-body">
+                      <div class="hero-badge-scan">
+                        <span class="hero-badge-scan-label">Scan to connect</span>
+                        <img
+                          id="hero-badge-qr-real"
+                          class="hero-badge-qr-real"
+                          alt="QR code — scan to open my portfolio"
+                          loading="lazy"
+                          width="120"
+                          height="120"
+                          draggable="false"
+                          onerror="window._heroBadgeQrError && window._heroBadgeQrError(this)"
+                        />
+                        <div class="hero-badge-qr-fallback" id="hero-badge-qr-fallback" aria-hidden="true"></div>
+                      </div>
+                      <div class="hero-badge-back-info">
+                        <span class="hero-badge-back-name" id="hero-badge-back-name">John Bryan Capellan</span>
+                        <span class="hero-badge-back-links">
+                          <a class="hero-badge-back-link" id="hero-badge-back-email" href="mailto:jhnbryn05@gmail.com">jhnbryn05@gmail.com</a>
+                          <a class="hero-badge-back-link" id="hero-badge-back-github" href="https://github.com/brokeCode05" target="_blank" rel="noopener">github.com/brokeCode05</a>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="hero-badge-back-foot">
+                      <span class="hero-badge-stamp" aria-hidden="true">VERIFIED</span>
+                      <span class="hero-badge-back-id">IT-2024-0842</span>
+                    </div>
                   </div>
-                  <div class="hero-badge-sheen" aria-hidden="true"></div>
                 </div>
               </div>
+              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
             </div>
           </div>
         </div>
@@ -3203,13 +3434,12 @@
       }
     })();
 
-    // ---- Hero: ID badge drop-in + pendulum physics ----
+    // ---- Hero: ID badge — drop-in, mouse tilt, click to flip ----
     (function(){
       var wrap = document.getElementById('hero-badge-wrap');
-      var badge = document.getElementById('hero-badge');
       var card = document.getElementById('hero-badge-card');
-      var face = document.getElementById('hero-badge-face');
-      if (!wrap || !badge || !card) return;
+      var media = document.getElementById('hero-media');
+      if (!wrap || !card) return;
 
       var reducedMotion = window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3223,145 +3453,88 @@
         if (fallback) fallback.style.display = 'flex';
       };
 
+      // Real QR error fallback → decorative pattern
+      window._heroBadgeQrError = function(img) {
+        img.style.display = 'none';
+        var fb = document.getElementById('hero-badge-qr-fallback');
+        if (fb) fb.style.display = 'block';
+      };
+
       // Drop-in entrance (strap unreels via CSS once hero-revealed is added)
       if (reducedMotion) {
         wrap.classList.add('hero-revealed');
-        return; // static badge, no physics
+      } else {
+        requestAnimationFrame(function() {
+          wrap.classList.add('hero-revealed');
+        });
       }
-      requestAnimationFrame(function() {
-        wrap.classList.add('hero-revealed');
+
+      // Point the back-side QR at the live site (graceful fallback if offline)
+      var qr = document.getElementById('hero-badge-qr-real');
+      if (qr) {
+        var site = window.location.origin + window.location.pathname;
+        if (/index\.html$/.test(site)) site = site.replace(/index\.html$/, '');
+        if (!site || site.indexOf('http') !== 0) site = 'https://brokeCode05.github.io/portfolio/';
+        qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=' +
+          encodeURIComponent(site);
+      }
+
+      // ── 3D mouse tilt (fine pointers only; card follows the cursor) ──
+      // The card hangs at a small resting tilt and leans toward the cursor
+      // while hovering the hero. Lerped per-frame for a smooth physical feel.
+      var TILT_X = 4, TILT_Y = -3;  // resting tilt (deg), mirrors the old static pose
+      var curX = TILT_X, curY = TILT_Y;
+      var targetX = TILT_X, targetY = TILT_Y;
+      var tiltRaf = null;
+
+      function applyTilt() {
+        curX += (targetX - curX) * 0.14;
+        curY += (targetY - curY) * 0.14;
+        card.style.transform =
+          'perspective(900px) rotateX(' + curX.toFixed(2) + 'deg) rotateY(' + curY.toFixed(2) + 'deg)';
+        if (Math.abs(targetX - curX) > 0.02 || Math.abs(targetY - curY) > 0.02) {
+          tiltRaf = requestAnimationFrame(applyTilt);
+        } else {
+          tiltRaf = null;
+        }
+      }
+
+      function setTiltTarget(x, y) {
+        targetX = x; targetY = y;
+        if (!tiltRaf) tiltRaf = requestAnimationFrame(applyTilt);
+      }
+
+      if (finePointer && !reducedMotion) {
+        var zone = media || wrap;
+        zone.addEventListener('mousemove', function(e) {
+          var r = card.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+          var nx = (e.clientX - r.left) / r.width - 0.5;   // -0.5..0.5 across the card
+          var ny = (e.clientY - r.top) / r.height - 0.5;
+          // Lean into the cursor: tilt X follows vertical, Y follows horizontal
+          setTiltTarget(TILT_X - ny * 10, TILT_Y + nx * 14);
+        });
+        zone.addEventListener('mouseleave', function() {
+          setTiltTarget(TILT_X, TILT_Y);
+        });
+      }
+
+      // ── Click / tap / keyboard to flip the ID over ──
+      function setFlipped(on) {
+        card.classList.toggle('flipped', on);
+        card.setAttribute('aria-pressed', on ? 'true' : 'false');
+        card.setAttribute('aria-label',
+          (on ? 'Student ID badge — back side. ' : 'Student ID badge — ') +
+          'Click to flip.');
+      }
+      card.addEventListener('click', function() {
+        setFlipped(!card.classList.contains('flipped'));
       });
-
-      // ── Damped pendulum around the strap hook ──
-      var DEG = Math.PI / 180;
-      var theta = 0;      // angle from vertical (radians)
-      var omega = 0;      // angular velocity (rad/s)
-      var G = 1600;       // effective gravity (px/s²)
-      var L = 150;        // pendulum length (px) — updated on measure
-      var damping = 1.35; // air resistance
-      var maxSwing = 70 * DEG;
-      // Static 3D tilt of the card face (mirrors the CSS on .hero-badge-face)
-      var TILT_X = 4, TILT_Y = -3;
-      var dragging = false;
-      var raf = null;
-      var lastT = 0, lastTheta = 0, lastDt = 0;
-
-      function measure() {
-        var strap = document.getElementById('hero-badge-strap');
-        var sh = strap ? strap.getBoundingClientRect().height : 96;
-        var ch = card.getBoundingClientRect().height || 260;
-        L = Math.max(80, sh + ch / 2);
-      }
-
-      function render() {
-        badge.style.transform = 'rotate(' + (theta / DEG) + 'deg)';
-        card.style.transform = 'rotate(' + (-theta / DEG) + 'deg)';
-        // Physical 3D feel: the card tilts slightly into the swing
-        if (face) {
-          var tilt = Math.max(-6, Math.min(6, omega * 1.4));
-          face.style.transform =
-            'perspective(900px) rotateX(' + (TILT_X + tilt * 0.25).toFixed(2) + 'deg) rotateY(' +
-            (TILT_Y + tilt).toFixed(2) + 'deg)';
-        }
-      }
-
-      function settle() {
-        if (Math.abs(theta) < 1.5 * DEG && Math.abs(omega) < 0.02) {
-          theta = 0; omega = 0;
-          render();
-          raf = null;
-          return true;
-        }
-        return false;
-      }
-
-      function step() {
-        if (dragging) { raf = requestAnimationFrame(step); return; }
-        var dt = Math.min(0.032, (performance.now() - lastT) / 1000 || 1 / 60);
-        lastT = performance.now();
-        var accel = -(G / L) * Math.sin(theta) - damping * omega;
-        omega += accel * dt;
-        theta += omega * dt;
-        theta = Math.max(-maxSwing, Math.min(maxSwing, theta));
-        render();
-        if (settle()) return;
-        raf = requestAnimationFrame(step);
-      }
-
-      function kickStart() {
-        // Gentle entrance sway after the drop-in
-        omega = 2.2; theta = 8 * DEG;
-        measure();
-        render();
-        lastT = performance.now();
-        raf = requestAnimationFrame(step);
-      }
-
-      // Keep pendulum length accurate across responsive widths
-      window.addEventListener('resize', measure);
-
-      // ── Drag (fine pointers only; touch = static badge) ──
-      if (finePointer) {
-        card.addEventListener('pointerdown', function(e) {
-          if (reducedMotion) return;
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          dragging = true;
-          card.classList.add('badge-grabbed');
-          measure();
-          lastTheta = theta; lastDt = performance.now();
-          if (raf) { cancelAnimationFrame(raf); raf = null; }
-          card.setPointerCapture && card.setPointerCapture(e.pointerId);
-        });
-        card.addEventListener('pointermove', function(e) {
-          if (!dragging) return;
-          var r = badge.getBoundingClientRect();
-          var px = e.clientX - r.left - r.width / 2;
-          var py = e.clientY - r.top;
-          var target = Math.atan2(px, py); // 0 = straight down
-          target = Math.max(-maxSwing, Math.min(maxSwing, target));
-          var now = performance.now();
-          var dt = Math.max(8, now - lastDt) / 1000;
-          omega = (target - lastTheta) / dt;
-          if (omega > 6) omega = 6;      // clamp wild flicks
-          if (omega < -6) omega = -6;
-          lastTheta = target; lastDt = now;
-          theta = target;
-          render();
-        });
-        function endDrag(e) {
-          if (!dragging) return;
-          dragging = false;
-          card.classList.remove('badge-grabbed');
-          lastT = performance.now();
-          raf = requestAnimationFrame(step);
+          setFlipped(!card.classList.contains('flipped'));
         }
-        card.addEventListener('pointerup', endDrag);
-        card.addEventListener('pointercancel', endDrag);
-      }
-
-      // ── Touch: tap to give a little sway (no drag) ──
-      if (!finePointer && !reducedMotion) {
-        card.addEventListener('click', function() {
-          if (dragging) return;
-          omega = 2.6; theta = 10 * DEG;
-          measure();
-          render();
-          lastT = performance.now();
-          if (raf) { cancelAnimationFrame(raf); raf = null; }
-          raf = requestAnimationFrame(step);
-        });
-      }
-
-      // Drop-in completes → start physics (initial sway + gravity hang).
-      // If the tab is hidden (user already scrolled to another section),
-      // defer until it's visible again so the sway isn't wasted off-screen.
-      function scheduleKick() {
-        if (document.hidden) { lastT = performance.now(); return; }
-        kickStart();
-      }
-      setTimeout(scheduleKick, 900);
-      document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && !raf) scheduleKick();
       });
     })();
   </script>
@@ -3502,10 +3675,15 @@
         if (badgeRole) badgeRole.textContent = data.hero.status || data.hero.badge || 'Information Technology Student';
         var badgeIdno = document.getElementById('hero-badge-idno');
         if (badgeIdno) badgeIdno.textContent = data.hero.idNumber || 'IT-2024-0842';
+        var personName = data.hero.name || 'John Bryan Capellan';
         var badgeCardEl = document.getElementById('hero-badge-card');
         if (badgeCardEl) {
-          badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + (data.hero.name || 'John Bryan Capellan'));
+          badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + personName + '. Click to flip.');
         }
+        var badgeBackName = document.getElementById('hero-badge-back-name');
+        if (badgeBackName) badgeBackName.textContent = personName;
+        var badgeBackId = document.querySelector('.hero-badge-back-id');
+        if (badgeBackId) badgeBackId.textContent = data.hero.idNumber || 'IT-2024-0842';
         var badgeFallback = document.getElementById('hero-badge-photo-fallback');
         if (badgeFallback) badgeFallback.style.display = 'none';
 
