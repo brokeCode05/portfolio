@@ -2203,8 +2203,8 @@
                   <div class="hero-badge-face" id="hero-badge-face">
                     <div class="hero-badge-head">
                       <span class="hero-badge-logo" aria-hidden="true">~</span>
-                      <span class="hero-badge-school">Student ID</span>
-                      <span class="hero-badge-school-sub">brokeCode05.dev</span>
+                      <span class="hero-badge-school" id="hero-badge-school">Student ID</span>
+                      <span class="hero-badge-school-sub" id="hero-badge-school-sub">brokeCode05.dev</span>
                     </div>
                     <div class="hero-badge-body">
                       <div class="hero-badge-photo" id="hero-badge-photo">
@@ -2239,8 +2239,8 @@
                   <div class="hero-badge-back" id="hero-badge-back" aria-hidden="true">
                     <div class="hero-badge-back-head">
                       <span class="hero-badge-logo" aria-hidden="true">~</span>
-                      <span class="hero-badge-school">Student ID</span>
-                      <span class="hero-badge-school-sub">brokeCode05.dev</span>
+                      <span class="hero-badge-school" id="hero-badge-back-school">Student ID</span>
+                      <span class="hero-badge-school-sub" id="hero-badge-back-school-sub">brokeCode05.dev</span>
                     </div>
                     <div class="hero-badge-back-body">
                       <div class="hero-badge-scan">
@@ -3424,7 +3424,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260805n"></script>
+  <script src="js/portfolio-data.js?v=20260805o"></script>
   <script src="js/ui-upgrade.js?v=20260805i" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3565,6 +3565,17 @@
         }
         var badgeBackName = document.getElementById('hero-badge-back-name');
         if (badgeBackName) badgeBackName.textContent = personName;
+        // Badge header (front + back) — admin-editable school title/subtitle
+        var schoolTitle = data.hero.schoolTitle || 'Student ID';
+        var schoolSub = data.hero.schoolSub || 'brokeCode05.dev';
+        var badgeSchool = document.getElementById('hero-badge-school');
+        if (badgeSchool) badgeSchool.textContent = schoolTitle;
+        var badgeSchoolSub = document.getElementById('hero-badge-school-sub');
+        if (badgeSchoolSub) badgeSchoolSub.textContent = schoolSub;
+        var badgeBackSchool = document.getElementById('hero-badge-back-school');
+        if (badgeBackSchool) badgeBackSchool.textContent = schoolTitle;
+        var badgeBackSchoolSub = document.getElementById('hero-badge-back-school-sub');
+        if (badgeBackSchoolSub) badgeBackSchoolSub.textContent = schoolSub;
         var badgeBackId = document.querySelector('.hero-badge-back-id');
         if (badgeBackId) badgeBackId.textContent = data.hero.idNumber || 'IT-2024-0842';
         var badgeFallback = document.getElementById('hero-badge-photo-fallback');

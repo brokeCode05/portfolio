@@ -226,6 +226,16 @@
             <input type="url" id="hero-qrlink" placeholder="https://github.com/brokeCode05" />
             <small class="form-hint">What the scannable QR on the ID back opens. Any URL works — GitHub, LinkedIn, etc.</small>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Badge Header Title (top of ID)</label>
+              <input type="text" id="hero-school" placeholder="Student ID" />
+            </div>
+            <div class="form-group">
+              <label>Badge Header Subtitle (top of ID)</label>
+              <input type="text" id="hero-school-sub" placeholder="brokeCode05.dev" />
+            </div>
+          </div>
           <div class="form-group">
             <label>Status Text</label>
             <input type="text" id="hero-status" />
@@ -256,8 +266,8 @@
               <div class="idp-card">
                 <div class="idp-head">
                   <span class="idp-logo" aria-hidden="true">~</span>
-                  <span class="idp-school">Student ID</span>
-                  <span class="idp-sub">brokeCode05.dev</span>
+                  <span class="idp-school" id="idp-school">Student ID</span>
+                  <span class="idp-sub" id="idp-sub">brokeCode05.dev</span>
                 </div>
                 <div class="idp-body">
                   <div class="idp-scan">
@@ -583,7 +593,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260803"></script>
+<script src="js/portfolio-data.js?v=20260804"></script>
 <script>
 (function(){
   'use strict';
@@ -1436,6 +1446,8 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-idno').value = d.hero.idNumber || '';
     document.getElementById('hero-qrlink').value = d.hero.qrLink || '';
+    document.getElementById('hero-school').value = d.hero.schoolTitle || '';
+    document.getElementById('hero-school-sub').value = d.hero.schoolSub || '';
     document.getElementById('hero-status').value = d.hero.status || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
@@ -1459,6 +1471,8 @@ CREATE POLICY "Admin update portfolio_data"
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
     d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
+    d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
+    d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
     d.hero.status = document.getElementById('hero-status').value;
     d.hero.title = document.getElementById('hero-title').value;
     d.hero.description = document.getElementById('hero-desc').value;
@@ -1467,7 +1481,7 @@ CREATE POLICY "Admin update portfolio_data"
   });
 
   // Live ID-back preview — refresh as hero fields are typed
-  ['hero-name', 'hero-idno', 'hero-qrlink'].forEach(function(id) {
+  ['hero-name', 'hero-idno', 'hero-qrlink', 'hero-school', 'hero-school-sub'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', updateIdPreview);
   });
@@ -1501,6 +1515,8 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
           d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
+          d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
+          d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
           d.hero.status = document.getElementById('hero-status').value;
           d.hero.title = document.getElementById('hero-title').value;
           d.hero.description = document.getElementById('hero-desc').value;
@@ -1525,6 +1541,8 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
       d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
+      d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
+      d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
       d.hero.status = document.getElementById('hero-status').value;
       d.hero.title = document.getElementById('hero-title').value;
       d.hero.description = document.getElementById('hero-desc').value;
@@ -1548,7 +1566,15 @@ CREATE POLICY "Admin update portfolio_data"
     var scanLabelEl = document.getElementById('idp-scan-label');
     var qrTargetEl = document.getElementById('idp-qr-target');
     var linksEl = document.getElementById('idp-links');
+    var schoolEl = document.getElementById('idp-school');
+    var schoolSubEl = document.getElementById('idp-sub');
     if (!nameEl || !idEl || !scanLabelEl || !qrTargetEl || !linksEl) return;
+
+    // Badge header (live from the form)
+    var schoolInput = document.getElementById('hero-school');
+    var schoolSubInput = document.getElementById('hero-school-sub');
+    if (schoolEl) schoolEl.textContent = (schoolInput && schoolInput.value) || 'Student ID';
+    if (schoolSubEl) schoolSubEl.textContent = (schoolSubInput && schoolSubInput.value) || 'brokeCode05.dev';
 
     // Hero fields (live from the form)
     var name = document.getElementById('hero-name').value || 'John Bryan Capellan';
