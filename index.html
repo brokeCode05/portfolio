@@ -503,7 +503,7 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       margin: 0 auto;
       display: flex;
       justify-content: center;
@@ -517,12 +517,14 @@
       opacity: 1;
       transform: translateY(0);
     }
-    .hero-badge {
+    /* NOTE: scoped to #hero-badge so the left badge-text pill (.hero-badge in
+       style.min.css) keeps its inline-block pill styling */
+    #hero-badge {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 260px;
+      width: 320px;
     }
     /* The PVC card shell */
     .hero-badge-card {
@@ -622,8 +624,8 @@
     .hero-badge-head {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 14px 8px;
+      gap: 9px;
+      padding: 12px 17px 9px;
       position: relative;
       z-index: 2;
     }
@@ -631,20 +633,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
       background: linear-gradient(160deg, #101826, #1F2B3E);
       color: var(--color-accent);
       font-family: var(--font-code);
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       flex-shrink: 0;
       box-shadow: 0 1px 2px rgba(20, 30, 48, 0.25);
     }
     .hero-badge-school {
       font-family: var(--font-code);
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -654,15 +656,15 @@
     .hero-badge-school-sub {
       margin-left: auto;
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 9.5px;
       color: #64748B;
       letter-spacing: 0.04em;
     }
     /* Card body — photo + identity */
     .hero-badge-body {
       display: flex;
-      gap: 12px;
-      padding: 4px 14px 10px;
+      gap: 15px;
+      padding: 5px 17px 12px;
       position: relative;
       z-index: 2;
     }
@@ -671,7 +673,7 @@
       width: 38%;
       aspect-ratio: 3 / 3.6;
       flex-shrink: 0;
-      border-radius: 8px;
+      border-radius: 9px;
       overflow: hidden;
       background-color: #D8DEE7;
       border: 2px solid #FFFFFF;
@@ -697,7 +699,7 @@
       padding: 4px;
       text-align: center;
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 9px;
       color: #64748B;
       background-color: #D8DEE7;
     }
@@ -707,13 +709,13 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 3px;
+      gap: 4px;
       text-align: left;
     }
     .hero-badge-name {
       display: block;
       font-family: var(--font-heading);
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 700;
       color: #0F172A;
       line-height: 1.2;
@@ -722,7 +724,7 @@
     .hero-badge-role {
       display: block;
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       color: #475569;
       line-height: 1.35;
     }
@@ -730,7 +732,7 @@
       display: block;
       margin-top: 2px;
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       color: #64748B;
       letter-spacing: 0.05em;
     }
@@ -741,22 +743,22 @@
     /* QR code (decorative) */
     .hero-badge-qr {
       position: relative;
-      width: 26px;
-      height: 26px;
-      margin-top: 5px;
+      width: 32px;
+      height: 32px;
+      margin-top: 6px;
       flex-shrink: 0;
       background:
         conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
-      background-size: 4px 4px;
-      border-radius: 2px;
+      background-size: 5px 5px;
+      border-radius: 3px;
       box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
     }
     .hero-badge-qr .hero-badge-qr-c1,
     .hero-badge-qr .hero-badge-qr-c2,
     .hero-badge-qr .hero-badge-qr-c3 {
       position: absolute;
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       background: #FFFFFF;
       box-shadow: inset 0 0 0 2px #0F172A;
     }
@@ -767,15 +769,15 @@
     .hero-badge-foot {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 7px 14px 9px;
+      gap: 12px;
+      padding: 9px 17px 11px;
       border-top: 1px solid rgba(20, 30, 48, 0.09);
       position: relative;
       z-index: 2;
     }
     .hero-badge-barcode {
       flex: 1;
-      height: 14px;
+      height: 17px;
       background: repeating-linear-gradient(
         90deg,
         #1E293B 0 2px,
@@ -791,7 +793,7 @@
     }
     .hero-badge-handle {
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       color: #64748B;
       white-space: nowrap;
       letter-spacing: 0.03em;
@@ -801,8 +803,8 @@
     .hero-badge-back-head {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 14px 8px;
+      gap: 9px;
+      padding: 14px 17px 9px;
       position: relative;
       z-index: 2;
     }
@@ -810,8 +812,8 @@
       flex: 1;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 4px 14px 10px;
+      gap: 15px;
+      padding: 5px 17px 12px;
       position: relative;
       z-index: 2;
     }
@@ -819,12 +821,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       flex-shrink: 0;
     }
     .hero-badge-scan-label {
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -832,21 +834,21 @@
     }
     .hero-badge-qr-real {
       display: block;
-      width: 104px;
-      height: 104px;
-      padding: 6px;
-      border-radius: 6px;
+      width: 128px;
+      height: 128px;
+      padding: 7px;
+      border-radius: 7px;
       background: #FFFFFF;
       box-shadow: 0 2px 6px rgba(20, 30, 48, 0.18);
     }
     .hero-badge-qr-fallback {
       display: none;
-      width: 104px;
-      height: 104px;
-      border-radius: 6px;
+      width: 128px;
+      height: 128px;
+      border-radius: 7px;
       background:
         conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
-      background-size: 6px 6px;
+      background-size: 7px 7px;
       box-shadow: 0 2px 6px rgba(20, 30, 48, 0.18);
     }
     .hero-badge-back-info {
@@ -854,11 +856,11 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
     .hero-badge-back-name {
       font-family: var(--font-heading);
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 700;
       color: #0F172A;
       line-height: 1.2;
@@ -866,11 +868,11 @@
     .hero-badge-back-links {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
     .hero-badge-back-link {
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       color: #475569;
       text-decoration: none;
       overflow: hidden;
@@ -886,27 +888,27 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 7px 14px 9px;
+      padding: 9px 17px 11px;
       border-top: 1px solid rgba(20, 30, 48, 0.09);
       position: relative;
       z-index: 2;
     }
     .hero-badge-stamp {
       font-family: var(--font-code);
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--color-accent-dim);
       border: 1.5px solid var(--color-accent-dim);
       border-radius: 4px;
-      padding: 2px 7px;
+      padding: 2px 8px;
       opacity: 0.85;
       transform: rotate(-3deg);
     }
     .hero-badge-back-id {
       font-family: var(--font-code);
-      font-size: 8px;
+      font-size: 10px;
       color: #64748B;
       letter-spacing: 0.05em;
     }
@@ -948,94 +950,15 @@
       opacity: 0.04;
     }
 
-    /* ---- Decorative Developer Elements ---- */
-    .hero-deco {
-      position: absolute;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.18;
-      font-family: var(--font-code);
-      color: var(--color-text-secondary);
-      animation: hero-deco-float 8s ease-in-out infinite;
-      will-change: transform;
-    }
-    .hero-deco:nth-of-type(1) { animation-delay: 0s; }
-    .hero-deco:nth-of-type(2) { animation-delay: -2s; }
-    .hero-deco:nth-of-type(3) { animation-delay: -4s; }
-    .hero-deco:nth-of-type(4) { animation-delay: -1.5s; }
-    .hero-deco:nth-of-type(5) { animation-delay: -5.5s; }
-    @keyframes hero-deco-float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33% { transform: translateY(-4px) rotate(1deg); }
-      66% { transform: translateY(3px) rotate(-1deg); }
-    }
-    /* Individual decorations */
-    .hero-deco-terminal {
-      top: 4%;
-      right: 6%;
-      font-size: 9px;
-      padding: 6px 10px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      line-height: 1.6;
-      white-space: pre;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .hero-deco-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      background: var(--color-surface);
-      color: var(--color-accent);
-      font-size: 12px;
-    }
-    .hero-deco-shield {
-      bottom: 8%;
-      left: 4%;
-    }
-    .hero-deco-git {
-      top: 50%;
-      right: -2%;
-    }
-    .hero-deco-code {
-      bottom: 18%;
-      right: 8%;
-      font-size: 9px;
-      padding: 5px 8px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      line-height: 1.6;
-      white-space: pre;
-    }
-    .hero-deco-nodes {
-      top: 38%;
-      left: 2%;
-      display: flex;
-      gap: 3px;
-    }
-    .hero-deco-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      opacity: 0.4;
-    }
-    .hero-deco-dot:nth-child(2) { opacity: 0.6; }
-    .hero-deco-dot:nth-child(3) { opacity: 0.3; }
+    /* (Removed the floating hero-deco decorations — redundant around the ID) */
 
     /* Responsive */
     @media (max-width: 1024px) {
       .hero-layout {
         gap: var(--space-2xl);
       }
-      .hero-badge {
-        width: 210px;
+      #hero-badge {
+        width: 290px;
       }
     }
     @media (max-width: 900px) {
@@ -1058,17 +981,13 @@
         order: -1;
         padding: 10px 0;
       }
-      .hero-badge {
-        width: 240px;
-      }
-      /* Hide decorative elements on mobile */
-      .hero-deco {
-        display: none;
+      #hero-badge {
+        width: 290px;
       }
     }
     @media (max-width: 480px) {
-      .hero-badge {
-        width: 220px;
+      #hero-badge {
+        width: 260px;
       }
       .hero-layout {
         gap: var(--space-xl);
@@ -1088,9 +1007,6 @@
         transition: none;
       }
       .hero-media-glow {
-        animation: none;
-      }
-      .hero-deco {
         animation: none;
       }
     }
@@ -2170,34 +2086,10 @@
           <div class="hero-media-bg" aria-hidden="true"></div>
           <div class="hero-media-grid" aria-hidden="true"></div>
 
-          <!-- Decorative floating elements -->
-          <div class="hero-deco hero-deco-terminal" aria-hidden="true">
-            <span style="color:var(--color-accent)">~</span> cat /etc/profile
-            <span style="display:block;color:var(--color-text-secondary)">student@home-lab:~$</span>
-          </div>
-          <div class="hero-deco hero-deco-shield hero-deco-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <div class="hero-deco hero-deco-git hero-deco-icon" aria-hidden="true">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-            </svg>
-          </div>
-          <div class="hero-deco hero-deco-code" aria-hidden="true">
-            <span style="color:var(--color-accent)">def</span> <span style="color:var(--color-text-primary)">build</span>():<br/>
-            <span style="opacity:0.5">&nbsp;&nbsp;return "infra"</span>
-          </div>
-          <div class="hero-deco hero-deco-nodes" aria-hidden="true">
-            <span class="hero-deco-dot"></span>
-            <span class="hero-deco-dot"></span>
-            <span class="hero-deco-dot"></span>
-          </div>
-
           <!-- Interactive student ID badge -->
           <div class="hero-badge-wrap" id="hero-badge-wrap">
-            <div class="hero-badge" id="hero-badge">
+            <!-- class intentionally omitted: style.min.css .hero-badge is the left pill; the ID wrapper is styled via #hero-badge -->
+            <div id="hero-badge">
               <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip." aria-pressed="false">
                 <div class="hero-badge-flip" id="hero-badge-flip">
                   <div class="hero-badge-face" id="hero-badge-face">
