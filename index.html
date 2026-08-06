@@ -2142,7 +2142,7 @@
                     <div class="hero-badge-info">
                       <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
                       <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
-                      <span class="hero-badge-idno">ID No. <strong>IT-2024-0842</strong></span>
+                      <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
                       <div class="hero-badge-qr" aria-hidden="true">
                         <span class="hero-badge-qr-c1"></span>
                         <span class="hero-badge-qr-c2"></span>
@@ -3368,7 +3368,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260805l"></script>
+  <script src="js/portfolio-data.js?v=20260805m"></script>
   <script src="js/ui-upgrade.js?v=20260805i" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3500,6 +3500,8 @@
         if (badgeName) badgeName.textContent = data.hero.name || 'John Bryan Capellan';
         var badgeRole = document.getElementById('hero-badge-role');
         if (badgeRole) badgeRole.textContent = data.hero.status || data.hero.badge || 'Information Technology Student';
+        var badgeIdno = document.getElementById('hero-badge-idno');
+        if (badgeIdno) badgeIdno.textContent = data.hero.idNumber || 'IT-2024-0842';
         var badgeCardEl = document.getElementById('hero-badge-card');
         if (badgeCardEl) {
           badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + (data.hero.name || 'John Bryan Capellan'));
