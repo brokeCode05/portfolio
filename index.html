@@ -1637,31 +1637,6 @@
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
     }
-    .gh-terminal {
-      max-width: 100%;
-    }
-    .gh-terminal .terminal-body {
-      padding: var(--space-md, 1rem);
-    }
-    .gh-prompt {
-      margin: 0 0 var(--space-md, 1rem);
-      font-family: var(--font-code, monospace);
-      font-size: var(--text-xs, 0.75rem);
-      color: var(--color-text-secondary, #A0A5B0);
-    }
-    .gh-prompt .prompt {
-      color: var(--color-accent, #4ADE80);
-      font-weight: 600;
-    }
-    .gh-prompt .gh-cursor {
-      display: inline-block;
-      width: 0.55em;
-      height: 1.05em;
-      margin-left: 2px;
-      background-color: var(--color-accent, #4ADE80);
-      vertical-align: text-bottom;
-      animation: blink 1s step-end infinite;
-    }
     .terminal-window {
       max-width: 100%;
     }
@@ -1682,7 +1657,7 @@
     }
   </style>
   <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805q" />
+  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260805r" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
@@ -2025,16 +2000,9 @@
         <p>Open source activity and contributions.</p>
       </div>
       <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
-        <div class="terminal-window gh-terminal">
-          <div class="terminal-header">
-            <span class="terminal-dot"></span>
-            <span class="terminal-dot"></span>
-            <span class="terminal-dot"></span>
-            <span class="terminal-title">~/github — zsh</span>
-          </div>
-          <div class="terminal-body">
-            <p class="gh-prompt" aria-hidden="true"><span class="prompt">$</span> <span id="gh-cmd">gh stats --user=brokeCode05</span><span class="gh-cursor" id="gh-cursor"></span></p>
-            <div class="gh-stats-grid" id="gh-stats-container">
+        <div class="github-card gh-stats-card">
+          <h3 class="github-card-title">Stats</h3>
+          <div class="gh-stats-grid" id="gh-stats-container">
               <div class="gh-stat-item">
                 <span class="gh-stat-value" id="gh-repos">—</span>
                 <span class="gh-stat-label">Repos</span>
@@ -2052,7 +2020,6 @@
                 <span class="gh-stat-label">Stars</span>
               </div>
             </div>
-          </div>
         </div>
         <div class="github-card">
           <h3 class="github-card-title">Streak</h3>
@@ -2355,31 +2322,10 @@
         if (el) el.src = ghImages.graph[t];
       }
 
-      // ---- GitHub stats typewriter (matches About/Contact terminals) ----
-      var ghTyped = false;
-      var ghTypeObserver = null;
-      var ghTypeTimer = null;
-      var ghTypePoll = null;
-
-      function typeGhPrompt() {
-        var cmdEl = document.getElementById('gh-cmd');
-        if (!cmdEl) return;
-        var full = cmdEl.textContent;
-        var reduced = window.matchMedia &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reduced) return;
-        cmdEl.textContent = '';
-        var i = 0;
-        ghTypeTimer = setInterval(function() {
-          i++;
-          cmdEl.textContent = full.substring(0, i);
-          if (i >= full.length) {
-            clearInterval(ghTypeTimer);
-            ghTypeTimer = null;
-            typeGhValues();
-          }
-        }, 26);
-      }
+      // ---- GitHub stats count-up (fires when the card scrolls into view) ----
+      var ghCounted = false;
+      var ghCountObserver = null;
+      var ghCountPoll = null;
 
       function typeGhValues() {
         var order = ['gh-repos', 'gh-followers', 'gh-following', 'gh-stars'];
@@ -2435,32 +2381,31 @@
           if (allLoaded) { countNext(); return; }
           attempts++;
           if (attempts > 40) { countNext(); return; }
-          ghTypePoll = setTimeout(waitForData, 300);
+          ghCountPoll = setTimeout(waitForData, 300);
         }
         waitForData();
       }
 
-      function initGhTypewriter() {
+      function initGhStats() {
         var grid = document.getElementById('gh-stats-container');
         if (!grid) return;
-        if (ghTypeTimer) { clearInterval(ghTypeTimer); ghTypeTimer = null; }
-        if (ghTypePoll) { clearTimeout(ghTypePoll); ghTypePoll = null; }
-        if (ghTyped) return;
+        if (ghCountPoll) { clearTimeout(ghCountPoll); ghCountPoll = null; }
+        if (ghCounted) return;
         var reduced = window.matchMedia &&
           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduced) return;
-        if (ghTypeObserver) ghTypeObserver.disconnect();
+        if (ghCountObserver) ghCountObserver.disconnect();
         if (!('IntersectionObserver' in window)) {
-          ghTyped = true;
-          typeGhPrompt();
+          ghCounted = true;
+          typeGhValues();
           return;
         }
-        ghTypeObserver = new IntersectionObserver(function(entries) {
+        ghCountObserver = new IntersectionObserver(function(entries) {
           entries.forEach(function(en) {
             if (en.isIntersecting) {
-              ghTypeObserver.disconnect();
-              ghTyped = true;
-              typeGhPrompt();
+              ghCountObserver.disconnect();
+              ghCounted = true;
+              typeGhValues();
             }
           });
         }, { threshold: 0.3 });
@@ -2469,7 +2414,7 @@
 
       displayGitHub();
       fetchGitHubStats();
-      initGhTypewriter();
+      initGhStats();
 
       var observer = new MutationObserver(function(m) {
         for (var i = 0; i < m.length; i++) {

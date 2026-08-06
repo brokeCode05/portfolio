@@ -358,8 +358,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 /* Command hint in the corner */
 .github-card::after,
-.github-graph-wrap::after {
-  content: "$ gh --stats";
+.github-graph-wrap::after,
+.gh-stats-card::after {
   position: absolute;
   top: var(--space-sm);
   right: var(--space-md);
@@ -372,8 +372,18 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     transform var(--transition-fast) 0.12s;
   pointer-events: none;
 }
+.github-card::after {
+  content: "$ gh --streak";
+}
+.gh-stats-card::after {
+  content: "$ gh --stats";
+}
 .github-graph-wrap::after {
   content: "$ gh --graph";
+}
+/* Stats tiles sit flush inside the card (the card owns the padding) */
+.gh-stats-card .gh-stats-grid {
+  padding: 0;
 }
 .github-card:hover::after,
 .github-graph-wrap:hover::after,
