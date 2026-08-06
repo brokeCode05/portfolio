@@ -351,6 +351,9 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   display: inline-block;
   margin-left: 4px;
   color: var(--color-accent);
+  /* don't inherit the title's letter-spacing/uppercase on the caret */
+  letter-spacing: 0;
+  text-transform: none;
   animation: blink 1s step-end infinite;
 }
 /* Command hint in the corner */
