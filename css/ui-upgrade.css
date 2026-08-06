@@ -311,6 +311,82 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     transform 0.16s ease-out;
 }
 
+/* ── GitHub cards: terminal focus frame on hover ─────────────
+   Matches the cert cards — the streak + contribution-graph cards
+   light up like focused terminal windows: accent border glow, a
+   blinking block cursor after the title, and a command hint in the
+   corner (they're live data, not links, so the hint reads as the
+   gh command that powers them). */
+.github-card,
+.github-graph-wrap {
+  position: relative;
+  /* opacity keeps the scroll-reveal fade working */
+  transition: opacity var(--transition-slow),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+.github-card:hover,
+.github-graph-wrap:hover,
+.github-card:focus-visible,
+.github-graph-wrap:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+  transform: translateY(-2px);
+}
+/* Focus keeps the site's clear keyboard ring AND adds the glow */
+.github-card:focus-visible,
+.github-graph-wrap:focus-visible {
+  box-shadow: var(--focus-ring),
+    0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+/* Blinking block cursor after the title, like a caret in a terminal */
+.github-card:hover .github-card-title::after,
+.github-graph-wrap:hover .github-card-title::after,
+.github-card:focus-visible .github-card-title::after,
+.github-graph-wrap:focus-visible .github-card-title::after {
+  content: "█";
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--color-accent);
+  animation: blink 1s step-end infinite;
+}
+/* Command hint in the corner */
+.github-card::after,
+.github-graph-wrap::after {
+  content: "$ gh --stats";
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-md);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast) 0.12s,
+    transform var(--transition-fast) 0.12s;
+  pointer-events: none;
+}
+.github-graph-wrap::after {
+  content: "$ gh --graph";
+}
+.github-card:hover::after,
+.github-graph-wrap:hover::after,
+.github-card:focus-visible::after,
+.github-graph-wrap:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Title brightens to accent while the frame is focused */
+.github-card:hover .github-card-title,
+.github-graph-wrap:hover .github-card-title,
+.github-card:focus-visible .github-card-title,
+.github-graph-wrap:focus-visible .github-card-title {
+  color: var(--color-accent);
+}
+
 /* ════════════════════════════════════════════════════════════
    7. HERO UPGRADES
    ════════════════════════════════════════════════════════════ */
@@ -649,6 +725,25 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     animation: none !important;
   }
   .cert-card-front::after {
+    transition: none !important;
+  }
+  /* GitHub cards: no glow/lift, cursor + hint show statically */
+  .github-card:hover,
+  .github-graph-wrap:hover,
+  .github-card:focus-visible,
+  .github-graph-wrap:focus-visible {
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .github-card:hover .github-card-title::after,
+  .github-graph-wrap:hover .github-card-title::after,
+  .github-card:focus-visible .github-card-title::after,
+  .github-graph-wrap:focus-visible .github-card-title::after {
+    animation: none !important;
+  }
+  .github-card::after,
+  .github-graph-wrap::after {
     transition: none !important;
   }
   /* Timeline: static full line + fully visible markers */
