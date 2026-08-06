@@ -498,7 +498,7 @@
       border-radius: 22px;
     }
 
-    /* ID badge — realistic student ID on a lanyard, 3D tilt + click-to-flip (JS) */
+    /* ID badge — realistic student ID, 3D tilt + click-to-flip (JS) */
     .hero-badge-wrap {
       position: relative;
       z-index: 1;
@@ -517,104 +517,14 @@
       opacity: 1;
       transform: translateY(0);
     }
-    /* Pendulum pivot — rotate around the top-center (the hook) */
     .hero-badge {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 260px;
-      transform-origin: top center;
-      will-change: transform;
     }
-    /* Woven nylon lanyard strap — unreels on entrance */
-    .hero-badge-strap {
-      width: 14px;
-      height: 96px;
-      border-radius: 7px;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          #1E2836 0 4px,
-          #2B3A52 4px 7px,
-          #232E40 7px 11px
-        ),
-        linear-gradient(180deg, #2B3A52, #1A2230);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.35), inset 0 0 3px rgba(255,255,255,0.08);
-      transform-origin: top center;
-      transform: scaleY(0);
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s;
-      position: relative;
-      flex-shrink: 0;
-    }
-    /* Strap weave highlight line */
-    .hero-badge-strap::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      border-radius: 1px;
-      background: rgba(255,255,255,0.14);
-    }
-    /* Strap bottom clip-tab */
-    .hero-badge-strap::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 24px;
-      height: 9px;
-      border-radius: 4px;
-      background: linear-gradient(180deg, #8FA0B5, #5C6B80);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
-    }
-    .hero-badge-wrap.hero-revealed .hero-badge-strap {
-      transform: scaleY(1);
-    }
-    /* Brushed-metal clip below the strap — its tab passes through the
-       card's punch hole so the lanyard reads as physically connected */
-    .hero-badge-clip {
-      width: 34px;
-      height: 14px;
-      margin-top: 5px;
-      border-radius: 4px;
-      background: linear-gradient(180deg, #C9D2DC 0%, #8A97A8 55%, #67748A 100%);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.5);
-      position: relative;
-      z-index: 5;
-      flex-shrink: 0;
-    }
-    .hero-badge-clip::before {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 14px;
-      height: 7px;
-      border-radius: 3px;
-      background: #5A6B80;
-      box-shadow: inset 0 1px 1px rgba(0,0,0,0.35);
-    }
-    /* Downward metal tab that dips into the card's punch hole */
-    .hero-badge-clip::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 10px;
-      height: 12px;
-      margin-top: -1px;
-      border-radius: 0 0 3px 3px;
-      background: linear-gradient(180deg, #8A97A8 0%, #5C6B80 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
-    }
-    /* The PVC card shell — counter-rotates in JS to stay upright */
+    /* The PVC card shell */
     .hero-badge-card {
       position: relative;
       width: 100%;
@@ -686,22 +596,6 @@
     }
     .hero-badge-card:hover .hero-badge-back {
       filter: drop-shadow(0 18px 34px rgba(0,0,0,0.42));
-    }
-    /* Punch hole at the top (lanyard loop) — sized so the clip tab sits in it */
-    .hero-badge-face::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #6B7A90 0%, #AEB9C6 45%, #E7EBF0 75%);
-      box-shadow:
-        inset 0 2px 4px rgba(20, 30, 48, 0.45),
-        0 1px 0 rgba(255,255,255,0.8);
-      z-index: 3;
     }
     /* Plastic sheen sweep — glides across on hover (reduced-motion disables) */
     .hero-badge-sheen {
@@ -1176,9 +1070,6 @@
       .hero-badge {
         width: 220px;
       }
-      .hero-badge-strap {
-        height: 64px;
-      }
       .hero-layout {
         gap: var(--space-xl);
       }
@@ -1187,10 +1078,6 @@
       .hero-badge-wrap {
         opacity: 1;
         transform: none;
-        transition: none;
-      }
-      .hero-badge-strap {
-        transform: scaleY(1);
         transition: none;
       }
       .hero-badge-card,
@@ -2308,11 +2195,9 @@
             <span class="hero-deco-dot"></span>
           </div>
 
-          <!-- Interactive student ID badge on a lanyard -->
+          <!-- Interactive student ID badge -->
           <div class="hero-badge-wrap" id="hero-badge-wrap">
             <div class="hero-badge" id="hero-badge">
-              <div class="hero-badge-strap" id="hero-badge-strap" aria-hidden="true"></div>
-              <div class="hero-badge-clip" aria-hidden="true"></div>
               <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip." aria-pressed="false">
                 <div class="hero-badge-flip" id="hero-badge-flip">
                   <div class="hero-badge-face" id="hero-badge-face">
