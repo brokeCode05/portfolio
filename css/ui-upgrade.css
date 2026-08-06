@@ -249,11 +249,12 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
-/* Focus keeps the site's clear keyboard ring AND adds the glow */
+/* Focus keeps the site's clear keyboard ring AND adds the glow + lift */
 .cert-card:focus-visible {
   border-color: var(--color-accent);
   box-shadow: var(--focus-ring),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  transform: translateY(-2px);
 }
 .cert-card-front {
   position: relative;
@@ -299,10 +300,10 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 
 /* Cursor tilt stays on the outer card, so tilt + focus frame compose:
-   the card tilts toward the cursor and lights up like a focused
-   terminal window at the same time. */
+   the card tilts toward the cursor, lifts, and lights up like a
+   focused terminal window at the same time. */
 .certs-grid .cert-card[data-reveal].revealed:hover {
-  transform: translateY(0) scale(1) perspective(800px)
+  transform: translateY(-2px) scale(1) perspective(800px)
     rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: border-color var(--transition-fast),
     box-shadow var(--transition-base),
@@ -640,6 +641,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .cert-card:hover,
   .cert-card:focus-visible {
     box-shadow: none !important;
+    transform: none !important;
     transition: none !important;
   }
   .cert-card:hover .cert-card-title::after,
