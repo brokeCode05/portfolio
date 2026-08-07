@@ -1753,7 +1753,7 @@
       z-index: 300;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
     }
@@ -1775,6 +1775,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      /* Fades in/out with the backdrop so the card never snaps away. */
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .idzoom-overlay.open ~ .idzoom-modal {
       opacity: 1;
@@ -1845,12 +1847,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: idzoom-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: idzoom-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
+    /* Entrance: the card rises, overshoots, and settles flat — a soft
+       "pick it up and set it down" feel instead of a hard pop. */
     @keyframes idzoom-pop {
-      0%   { opacity: 0; transform: scale(0.62) translateY(18px); }
-      60%  { opacity: 1; transform: scale(1.04) translateY(-3px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+      0%   { opacity: 0; transform: scale(0.72) translateY(22px) rotate(1.5deg); }
+      55%  { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(-0.5deg); }
+      100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+    }
+    /* Exit: the card shrinks away while the backdrop fades — mirrors the pop. */
+    .idzoom-modal.closing .idzoom-stage {
+      animation: idzoom-out 0.22s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+    }
+    @keyframes idzoom-out {
+      0%   { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.7) translateY(14px) rotate(-1deg); }
     }
     .idzoom-cap {
       display: flex;
@@ -1858,6 +1870,17 @@
       justify-content: center;
       gap: 0.75rem;
       margin-top: 1.1rem;
+      /* The caption eases in just after the card lands. */
+      animation: idzoom-cap-in 0.35s ease 0.12s both;
+    }
+    @keyframes idzoom-cap-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .idzoom-modal.closing .idzoom-cap {
+      animation: none;
+      opacity: 0;
+      transition: opacity 0.18s ease;
     }
     .idzoom-hint {
       font-family: var(--font-code);
@@ -1890,7 +1913,8 @@
       .idzoom-body .hero-badge-qr-real { width: 120px; height: 120px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .idzoom-stage { animation: none; }
+      .idzoom-stage,
+      .idzoom-cap { animation: none; }
     }
 
     /* ===== Certificate Viewer Modal ===== */
@@ -3708,6 +3732,8 @@
       if (expandBtn && idOverlay && idModal && idBody) {
         function openIdZoom() {
           if (idCloseTimer) { clearTimeout(idCloseTimer); idCloseTimer = null; }
+          // Clear any leftover closing state so the fresh stage plays the pop.
+          idModal.classList.remove('closing');
           // Clone the card so the small one keeps its own state and handlers.
           var clone = card.cloneNode(true);
           // Strip ids so the clone never collides with the live card.
@@ -3744,13 +3770,15 @@
         function closeIdZoom() {
           if (idCloseTimer) return;
           idOverlay.classList.remove('open');
+          idModal.classList.add('closing');
           document.body.classList.remove('modal-open');
           idCloseTimer = setTimeout(function() {
             idOverlay.hidden = true;
             idModal.hidden = true;
+            idModal.classList.remove('closing');
             idBody.innerHTML = '';
             idCloseTimer = null;
-          }, 250);
+          }, 330);
           if (expandBtn) expandBtn.focus();
         }
         expandBtn.addEventListener('click', function(e) {
