@@ -46,13 +46,19 @@
 
   <!-- Skills progress bar cards styles -->
   <style>
-    /* ===== Hero: Buttons full clickable area ===== */
-    .hero-actions {
-      flex-wrap: wrap;
-      align-items: center;
-    }
+    /* ===== Hero: Buttons ===== */
     .hero-actions .btn {
+      width: 100%;
       justify-content: center;
+    }
+    @media (min-width: 769px) {
+      .hero-actions {
+        flex-direction: row;
+      }
+      .hero-actions .btn {
+        width: auto;
+        justify-content: center;
+      }
     }
 
     /* ===== Global Button Styles ===== */
@@ -402,26 +408,15 @@
     /* ===== Hero: Premium Portrait ===== */
     .hero-layout {
       display: grid;
-      /* ID-centered: single centered column — the badge is the focal point,
-         identity on top, intro + actions below. */
-      grid-template-columns: minmax(0, 1fr);
-      justify-items: center;
+      /* Split hero: text left, ID right. The card keeps the extra weight
+         (48fr) — the ID is the focal point, text is the support cast. */
+      grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
       align-items: center;
-      text-align: center;
-      gap: var(--space-2xl);
+      gap: var(--space-3xl);
       min-height: 75vh;
     }
     .hero-content {
-      width: 100%;
-    }
-    .hero-close {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-lg);
-    }
-    .hero-close .hero-description {
-      margin-bottom: 0;
+      max-width: 560px;
     }
 
     /* ---- Image Column ---- */
@@ -989,8 +984,20 @@
     }
     @media (max-width: 900px) {
       .hero-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
         gap: var(--space-2xl);
         min-height: auto;
+      }
+      .hero-content {
+        max-width: 100%;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .hero-media {
+        order: -1;
+        padding: 10px 0;
       }
       #hero-badge {
         width: min(390px, 100%);
@@ -2047,7 +2054,7 @@
   <section id="hero" class="hero section" aria-label="Introduction">
     <div class="container">
       <div class="hero-layout">
-        <!-- Top: identity — name + role rotator -->
+        <!-- Left: content -->
         <div class="hero-content">
           <h1 class="hero-title"></h1>
           <div class="hero-roles">
@@ -2055,9 +2062,14 @@
             <span id="hero-roles-text"></span>
             <span class="hero-roles-caret" aria-hidden="true">▊</span>
           </div>
+          <p class="hero-description"></p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">View Projects</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          </div>
         </div>
 
-        <!-- Center: the ID badge — the focal point -->
+        <!-- Right: the ID badge -->
         <div class="hero-media" id="hero-media" data-parallax>
           <!-- Background effects -->
           <div class="hero-media-glow" aria-hidden="true"></div>
@@ -2066,7 +2078,7 @@
 
           <!-- Interactive student ID badge -->
           <div class="hero-badge-wrap" id="hero-badge-wrap">
-            <!-- class intentionally omitted: style.min.css .hero-badge is the left pill; the ID wrapper is styled via #hero-badge -->
+            <!-- ID wrapper styled via #hero-badge; the .hero-badge class in style.min.css is the (unused) pill style -->
             <div id="hero-badge">
               <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip." aria-pressed="false">
                 <div class="hero-badge-flip" id="hero-badge-flip">
@@ -2144,14 +2156,6 @@
           </div>
         </div>
 
-        <!-- Bottom: intro + calls to action -->
-        <div class="hero-close">
-          <p class="hero-description"></p>
-          <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
-          </div>
-        </div>
       </div>
     </div>
     <a href="#about" class="hero-scroll-indicator" aria-label="Scroll to About">
