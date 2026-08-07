@@ -1229,7 +1229,7 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 280px;
+      width: min(280px, 82vw);
       height: 100vh;
       background-color: var(--color-surface);
       border-left: 1px solid var(--color-border);
@@ -1238,10 +1238,18 @@
       transition: transform var(--transition-base);
       display: flex;
       flex-direction: column;
-      padding: calc(var(--nav-height) + var(--space-lg)) var(--space-lg) var(--space-lg);
+      padding: calc(var(--nav-height) + var(--space-lg)) var(--space-lg)
+               calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
       gap: var(--space-xs);
+      overflow-y: auto;
       pointer-events: none;
       visibility: hidden;
+    }
+    /* 100vh is the TALL viewport on phones (it hides behind the URL bar), so
+       the bottom of the menu — and the theme toggle pinned there — ended up
+       off-screen. 100dvh matches the visible area instead. */
+    @supports (height: 100dvh) {
+      .nav-menu-mobile { height: 100dvh; }
     }
     .nav-menu-mobile.open {
       transform: translateX(0);
@@ -1288,9 +1296,54 @@
       font-size: var(--text-sm);
       font-weight: 500;
     }
+    .nav-menu-mobile-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xs);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .nav-menu-mobile-title {
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+    }
+    .nav-menu-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), color var(--transition-fast),
+                  background-color var(--transition-fast);
+    }
+    .nav-menu-close:hover {
+      color: var(--color-text-primary);
+      border-color: var(--color-border-hover);
+      background-color: var(--color-surface-hover);
+    }
     @media (max-width: 768px) {
       .navbar-links { display: none; }
       .hamburger { display: flex; }
+      /* Keep the logo + hamburger (X) above the menu overlay so the close
+         control stays visible and clickable while the menu is open. */
+      .navbar-inner {
+        position: relative;
+        z-index: 100;
+      }
     }
     [data-theme="light"] .nav-overlay {
       background-color: rgba(0, 0, 0, 0.3);
@@ -2326,6 +2379,10 @@
     <!-- Mobile menu overlay + panel -->
     <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
     <div class="nav-menu-mobile" id="nav-menu-mobile" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <div class="nav-menu-mobile-head">
+        <span class="nav-menu-mobile-title">Menu</span>
+        <button type="button" class="nav-menu-close" id="nav-menu-close" aria-label="Close menu">&times;</button>
+      </div>
       <a href="#about" class="nav-link">About</a>
       <a href="#skills" class="nav-link">Skills</a>
       <a href="#projects" class="nav-link">Projects</a>
@@ -3112,12 +3169,21 @@
 
         overlay.addEventListener('click', closeMenu);
 
+        // Explicit close button in the menu panel itself.
+        var menuClose = document.getElementById('nav-menu-close');
+        if (menuClose) menuClose.addEventListener('click', closeMenu);
+
         // Wire up mobile theme toggle to dispatch a click on the desktop one
         var mobileToggle = document.getElementById('mobile-theme-toggle');
         var desktopToggle = document.querySelector('.navbar-links .theme-toggle');
         if (mobileToggle && desktopToggle) {
           mobileToggle.addEventListener('click', function() {
             desktopToggle.click();
+            // main.min.js only syncs the first .theme-toggle's label/state, so
+            // mirror it onto the mobile button too.
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            mobileToggle.setAttribute('aria-pressed', String(!isDark));
+            mobileToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
           });
         }
 
