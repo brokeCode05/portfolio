@@ -1712,7 +1712,7 @@
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.94);
+      transform: translate(-50%, -50%);
       opacity: 0;
       pointer-events: none;
       z-index: 301;
@@ -1720,56 +1720,40 @@
       max-height: calc(100vh - 2rem);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      background-color: #0F1115;
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
-      transition: transform 0.25s ease, opacity 0.25s ease;
+      align-items: center;
+      justify-content: center;
     }
     .idzoom-overlay.open ~ .idzoom-modal {
-      transform: translate(-50%, -50%) scale(1);
       opacity: 1;
       pointer-events: auto;
     }
-    .idzoom-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      background-color: #1A1D27;
-      border-bottom: 1px solid #2A2D35;
-      flex-shrink: 0;
-    }
-    .idzoom-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .idzoom-dot.red { background-color: #EF4444; }
-    .idzoom-dot.yellow { background-color: #F59E0B; }
-    .idzoom-dot.green { background-color: #4ADE80; }
-    .idzoom-title {
-      margin: 0 auto;
-      font-family: var(--font-code);
-      font-size: var(--text-xs);
-      color: #6B7280;
-      letter-spacing: 0.02em;
-    }
-    .idzoom-highlight { color: var(--color-accent); }
     .idzoom-close {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 302;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
+      width: 42px;
+      height: 42px;
       padding: 0;
-      border: 1px solid #2A2D35;
-      border-radius: 6px;
-      background: transparent;
-      color: #9CA3AF;
-      font-size: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.08);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      color: #FFFFFF;
+      font-size: 22px;
       line-height: 1;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
     }
-    .idzoom-close:hover { color: #FFFFFF; border-color: #EF4444; }
+    .idzoom-close:hover {
+      background-color: rgba(239, 68, 68, 0.28);
+      border-color: #EF4444;
+      transform: scale(1.06);
+    }
     .idzoom-body {
       flex: 1;
       min-height: 0;
@@ -1804,36 +1788,45 @@
     .idzoom-body .hero-badge-scan-label { font-size: 14px; }
     .idzoom-body .hero-badge-back-link-site { font-size: 14px; }
     .idzoom-body .hero-badge-stamp { font-size: 9px; padding: 2px 8px; }
-    .idzoom-foot {
+    .idzoom-stage {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      animation: idzoom-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes idzoom-pop {
+      0%   { opacity: 0; transform: scale(0.62) translateY(18px); }
+      60%  { opacity: 1; transform: scale(1.04) translateY(-3px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .idzoom-cap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 0.75rem;
-      padding: 12px 16px;
-      background-color: #1A1D27;
-      border-top: 1px solid #2A2D35;
-      flex-shrink: 0;
+      margin-top: 1.1rem;
     }
     .idzoom-hint {
       font-family: var(--font-code);
       font-size: var(--text-xs);
-      color: #6B7280;
+      color: rgba(255, 255, 255, 0.55);
     }
     .idzoom-flip-btn {
-      padding: 0.5rem 1.25rem;
+      padding: 0.45rem 1.15rem;
       font-size: 0.8125rem;
       font-weight: 600;
       font-family: var(--font-code);
       color: #0F172A;
       background-color: var(--color-accent);
       border: 1px solid var(--color-accent);
-      border-radius: var(--border-radius);
+      border-radius: 999px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
     }
     .idzoom-flip-btn:hover {
       background-color: #5DF08C;
       box-shadow: 0 0 14px rgba(74, 222, 128, 0.4);
+      transform: translateY(-1px);
     }
     @media (max-width: 560px) {
       .idzoom-body { padding: 1rem; }
@@ -1842,7 +1835,9 @@
       .idzoom-body .hero-badge-role,
       .idzoom-body .hero-badge-role2 { font-size: 13px; }
       .idzoom-body .hero-badge-qr-real { width: 120px; height: 120px; }
-      .idzoom-foot { flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .idzoom-stage { animation: none; }
     }
 
     /* ===== Certificate Viewer Modal ===== */
@@ -2824,17 +2819,11 @@
   <!-- ID Card Viewer Modal (enlarge the hero ID) -->
   <div class="idzoom-overlay" id="idzoom-overlay" hidden></div>
   <div class="idzoom-modal" id="idzoom-modal" role="dialog" aria-modal="true" aria-label="Student ID card — enlarged" hidden>
-    <div class="idzoom-head">
-      <span class="idzoom-dot red"></span>
-      <span class="idzoom-dot yellow"></span>
-      <span class="idzoom-dot green"></span>
-      <span class="idzoom-title">ID VIEWER — <span class="idzoom-highlight">enlarged</span></span>
-      <button type="button" class="idzoom-close" id="idzoom-close" aria-label="Close viewer">&times;</button>
-    </div>
+    <button type="button" class="idzoom-close" id="idzoom-close" aria-label="Close viewer">&times;</button>
     <div class="idzoom-body" id="idzoom-body"></div>
-    <div class="idzoom-foot">
+    <div class="idzoom-cap">
       <span class="idzoom-hint">click the card to flip · esc to close</span>
-      <button type="button" class="idzoom-flip-btn" id="idzoom-flip">Flip &#8635;</button>
+      <button type="button" class="idzoom-flip-btn" id="idzoom-flip">Flip</button>
     </div>
   </div>
 
@@ -3673,8 +3662,13 @@
           clone.querySelectorAll('a').forEach(function(a) {
             a.addEventListener('click', function(ev) { ev.stopPropagation(); });
           });
+          // Wrap the clone in a stage so the entrance animation never fights
+          // the card's own flip transform.
+          var stage = document.createElement('div');
+          stage.className = 'idzoom-stage';
           idBody.innerHTML = '';
-          idBody.appendChild(clone);
+          stage.appendChild(clone);
+          idBody.appendChild(stage);
           idOverlay.hidden = false;
           idModal.hidden = false;
           requestAnimationFrame(function() { idOverlay.classList.add('open'); });
@@ -3907,7 +3901,7 @@
           // is too long for the 8px caption.
           var knownBrands = ['GitHub', 'LinkedIn', 'Facebook', 'Instagram', 'Telegram', 'X / Twitter'];
           badgeFlipHint.textContent =
-            (knownBrands.indexOf(qrLabel) > -1) ? 'flip to scan my ' + qrLabel + ' · ⤢ enlarge' : 'click to flip · ⤢ enlarge';
+            (knownBrands.indexOf(qrLabel) > -1) ? 'flip to scan my ' + qrLabel : 'click to flip';
         }
 
         // ─── About ────────────────────────────────
