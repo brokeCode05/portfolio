@@ -802,11 +802,26 @@
       opacity: 0.85;
     }
     .hero-badge-handle {
+      display: inline-block;
       font-family: var(--font-code);
       font-size: 12px;
       color: #64748B;
       white-space: nowrap;
       letter-spacing: 0.03em;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(20, 30, 48, 0.35);
+      padding: 3px 7px;
+      margin: -3px -7px;
+      border-radius: 4px;
+      transition: color 0.15s ease, text-decoration-color 0.15s ease,
+                  background-color 0.15s ease, transform 0.15s ease;
+    }
+    .hero-badge-handle:hover {
+      color: var(--color-accent-dim);
+      text-decoration-color: currentColor;
+      background-color: rgba(20, 30, 48, 0.05);
+      transform: translateY(-1px);
     }
 
     /* ---- ID card back face ---- */
@@ -1015,7 +1030,8 @@
       .hero-badge-face,
       .hero-badge-back,
       .hero-badge-sheen,
-      .hero-badge-back-link-site {
+      .hero-badge-back-link-site,
+      .hero-badge-handle {
         transition: none;
         transform: none;
       }
@@ -2084,7 +2100,7 @@
                     </div>
                     <div class="hero-badge-foot">
                       <span class="hero-badge-barcode" aria-hidden="true"></span>
-                      <span class="hero-badge-handle">github.com/brokeCode05</span>
+                      <a class="hero-badge-handle" href="https://github.com/brokeCode05" target="_blank" rel="noopener">github.com/brokeCode05</a>
                     </div>
                     <div class="hero-badge-sheen" aria-hidden="true"></div>
                   </div>
@@ -3276,6 +3292,13 @@
       var backSiteLink = card.querySelector('.hero-badge-back-link-site');
       if (backSiteLink) {
         backSiteLink.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+      // The front GitHub handle opens the profile instead of flipping the card
+      var frontHandle = card.querySelector('.hero-badge-handle');
+      if (frontHandle) {
+        frontHandle.addEventListener('click', function(e) {
           e.stopPropagation();
         });
       }
