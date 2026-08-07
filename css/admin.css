@@ -663,18 +663,6 @@ body {
   letter-spacing: 0.04em;
   text-align: center;
 }
-.idp-stamp {
-  margin-top: 2px;
-  font-size: 5.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #16A34A;
-  border: 1px solid rgba(22, 163, 74, 0.4);
-  border-radius: 3px;
-  padding: 1px 5px;
-  line-height: 1.2;
-}
 
 /* Hero section sub-groups + field-location tags */
 .admin-subgroup {
