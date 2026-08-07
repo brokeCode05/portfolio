@@ -2254,7 +2254,15 @@ details.admin-details > .admin-details-body { padding: 0.25rem 0.875rem 0.875rem
   background: rgba(255, 255, 255, 0.015);
   cursor: grab;
   user-select: none;
+  /* Let the list scroll normally when swiping rows… */
+  touch-action: pan-y;
   transition: border-color 0.15s ease, background 0.15s ease;
+}
+/* …but while a drag is active, the container claims the touch so the
+   browser never turns the gesture into a scroll. Added on pointerdown,
+   removed on pointerup/pointercancel. */
+.drag-active {
+  touch-action: none;
 }
 .admin-row:active { user-select: none; cursor: grabbing; }
 .admin-row:hover { border-color: var(--admin-border-hover, #3B4455); background: rgba(255, 255, 255, 0.03); }

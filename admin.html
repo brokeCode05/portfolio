@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807t" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807u" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -2497,8 +2497,10 @@ CREATE POLICY "Admin update portfolio_data"
     // browser (native HTML5 drag/drop is unreliable for list reordering). Drag
     // any row; the top half of a row = place before, bottom half = after. Drops
     // land on rows AND the gaps between them. A 5px movement threshold keeps
-    // ordinary clicks untouched.
-    var dragState = { from: -1, to: -1, row: null, moved: false, sx: 0, sy: 0, pid: null };
+    // ordinary clicks untouched. Touch needs a ~300ms hold to arm the drag so
+    // swiping still scrolls the list; the scroll lock (touch-action: none on
+    // the container) is applied when the drag arms and removed on release.
+    var dragState = { from: -1, to: -1, row: null, moved: false, sx: 0, sy: 0, pid: null, timer: null };
     function clearDragMarks() {
       container.querySelectorAll('.admin-row').forEach(function(r) {
         r.classList.remove('dragging', 'drag-before', 'drag-after');
@@ -2520,9 +2522,40 @@ CREATE POLICY "Admin update portfolio_data"
       dragState.sy = e.clientY;
       dragState.row = row;
       dragState.pid = e.pointerId;
+      // Defensive: never let a stale scroll lock linger from an interrupted
+      // gesture (it is normally removed on pointerup/pointercancel).
+      container.classList.remove('drag-active');
+      // Touch: a quick swipe should keep scrolling the list, so a drag only
+      // arms after a short hold (the standard mobile reorder gesture). The
+      // scroll lock is applied at that moment — before the finger moves — so
+      // the browser never turns the drag into a pan.
+      if (dragState.timer) { clearTimeout(dragState.timer); dragState.timer = null; }
+      if (e.pointerType === 'touch') {
+        dragState.timer = setTimeout(function() {
+          dragState.timer = null;
+          dragState.moved = true;
+          container.classList.add('drag-active');
+          if (dragState.row) dragState.row.classList.add('dragging');
+          if (dragState.pid !== null && container.setPointerCapture) {
+            try { container.setPointerCapture(dragState.pid); } catch (err) {}
+          }
+        }, 300);
+      }
     });
     container.addEventListener('pointermove', function(e) {
       if (dragState.from < 0) return;
+      // Touch: movement before the hold completes means the user is scrolling —
+      // abandon the pending hold and hand the gesture back to the browser.
+      if (dragState.timer) {
+        if (Math.abs(e.clientX - dragState.sx) + Math.abs(e.clientY - dragState.sy) >= 5) {
+          clearTimeout(dragState.timer);
+          dragState.timer = null;
+          dragState.from = -1;
+          dragState.pid = null;
+          dragState.row = null;
+        }
+        return;
+      }
       if (!dragState.moved &&
           Math.abs(e.clientX - dragState.sx) + Math.abs(e.clientY - dragState.sy) < 5) return;
       if (!dragState.moved) {
@@ -2532,6 +2565,9 @@ CREATE POLICY "Admin update portfolio_data"
           try { container.setPointerCapture(dragState.pid); } catch (err) {}
         }
       }
+      // Stop the browser from panning while the row is in motion (also keeps
+      // touch drags reliable — pointer capture + preventDefault win the gesture).
+      e.preventDefault();
       var rows = container.querySelectorAll('.admin-row');
       var cRect = container.getBoundingClientRect();
       if (!rows.length || e.clientY < cRect.top || e.clientY > cRect.bottom) {
@@ -2563,7 +2599,9 @@ CREATE POLICY "Admin update portfolio_data"
       dragState.row = null;
       dragState.moved = false;
       dragState.pid = null;
+      if (dragState.timer) { clearTimeout(dragState.timer); dragState.timer = null; }
       clearDragMarks();
+      container.classList.remove('drag-active');
       if (container.releasePointerCapture) {
         try { container.releasePointerCapture(e.pointerId); } catch (err) {}
       }
@@ -2584,7 +2622,9 @@ CREATE POLICY "Admin update portfolio_data"
       dragState.row = null;
       dragState.moved = false;
       dragState.pid = null;
+      if (dragState.timer) { clearTimeout(dragState.timer); dragState.timer = null; }
       clearDragMarks();
+      container.classList.remove('drag-active');
     });
     // Fallback cleanup for browsers without pointer capture: a release outside
     // the container never reaches the container's pointerup, so reset here.
@@ -2595,7 +2635,9 @@ CREATE POLICY "Admin update portfolio_data"
         dragState.row = null;
         dragState.moved = false;
         dragState.pid = null;
+        if (dragState.timer) { clearTimeout(dragState.timer); dragState.timer = null; }
         clearDragMarks();
+        container.classList.remove('drag-active');
       }
     });
     window.addEventListener('pointercancel', function(e) {
@@ -2605,7 +2647,9 @@ CREATE POLICY "Admin update portfolio_data"
         dragState.row = null;
         dragState.moved = false;
         dragState.pid = null;
+        if (dragState.timer) { clearTimeout(dragState.timer); dragState.timer = null; }
         clearDragMarks();
+        container.classList.remove('drag-active');
       }
     });
   });
