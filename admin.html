@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807r" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807s" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -2497,7 +2497,9 @@ CREATE POLICY "Admin update portfolio_data"
     // row (top half = place before, bottom half = place after).
     var dragState = { from: -1 };
     container.addEventListener('dragstart', function(e) {
-      if (!e.target.closest('.drag-handle')) { e.preventDefault(); return; }
+      // Drag from anywhere on the row except interactive controls, so the whole
+      // row feels grabbable while Edit/Remove/up-down buttons stay clickable.
+      if (e.target.closest('button, a, input, select, textarea')) { e.preventDefault(); return; }
       var row = e.target.closest('.admin-row');
       if (!row) { e.preventDefault(); return; }
       dragState.from = Array.prototype.indexOf.call(container.children, row);
