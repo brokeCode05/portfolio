@@ -742,8 +742,8 @@ body {
 }
 .idp-photo {
   position: relative;
-  width: 52px;
-  aspect-ratio: 3 / 3.6;
+  width: 56px;
+  aspect-ratio: 3 / 4.2;
   border-radius: 6px;
   overflow: hidden;
   background: #D8DEE7;

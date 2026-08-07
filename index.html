@@ -580,6 +580,7 @@
     }
     /* Flip stage — rotates 180° on click; the faces swap via backface-visibility */
     .hero-badge-flip {
+      display: flex;
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
@@ -595,6 +596,9 @@
     /* Plastic card face (front) — backface hidden so the back shows when flipped */
     .hero-badge-face {
       position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       border-radius: 14px;
       overflow: hidden;
       background:
@@ -736,6 +740,7 @@
     /* Card body — photo + identity */
     .hero-badge-body {
       display: flex;
+      flex: 1;
       align-items: center;
       gap: 18px;
       padding: 6px 20px 14px;
@@ -744,8 +749,9 @@
     }
     .hero-badge-photo {
       position: relative;
-      width: 38%;
-      aspect-ratio: 3 / 3.6;
+      width: 44%;
+      height: 235px;
+      align-self: center;
       flex-shrink: 0;
       border-radius: 10px;
       overflow: hidden;
@@ -758,6 +764,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center 20%;
       filter: saturate(0.95) contrast(1.05);
       transition: filter 0.4s ease;
     }
@@ -783,7 +790,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       text-align: left;
     }
     .hero-badge-name {
@@ -861,6 +868,10 @@
         margin-top: 4px;
         font-size: 10px;
         padding: 1px 7px;
+      }
+      .hero-badge-photo {
+        width: 46%;
+        height: 200px;
       }
     }
     /* Card footer — barcode + handle */
