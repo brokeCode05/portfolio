@@ -265,6 +265,11 @@
             <label>Description <span class="field-tag" aria-hidden="true">Hero · intro</span></label>
             <textarea id="hero-desc" rows="4"></textarea>
           </div>
+          <div class="form-group">
+            <label>Role Rotator <span class="field-tag" aria-hidden="true">Hero · ~/role line</span></label>
+            <input type="text" id="hero-roles" placeholder="BSIT Student, Web Developer, Network &amp; Security Enthusiast, Lifelong Learner" />
+            <small class="form-hint">The rotating line beside the headline — comma-separated, e.g. "BSIT Student, Web Developer".</small>
+          </div>
 
           <h3 class="admin-subgroup">4 · Live Preview</h3>
           <p class="admin-subgroup-desc">See exactly what the ID looks like as you type.</p>
@@ -622,7 +627,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260807c"></script>
+<script src="js/portfolio-data.js?v=20260807e"></script>
 <script>
 (function(){
   'use strict';
@@ -1479,6 +1484,7 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-school-sub').value = d.hero.schoolSub || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
+    document.getElementById('hero-roles').value = (d.hero.roles || []).join(', ');
     renderHeroPhotoPreview(d.hero.photo || '');
   }
 
@@ -1504,6 +1510,7 @@ CREATE POLICY "Admin update portfolio_data"
     d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
     d.hero.title = document.getElementById('hero-title').value;
     d.hero.description = document.getElementById('hero-desc').value;
+    d.hero.roles = document.getElementById('hero-roles').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
     writeData();
     showToast('Hero saved!', 'success');
   });
@@ -1547,6 +1554,7 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
           d.hero.title = document.getElementById('hero-title').value;
           d.hero.description = document.getElementById('hero-desc').value;
+          d.hero.roles = document.getElementById('hero-roles').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
           d.hero.photo = canvas.toDataURL('image/jpeg', 0.85);
           writeData();
           renderHeroPhotoPreview(d.hero.photo);
@@ -1573,6 +1581,7 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
       d.hero.title = document.getElementById('hero-title').value;
       d.hero.description = document.getElementById('hero-desc').value;
+      d.hero.roles = document.getElementById('hero-roles').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
       d.hero.photo = '';
       writeData();
       renderHeroPhotoPreview('');

@@ -12,8 +12,20 @@
   'use strict';
 
   // ── Config ─────────────────────────────────────────────────
-  // Edit the roles here — they cycle in the hero role line.
+  // Default roles — overridden by the admin-set Hero > Role Rotator when present.
   var ROLES = ['BSIT Student', 'Web Developer', 'Network & Security Enthusiast', 'Lifelong Learner'];
+
+  // Read the rotator roles from portfolio data (admin-editable).
+  // Falls back to ROLES when the field is empty or unavailable.
+  function portfolioRoles() {
+    try {
+      if (typeof getPortfolioData === 'function') {
+        var d = getPortfolioData();
+        if (d && d.hero && d.hero.roles && d.hero.roles.length) return d.hero.roles;
+      }
+    } catch (e) {}
+    return ROLES;
+  }
   var SPOTLIGHT_SELECTOR = '.project-card, .skill-compact-card, .cert-card, .github-card, .github-graph-wrap';
 
   // ── Pure helpers (exported for headless tests) ─────────────
@@ -572,7 +584,7 @@
     createCursorGlow();
     cardSpotlight();
     certTilt();
-    heroRoles(document.getElementById('hero-roles-text'), ROLES);
+    heroRoles(document.getElementById('hero-roles-text'), portfolioRoles());
     parallax();
     backToTop();
     skillFilters();
