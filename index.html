@@ -408,7 +408,10 @@
     /* ===== Hero: Premium Portrait ===== */
     .hero-layout {
       display: grid;
-      grid-template-columns: 45fr 55fr;
+      /* Text column gets the extra room — the ID card only needs ~360px,
+         so 52/48 keeps the left content from feeling cramped next to it.
+         minmax(0, ...) stops long terminal lines from forcing the track wider. */
+      grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
       align-items: center;
       gap: var(--space-3xl);
       min-height: 75vh;
