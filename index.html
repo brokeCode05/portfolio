@@ -525,6 +525,20 @@
       flex-direction: column;
       align-items: center;
       width: 320px;
+      /* Gentle idle float — keeps the card alive now that the decos are gone.
+         Paused on hover so the 3D tilt stays easy to control. */
+      animation: hero-idle-float 7s ease-in-out infinite;
+    }
+    @keyframes hero-idle-float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-8px) rotate(-0.5deg);
+      }
+    }
+    .hero-badge-wrap:hover #hero-badge {
+      animation-play-state: paused;
     }
     /* The PVC card shell */
     .hero-badge-card {
@@ -998,6 +1012,9 @@
         opacity: 1;
         transform: none;
         transition: none;
+      }
+      #hero-badge {
+        animation: none;
       }
       .hero-badge-card,
       .hero-badge-flip,
