@@ -164,7 +164,8 @@ function loadData() {
     experience: [],
     learning: [],
     contactLinks: [],
-    chatFaq: []
+    chatFaq: [],
+    chatConfig: { enabled: true, botName: '', greeting: '', suggested: [] }
   };
 }
 

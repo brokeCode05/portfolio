@@ -41,6 +41,21 @@
     return null;
   }
 
+  // ── Admin-editable settings (data.chatConfig from the admin dashboard) ──
+  // The admin can set the bot name, greeting, suggested questions, and an
+  // on/off switch. Everything else (FAQ, portfolio knowledge) is read live
+  // from the same data that powers the site, so there's nothing to duplicate.
+  function chatConfig() {
+    var d = getData();
+    return (d && d.chatConfig) || {};
+  }
+  function botName() {
+    return String(chatConfig().botName || '').trim() || 'bryan-bot';
+  }
+  function botEnabled() {
+    return !(chatConfig().enabled === false);
+  }
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;')
@@ -528,7 +543,7 @@
     windowEl.innerHTML =
       '<div class="chatbot-header">' +
         '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
-        '<span class="chatbot-title">bryan-bot:~$ ./assistant --help</span>' +
+        '<span class="chatbot-title">' + botName() + ':~$ ./assistant --help</span>' +
         '<button type="button" id="chatbot-sound" aria-label="Mute reply sound" aria-pressed="true" title="Toggle reply sound">' + SOUND_ON_SVG + '</button>' +
         '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
       '</div>' +
@@ -564,7 +579,7 @@
 
     function addLine(who, html) {
       var line = el('div', { 'class': 'chat-msg ' + who },
-        '<span class="chat-prompt" aria-hidden="true">' + (who === 'bot' ? 'bryan-bot:~$' : 'you:~$') + '</span>' +
+        '<span class="chat-prompt" aria-hidden="true">' + (who === 'bot' ? botName() + ':~$' : 'you:~$') + '</span>' +
         '<span class="chat-text">' + html + '</span>');
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
@@ -576,7 +591,7 @@
     // flashes on screen.
     function typeBot(text, done) {
       var line = el('div', { 'class': 'chat-msg bot' },
-        '<span class="chat-prompt" aria-hidden="true">bryan-bot:~$</span>' +
+        '<span class="chat-prompt" aria-hidden="true">' + botName() + ':~$</span>' +
         '<span class="chat-text"></span>');
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
@@ -629,7 +644,14 @@
     }
 
     function showChips() {
-      ['skills', 'projects', 'experience', 'contact'].forEach(function(label) {
+      // Suggested questions come from the admin (chatConfig.suggested), falling
+      // back to the built-in quick-pick chips when none are configured.
+      var suggested = chatConfig().suggested;
+      var list = Array.isArray(suggested)
+        ? suggested.map(function(s) { return String(s || '').trim(); }).filter(Boolean)
+        : [];
+      if (!list.length) list = ['skills', 'projects', 'experience', 'contact'];
+      list.slice(0, 8).forEach(function(label) {
         var chip = el('button', { 'type': 'button', 'class': 'chat-chip' }, label);
         chip.addEventListener('click', function() { send(label); });
         chipsEl.appendChild(chip);
@@ -742,6 +764,16 @@
     }
 
     function openChat() {
+      // Respect the admin on/off switch (re-checked here because cloud data can
+      // arrive after the widget is built).
+      if (!botEnabled()) {
+        launcher.style.display = 'none';
+        return;
+      }
+      // Repaint the header title so an admin bot-name change shows up without
+      // a full page reload (prompts already read botName() per message).
+      var titleEl = windowEl.querySelector('.chatbot-title');
+      if (titleEl) titleEl.textContent = botName() + ':~$ ./assistant --help';
       windowEl.hidden = false;
       backdropEl.classList.add('is-open');
       // On mobile the sheet is a modal — lock page scroll like the other modals.
@@ -751,7 +783,9 @@
       launcher.setAttribute('aria-expanded', 'true');
       if (!greeted) {
         greeted = true;
-        var help = 'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), certifications, or how to [contact](contact) him.\n\nOr just type a question below.';
+        // Greeting comes from the admin when set, otherwise the default.
+        var help = String(chatConfig().greeting || '').trim() ||
+          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), certifications, or how to [contact](contact) him.\n\nOr just type a question below.';
         setTimeout(function() { botRecord(help); typeBot(help, showChips); }, 150);
       }
       setTimeout(function() { inputEl.focus(); }, 50);
@@ -812,6 +846,18 @@
         if (nameField && nameField.focus) setTimeout(function() { nameField.focus(); }, 600);
       }
     });
+
+    // Hide the launcher entirely when the admin has disabled the chatbot.
+    // Cloud data can arrive a moment after the widget is built, so re-check
+    // once more after the async fetch has had time to land.
+    function applyEnabled() {
+      if (!botEnabled()) {
+        launcher.style.display = 'none';
+        if (!windowEl.hidden) closeChat();
+      }
+    }
+    applyEnabled();
+    setTimeout(applyEnabled, 3000);
   }
 
   // ── Init (browser only) ─────────────────────────────────────
