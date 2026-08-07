@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807n" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807o" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -348,9 +348,11 @@
             <small class="form-hint">The rotating line beside the headline — comma-separated, e.g. "BSIT Student, Web Developer".</small>
           </div>
 
-          <h3 class="admin-subgroup">4 · Live Preview</h3>
-          <p class="admin-subgroup-desc">See exactly what the ID looks like as you type.</p>
-          <div class="idp-preview-grid">
+          <details class="admin-details" id="hero-preview-details">
+            <summary>4 · Live Preview</summary>
+            <div class="admin-details-body">
+            <p class="admin-subgroup-desc">See exactly what the ID looks like as you type.</p>
+            <div class="idp-preview-grid">
             <div class="idp-preview-col">
               <span class="idp-preview-caption">Front</span>
               <div class="id-front-preview">
@@ -403,7 +405,9 @@
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+            </div>
+          </details>
           <button class="btn btn-primary" id="hero-save">Save Hero</button>
         </div>
       </div>
@@ -417,7 +421,9 @@
             <label>Bio Paragraph</label>
             <textarea id="about-bio" rows="6"></textarea>
           </div>
-          <h4 style="font-size:0.875rem;font-weight:600;margin:1rem 0 0.75rem">Terminal JSON</h4>
+          <details class="admin-details">
+            <summary>Terminal JSON <span class="form-hint" style="display:inline;margin:0">— what shows in the About terminal</span></summary>
+            <div class="admin-details-body">
           <div class="form-row">
             <div class="form-group">
               <label>Role</label>
@@ -438,6 +444,8 @@
               <input type="text" id="about-status" />
             </div>
           </div>
+            </div>
+          </details>
           <button class="btn btn-primary" id="about-save">Save About</button>
         </div>
       </div>
@@ -467,56 +475,54 @@
 
       <!-- ===== PROJECTS SECTION ===== -->
       <div class="admin-section" id="section-projects">
-        <h2 class="admin-section-title">Projects</h2>
-        <p class="admin-section-desc">Manage your featured projects.</p>
+        <h2 class="admin-section-title">Projects <span class="admin-count" id="projects-count">0</span></h2>
+        <p class="admin-section-desc">Manage your featured projects. Click <strong>Edit</strong> on a project to update it — changes save instantly.</p>
+        <div class="messages-toolbar" style="margin-bottom:0.75rem">
+          <input type="search" id="projects-search" placeholder="Search projects…" aria-label="Search projects" />
+        </div>
         <div id="projects-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="projects-add">+ Add Project</button>
-          <button class="btn btn-primary" id="projects-save">Save All Projects</button>
         </div>
       </div>
 
       <!-- ===== CERTS SECTION ===== -->
       <div class="admin-section" id="section-certs">
-        <h2 class="admin-section-title">Certifications</h2>
-        <p class="admin-section-desc">Manage your certificate cards.</p>
+        <h2 class="admin-section-title">Certifications <span class="admin-count" id="certs-count">0</span></h2>
+        <p class="admin-section-desc">Manage your certificate cards. Click <strong>Edit</strong> to change a certificate — changes save instantly.</p>
         <div id="certs-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="certs-add">+ Add Certificate</button>
-          <button class="btn btn-primary" id="certs-save">Save All Certificates</button>
         </div>
       </div>
 
       <!-- ===== EXPERIENCE SECTION ===== -->
       <div class="admin-section" id="section-experience">
-        <h2 class="admin-section-title">Experience</h2>
-        <p class="admin-section-desc">Manage your work experience timeline.</p>
+        <h2 class="admin-section-title">Experience <span class="admin-count" id="experience-count">0</span></h2>
+        <p class="admin-section-desc">Manage your work experience timeline. Click <strong>Edit</strong> on an entry — changes save instantly.</p>
         <div id="experience-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="experience-add">+ Add Experience</button>
-          <button class="btn btn-primary" id="experience-save">Save All Experience</button>
         </div>
       </div>
 
       <!-- ===== LEARNING JOURNEY SECTION ===== -->
       <div class="admin-section" id="section-learning">
-        <h2 class="admin-section-title">Learning Journey</h2>
-        <p class="admin-section-desc">Key milestones in your academic and self-directed learning path.</p>
+        <h2 class="admin-section-title">Learning Journey <span class="admin-count" id="learning-count">0</span></h2>
+        <p class="admin-section-desc">Key milestones in your learning path. Click <strong>Edit</strong> on a milestone — changes save instantly.</p>
         <div id="learning-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="learning-add">+ Add Milestone</button>
-          <button class="btn btn-primary" id="learning-save">Save All Milestones</button>
         </div>
       </div>
 
       <!-- ===== DIRECT CONTACT SECTION ===== -->
       <div class="admin-section" id="section-contact">
-        <h2 class="admin-section-title">Direct Contact</h2>
-        <p class="admin-section-desc">Links shown in the Contact section (Email, GitHub, LinkedIn, etc.).</p>
+        <h2 class="admin-section-title">Direct Contact <span class="admin-count" id="contact-links-count">0</span></h2>
+        <p class="admin-section-desc">Links shown in the Contact section (Email, GitHub, LinkedIn, etc.). Click <strong>Edit</strong> on a method — changes save instantly.</p>
         <div id="contact-links-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="contact-links-add">+ Add Link</button>
-          <button class="btn btn-primary" id="contact-links-save">Save All Links</button>
+          <button class="btn" id="contact-links-add">+ Add Contact Method</button>
         </div>
       </div>
 
@@ -559,17 +565,22 @@
           <div id="chats-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin-top:0.75rem"></div>
         </div>
         <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Most asked topics</h4>
+          <h4 style="margin-bottom:0.75rem">Common questions</h4>
           <div id="chats-topics"></div>
         </div>
-        <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Unanswered questions — consider adding to the FAQ</h4>
-          <div id="chats-unanswered"></div>
-        </div>
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">Recent chats</h4>
-          <div id="chats-recent"></div>
-        </div>
+        <details class="admin-details">
+          <summary>Detailed insights</summary>
+          <div class="admin-details-body">
+            <div class="admin-card" style="margin-bottom:1rem">
+              <h4 style="margin-bottom:0.75rem">Unanswered questions — consider adding to the FAQ</h4>
+              <div id="chats-unanswered"></div>
+            </div>
+            <div class="admin-card">
+              <h4 style="margin-bottom:0.75rem">Recent chats</h4>
+              <div id="chats-recent"></div>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- ===== CHATBOT CONFIG SECTION ===== -->
@@ -589,12 +600,7 @@
         </div>
 
         <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Identity</h4>
-          <div class="form-group">
-            <label for="chatbot-name">Bot name</label>
-            <input type="text" id="chatbot-name" placeholder="bryan-bot" maxlength="32" />
-            <p class="form-hint">Shown in the chat header and command prompts.</p>
-          </div>
+          <h4 style="margin-bottom:0.75rem">Greeting</h4>
           <div class="form-group">
             <label for="chatbot-greeting">Greeting message</label>
             <textarea id="chatbot-greeting" rows="3" placeholder="Welcome message shown when a visitor opens the chat…" maxlength="600"></textarea>
@@ -602,16 +608,23 @@
           </div>
         </div>
 
-        <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Suggested questions</h4>
-          <div class="form-group">
-            <label for="chatbot-suggested">Quick-pick chips (comma-separated)</label>
-            <input type="text" id="chatbot-suggested" placeholder="skills, projects, experience, contact" maxlength="200" />
-            <p class="form-hint">Shown under the chat as one-tap questions. Leave empty for the defaults.</p>
+        <details class="admin-details">
+          <summary>Advanced settings</summary>
+          <div class="admin-details-body">
+            <div class="form-group">
+              <label for="chatbot-name">Bot name</label>
+              <input type="text" id="chatbot-name" placeholder="bryan-bot" maxlength="32" />
+              <p class="form-hint">Shown in the chat header and command prompts.</p>
+            </div>
+            <div class="form-group">
+              <label for="chatbot-suggested">Suggested questions (comma-separated)</label>
+              <input type="text" id="chatbot-suggested" placeholder="skills, projects, experience, contact" maxlength="200" />
+              <p class="form-hint">Shown under the chat as one-tap question chips. Leave empty for the defaults.</p>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="admin-card" style="margin-bottom:1rem">
+        <div class="admin-card" style="margin-top:1rem">
           <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
             <div>
               <h4 style="margin-bottom:0.25rem">Test it</h4>
@@ -628,19 +641,36 @@
 
       <!-- ===== CHAT FAQ SECTION ===== -->
       <div class="admin-section" id="section-faq">
-        <h2 class="admin-section-title">Chat FAQ</h2>
-        <p class="admin-section-desc">Custom answers for the terminal chatbot. Each entry matches when a visitor's question contains any of its keywords (comma-separated). Custom entries are checked before the built-in answers — so you can override anything or add entirely new topics.</p>
+        <h2 class="admin-section-title">Chat FAQ <span class="admin-count" id="faq-count">0</span></h2>
+        <p class="admin-section-desc">Custom answers for the terminal chatbot. Each entry matches when a visitor's question contains any of its keywords (comma-separated). Custom entries are checked before the built-in answers. Click <strong>Edit</strong> on an entry — changes save instantly.</p>
         <div id="faq-list"></div>
         <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
           <button class="btn" id="faq-add">+ Add FAQ Entry</button>
-          <button class="btn btn-primary" id="faq-save">Save All FAQ Entries</button>
         </div>
       </div>
 
       <!-- ===== CLOUD SYNC SECTION ===== -->
       <div class="admin-section" id="section-cloud">
-        <h2 class="admin-section-title">☁️ Cloud Sync</h2>
+        <h2 class="admin-section-title">Cloud Sync</h2>
         <p class="admin-section-desc">Sync your portfolio data to Supabase so everyone sees your updates on any device.</p>
+
+        <div class="admin-card" style="margin-bottom:1rem">
+          <h4 style="margin-bottom:0.75rem">Connection Status</h4>
+          <div id="cloud-status">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
+              <span id="cloud-status-icon" style="font-size:1.1rem">⏳</span>
+              <span id="cloud-status-text" style="color:var(--admin-text-secondary)">Checking connection...</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap">
+            <button class="btn btn-primary" id="cloud-publish-btn">📤 Publish to Cloud</button>
+            <button class="btn" id="cloud-fetch-btn">📥 Fetch from Cloud</button>
+          </div>
+        </div>
+
+        <details class="admin-details">
+          <summary>Sync settings</summary>
+          <div class="admin-details-body">
 
         <div class="admin-card">
           <h4 style="margin-bottom:0.75rem">✅ Secure Mode — No Service Key Needed</h4>
@@ -704,20 +734,6 @@ CREATE POLICY "Admin update portfolio_data"
           <button class="btn btn-primary" id="github-token-save-btn">Save Token</button>
         </div>
 
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">Cloud Status</h4>
-          <div id="cloud-status">
-            <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
-              <span id="cloud-status-icon" style="font-size:1.1rem">⏳</span>
-              <span id="cloud-status-text" style="color:var(--admin-text-secondary)">Checking connection...</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
-            <button class="btn btn-primary" id="cloud-publish-btn">📤 Publish to Cloud</button>
-            <button class="btn" id="cloud-fetch-btn">📥 Fetch from Cloud</button>
-          </div>
-        </div>
-
         <div class="admin-card" style="background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)">
           <h4 style="margin-bottom:0.5rem">📖 How It Works</h4>
           <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
@@ -728,6 +744,9 @@ CREATE POLICY "Admin update portfolio_data"
             <li>Changes are <strong>instant and worldwide</strong>!</li>
           </ol>
         </div>
+
+          </div>
+        </details>
       </div>
 
     </div>
@@ -745,6 +764,21 @@ CREATE POLICY "Admin update portfolio_data"
         <textarea id="chat-test-input" rows="3" placeholder="Ask something a visitor might ask…" maxlength="500"></textarea>
         <button class="btn btn-primary" id="chat-test-send" style="margin-top:0.5rem">Send</button>
         <div id="chat-test-result" class="chat-test-result" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Editor Modal -->
+  <div class="admin-modal-backdrop" id="item-modal-backdrop" hidden>
+    <div class="admin-modal admin-modal-lg" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
+      <div class="admin-modal-head">
+        <h4 id="item-modal-title">Edit Item</h4>
+        <button class="admin-modal-close" id="item-modal-close" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="admin-modal-body" id="item-modal-body"></div>
+      <div class="admin-modal-foot">
+        <button class="btn" id="item-modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="item-modal-save">Save Changes</button>
       </div>
     </div>
   </div>
@@ -1289,7 +1323,12 @@ CREATE POLICY "Admin update portfolio_data"
     var closeBtn = document.getElementById('chat-test-close');
     if (closeBtn) closeBtn.addEventListener('click', closeChatTest);
     var backdrop = document.getElementById('chat-test-backdrop');
-    if (backdrop) backdrop.addEventListener('click', function(e) { if (e.target === backdrop) closeChatTest(); });
+    if (backdrop) {
+      backdrop.addEventListener('click', function(e) { if (e.target === backdrop) closeChatTest(); });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !backdrop.hidden) closeChatTest();
+      });
+    }
     var sendBtn = document.getElementById('chat-test-send');
     if (sendBtn) sendBtn.addEventListener('click', runChatTest);
     var input = document.getElementById('chat-test-input');
@@ -1351,27 +1390,35 @@ CREATE POLICY "Admin update portfolio_data"
           '</div>';
         }).join('') +
       '</div>' : '';
-    return '<div class="admin-message" data-id="' + escapeHtml(m.id) + '" data-read="' + (m.read ? '1' : '0') + '" data-name="' + escapeHtml(m.name || '') + '" data-email="' + escapeHtml(m.email || '') + '">' +
-      '<div class="admin-message-head">' +
-        '<strong>' + escapeHtml(m.name) + '</strong>' +
-        '<span class="admin-message-email">&lt;' + escapeHtml(m.email) + '&gt;</span>' +
+    // Compact inbox row — body/actions are revealed on click so the list stays
+    // scannable. Click a message to open it; reply/delete live inside.
+    return '<div class="admin-message' + (m.read ? '' : ' is-unread') + '" data-id="' + escapeHtml(m.id) + '" data-read="' + (m.read ? '1' : '0') + '" data-name="' + escapeHtml(m.name || '') + '" data-email="' + escapeHtml(m.email || '') + '">' +
+      '<button type="button" class="admin-message-toggle" aria-expanded="false" aria-controls="msg-detail-' + escapeHtml(m.id) + '">' +
+        '<span class="admin-message-dot" aria-hidden="true"></span>' +
+        '<span class="admin-message-toggle-head">' +
+          '<strong>' + escapeHtml(m.name) + '</strong>' +
+          '<span class="admin-message-email">&lt;' + escapeHtml(m.email) + '&gt;</span>' +
+          (m.replied_at ? '<span class="admin-message-replied">Replied</span>' : '') +
+        '</span>' +
         '<span class="admin-message-date">' + date + '</span>' +
-        (m.replied_at ? '<span class="admin-message-replied">Replied</span>' : '') +
-      '</div>' +
+        '<span class="admin-message-chevron" aria-hidden="true">›</span>' +
+      '</button>' +
       '<div class="admin-message-subject">' + escapeHtml(m.subject) + '</div>' +
-      '<p class="admin-message-body">' + escapeHtml(m.message) + '</p>' +
-      thread +
-      '<div class="admin-message-actions">' +
-        '<button class="btn btn-sm msg-reply" data-id="' + escapeHtml(m.id) + '">' + (replies.length ? 'Reply Again' : 'Reply') + '</button>' +
-        '<button class="btn btn-sm msg-toggle-read" data-id="' + escapeHtml(m.id) + '">' + (m.read ? 'Mark Unread' : 'Mark Read') + '</button>' +
-        '<button class="btn btn-sm btn-danger-ghost msg-delete" data-id="' + escapeHtml(m.id) + '">Delete</button>' +
-      '</div>' +
-      '<div class="msg-compose" hidden>' +
-        '<label class="msg-compose-label" for="msg-reply-' + escapeHtml(m.id) + '">Reply to &lt;' + escapeHtml(m.email) + '&gt;</label>' +
-        '<textarea class="msg-compose-input" id="msg-reply-' + escapeHtml(m.id) + '" rows="4" placeholder="Write your reply…" maxlength="10000"></textarea>' +
-        '<div class="msg-compose-actions">' +
-          '<button class="btn btn-sm msg-send-reply" data-id="' + escapeHtml(m.id) + '" data-email="' + escapeHtml(m.email) + '">Send Reply</button>' +
-          '<button class="btn btn-sm btn-danger-ghost msg-cancel-reply">Cancel</button>' +
+      '<div class="admin-message-detail" id="msg-detail-' + escapeHtml(m.id) + '" hidden>' +
+        '<p class="admin-message-body">' + escapeHtml(m.message) + '</p>' +
+        thread +
+        '<div class="admin-message-actions">' +
+          '<button class="btn btn-sm msg-reply" data-id="' + escapeHtml(m.id) + '">' + (replies.length ? 'Reply Again' : 'Reply') + '</button>' +
+          '<button class="btn btn-sm msg-toggle-read" data-id="' + escapeHtml(m.id) + '">' + (m.read ? 'Mark Unread' : 'Mark Read') + '</button>' +
+          '<button class="btn btn-sm btn-danger-ghost msg-delete" data-id="' + escapeHtml(m.id) + '">Delete</button>' +
+        '</div>' +
+        '<div class="msg-compose" hidden>' +
+          '<label class="msg-compose-label" for="msg-reply-' + escapeHtml(m.id) + '">Reply to &lt;' + escapeHtml(m.email) + '&gt;</label>' +
+          '<textarea class="msg-compose-input" id="msg-reply-' + escapeHtml(m.id) + '" rows="4" placeholder="Write your reply…" maxlength="10000"></textarea>' +
+          '<div class="msg-compose-actions">' +
+            '<button class="btn btn-sm msg-send-reply" data-id="' + escapeHtml(m.id) + '" data-email="' + escapeHtml(m.email) + '">Send Reply</button>' +
+            '<button class="btn btn-sm btn-danger-ghost msg-cancel-reply">Cancel</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1438,6 +1485,14 @@ CREATE POLICY "Admin update portfolio_data"
           btn.addEventListener('click', function() {
             var card = btn.closest('.admin-message');
             if (!card) return;
+            // Make sure the collapsed detail is open so the reply box is visible.
+            var detail = card.querySelector('.admin-message-detail');
+            if (detail && detail.hidden) {
+              detail.hidden = false;
+              card.classList.add('expanded');
+              var toggle = card.querySelector('.admin-message-toggle');
+              if (toggle) toggle.setAttribute('aria-expanded', 'true');
+            }
             var compose = card.querySelector('.msg-compose');
             if (compose) {
               compose.hidden = !compose.hidden;
@@ -1484,109 +1539,16 @@ CREATE POLICY "Admin update portfolio_data"
 
   // ─── Chat FAQ (admin-editable chatbot answers) ─
   function renderFaqList() {
-    var d = readData();
-    var container = document.getElementById('faq-list');
-    if (!container) return;
-    if (!d.chatFaq || !d.chatFaq.length) {
-      container.innerHTML = '<div class="empty-state">No custom FAQ entries yet. Add one to give the chatbot answers you control — they take priority over the built-in ones.</div>';
-      return;
-    }
-    container.innerHTML = d.chatFaq.map(function(f, idx) {
-      var title = String(f.keywords || '').split(',')[0].trim() || 'Untitled FAQ';
-      return '<div class="admin-card" data-fidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn faq-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn faq-move-down" data-idx="' + idx + '"' + (idx === d.chatFaq.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(title) + '</h4>' +
-          '<button class="btn btn-sm btn-danger faq-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Topic (optional — shown in Chat Insights)</label>' +
-            '<input type="text" class="faq-topic" value="' + escapeHtml(f.topic || '') + '" placeholder="e.g. pricing" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Keywords (comma-separated)</label>' +
-            '<input type="text" class="faq-keywords" value="' + escapeHtml(f.keywords || '') + '" placeholder="e.g. price, cost, how much" />' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Answer</label>' +
-          '<textarea class="faq-answer" rows="3">' + escapeHtml(f.answer || '') + '</textarea>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    container.querySelectorAll('.faq-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this FAQ entry?', function(ok) {
-          if (!ok) return;
-          var d = readData();
-          d.chatFaq.splice(parseInt(this.dataset.idx), 1);
-          writeData();
-          renderFaqList();
-          showToast('FAQ entry removed', 'success');
-        });
-      });
-    });
-
-    container.querySelectorAll('.faq-move-up').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var d = readData();
-        var i = parseInt(this.dataset.idx);
-        if (i > 0) { var t = d.chatFaq[i - 1]; d.chatFaq[i - 1] = d.chatFaq[i]; d.chatFaq[i] = t; }
-        writeData();
-        renderFaqList();
-      });
-    });
-    container.querySelectorAll('.faq-move-down').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var d = readData();
-        var i = parseInt(this.dataset.idx);
-        if (i < d.chatFaq.length - 1) { var t = d.chatFaq[i + 1]; d.chatFaq[i + 1] = d.chatFaq[i]; d.chatFaq[i] = t; }
-        writeData();
-        renderFaqList();
-      });
-    });
-
-    // Sync edits into the data object as the admin types, so Move/Remove/Save
-    // never lose unsaved text (matches the Learning Journey editor pattern).
-    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.fidx);
-        var d = readData();
-        if (isNaN(idx) || !d.chatFaq[idx]) return;
-        d.chatFaq[idx].topic = card.querySelector('.faq-topic').value;
-        d.chatFaq[idx].keywords = card.querySelector('.faq-keywords').value;
-        d.chatFaq[idx].answer = card.querySelector('.faq-answer').value;
-      });
-    });
+    renderManager('faq');
   }
 
   document.getElementById('faq-add').addEventListener('click', function() {
     var d = readData();
     if (!d.chatFaq) d.chatFaq = [];
-    d.chatFaq.push({ topic: '', keywords: 'new topic, keyword', answer: 'Answer the visitor here.' });
+    d.chatFaq.push({ topic: '', keywords: 'new topic', answer: 'Answer the visitor here.' });
     writeData();
-    renderFaqList();
-    showToast('New FAQ entry added', 'success');
-  });
-
-  document.getElementById('faq-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('faq-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.fidx);
-      if (isNaN(idx) || !d.chatFaq[idx]) return;
-      d.chatFaq[idx].topic = card.querySelector('.faq-topic').value;
-      d.chatFaq[idx].keywords = card.querySelector('.faq-keywords').value;
-      d.chatFaq[idx].answer = card.querySelector('.faq-answer').value;
-    });
-    writeData();
-    showToast('All FAQ entries saved!', 'success');
+    renderManager('faq');
+    openItemModal('faq', d.chatFaq.length - 1);
   });
 
   // ─── Chat Insights ─────────────────────────────
@@ -1744,6 +1706,23 @@ CREATE POLICY "Admin update portfolio_data"
     messagesRefreshBtn.addEventListener('click', loadMessages);
   }
 
+  // Click a message row to expand/collapse its body + actions (compact inbox).
+  var inboxToggleEl = document.getElementById('messages-inbox');
+  if (inboxToggleEl) {
+    inboxToggleEl.addEventListener('click', function(e) {
+      var toggle = e.target.closest('.admin-message-toggle');
+      if (!toggle) return;
+      var card = toggle.closest('.admin-message');
+      if (!card) return;
+      var detail = card.querySelector('.admin-message-detail');
+      if (!detail) return;
+      var expand = detail.hidden;
+      detail.hidden = !expand;
+      card.classList.toggle('expanded', expand);
+      toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
+    });
+  }
+
   // ─── Messages search/filter ────────────────
   function applyMessageFilter() {
     var inbox = document.getElementById('messages-inbox');
@@ -1898,6 +1877,7 @@ CREATE POLICY "Admin update portfolio_data"
       // talk to Supabase/localStorage directly — they are not portfolio content,
       // so editing them must not trigger the unsaved-changes warning.
       if (t.closest('#section-messages') || t.closest('#section-cloud')) return;
+      if (t.id === 'projects-search') return;
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') markDirty();
     });
   }
@@ -2465,74 +2445,326 @@ CREATE POLICY "Admin update portfolio_data"
   });
 
   // ─── Projects ──────────────────────────────
-  function renderProjects() {
+  // ─── Collection manager ────────────────────
+  // Projects, Certs, Experience, Learning, Contact, and FAQ share one compact
+  // list: a row per item with title + meta + Edit/Remove/Reorder. Editing
+  // opens the item modal, so you never face a wall of inline forms. Per-item
+  // saves persist immediately (writeData) and return you to the list.
+  var MANAGERS = {
+    projects: { key: 'projects', container: 'projects-list', count: 'projects-count',
+      empty: 'No projects yet. Click + Add Project to create your first one.',
+      title: function(p) { return p.title || 'Untitled'; },
+      sub: function(p) { var parts = [p.category || 'Uncategorized']; if (p.tags && p.tags.length) parts.push(p.tags.join(', ')); return parts.join(' · '); },
+      badge: function(p) { return '<span class="admin-badge ' + (p.status === 'draft' ? 'is-draft' : 'is-live') + '">' + (p.status === 'draft' ? 'Draft' : 'Published') + '</span>'; } },
+    certs: { key: 'certifications', container: 'certs-list', count: 'certs-count',
+      empty: 'No certificates yet. Click + Add Certificate.',
+      title: function(c) { return c.name || 'Untitled'; },
+      sub: function(c) { return [c.issuer || '', c.date || ''].filter(Boolean).join(' · '); } },
+    experience: { key: 'experience', container: 'experience-list', count: 'experience-count',
+      empty: 'No experience entries yet. Click + Add Experience.',
+      title: function(x) { return (x.role || 'Role') + (x.company ? ' @ ' + x.company : ''); },
+      sub: function(x) { return x.date || ''; } },
+    learning: { key: 'learning', container: 'learning-list', count: 'learning-count',
+      empty: 'No milestones yet. Click + Add Milestone.',
+      title: function(l) { return (l.year ? l.year + ' — ' : '') + (l.title || 'Untitled'); },
+      sub: function(l) { return String(l.description || '').slice(0, 90); } },
+    'contact-links': { key: 'contactLinks', container: 'contact-links-list', count: 'contact-links-count',
+      empty: 'Email and GitHub show by default until you add your own links.',
+      title: function(l) { return l.label || 'New Link'; },
+      sub: function(l) { return l.value || l.url || ''; } },
+    faq: { key: 'chatFaq', container: 'faq-list', count: 'faq-count',
+      empty: 'No custom FAQ entries yet. Add one to give the chatbot answers you control.',
+      title: function(f) { return String(f.keywords || '').split(',')[0].trim() || 'Untitled FAQ'; },
+      sub: function(f) { return String(f.answer || '').slice(0, 90); } }
+  };
+
+  function renderManager(name) {
+    var cfg = MANAGERS[name];
     var d = readData();
-    var container = document.getElementById('projects-list');
-    if (!d.projects || !d.projects.length) {
-      container.innerHTML = '<div class="empty-state">No projects yet.</div>';
+    var list = d[cfg.key] || [];
+    var container = document.getElementById(cfg.container);
+    if (!container) return;
+    var countEl = cfg.count ? document.getElementById(cfg.count) : null;
+    if (countEl) countEl.textContent = list.length;
+    if (!list.length) {
+      container.innerHTML = '<div class="empty-state">' + cfg.empty + '</div>';
       return;
     }
-    container.innerHTML = d.projects.map(function(proj, idx) {
-      var tags = (proj.tags || []).join(', ');
-      return '<div class="admin-card" data-pidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn proj-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn proj-move-down" data-idx="' + idx + '"' + (idx === d.projects.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(proj.title) + '</h4>' +
-          '<button class="btn btn-sm btn-danger proj-remove" data-idx="' + idx + '">Remove</button>' +
+    container.innerHTML = list.map(function(item, idx) {
+      return '<div class="admin-row">' +
+        '<div class="admin-row-main">' +
+          '<div class="admin-row-title">' + escapeHtml(cfg.title(item)) + '</div>' +
+          (cfg.sub ? '<div class="admin-row-sub">' + escapeHtml(cfg.sub(item)) + '</div>' : '') +
+          (cfg.badge ? cfg.badge(item) : '') +
         '</div>' +
-        '<div class="form-group">' +
-          '<label>Title</label>' +
-          '<input type="text" class="proj-title" value="' + escapeHtml(proj.title) + '" />' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Description</label>' +
-          '<textarea class="proj-desc" rows="3">' + escapeHtml(proj.description) + '</textarea>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Tags (comma separated)</label>' +
-          '<input type="text" class="proj-tags" value="' + escapeHtml(tags) + '" />' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Live URL</label>' +
-            '<input type="text" class="proj-live" value="' + (proj.links.live || '') + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Repo URL</label>' +
-            '<input type="text" class="proj-repo" value="' + (proj.links.repo || '') + '" />' +
-          '</div>' +
+        '<div class="admin-row-actions">' +
+          '<button class="reorder-btn ' + name + '-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move up">' + REORDER_UP_SVG + '</button>' +
+          '<button class="reorder-btn ' + name + '-down" data-idx="' + idx + '"' + (idx === list.length - 1 ? ' disabled' : '') + ' title="Move down">' + REORDER_DOWN_SVG + '</button>' +
+          '<button class="btn btn-sm ' + name + '-edit" data-idx="' + idx + '">Edit</button>' +
+          '<button class="btn btn-sm btn-danger ' + name + '-remove" data-idx="' + idx + '" title="Remove">×</button>' +
         '</div>' +
       '</div>';
     }).join('');
+  }
 
-    container.querySelectorAll('.proj-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this project?', function(ok) {
+  function renderProjects() { renderManager('projects'); }
+
+  // Re-render a manager list after an edit, keeping the ID-back preview in
+  // sync for contact links.
+  function renderAfter(name) {
+    renderManager(name);
+    if (name === 'contact-links') updateIdPreview();
+  }
+
+  // Delegated Edit / Remove / Reorder for every manager (no per-item binding).
+  var MANAGER_CONTAINERS = {
+    'projects-list': 'projects', 'certs-list': 'certs', 'experience-list': 'experience',
+    'learning-list': 'learning', 'contact-links-list': 'contact-links', 'faq-list': 'faq'
+  };
+  Object.keys(MANAGER_CONTAINERS).forEach(function(cid) {
+    var container = document.getElementById(cid);
+    if (!container) return;
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('button[data-idx]');
+      if (!btn) return;
+      var name = MANAGER_CONTAINERS[cid];
+      var cfg = MANAGERS[name];
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (btn.classList.contains(name + '-edit')) { openItemModal(name, idx); return; }
+      if (btn.classList.contains(name + '-remove')) {
+        showConfirm('Remove this item?', function(ok) {
           if (!ok) return;
-          var d = readData();
-          d.projects.splice(parseInt(this.dataset.idx), 1);
+          readData()[cfg.key].splice(idx, 1);
           writeData();
-          renderProjects();
-          showToast('Project removed', 'success');
+          renderAfter(name);
+          showToast('Item removed', 'success');
         });
-      });
-    });
-
-    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.pidx);
-        var d = readData();
-        d.projects[idx].title = card.querySelector('.proj-title').value;
-        d.projects[idx].description = card.querySelector('.proj-desc').value;
-        d.projects[idx].tags = card.querySelector('.proj-tags').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-        if (!d.projects[idx].links) d.projects[idx].links = {};
-        d.projects[idx].links.live = card.querySelector('.proj-live').value;
-        d.projects[idx].links.repo = card.querySelector('.proj-repo').value;
+        return;
+      }
+      var up = btn.classList.contains(name + '-up');
+      var down = btn.classList.contains(name + '-down');
+      if (up || down) {
+        var list = readData()[cfg.key];
+        var to = up ? idx - 1 : idx + 1;
+        if (to < 0 || to >= list.length) return;
+        var tmp = list[idx]; list[idx] = list[to]; list[to] = tmp;
         writeData();
+        renderAfter(name);
+      }
+    });
+  });
+
+  // ─── Item editor modal ────────────────────
+  var ITEM_KEYS = { projects: 'projects', certs: 'certifications', experience: 'experience', learning: 'learning', 'contact-links': 'contactLinks', faq: 'chatFaq' };
+  var ITEM_TITLES = { projects: 'Project', certs: 'Certificate', experience: 'Experience', learning: 'Milestone', 'contact-links': 'Contact Method', faq: 'FAQ Entry' };
+  var itemModalType = null;
+  var itemModalIndex = -1;
+  var certModalPath = '';
+
+  function imVal(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+  function itemModalFields(name, item) {
+    var e = escapeHtml;
+    if (name === 'projects') {
+      var statusOpts = '<option value="published"' + (item.status !== 'draft' ? ' selected' : '') + '>Published</option>' +
+        '<option value="draft"' + (item.status === 'draft' ? ' selected' : '') + '>Draft</option>';
+      return '<div class="form-group"><label for="im-title">Project Name</label><input type="text" id="im-title" value="' + e(item.title || '') + '" /></div>' +
+        '<div class="form-row">' +
+          '<div class="form-group"><label for="im-category">Category</label><input type="text" id="im-category" value="' + e(item.category || '') + '" placeholder="e.g. Web App" /></div>' +
+          '<div class="form-group"><label for="im-status">Status</label><select id="im-status">' + statusOpts + '</select></div>' +
+        '</div>' +
+        '<div class="form-group"><label for="im-desc">Short Description</label><textarea id="im-desc" rows="3">' + e(item.description || '') + '</textarea></div>' +
+        '<div class="form-group"><label for="im-tags">Technologies (comma separated)</label><input type="text" id="im-tags" value="' + e((item.tags || []).join(', ')) + '" placeholder="HTML, CSS, JavaScript" /></div>' +
+        '<div class="form-row">' +
+          '<div class="form-group"><label for="im-live">Live URL</label><input type="text" id="im-live" value="' + e((item.links && item.links.live) || '') + '" placeholder="https://…" /></div>' +
+          '<div class="form-group"><label for="im-repo">GitHub URL</label><input type="text" id="im-repo" value="' + e((item.links && item.links.repo) || '') + '" placeholder="https://github.com/…" /></div>' +
+        '</div>';
+    }
+    if (name === 'certs') {
+      var imgHtml = certModalPath
+        ? '<img src="' + e(certModalPath) + '" style="max-width:140px;max-height:80px;border-radius:4px;object-fit:cover" alt="Certificate preview" />' +
+          '<button type="button" class="btn btn-sm" id="cert-modal-clear" style="padding:2px 6px;font-size:10px">× Remove</button>'
+        : '<span class="form-hint" style="margin:0">No image yet.</span>';
+      return '<div class="form-group"><label for="im-name">Certificate Name</label><input type="text" id="im-name" value="' + e(item.name || '') + '" /></div>' +
+        '<div class="form-row">' +
+          '<div class="form-group"><label for="im-issuer">Issuer</label><input type="text" id="im-issuer" value="' + e(item.issuer || '') + '" /></div>' +
+          '<div class="form-group"><label for="im-date">Date</label><input type="text" id="im-date" value="' + e(item.date || '') + '" placeholder="2026" /></div>' +
+        '</div>' +
+        '<div class="form-group"><label>Certificate Image</label>' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+            '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">📁 Upload<input type="file" id="cert-modal-upload" accept="image/*" style="display:none" /></label>' +
+            '<div id="cert-modal-preview" style="display:flex;align-items:center;gap:8px">' + imgHtml + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+    if (name === 'experience') {
+      return '<div class="form-row">' +
+          '<div class="form-group"><label for="im-role">Role</label><input type="text" id="im-role" value="' + e(item.role || '') + '" /></div>' +
+          '<div class="form-group"><label for="im-company">Company / Organization</label><input type="text" id="im-company" value="' + e(item.company || '') + '" /></div>' +
+        '</div>' +
+        '<div class="form-group"><label for="im-date">Date / Period</label><input type="text" id="im-date" value="' + e(item.date || '') + '" placeholder="2024 — Present" /></div>' +
+        '<div class="form-group"><label for="im-bullets">Bullet Points (one per line)</label>' +
+          '<textarea id="im-bullets" rows="5" placeholder="Built the landing page&#10;Fixed 12 bugs">' + e((item.bullets || []).join('\n')) + '</textarea></div>';
+    }
+    if (name === 'learning') {
+      return '<div class="form-row">' +
+          '<div class="form-group"><label for="im-year">Year</label><input type="text" id="im-year" value="' + e(item.year || '') + '" /></div>' +
+          '<div class="form-group"><label for="im-title">Title</label><input type="text" id="im-title" value="' + e(item.title || '') + '" /></div>' +
+        '</div>' +
+        '<div class="form-group"><label for="im-desc">Description</label><textarea id="im-desc" rows="4">' + e(item.description || '') + '</textarea></div>';
+    }
+    if (name === 'contact-links') {
+      var iconOpts = ['email', 'github', 'linkedin', 'generic'].map(function(i) {
+        return '<option value="' + i + '"' + (item.icon === i ? ' selected' : '') + '>' + i.charAt(0).toUpperCase() + i.slice(1) + '</option>';
+      }).join('');
+      return '<div class="form-row">' +
+          '<div class="form-group"><label for="im-label">Label</label><input type="text" id="im-label" value="' + e(item.label || '') + '" placeholder="LinkedIn" /></div>' +
+          '<div class="form-group"><label for="im-icon">Icon</label><select id="im-icon">' + iconOpts + '</select></div>' +
+        '</div>' +
+        '<div class="form-group"><label for="im-value">Display Text</label><input type="text" id="im-value" value="' + e(item.value || '') + '" placeholder="linkedin.com/in/username" /></div>' +
+        '<div class="form-group"><label for="im-url">URL</label><input type="text" id="im-url" value="' + e(item.url || '') + '" placeholder="https://linkedin.com/in/username" /></div>';
+    }
+    if (name === 'faq') {
+      return '<div class="form-group"><label for="im-topic">Topic (optional — shown in Chat Insights)</label><input type="text" id="im-topic" value="' + e(item.topic || '') + '" placeholder="e.g. pricing" /></div>' +
+        '<div class="form-group"><label for="im-keywords">Keywords (comma-separated)</label><input type="text" id="im-keywords" value="' + e(item.keywords || '') + '" placeholder="price, cost, how much" /></div>' +
+        '<div class="form-group"><label for="im-answer">Answer</label><textarea id="im-answer" rows="5">' + e(item.answer || '') + '</textarea></div>';
+    }
+    return '';
+  }
+
+  function openItemModal(name, idx) {
+    var d = readData();
+    var item = (d[ITEM_KEYS[name]] || [])[idx];
+    if (!item) return;
+    itemModalType = name;
+    itemModalIndex = idx;
+    certModalPath = item.path || '';
+    document.getElementById('item-modal-title').textContent = 'Edit ' + ITEM_TITLES[name];
+    document.getElementById('item-modal-body').innerHTML = itemModalFields(name, item);
+    if (name === 'certs') bindCertModalUpload();
+    var backdrop = document.getElementById('item-modal-backdrop');
+    if (!backdrop) return;
+    backdrop.hidden = false;
+    document.body.classList.add('modal-open');
+    var first = backdrop.querySelector('input[type="text"], textarea, select');
+    if (first) first.focus();
+  }
+
+  function closeItemModal() {
+    var backdrop = document.getElementById('item-modal-backdrop');
+    if (backdrop) backdrop.hidden = true;
+    document.body.classList.remove('modal-open');
+    itemModalType = null;
+    itemModalIndex = -1;
+  }
+
+  function saveItemModal() {
+    if (itemModalType === null) return;
+    var d = readData();
+    var list = d[ITEM_KEYS[itemModalType]];
+    var item = list[itemModalIndex];
+    if (!item) { closeItemModal(); return; }
+    if (itemModalType === 'projects') {
+      item.title = imVal('im-title');
+      item.category = imVal('im-category') || 'Uncategorized';
+      item.status = imVal('im-status') || 'published';
+      item.description = imVal('im-desc');
+      item.tags = imVal('im-tags').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+      if (!item.links) item.links = {};
+      item.links.live = imVal('im-live');
+      item.links.repo = imVal('im-repo');
+    } else if (itemModalType === 'certs') {
+      item.name = imVal('im-name');
+      item.issuer = imVal('im-issuer');
+      item.date = imVal('im-date');
+      item.path = certModalPath;
+    } else if (itemModalType === 'experience') {
+      item.role = imVal('im-role');
+      item.company = imVal('im-company');
+      item.date = imVal('im-date');
+      item.bullets = imVal('im-bullets').split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+    } else if (itemModalType === 'learning') {
+      item.year = imVal('im-year');
+      item.title = imVal('im-title');
+      item.description = imVal('im-desc');
+    } else if (itemModalType === 'contact-links') {
+      item.label = imVal('im-label');
+      item.value = imVal('im-value');
+      item.url = imVal('im-url');
+      item.icon = imVal('im-icon') || 'generic';
+    } else if (itemModalType === 'faq') {
+      item.topic = imVal('im-topic');
+      item.keywords = imVal('im-keywords');
+      item.answer = imVal('im-answer');
+    }
+    writeData();
+    renderAfter(itemModalType);
+    closeItemModal();
+    showToast(ITEM_TITLES[itemModalType] + ' saved', 'success');
+  }
+
+  function bindCertModalUpload() {
+    var input = document.getElementById('cert-modal-upload');
+    if (!input) return;
+    input.addEventListener('change', function() {
+      var file = input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var MAX = 800;
+          var w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            var ratio = Math.min(MAX / w, MAX / h);
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.round(w * ratio);
+            canvas.height = Math.round(h * ratio);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            certModalPath = canvas.toDataURL('image/jpeg', 0.85);
+          } else {
+            certModalPath = e.target.result;
+          }
+          var preview = document.getElementById('cert-modal-preview');
+          if (preview) {
+            preview.innerHTML = '<img src="' + certModalPath + '" style="max-width:140px;max-height:80px;border-radius:4px;object-fit:cover" alt="Certificate preview" />' +
+              '<button type="button" class="btn btn-sm" id="cert-modal-clear" style="padding:2px 6px;font-size:10px">× Remove</button>';
+            var clearBtn = preview.querySelector('#cert-modal-clear');
+            if (clearBtn) clearBtn.addEventListener('click', function() {
+              certModalPath = '';
+              preview.innerHTML = '<span class="form-hint" style="margin:0">No image yet.</span>';
+              input.value = '';
+            });
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  (function bindItemModal() {
+    var backdrop = document.getElementById('item-modal-backdrop');
+    if (!backdrop) return;
+    var closeBtn = document.getElementById('item-modal-close');
+    var cancelBtn = document.getElementById('item-modal-cancel');
+    var saveBtn = document.getElementById('item-modal-save');
+    if (closeBtn) closeBtn.addEventListener('click', closeItemModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeItemModal);
+    if (saveBtn) saveBtn.addEventListener('click', saveItemModal);
+    backdrop.addEventListener('click', function(e) { if (e.target === backdrop) closeItemModal(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !backdrop.hidden) closeItemModal();
+    });
+  })();
+
+  // Live filter for the projects manager (title / category / tags / status).
+  var projectsSearchEl = document.getElementById('projects-search');
+  if (projectsSearchEl) {
+    projectsSearchEl.addEventListener('input', function() {
+      var q = projectsSearchEl.value.toLowerCase().trim();
+      document.querySelectorAll('#projects-list .admin-row').forEach(function(row) {
+        row.style.display = (!q || row.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
       });
     });
   }
@@ -2540,201 +2772,15 @@ CREATE POLICY "Admin update portfolio_data"
   document.getElementById('projects-add').addEventListener('click', function() {
     var d = readData();
     if (!d.projects) d.projects = [];
-    d.projects.push({
-      id: 'proj-' + Date.now(),
-      title: 'New Project',
-      description: 'Project description here.',
-      tags: ['Tag1'],
-      links: { live: '', repo: '' }
-    });
+    d.projects.push({ id: 'proj-' + Date.now(), title: 'New Project', description: '', category: 'Uncategorized', status: 'published', tags: [], links: { live: '', repo: '' } });
     writeData();
-    renderProjects();
-    showToast('New project added', 'success');
-  });
-
-  document.getElementById('projects-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('projects-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.pidx);
-      if (isNaN(idx) || !d.projects[idx]) return;
-      d.projects[idx].title = card.querySelector('.proj-title').value;
-      d.projects[idx].description = card.querySelector('.proj-desc').value;
-      d.projects[idx].tags = card.querySelector('.proj-tags').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-      if (!d.projects[idx].links) d.projects[idx].links = {};
-      d.projects[idx].links.live = card.querySelector('.proj-live').value;
-      d.projects[idx].links.repo = card.querySelector('.proj-repo').value;
-    });
-    writeData();
-    showToast('All projects saved!', 'success');
-  });
-
-  // ─── Project Reorder ───────────────────────
-  document.getElementById('projects-list').addEventListener('click', function(e) {
-    var btn = e.target.closest('.proj-move-up, .proj-move-down');
-    if (!btn) return;
-    var idx = parseInt(btn.dataset.idx);
-    var d = readData();
-    if (btn.classList.contains('proj-move-up')) {
-      if (idx === 0) return;
-      var tmp = d.projects[idx];
-      d.projects[idx] = d.projects[idx - 1];
-      d.projects[idx - 1] = tmp;
-    } else {
-      if (idx >= d.projects.length - 1) return;
-      var tmp = d.projects[idx];
-      d.projects[idx] = d.projects[idx + 1];
-      d.projects[idx + 1] = tmp;
-    }
-    writeData();
-    renderProjects();
+    renderManager('projects');
+    openItemModal('projects', d.projects.length - 1);
   });
 
   // ─── Certs ─────────────────────────────────
   function renderCerts() {
-    var d = readData();
-    var container = document.getElementById('certs-list');
-    if (!d.certifications || !d.certifications.length) {
-      container.innerHTML = '<div class="empty-state">No certifications yet.</div>';
-      return;
-    }
-    container.innerHTML = d.certifications.map(function(cert, idx) {
-      var previewHtml = '';
-      if (cert.path) {
-        previewHtml = '<div class="cert-upload-preview" data-cidx="' + idx + '">' +
-          '<img src="' + escapeHtml(cert.path) + '" style="max-width:100px;max-height:56px;border-radius:4px;object-fit:cover" onerror="this.remove()" />' +
-          '<button class="btn btn-sm cert-upload-clear" data-idx="' + idx + '" style="padding:2px 6px;font-size:10px;margin-left:6px" title="Remove image">×</button>' +
-        '</div>';
-      }
-      return '<div class="admin-card" data-cidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn cert-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn cert-move-down" data-idx="' + idx + '"' + (idx === d.certifications.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(cert.name) + '</h4>' +
-          '<button class="btn btn-sm btn-danger cert-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Name</label>' +
-            '<input type="text" class="cert-name" value="' + escapeHtml(cert.name) + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Issuer</label>' +
-            '<input type="text" class="cert-issuer" value="' + escapeHtml(cert.issuer) + '" />' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Date</label>' +
-            '<input type="text" class="cert-date" value="' + escapeHtml(cert.date) + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Image Path</label>' +
-            '<div style="display:flex;gap:6px;align-items:center">' +
-              '<input type="text" class="cert-path" value="' + escapeHtml(cert.path) + '" placeholder="File path or URL" style="flex:1" />' +
-              '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0;font-size:11px;padding:4px 8px">📁 Upload<input type="file" class="cert-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
-            '</div>' +
-            previewHtml +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    container.querySelectorAll('.cert-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this certificate?', function(ok) {
-          if (!ok) return;
-          var d = readData();
-          d.certifications.splice(parseInt(this.dataset.idx), 1);
-          writeData();
-          renderCerts();
-          showToast('Certificate removed', 'success');
-        });
-      });
-    });
-
-    container.querySelectorAll('.admin-card input:not(.cert-upload)').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.cidx);
-        var d = readData();
-        d.certifications[idx].name = card.querySelector('.cert-name').value;
-        d.certifications[idx].issuer = card.querySelector('.cert-issuer').value;
-        d.certifications[idx].date = card.querySelector('.cert-date').value;
-        d.certifications[idx].path = card.querySelector('.cert-path').value;
-        writeData();
-      });
-    });
-
-    container.querySelectorAll('.cert-upload').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var idx = parseInt(this.dataset.idx);
-        var file = this.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var d = readData();
-          if (!d.certifications[idx]) return;
-          var img = new Image();
-          img.onload = function() {
-            var MAX = 800;
-            var w = img.width, h = img.height;
-            if (w > MAX || h > MAX) {
-              var ratio = Math.min(MAX / w, MAX / h);
-              var canvas = document.createElement('canvas');
-              canvas.width = Math.round(w * ratio);
-              canvas.height = Math.round(h * ratio);
-              var ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-              d.certifications[idx].path = canvas.toDataURL('image/jpeg', 0.85);
-            } else {
-              d.certifications[idx].path = e.target.result;
-            }
-            writeData();
-            renderCerts();
-            showToast('Image uploaded!', 'success');
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-        this.value = '';
-      });
-    });
-
-    container.querySelectorAll('.cert-upload-clear').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        var d = readData();
-        if (d.certifications[idx]) {
-          d.certifications[idx].path = '';
-          writeData();
-          renderCerts();
-        }
-      });
-    });
-
-    // ─── Certs Reorder ──────────────────────────
-    container.addEventListener('click', function(e) {
-      var btn = e.target.closest('.cert-move-up, .cert-move-down');
-      if (!btn) return;
-      var idx = parseInt(btn.dataset.idx);
-      var d = readData();
-      if (btn.classList.contains('cert-move-up')) {
-        if (idx === 0) return;
-        var tmp = d.certifications[idx];
-        d.certifications[idx] = d.certifications[idx - 1];
-        d.certifications[idx - 1] = tmp;
-      } else {
-        if (idx >= d.certifications.length - 1) return;
-        var tmp = d.certifications[idx];
-        d.certifications[idx] = d.certifications[idx + 1];
-        d.certifications[idx + 1] = tmp;
-      }
-      writeData();
-      renderCerts();
-    });
+    renderManager('certs');
   }
 
   document.getElementById('certs-add').addEventListener('click', function() {
@@ -2742,256 +2788,27 @@ CREATE POLICY "Admin update portfolio_data"
     if (!d.certifications) d.certifications = [];
     d.certifications.push({ id: 'cert-' + Date.now(), name: 'New Certificate', issuer: 'Issuer', date: '2026', path: '' });
     writeData();
-    renderCerts();
-    showToast('New certificate added', 'success');
-  });
-
-  document.getElementById('certs-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('certs-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.cidx);
-      if (isNaN(idx) || !d.certifications[idx]) return;
-      d.certifications[idx].name = card.querySelector('.cert-name').value;
-      d.certifications[idx].issuer = card.querySelector('.cert-issuer').value;
-      d.certifications[idx].date = card.querySelector('.cert-date').value;
-      d.certifications[idx].path = card.querySelector('.cert-path').value;
-    });
-    writeData();
-    showToast('All certifications saved!', 'success');
+    renderManager('certs');
+    openItemModal('certs', d.certifications.length - 1);
   });
 
   // ─── Experience ────────────────────────────
   function renderExperience() {
-    var d = readData();
-    var container = document.getElementById('experience-list');
-    if (!d.experience || !d.experience.length) {
-      container.innerHTML = '<div class="empty-state">No experience entries yet.</div>';
-      return;
-    }
-    container.innerHTML = d.experience.map(function(exp, idx) {
-      var bullets = (exp.bullets || []).map(function(b, bi) {
-        return '<div class="bullet-item">' +
-          '<textarea class="exp-bullet" data-idx="' + idx + '" data-bi="' + bi + '" rows="2">' + escapeHtml(b) + '</textarea>' +
-          '<button class="btn btn-sm btn-danger bullet-remove" data-idx="' + idx + '" data-bi="' + bi + '">×</button>' +
-        '</div>';
-      }).join('');
-      return '<div class="admin-card" data-eidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn exp-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn exp-move-down" data-idx="' + idx + '"' + (idx === d.experience.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(exp.role) + ' @ ' + escapeHtml(exp.company) + '</h4>' +
-          '<button class="btn btn-sm btn-danger exp-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Role</label>' +
-            '<input type="text" class="exp-role" value="' + escapeHtml(exp.role) + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Company</label>' +
-            '<input type="text" class="exp-company" value="' + escapeHtml(exp.company) + '" />' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Bullet Points</label>' +
-          bullets +
-          '<button class="btn btn-sm bullet-add" data-idx="' + idx + '" style="margin-top:0.5rem">+ Add Bullet</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    container.querySelectorAll('.exp-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this experience entry?', function(ok) {
-          if (!ok) return;
-          var d = readData();
-          d.experience.splice(parseInt(this.dataset.idx), 1);
-          writeData();
-          renderExperience();
-          showToast('Experience removed', 'success');
-        });
-      });
-    });
-
-    container.querySelectorAll('.bullet-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var d = readData();
-        d.experience[parseInt(this.dataset.idx)].bullets.splice(parseInt(this.dataset.bi), 1);
-        writeData();
-        renderExperience();
-      });
-    });
-
-    container.querySelectorAll('.exp-role, .exp-company').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.eidx);
-        var d = readData();
-        d.experience[idx].role = card.querySelector('.exp-role').value;
-        d.experience[idx].company = card.querySelector('.exp-company').value;
-        writeData();
-      });
-    });
-
-    container.querySelectorAll('.exp-bullet').forEach(function(textarea) {
-      textarea.addEventListener('change', function() {
-        var d = readData();
-        d.experience[parseInt(this.dataset.idx)].bullets[parseInt(this.dataset.bi)] = this.value;
-        writeData();
-      });
-    });
-
-    container.querySelectorAll('.bullet-add').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        var d = readData();
-        d.experience[idx].bullets.push('New bullet point');
-        writeData();
-        renderExperience();
-      });
-    });
-
-    // ─── Experience Reorder ─────────────────────
-    container.addEventListener('click', function(e) {
-      var btn = e.target.closest('.exp-move-up, .exp-move-down');
-      if (!btn) return;
-      var idx = parseInt(btn.dataset.idx);
-      var d = readData();
-      if (btn.classList.contains('exp-move-up')) {
-        if (idx === 0) return;
-        var tmp = d.experience[idx];
-        d.experience[idx] = d.experience[idx - 1];
-        d.experience[idx - 1] = tmp;
-      } else {
-        if (idx >= d.experience.length - 1) return;
-        var tmp = d.experience[idx];
-        d.experience[idx] = d.experience[idx + 1];
-        d.experience[idx + 1] = tmp;
-      }
-      writeData();
-      renderExperience();
-    });
+    renderManager('experience');
   }
 
   document.getElementById('experience-add').addEventListener('click', function() {
     var d = readData();
     if (!d.experience) d.experience = [];
-    d.experience.push({
-      id: 'exp-' + Date.now(),
-      role: 'New Role',
-      company: 'Company Name',
-      date: '2026',
-      bullets: ['Bullet point 1']
-    });
+    d.experience.push({ id: 'exp-' + Date.now(), role: 'New Role', company: 'Company Name', date: '2026', bullets: ['New bullet point'] });
     writeData();
-    renderExperience();
-    showToast('New experience added', 'success');
-  });
-
-  document.getElementById('experience-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('experience-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.eidx);
-      if (isNaN(idx) || !d.experience[idx]) return;
-      d.experience[idx].role = card.querySelector('.exp-role').value;
-      d.experience[idx].company = card.querySelector('.exp-company').value;
-      var bullets = card.querySelectorAll('.exp-bullet');
-      bullets.forEach(function(textarea, bi) {
-        if (!d.experience[idx].bullets[bi]) {
-          d.experience[idx].bullets[bi] = '';
-        }
-        d.experience[idx].bullets[bi] = textarea.value;
-      });
-    });
-    writeData();
-    showToast('All experience saved!', 'success');
+    renderManager('experience');
+    openItemModal('experience', d.experience.length - 1);
   });
 
   // ─── Learning Journey ────────────────────
   function renderLearningMilestones() {
-    var d = readData();
-    var container = document.getElementById('learning-list');
-    if (!d.learning || !d.learning.length) {
-      container.innerHTML = '<div class="empty-state">No milestones yet.</div>';
-      return;
-    }
-    container.innerHTML = d.learning.map(function(item, idx) {
-      return '<div class="admin-card" data-lidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn learn-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn learn-move-down" data-idx="' + idx + '"' + (idx === d.learning.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(item.title) + ' (' + escapeHtml(item.year) + ')</h4>' +
-          '<button class="btn btn-sm btn-danger learn-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Year</label>' +
-            '<input type="text" class="learn-year" value="' + escapeHtml(item.year) + '" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Title</label>' +
-            '<input type="text" class="learn-title" value="' + escapeHtml(item.title) + '" />' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-group">' +
-          '<label>Description</label>' +
-          '<textarea class="learn-desc" rows="3">' + escapeHtml(item.description) + '</textarea>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    container.querySelectorAll('.learn-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this milestone?', function(ok) {
-          if (!ok) return;
-          var d = readData();
-          d.learning.splice(parseInt(this.dataset.idx), 1);
-          writeData();
-          renderLearningMilestones();
-          showToast('Milestone removed', 'success');
-        });
-      });
-    });
-
-    container.querySelectorAll('.admin-card input, .admin-card textarea').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.lidx);
-        var d = readData();
-        if (!d.learning[idx]) return;
-        d.learning[idx].year = card.querySelector('.learn-year').value;
-        d.learning[idx].title = card.querySelector('.learn-title').value;
-        d.learning[idx].description = card.querySelector('.learn-desc').value;
-        writeData();
-      });
-    });
-
-    // ─── Learning Reorder ───────────────────────
-    container.addEventListener('click', function(e) {
-      var btn = e.target.closest('.learn-move-up, .learn-move-down');
-      if (!btn) return;
-      var idx = parseInt(btn.dataset.idx);
-      var d = readData();
-      if (btn.classList.contains('learn-move-up')) {
-        if (idx === 0) return;
-        var tmp = d.learning[idx];
-        d.learning[idx] = d.learning[idx - 1];
-        d.learning[idx - 1] = tmp;
-      } else {
-        if (idx >= d.learning.length - 1) return;
-        var tmp = d.learning[idx];
-        d.learning[idx] = d.learning[idx + 1];
-        d.learning[idx + 1] = tmp;
-      }
-      writeData();
-      renderLearningMilestones();
-    });
+    renderManager('learning');
   }
 
   document.getElementById('learning-add').addEventListener('click', function() {
@@ -2999,126 +2816,15 @@ CREATE POLICY "Admin update portfolio_data"
     if (!d.learning) d.learning = [];
     d.learning.push({ year: '2026', title: 'New Milestone', description: 'Description of what I learned.' });
     writeData();
-    renderLearningMilestones();
-    showToast('New milestone added', 'success');
-  });
-
-  document.getElementById('learning-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('learning-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.lidx);
-      if (isNaN(idx) || !d.learning[idx]) return;
-      d.learning[idx].year = card.querySelector('.learn-year').value;
-      d.learning[idx].title = card.querySelector('.learn-title').value;
-      d.learning[idx].description = card.querySelector('.learn-desc').value;
-    });
-    writeData();
-    showToast('All milestones saved!', 'success');
+    renderManager('learning');
+    openItemModal('learning', d.learning.length - 1);
   });
 
   // ─── Direct Contact Links ─────────────────
   function renderContactLinksList() {
-    var d = readData();
-    var container = document.getElementById('contact-links-list');
-    if (!d.contactLinks || !d.contactLinks.length) {
-      container.innerHTML = '<div class="empty-state">Email and GitHub show by default until you add your own links.</div>';
-      updateIdPreview();
-      return;
-    }
-    container.innerHTML = d.contactLinks.map(function(link, idx) {
-      return '<div class="admin-card" data-cidx="' + idx + '">' +
-        '<div class="admin-card-header">' +
-          '<div class="admin-card-actions">' +
-            '<button class="reorder-btn contact-move-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move Up">' + REORDER_UP_SVG + '</button>' +
-            '<button class="reorder-btn contact-move-down" data-idx="' + idx + '"' + (idx === d.contactLinks.length - 1 ? ' disabled' : '') + ' title="Move Down">' + REORDER_DOWN_SVG + '</button>' +
-          '</div>' +
-          '<h4>' + escapeHtml(link.label || 'New Link') + '</h4>' +
-          '<button class="btn btn-sm btn-danger contact-remove" data-idx="' + idx + '">Remove</button>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group">' +
-            '<label>Label</label>' +
-            '<input type="text" class="contact-label" value="' + escapeHtml(link.label || '') + '" placeholder="e.g. LinkedIn" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Display Text</label>' +
-            '<input type="text" class="contact-value" value="' + escapeHtml(link.value || '') + '" placeholder="e.g. linkedin.com/in/username" />' +
-          '</div>' +
-        '</div>' +
-        '<div class="form-row">' +
-          '<div class="form-group" style="flex:2">' +
-            '<label>URL</label>' +
-            '<input type="text" class="contact-url" value="' + escapeHtml(link.url || '') + '" placeholder="https://linkedin.com/in/username" />' +
-          '</div>' +
-          '<div class="form-group">' +
-            '<label>Icon</label>' +
-            '<select class="contact-icon">' +
-              '<option value="email"' + (link.icon === 'email' ? ' selected' : '') + '>Email</option>' +
-              '<option value="github"' + (link.icon === 'github' ? ' selected' : '') + '>GitHub</option>' +
-              '<option value="linkedin"' + (link.icon === 'linkedin' ? ' selected' : '') + '>LinkedIn</option>' +
-              '<option value="generic"' + (link.icon === 'generic' ? ' selected' : '') + '>Link</option>' +
-            '</select>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-
-    container.querySelectorAll('.contact-remove').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        showConfirm('Remove this contact link?', function(ok) {
-          if (!ok) return;
-          var d = readData();
-          d.contactLinks.splice(parseInt(this.dataset.idx), 1);
-          writeData();
-          renderContactLinksList();
-          showToast('Link removed', 'success');
-        });
-      });
-    });
-
-    container.querySelectorAll('.admin-card input, .admin-card select').forEach(function(input) {
-      input.addEventListener('change', function() {
-        var card = this.closest('.admin-card');
-        var idx = parseInt(card.dataset.cidx);
-        var d = readData();
-        if (!d.contactLinks[idx]) return;
-        d.contactLinks[idx].label = card.querySelector('.contact-label').value;
-        d.contactLinks[idx].value = card.querySelector('.contact-value').value;
-        d.contactLinks[idx].url = card.querySelector('.contact-url').value;
-        d.contactLinks[idx].icon = card.querySelector('.contact-icon').value;
-        writeData();
-      });
-    });
-
-    // ─── Contact Reorder ─────────────────────
-    container.addEventListener('click', function(e) {
-      var btn = e.target.closest('.contact-move-up, .contact-move-down');
-      if (!btn) return;
-      var idx = parseInt(btn.dataset.idx);
-      var d = readData();
-      if (btn.classList.contains('contact-move-up')) {
-        if (idx === 0) return;
-        var tmp = d.contactLinks[idx];
-        d.contactLinks[idx] = d.contactLinks[idx - 1];
-        d.contactLinks[idx - 1] = tmp;
-      } else {
-        if (idx >= d.contactLinks.length - 1) return;
-        var tmp = d.contactLinks[idx];
-        d.contactLinks[idx] = d.contactLinks[idx + 1];
-        d.contactLinks[idx + 1] = tmp;
-      }
-      writeData();
-      renderContactLinksList();
-      updateIdPreview();
-    });
-
+    renderManager('contact-links');
     updateIdPreview();
   }
-
-  // Live ID-back preview — delegated so it works across link re-renders
-  var linksListEl = document.getElementById('contact-links-list');
-  if (linksListEl) linksListEl.addEventListener('input', updateIdPreview);
 
   document.getElementById('contact-links-add').addEventListener('click', function() {
     var d = readData();
@@ -3131,23 +2837,8 @@ CREATE POLICY "Admin update portfolio_data"
     }
     d.contactLinks.push({ label: 'LinkedIn', value: 'linkedin.com/in/username', url: 'https://linkedin.com/in/username', icon: 'linkedin' });
     writeData();
-    renderContactLinksList();
-    showToast('New contact link added', 'success');
-  });
-
-  document.getElementById('contact-links-save').addEventListener('click', function() {
-    var d = readData();
-    var container = document.getElementById('contact-links-list');
-    container.querySelectorAll('.admin-card').forEach(function(card) {
-      var idx = parseInt(card.dataset.cidx);
-      if (isNaN(idx) || !d.contactLinks[idx]) return;
-      d.contactLinks[idx].label = card.querySelector('.contact-label').value;
-      d.contactLinks[idx].value = card.querySelector('.contact-value').value;
-      d.contactLinks[idx].url = card.querySelector('.contact-url').value;
-      d.contactLinks[idx].icon = card.querySelector('.contact-icon').value;
-    });
-    writeData();
-    showToast('All contact links saved!', 'success');
+    renderManager('contact-links');
+    openItemModal('contact-links', d.contactLinks.length - 1);
   });
 
   // ─── JSON Export/Import ────────────────────
