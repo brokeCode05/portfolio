@@ -624,6 +624,30 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.hero-extra-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.hero-extra-row input {
+  flex: 1;
+  min-width: 0;
+}
+.hero-extra-row .hero-extra-label {
+  flex: 0 0 40%;
+}
+.hero-extra-remove {
+  flex-shrink: 0;
+  padding: 0 10px;
+}
+#hero-extra-add {
+  margin-top: 2px;
+}
+#hero-extra-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .idp-foot {
   display: flex;
   align-items: center;

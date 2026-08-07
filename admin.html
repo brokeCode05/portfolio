@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807b" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -245,6 +245,12 @@
               <label>Status Text (shown on ID back)</label>
               <input type="text" id="hero-status" />
             </div>
+          </div>
+          <div class="form-group">
+            <label>Extra Info Rows (ID back)</label>
+            <div id="hero-extra-rows"></div>
+            <button type="button" class="btn btn-sm" id="hero-extra-add">+ Add row</button>
+            <small class="form-hint">Extra label/value lines on the ID back — e.g. Phone, Website, Student Year. Location and Status are always shown first.</small>
           </div>
           <div class="form-group">
             <label>Profile Photo</label>
@@ -599,7 +605,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260807"></script>
+<script src="js/portfolio-data.js?v=20260807b"></script>
 <script>
 (function(){
   'use strict';
@@ -1458,6 +1464,7 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-status').value = d.hero.status || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
+    renderHeroExtraRows(d.hero.infoRows || []);
     renderHeroPhotoPreview(d.hero.photo || '');
   }
 
@@ -1472,12 +1479,66 @@ CREATE POLICY "Admin update portfolio_data"
     }
   }
 
+  // ─── Hero: extra ID back rows editor ──────
+  var HERO_EXTRA_MAX = 5;
+  function heroExtraRowHTML(label, value) {
+    return '<div class="hero-extra-row">' +
+      '<input type="text" class="hero-extra-label" placeholder="Label (e.g. Phone)" value="' + escapeHtml(label || '') + '" />' +
+      '<input type="text" class="hero-extra-value" placeholder="Value" value="' + escapeHtml(value || '') + '" />' +
+      '<button type="button" class="btn btn-sm hero-extra-remove" title="Remove row" aria-label="Remove row">×</button>' +
+      '</div>';
+  }
+  function renderHeroExtraRows(rows) {
+    var box = document.getElementById('hero-extra-rows');
+    if (!box) return;
+    box.innerHTML = (rows || []).map(function(r) {
+      return heroExtraRowHTML(r && r.label, r && r.value);
+    }).join('');
+    var addBtn = document.getElementById('hero-extra-add');
+    if (addBtn) addBtn.disabled = box.children.length >= HERO_EXTRA_MAX;
+  }
+  function collectHeroExtraRows() {
+    var rows = [];
+    var box = document.getElementById('hero-extra-rows');
+    if (!box) return rows;
+    box.querySelectorAll('.hero-extra-row').forEach(function(el) {
+      var label = el.querySelector('.hero-extra-label').value.trim();
+      var value = el.querySelector('.hero-extra-value').value.trim();
+      if (label && value) rows.push({ label: label, value: value });
+    });
+    return rows;
+  }
+  var heroExtraBox = document.getElementById('hero-extra-rows');
+  if (heroExtraBox) {
+    heroExtraBox.addEventListener('click', function(e) {
+      var btn = e.target.closest('.hero-extra-remove');
+      if (!btn) return;
+      btn.parentNode.remove();
+      var addBtn = document.getElementById('hero-extra-add');
+      if (addBtn) addBtn.disabled = heroExtraBox.children.length >= HERO_EXTRA_MAX;
+      updateIdPreview();
+    });
+  }
+  var heroExtraAdd = document.getElementById('hero-extra-add');
+  if (heroExtraAdd) {
+    heroExtraAdd.addEventListener('click', function() {
+      var box = document.getElementById('hero-extra-rows');
+      if (!box || box.children.length >= HERO_EXTRA_MAX) return;
+      box.insertAdjacentHTML('beforeend', heroExtraRowHTML('', ''));
+      heroExtraAdd.disabled = box.children.length >= HERO_EXTRA_MAX;
+      var last = box.querySelector('.hero-extra-row:last-child .hero-extra-label');
+      if (last) last.focus();
+      updateIdPreview();
+    });
+  }
+
   document.getElementById('hero-save').addEventListener('click', function() {
     var d = readData();
     d.hero.badge = document.getElementById('hero-badge').value;
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
     d.hero.location = document.getElementById('hero-location').value.trim();
+    d.hero.infoRows = collectHeroExtraRows();
     d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
     d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
     d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1523,6 +1584,7 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
           d.hero.location = document.getElementById('hero-location').value.trim();
+          d.hero.infoRows = collectHeroExtraRows();
           d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
           d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
           d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1550,6 +1612,7 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
       d.hero.location = document.getElementById('hero-location').value.trim();
+      d.hero.infoRows = collectHeroExtraRows();
       d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
       d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
       d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1613,12 +1676,15 @@ CREATE POLICY "Admin update portfolio_data"
     qrTargetEl.textContent = brand || (qrTarget || 'QR');
 
     // Identity rows — live from the Location / Status form fields
+    // plus any admin-added extra rows in the editor
     var locationInput = document.getElementById('hero-location');
     var statusInput = document.getElementById('hero-status');
     var rows = [
       { label: 'Location', value: locationInput ? locationInput.value : '' },
       { label: 'Status', value: statusInput ? statusInput.value : '' }
-    ].filter(function(row) { return row.value; });
+    ];
+    rows = rows.concat(collectHeroExtraRows());
+    rows = rows.filter(function(row) { return row.value; });
     metaEl.innerHTML = rows.map(function(row) {
       return '<span class="idp-row">' +
         '<span class="idp-row-label">' + escapeHtml(row.label) + '</span>' +

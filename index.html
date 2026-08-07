@@ -3333,7 +3333,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260807"></script>
+  <script src="js/portfolio-data.js?v=20260807b"></script>
   <script src="js/ui-upgrade.js?v=20260807a" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3523,13 +3523,18 @@
         }
 
         // Back-side identity rows — mirrors the card's own data (admin-editable).
+        // Location + Status always come first, then any admin-added extra rows.
         // Rows with empty values are skipped so the back stays clean.
         var badgeBackMeta = document.getElementById('hero-badge-back-meta');
         if (badgeBackMeta) {
           var metaRows = [
             { label: 'Location', value: data.hero.location || '' },
             { label: 'Status', value: data.hero.status || '' }
-          ].filter(function(row) { return row.value; });
+          ];
+          (data.hero.infoRows || []).forEach(function(row) {
+            if (row && row.label) metaRows.push({ label: row.label, value: row.value || '' });
+          });
+          metaRows = metaRows.filter(function(row) { return row.value; });
           badgeBackMeta.innerHTML = metaRows.map(function(row) {
             return '<span class="hero-badge-back-row">' +
               '<span class="hero-badge-back-row-label">' + escapeHtml(row.label) + '</span>' +
