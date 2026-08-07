@@ -526,52 +526,6 @@
     timer = setTimeout(tick, 500);
   }
 
-  // ── Count-up animation ─────────────────────────────────────
-  function countUp(el, target, dur) {
-    var start = null;
-    function frame(ts) {
-      if (start === null) start = ts;
-      var p = Math.min(1, (ts - start) / dur);
-      el.textContent = String(Math.round(easeOutQuad(p) * target));
-      if (p < 1) { requestAnimationFrame(frame); }
-      else { el.textContent = String(target); }
-    }
-    requestAnimationFrame(frame);
-  }
-
-  // ── Data-driven hero stats row ─────────────────────────────
-  function heroStats(container, data) {
-    if (!container) return;
-    container.setAttribute('role', 'list');
-    var targets = statTargets(data);
-    var labels = Object.keys(targets);
-    if (!labels.length) { container.style.display = 'none'; return; }
-    labels.forEach(function (label) {
-      var item = document.createElement('div');
-      item.className = 'hero-stat';
-      item.setAttribute('role', 'listitem');
-      var val = document.createElement('span');
-      val.className = 'hero-stat-value';
-      val.textContent = '0';
-      var lab = document.createElement('span');
-      lab.className = 'hero-stat-label';
-      lab.textContent = label;
-      item.appendChild(val);
-      item.appendChild(lab);
-      container.appendChild(item);
-      if (reducedMotion()) { val.textContent = String(targets[label]); return; }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) {
-            countUp(val, targets[label], 1100);
-            io.disconnect();
-          }
-        });
-      }, { threshold: 0.4 });
-      io.observe(item);
-    });
-  }
-
   // ── Hero media parallax (badge physics lives in index.html) ──
   function parallax() {
     var media = document.getElementById('hero-media');
@@ -619,8 +573,6 @@
     cardSpotlight();
     certTilt();
     heroRoles(document.getElementById('hero-roles-text'), ROLES);
-    heroStats(document.getElementById('hero-stats'),
-      typeof global.loadData === 'function' ? global.loadData() : null);
     parallax();
     backToTop();
     skillFilters();

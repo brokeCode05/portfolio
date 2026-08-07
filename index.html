@@ -47,18 +47,12 @@
   <!-- Skills progress bar cards styles -->
   <style>
     /* ===== Hero: Buttons full clickable area ===== */
-    .hero-actions .btn {
-      width: 100%;
-      justify-content: center;
+    .hero-actions {
+      flex-wrap: wrap;
+      align-items: center;
     }
-    @media (min-width: 769px) {
-      .hero-actions {
-        flex-direction: row;
-      }
-      .hero-actions .btn {
-        width: auto;
-        justify-content: center;
-      }
+    .hero-actions .btn {
+      justify-content: center;
     }
 
     /* ===== Global Button Styles ===== */
@@ -408,16 +402,26 @@
     /* ===== Hero: Premium Portrait ===== */
     .hero-layout {
       display: grid;
-      /* Text column gets the extra room — the ID card only needs ~360px,
-         so 52/48 keeps the left content from feeling cramped next to it.
-         minmax(0, ...) stops long terminal lines from forcing the track wider. */
-      grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+      /* ID-centered: single centered column — the badge is the focal point,
+         identity on top, intro + actions below. */
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
       align-items: center;
-      gap: var(--space-3xl);
+      text-align: center;
+      gap: var(--space-2xl);
       min-height: 75vh;
     }
     .hero-content {
-      max-width: 560px;
+      width: 100%;
+    }
+    .hero-close {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+    .hero-close .hero-description {
+      margin-bottom: 0;
     }
 
     /* ---- Image Column ---- */
@@ -506,7 +510,7 @@
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 540px;
+      max-width: 600px;
       margin: 0 auto;
       display: flex;
       justify-content: center;
@@ -527,7 +531,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 380px;
+      width: 420px;
       /* Gentle idle float — keeps the card alive now that the decos are gone.
          Paused on hover so the 3D tilt stays easy to control. */
       animation: hero-idle-float 7s ease-in-out infinite;
@@ -975,36 +979,21 @@
         gap: var(--space-2xl);
       }
       #hero-badge {
-        width: 340px;
+        width: 390px;
       }
       .hero-badge-qr-real,
       .hero-badge-qr-fallback {
-        width: 136px;
-        height: 136px;
+        width: 140px;
+        height: 140px;
       }
     }
     @media (max-width: 900px) {
       .hero-layout {
-        grid-template-columns: 1fr;
-        text-align: center;
         gap: var(--space-2xl);
         min-height: auto;
       }
-      .hero-content {
-        max-width: 100%;
-      }
-      .hero-actions {
-        justify-content: center;
-      }
-      .hero-terminal {
-        text-align: left;
-      }
-      .hero-media {
-        order: -1;
-        padding: 10px 0;
-      }
       #hero-badge {
-        width: min(350px, 100%);
+        width: min(390px, 100%);
       }
       /* Fixed QR would dominate the smaller card — scale it down
          so the name/links column keeps proportional breathing room. */
@@ -1016,7 +1005,7 @@
     }
     @media (max-width: 480px) {
       #hero-badge {
-        width: min(300px, 100%);
+        width: min(320px, 100%);
       }
       .hero-layout {
         gap: var(--space-xl);
@@ -1052,41 +1041,7 @@
       }
     }
 
-    /* ===== Hero Status Badge ===== */
-    .hero-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: var(--space-md);
-      padding: 4px 12px 4px 8px;
-      font-size: var(--text-xs);
-      font-family: var(--font-code);
-      color: var(--color-text-secondary);
-      border: 1px solid var(--color-border);
-      border-radius: 100px;
-      background-color: var(--color-surface);
-      white-space: nowrap;
-    }
-    .hero-status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: var(--color-accent);
-      animation: hero-status-pulse 2s ease-in-out infinite;
-    }
-    @keyframes hero-status-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .hero-status-text {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    @media (max-width: 900px) {
-      .hero-status {
-        justify-content: center;
-      }
-    }
+
 
 
 
@@ -2092,35 +2047,17 @@
   <section id="hero" class="hero section" aria-label="Introduction">
     <div class="container">
       <div class="hero-layout">
-        <!-- Left: Content -->
-        <div class="hero-content">          <div class="hero-badge"></div>
-          <div class="hero-status" aria-label="">
-            <span class="hero-status-dot" aria-hidden="true"></span>
-            <span class="hero-status-text"></span>
-          </div>
+        <!-- Top: identity — name + role rotator -->
+        <div class="hero-content">
           <h1 class="hero-title"></h1>
-          <p class="hero-description"></p>
           <div class="hero-roles">
             <span class="hero-roles-prompt">~/role</span>
             <span id="hero-roles-text"></span>
             <span class="hero-roles-caret" aria-hidden="true">▊</span>
           </div>
-          <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
-          </div>
-          <div class="hero-stats" id="hero-stats" data-reveal data-reveal-delay="200" aria-label="Portfolio stats"></div>
-          <div class="hero-terminal" aria-hidden="true">
-            <div class="terminal-line">
-              <span class="prompt">$</span>
-              <span class="typing" id="hero-typing"></span>
-              <span class="cursor-blink" id="hero-cursor">▊</span>
-            </div>
-            <div class="terminal-output" id="hero-output"></div>
-          </div>
         </div>
 
-        <!-- Right: Premium Portrait -->
+        <!-- Center: the ID badge — the focal point -->
         <div class="hero-media" id="hero-media" data-parallax>
           <!-- Background effects -->
           <div class="hero-media-glow" aria-hidden="true"></div>
@@ -2204,6 +2141,15 @@
               </div>
               <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
             </div>
+          </div>
+        </div>
+
+        <!-- Bottom: intro + calls to action -->
+        <div class="hero-close">
+          <p class="hero-description"></p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">View Projects</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
           </div>
         </div>
       </div>
@@ -3358,7 +3304,7 @@
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
   <script src="js/portfolio-data.js?v=20260805o"></script>
-  <script src="js/ui-upgrade.js?v=20260805i" defer></script>
+  <script src="js/ui-upgrade.js?v=20260807a" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
   (function(){
@@ -3467,13 +3413,9 @@
 
       function renderPortfolio(data) {
         // ─── Hero ─────────────────────────────────
-        var badgeEl = document.querySelector('.hero-badge');
-        var statusTextEl = document.querySelector('.hero-status-text');
         var titleEl = document.querySelector('.hero-title');
         var descEl = document.querySelector('.hero-description');
 
-        if (badgeEl) badgeEl.textContent = data.hero.badge || '';
-        if (statusTextEl) statusTextEl.textContent = data.hero.status || '';
         if (titleEl) {
           titleEl.innerHTML = (data.hero.title || '').replace(/\n/g, '<br />');
         }
