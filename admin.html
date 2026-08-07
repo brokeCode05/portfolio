@@ -2493,9 +2493,11 @@ CREATE POLICY "Admin update portfolio_data"
       }
     });
 
-    // Drag-and-drop reordering — grab the grip handle and drop onto another
-    // row (top half = place before, bottom half = place after).
-    var dragState = { from: -1 };
+    // Drag-and-drop reordering — drag any row (top half of the target = place
+    // before, bottom half = place after). Drops work on rows AND in the gaps
+    // between them; the insertion index is captured in dragover so the drop is
+    // reliable no matter where the pointer is released.
+    var dragState = { from: -1, to: -1 };
     container.addEventListener('dragstart', function(e) {
       // Drag from anywhere on the row except interactive controls, so the whole
       // row feels grabbable while Edit/Remove/up-down buttons stay clickable.
@@ -2503,6 +2505,7 @@ CREATE POLICY "Admin update portfolio_data"
       var row = e.target.closest('.admin-row');
       if (!row) { e.preventDefault(); return; }
       dragState.from = Array.prototype.indexOf.call(container.children, row);
+      dragState.to = -1;
       row.classList.add('dragging');
       try {
         e.dataTransfer.effectAllowed = 'move';
@@ -2510,38 +2513,55 @@ CREATE POLICY "Admin update portfolio_data"
       } catch (err) {}
     });
     container.addEventListener('dragover', function(e) {
-      var row = e.target.closest('.admin-row');
-      if (!row || dragState.from < 0) return;
+      if (dragState.from < 0) return;
+      var cRect = container.getBoundingClientRect();
+      if (e.clientY < cRect.top || e.clientY > cRect.bottom) {
+        dragState.to = -1;
+        return;
+      }
       e.preventDefault();
       try { e.dataTransfer.dropEffect = 'move'; } catch (err) {}
-      var rect = row.getBoundingClientRect();
-      var before = (e.clientY - rect.top) < rect.height / 2;
-      container.querySelectorAll('.admin-row').forEach(function(r) {
-        r.classList.remove('drag-before', 'drag-after');
-      });
-      row.classList.add(before ? 'drag-before' : 'drag-after');
+      var rows = container.querySelectorAll('.admin-row');
+      if (!rows.length) return;
+      // Nearest visible row decides the insertion point (works on rows AND gaps).
+      var best = 0, bestDist = Infinity;
+      for (var i = 0; i < rows.length; i++) {
+        var rc = rows[i].getBoundingClientRect();
+        var d = Math.abs(e.clientY - (rc.top + rc.height / 2));
+        if (d < bestDist) { bestDist = d; best = i; }
+      }
+      var bRect = rows[best].getBoundingClientRect();
+      var before = e.clientY < bRect.top + bRect.height / 2;
+      // Map to the real children index so hidden (filtered) rows keep order.
+      var realIdx = Array.prototype.indexOf.call(container.children, rows[best]);
+      dragState.to = realIdx + (before ? 0 : 1);
+      rows.forEach(function(r) { r.classList.remove('drag-before', 'drag-after'); });
+      rows[best].classList.add(before ? 'drag-before' : 'drag-after');
     });
     container.addEventListener('drop', function(e) {
-      var row = e.target.closest('.admin-row');
-      if (!row || dragState.from < 0) return;
+      if (dragState.from < 0) return;
       e.preventDefault();
       var from = dragState.from;
-      var rowIdx = Array.prototype.indexOf.call(container.children, row);
-      var to = row.classList.contains('drag-before') ? rowIdx : rowIdx + 1;
-      var list = readData()[cfg.key];
-      if (from >= 0 && from < list.length && to >= 0 && to <= list.length && from !== to && to - 1 !== from) {
-        var item = list.splice(from, 1)[0];
-        list.splice(to > from ? to - 1 : to, 0, item);
-        writeData();
-      }
-      renderAfter(name);
+      var to = dragState.to;
       dragState.from = -1;
+      dragState.to = -1;
+      if (to < 0) return;
+      try {
+        var list = readData()[cfg.key] || [];
+        if (from >= 0 && from < list.length && to >= 0 && to <= list.length && from !== to && to - 1 !== from) {
+          var item = list.splice(from, 1)[0];
+          list.splice(to > from ? to - 1 : to, 0, item);
+          writeData();
+        }
+      } catch (err) {}
+      renderAfter(name);
     });
     container.addEventListener('dragend', function() {
       container.querySelectorAll('.admin-row').forEach(function(r) {
         r.classList.remove('dragging', 'drag-before', 'drag-after');
       });
       dragState.from = -1;
+      dragState.to = -1;
     });
     container.addEventListener('dragleave', function(e) {
       if (!container.contains(e.relatedTarget)) {
