@@ -413,7 +413,9 @@
       grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
       align-items: center;
       gap: var(--space-3xl);
-      min-height: 75vh;
+      /* The landscape ID is shorter than the old square card, so a tighter
+         hero keeps both columns visually filled instead of floating. */
+      min-height: 62vh;
     }
     .hero-content {
       max-width: 560px;
@@ -542,7 +544,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 420px;
+      width: 440px;
       /* Gentle idle float — keeps the card alive now that the decos are gone.
          Paused on hover so the 3D tilt stays easy to control. */
       animation: hero-idle-float 7s ease-in-out infinite;
