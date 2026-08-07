@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260803" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -236,9 +236,15 @@
               <input type="text" id="hero-school-sub" placeholder="brokeCode05.dev" />
             </div>
           </div>
-          <div class="form-group">
-            <label>Status Text</label>
-            <input type="text" id="hero-status" />
+          <div class="form-row">
+            <div class="form-group">
+              <label>Location (shown on ID back)</label>
+              <input type="text" id="hero-location" placeholder="Philippines" />
+            </div>
+            <div class="form-group">
+              <label>Status Text (shown on ID back)</label>
+              <input type="text" id="hero-status" />
+            </div>
           </div>
           <div class="form-group">
             <label>Profile Photo</label>
@@ -281,7 +287,7 @@
                   </div>
                   <div class="idp-info">
                     <span class="idp-name" id="idp-name">John Bryan Capellan</span>
-                    <span class="idp-links" id="idp-links"></span>
+                    <span class="idp-meta" id="idp-meta"></span>
                   </div>
                 </div>
                 <div class="idp-foot">
@@ -593,7 +599,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260804"></script>
+<script src="js/portfolio-data.js?v=20260807"></script>
 <script>
 (function(){
   'use strict';
@@ -1445,6 +1451,7 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-badge').value = d.hero.badge || '';
     document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-idno').value = d.hero.idNumber || '';
+    document.getElementById('hero-location').value = d.hero.location || '';
     document.getElementById('hero-qrlink').value = d.hero.qrLink || '';
     document.getElementById('hero-school').value = d.hero.schoolTitle || '';
     document.getElementById('hero-school-sub').value = d.hero.schoolSub || '';
@@ -1470,6 +1477,7 @@ CREATE POLICY "Admin update portfolio_data"
     d.hero.badge = document.getElementById('hero-badge').value;
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
+    d.hero.location = document.getElementById('hero-location').value.trim();
     d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
     d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
     d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1514,6 +1522,7 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.badge = document.getElementById('hero-badge').value;
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
+          d.hero.location = document.getElementById('hero-location').value.trim();
           d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
           d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
           d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1540,6 +1549,7 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.badge = document.getElementById('hero-badge').value;
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
+      d.hero.location = document.getElementById('hero-location').value.trim();
       d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
       d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
       d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
@@ -1565,10 +1575,10 @@ CREATE POLICY "Admin update portfolio_data"
     var idEl = document.getElementById('idp-id');
     var scanLabelEl = document.getElementById('idp-scan-label');
     var qrTargetEl = document.getElementById('idp-qr-target');
-    var linksEl = document.getElementById('idp-links');
+    var metaEl = document.getElementById('idp-meta');
     var schoolEl = document.getElementById('idp-school');
     var schoolSubEl = document.getElementById('idp-sub');
-    if (!nameEl || !idEl || !scanLabelEl || !qrTargetEl || !linksEl) return;
+    if (!nameEl || !idEl || !scanLabelEl || !qrTargetEl || !metaEl) return;
 
     // Badge header (live from the form)
     var schoolInput = document.getElementById('hero-school');
@@ -1602,27 +1612,18 @@ CREATE POLICY "Admin update portfolio_data"
     scanLabelEl.textContent = brand ? 'Scan to connect on ' + brand : 'Scan to connect';
     qrTargetEl.textContent = brand || (qrTarget || 'QR');
 
-    // Contact chips — live from the Direct Contact editor DOM, falling back
-    // to saved/default links when nothing is on screen yet
-    var links = [];
-    var container = document.getElementById('contact-links-list');
-    if (container) {
-      container.querySelectorAll('.admin-card').forEach(function(card) {
-        var label = card.querySelector('.contact-label');
-        var value = card.querySelector('.contact-value');
-        var url = card.querySelector('.contact-url');
-        if (label && value && url) {
-          links.push({ label: label.value, value: value.value, url: url.value });
-        }
-      });
-    }
-    if (!links.length) {
-      var d = readData();
-      links = (d.contactLinks && d.contactLinks.length) ? d.contactLinks : DEFAULT_CONTACT_LINKS;
-    }
-    linksEl.innerHTML = links.slice(0, 4).map(function(link) {
-      return '<span class="idp-link" title="' + escapeHtml(link.label || '') + '">' +
-        escapeHtml(link.value || link.url || link.label || '') + '</span>';
+    // Identity rows — live from the Location / Status form fields
+    var locationInput = document.getElementById('hero-location');
+    var statusInput = document.getElementById('hero-status');
+    var rows = [
+      { label: 'Location', value: locationInput ? locationInput.value : '' },
+      { label: 'Status', value: statusInput ? statusInput.value : '' }
+    ].filter(function(row) { return row.value; });
+    metaEl.innerHTML = rows.map(function(row) {
+      return '<span class="idp-row">' +
+        '<span class="idp-row-label">' + escapeHtml(row.label) + '</span>' +
+        '<span class="idp-row-value">' + escapeHtml(row.value) + '</span>' +
+        '</span>';
     }).join('');
   }
 

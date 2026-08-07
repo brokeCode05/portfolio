@@ -424,26 +424,7 @@
       position: relative;
     }
 
-    /* ===== Left column: cmd line + ID data sheet ===== */
-    .hero-cmd {
-      margin: 0 0 var(--space-md);
-      font-family: var(--font-code);
-      font-size: var(--text-sm);
-      color: var(--color-text-secondary);
-    }
-    .hero-cmd .prompt {
-      color: var(--color-accent);
-      font-weight: 600;
-    }
-    .hero-cmd-caret {
-      display: inline-block;
-      width: 0.55em;
-      height: 1.05em;
-      margin-left: 2px;
-      background-color: var(--color-accent);
-      vertical-align: text-bottom;
-      animation: blink 1s step-end infinite;
-    }
+    /* ===== Left column ===== */
     .hero-content .hero-title {
       margin-bottom: var(--space-md);
     }
@@ -452,37 +433,6 @@
     }
     .hero-content .hero-actions {
       margin-bottom: 0;
-    }
-    /* ID data sheet — mirrors the card's label language (mono uppercase) */
-    .hero-id-data {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      column-gap: var(--space-md);
-      row-gap: 5px;
-      margin: 0 0 var(--space-lg);
-    }
-    .hero-id-row {
-      display: contents;
-    }
-    .hero-id-data dt {
-      font-family: var(--font-code);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-secondary);
-      opacity: 0.75;
-    }
-    .hero-id-data dd {
-      margin: 0;
-      font-family: var(--font-code);
-      font-size: var(--text-sm);
-      color: var(--color-text-primary);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .hero-cmd-caret {
-        animation: none;
-      }
     }
 
     /* ---- Image Column ---- */
@@ -947,23 +897,35 @@
       color: #0F172A;
       line-height: 1.2;
     }
-    .hero-badge-back-links {
+    .hero-badge-back-meta {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
-    .hero-badge-back-link {
+    .hero-badge-back-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
+    .hero-badge-back-row-label {
+      font-family: var(--font-code);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748B;
+      flex-shrink: 0;
+      min-width: 52px;
+    }
+    .hero-badge-back-row-value {
       font-family: var(--font-code);
       font-size: 12px;
-      color: #475569;
-      text-decoration: none;
+      font-weight: 600;
+      color: #0F172A;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      transition: color 0.15s ease;
-    }
-    .hero-badge-back-link:hover {
-      color: var(--color-accent-dim);
     }
     .hero-badge-back-foot {
       display: flex;
@@ -1060,10 +1022,6 @@
       }
       .hero-actions {
         justify-content: center;
-      }
-      .hero-id-data {
-        width: fit-content;
-        margin-inline: auto;
       }
       .hero-media {
         order: -1;
@@ -2126,27 +2084,12 @@
       <div class="hero-layout">
         <!-- Left: content -->
         <div class="hero-content">
-          <p class="hero-cmd" aria-hidden="true"><span class="prompt">$</span> whoami<span class="hero-cmd-caret">▊</span></p>
           <h1 class="hero-title"></h1>
           <div class="hero-roles">
             <span class="hero-roles-prompt">~/role</span>
             <span id="hero-roles-text"></span>
             <span class="hero-roles-caret" aria-hidden="true">▊</span>
           </div>
-          <dl class="hero-id-data">
-            <div class="hero-id-row">
-              <dt>ID No.</dt>
-              <dd id="hero-id-data-no">IT-2024-0842</dd>
-            </div>
-            <div class="hero-id-row">
-              <dt>Location</dt>
-              <dd>Philippines</dd>
-            </div>
-            <div class="hero-id-row">
-              <dt>Status</dt>
-              <dd id="hero-id-data-status">open to work</dd>
-            </div>
-          </dl>
           <p class="hero-description"></p>
           <div class="hero-actions">
             <a href="#projects" class="btn btn-primary">View Projects</a>
@@ -2226,7 +2169,7 @@
                       </div>
                       <div class="hero-badge-back-info">
                         <span class="hero-badge-back-name" id="hero-badge-back-name">John Bryan Capellan</span>
-                        <span class="hero-badge-back-links" id="hero-badge-back-links"></span>
+                        <span class="hero-badge-back-meta" id="hero-badge-back-meta"></span>
                       </div>
                     </div>
                     <div class="hero-badge-back-foot">
@@ -3390,7 +3333,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260805o"></script>
+  <script src="js/portfolio-data.js?v=20260807"></script>
   <script src="js/ui-upgrade.js?v=20260807a" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3502,10 +3445,6 @@
         // ─── Hero ─────────────────────────────────
         var titleEl = document.querySelector('.hero-title');
         var descEl = document.querySelector('.hero-description');
-        var idNoData = document.getElementById('hero-id-data-no');
-        if (idNoData) idNoData.textContent = data.hero.idNumber || 'IT-2024-0842';
-        var idStatusData = document.getElementById('hero-id-data-status');
-        if (idStatusData) idStatusData.textContent = data.hero.status || 'open to work';
 
         if (titleEl) {
           titleEl.innerHTML = (data.hero.title || '').replace(/\n/g, '<br />');
@@ -3583,21 +3522,19 @@
             (knownBrands.indexOf(qrLabel) > -1) ? 'click to flip — scan my ' + qrLabel : 'click to flip';
         }
 
-        // Back-side contact chips — driven by the admin Direct Contact links
-        // (Email, GitHub, LinkedIn, etc.). Falls back to Email + GitHub.
-        var badgeBackLinks = document.getElementById('hero-badge-back-links');
-        if (badgeBackLinks) {
-          var links = (data.contactLinks && data.contactLinks.length)
-            ? data.contactLinks
-            : DEFAULT_CONTACT_LINKS;
-          // Keep the card readable — an ID back fits ~4 contact lines
-          badgeBackLinks.innerHTML = links.slice(0, 4).map(function(link) {
-            var url = link.url || '#';
-            var external = url.indexOf('mailto:') !== 0 && url.indexOf('tel:') !== 0;
-            return '<a class="hero-badge-back-link" href="' + escapeHtml(url) + '"' +
-              (external ? ' target="_blank" rel="noopener"' : '') +
-              ' title="' + escapeHtml(link.label || '') + '">' +
-              escapeHtml(link.value || link.url || link.label || '') + '</a>';
+        // Back-side identity rows — mirrors the card's own data (admin-editable).
+        // Rows with empty values are skipped so the back stays clean.
+        var badgeBackMeta = document.getElementById('hero-badge-back-meta');
+        if (badgeBackMeta) {
+          var metaRows = [
+            { label: 'Location', value: data.hero.location || '' },
+            { label: 'Status', value: data.hero.status || '' }
+          ].filter(function(row) { return row.value; });
+          badgeBackMeta.innerHTML = metaRows.map(function(row) {
+            return '<span class="hero-badge-back-row">' +
+              '<span class="hero-badge-back-row-label">' + escapeHtml(row.label) + '</span>' +
+              '<span class="hero-badge-back-row-value">' + escapeHtml(row.value) + '</span>' +
+              '</span>';
           }).join('');
         }
 

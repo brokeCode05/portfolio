@@ -596,23 +596,33 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.idp-links {
+.idp-meta {
   display: flex;
   flex-direction: column;
   gap: 3px;
   min-height: 8px;
 }
-.idp-link {
+.idp-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+.idp-row-label {
+  font-size: 6px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+.idp-row-value {
   font-size: 7px;
-  color: #475569;
+  font-weight: 600;
+  color: #1E293B;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.idp-link-empty {
-  font-size: 7px;
-  color: #94A3B8;
-  font-style: italic;
 }
 .idp-foot {
   display: flex;
