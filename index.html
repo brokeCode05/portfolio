@@ -1632,6 +1632,195 @@
       }
     }
 
+    /* ===== ID Card Viewer — enlarge the hero badge ===== */
+    .hero-badge-expand {
+      position: absolute;
+      top: 10px;
+      right: 4px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 9px;
+      background: rgba(15, 23, 42, 0.55);
+      color: #FFFFFF;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    #hero-badge:hover .hero-badge-expand,
+    .hero-badge-expand:focus-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .hero-badge-expand:hover {
+      background: rgba(74, 222, 128, 0.9);
+      color: #0F172A;
+      border-color: rgba(74, 222, 128, 0.9);
+    }
+    @media (hover: none) {
+      .hero-badge-expand { opacity: 1; transform: none; }
+    }
+
+    .idzoom-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.78);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+    .idzoom-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .idzoom-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.94);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 301;
+      width: min(600px, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: #0F1115;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .idzoom-overlay.open ~ .idzoom-modal {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .idzoom-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background-color: #1A1D27;
+      border-bottom: 1px solid #2A2D35;
+      flex-shrink: 0;
+    }
+    .idzoom-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .idzoom-dot.red { background-color: #EF4444; }
+    .idzoom-dot.yellow { background-color: #F59E0B; }
+    .idzoom-dot.green { background-color: #4ADE80; }
+    .idzoom-title {
+      margin: 0 auto;
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: #6B7280;
+      letter-spacing: 0.02em;
+    }
+    .idzoom-highlight { color: var(--color-accent); }
+    .idzoom-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid #2A2D35;
+      border-radius: 6px;
+      background: transparent;
+      color: #9CA3AF;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .idzoom-close:hover { color: #FFFFFF; border-color: #EF4444; }
+    .idzoom-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .idzoom-body .hero-badge-card {
+      width: min(480px, 100%);
+      cursor: pointer;
+      transform: none;
+    }
+    .idzoom-body .hero-badge-name { font-size: 26px; }
+    .idzoom-body .hero-badge-role,
+    .idzoom-body .hero-badge-role2 { font-size: 15px; }
+    .idzoom-body .hero-badge-school,
+    .idzoom-body .hero-badge-back-head .hero-badge-school { font-size: 14px; }
+    .idzoom-body .hero-badge-school-sub,
+    .idzoom-body .hero-badge-back-head .hero-badge-school-sub { font-size: 12px; }
+    .idzoom-body .hero-badge-idno { font-size: 13px; }
+    .idzoom-body .hero-badge-photo {
+      width: 34%;
+      height: auto;
+      aspect-ratio: 3 / 3.7;
+    }
+    .idzoom-body .hero-badge-qr-real {
+      width: 148px;
+      height: 148px;
+    }
+    .idzoom-body .hero-badge-scan-label { font-size: 14px; }
+    .idzoom-body .hero-badge-back-link-site { font-size: 14px; }
+    .idzoom-body .hero-badge-stamp { font-size: 9px; padding: 2px 8px; }
+    .idzoom-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 12px 16px;
+      background-color: #1A1D27;
+      border-top: 1px solid #2A2D35;
+      flex-shrink: 0;
+    }
+    .idzoom-hint {
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: #6B7280;
+    }
+    .idzoom-flip-btn {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      font-family: var(--font-code);
+      color: #0F172A;
+      background-color: var(--color-accent);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .idzoom-flip-btn:hover {
+      background-color: #5DF08C;
+      box-shadow: 0 0 14px rgba(74, 222, 128, 0.4);
+    }
+    @media (max-width: 560px) {
+      .idzoom-body { padding: 1rem; }
+      .idzoom-body .hero-badge-card { width: 100%; }
+      .idzoom-body .hero-badge-name { font-size: 20px; }
+      .idzoom-body .hero-badge-role,
+      .idzoom-body .hero-badge-role2 { font-size: 13px; }
+      .idzoom-body .hero-badge-qr-real { width: 120px; height: 120px; }
+      .idzoom-foot { flex-wrap: wrap; }
+    }
+
     /* ===== Certificate Viewer Modal ===== */
     .cert-overlay {
       position: fixed;
@@ -2176,7 +2365,7 @@
           <div class="hero-badge-wrap" id="hero-badge-wrap">
             <!-- ID wrapper styled via #hero-badge; the .hero-badge class in style.min.css is the (unused) pill style -->
             <div id="hero-badge">
-              <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip." aria-pressed="false">
+              <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip, or use the corner button to enlarge." aria-pressed="false">
                 <div class="hero-badge-flip" id="hero-badge-flip">
                   <div class="hero-badge-face" id="hero-badge-face">
                     <div class="hero-badge-head">
@@ -2241,7 +2430,10 @@
                     </div>
                   </div>
                 </div>
-              </div>              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
+              </div>              <button type="button" class="hero-badge-expand" id="hero-badge-expand" aria-label="View ID card enlarged" title="View enlarged">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+              </button>
+              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
             </div>
           </div>
         </div>
@@ -2604,6 +2796,23 @@
     }, 12000);
   })();
   </script>
+
+  <!-- ID Card Viewer Modal (enlarge the hero ID) -->
+  <div class="idzoom-overlay" id="idzoom-overlay" hidden></div>
+  <div class="idzoom-modal" id="idzoom-modal" role="dialog" aria-modal="true" aria-label="Student ID card — enlarged" hidden>
+    <div class="idzoom-head">
+      <span class="idzoom-dot red"></span>
+      <span class="idzoom-dot yellow"></span>
+      <span class="idzoom-dot green"></span>
+      <span class="idzoom-title">ID VIEWER — <span class="idzoom-highlight">enlarged</span></span>
+      <button type="button" class="idzoom-close" id="idzoom-close" aria-label="Close viewer">&times;</button>
+    </div>
+    <div class="idzoom-body" id="idzoom-body"></div>
+    <div class="idzoom-foot">
+      <span class="idzoom-hint">click the card to flip · esc to close</span>
+      <button type="button" class="idzoom-flip-btn" id="idzoom-flip">Flip &#8635;</button>
+    </div>
+  </div>
 
   <!-- Certificate Viewer Modal -->
   <div class="cert-overlay" id="cert-overlay" aria-hidden="true"></div>
@@ -3382,7 +3591,7 @@
         card.setAttribute('aria-pressed', on ? 'true' : 'false');
         card.setAttribute('aria-label',
           (on ? 'Student ID badge — back side. ' : 'Student ID badge — ') +
-          'Click to flip.');
+          'Click to flip. Use the corner button to enlarge.');
       }
       card.addEventListener('click', function() {
         setFlipped(!card.classList.contains('flipped'));
@@ -3406,6 +3615,76 @@
       if (frontHandle) {
         frontHandle.addEventListener('click', function(e) {
           e.stopPropagation();
+        });
+      }
+
+      // ── Enlarge the ID in a lightbox viewer (click-to-flip stays on the card) ──
+      var expandBtn = document.getElementById('hero-badge-expand');
+      var idOverlay = document.getElementById('idzoom-overlay');
+      var idModal = document.getElementById('idzoom-modal');
+      var idBody = document.getElementById('idzoom-body');
+      var idClose = document.getElementById('idzoom-close');
+      var idFlip = document.getElementById('idzoom-flip');
+      var idCloseTimer = null;
+      if (expandBtn && idOverlay && idModal && idBody) {
+        function openIdZoom() {
+          if (idCloseTimer) { clearTimeout(idCloseTimer); idCloseTimer = null; }
+          // Clone the card so the small one keeps its own state and handlers.
+          var clone = card.cloneNode(true);
+          // Strip ids so the clone never collides with the live card.
+          clone.removeAttribute('id');
+          clone.querySelectorAll('[id]').forEach(function(el) { el.removeAttribute('id'); });
+          clone.classList.remove('flipped');
+          clone.setAttribute('aria-label', 'Student ID card — enlarged. Click to flip.');
+          clone.addEventListener('click', function() {
+            clone.classList.toggle('flipped');
+          });
+          clone.addEventListener('keydown', function(ev) {
+            if ((ev.key === 'Enter' || ev.key === ' ') && ev.target === clone) {
+              ev.preventDefault();
+              clone.classList.toggle('flipped');
+            }
+          });
+          // Inner links open normally without flipping the card.
+          clone.querySelectorAll('a').forEach(function(a) {
+            a.addEventListener('click', function(ev) { ev.stopPropagation(); });
+          });
+          idBody.innerHTML = '';
+          idBody.appendChild(clone);
+          idOverlay.hidden = false;
+          idModal.hidden = false;
+          requestAnimationFrame(function() { idOverlay.classList.add('open'); });
+          document.body.classList.add('modal-open');
+          if (idClose) idClose.focus();
+        }
+        function closeIdZoom() {
+          if (idCloseTimer) return;
+          idOverlay.classList.remove('open');
+          document.body.classList.remove('modal-open');
+          idCloseTimer = setTimeout(function() {
+            idOverlay.hidden = true;
+            idModal.hidden = true;
+            idBody.innerHTML = '';
+            idCloseTimer = null;
+          }, 250);
+          if (expandBtn) expandBtn.focus();
+        }
+        expandBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openIdZoom();
+        });
+        if (idClose) idClose.addEventListener('click', closeIdZoom);
+        if (idFlip) {
+          idFlip.addEventListener('click', function() {
+            var cc = idBody.querySelector('.hero-badge-card');
+            if (cc) cc.classList.toggle('flipped');
+          });
+        }
+        idOverlay.addEventListener('click', function(e) {
+          if (e.target === idOverlay) closeIdZoom();
+        });
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && !idOverlay.hidden) closeIdZoom();
         });
       }
     })();
@@ -3552,7 +3831,7 @@
         var personName = data.hero.name || 'John Bryan Capellan';
         var badgeCardEl = document.getElementById('hero-badge-card');
         if (badgeCardEl) {
-          badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + personName + '. Click to flip.');
+          badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + personName + '. Click to flip, or use the corner button to enlarge.');
         }
 
         // Badge header (front + back) — admin-editable school title/subtitle
@@ -3604,7 +3883,7 @@
           // is too long for the 8px caption.
           var knownBrands = ['GitHub', 'LinkedIn', 'Facebook', 'Instagram', 'Telegram', 'X / Twitter'];
           badgeFlipHint.textContent =
-            (knownBrands.indexOf(qrLabel) > -1) ? 'click to flip — scan my ' + qrLabel : 'click to flip';
+            (knownBrands.indexOf(qrLabel) > -1) ? 'flip to scan my ' + qrLabel + ' · ⤢ enlarge' : 'click to flip · ⤢ enlarge';
         }
 
         // ─── About ────────────────────────────────
