@@ -1001,6 +1001,13 @@
       #hero-badge {
         width: 290px;
       }
+      /* Fixed 128px QR would dominate the smaller card — scale it down
+         so the name/links column keeps proportional breathing room. */
+      .hero-badge-qr-real,
+      .hero-badge-qr-fallback {
+        width: 108px;
+        height: 108px;
+      }
     }
     @media (max-width: 480px) {
       #hero-badge {
@@ -1008,6 +1015,15 @@
       }
       .hero-layout {
         gap: var(--space-xl);
+      }
+      /* Tighter back face on phones — QR 96px, smaller column gap */
+      .hero-badge-qr-real,
+      .hero-badge-qr-fallback {
+        width: 96px;
+        height: 96px;
+      }
+      .hero-badge-back-body {
+        gap: 12px;
       }
     }
     @media (prefers-reduced-motion: reduce) {
