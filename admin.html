@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807o" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807p" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -1887,10 +1887,6 @@ CREATE POLICY "Admin update portfolio_data"
     e.returnValue = '';
   });
 
-  // ─── Reorder SVG Icons ─────────────────────
-  var REORDER_UP_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
-  var REORDER_DOWN_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-
   // ─── Helpers ───────────────────────────────
   function readData() { data = loadData(); return data; }
   function writeData() {
@@ -2478,6 +2474,9 @@ CREATE POLICY "Admin update portfolio_data"
       sub: function(f) { return String(f.answer || '').slice(0, 90); } }
   };
 
+  // 6-dot grip handle for drag reordering (replaces the old up/down buttons).
+  var DRAG_GRIP_SVG = '<svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="2" r="1.2"/><circle cx="9" cy="2" r="1.2"/><circle cx="3" cy="8" r="1.2"/><circle cx="9" cy="8" r="1.2"/><circle cx="3" cy="14" r="1.2"/><circle cx="9" cy="14" r="1.2"/></svg>';
+
   function renderManager(name) {
     var cfg = MANAGERS[name];
     var d = readData();
@@ -2491,20 +2490,25 @@ CREATE POLICY "Admin update portfolio_data"
       return;
     }
     container.innerHTML = list.map(function(item, idx) {
-      return '<div class="admin-row">' +
+      return '<div class="admin-row" draggable="true">' +
+        '<span class="drag-handle" title="Drag to reorder" aria-hidden="true">' + DRAG_GRIP_SVG + '</span>' +
         '<div class="admin-row-main">' +
           '<div class="admin-row-title">' + escapeHtml(cfg.title(item)) + '</div>' +
           (cfg.sub ? '<div class="admin-row-sub">' + escapeHtml(cfg.sub(item)) + '</div>' : '') +
           (cfg.badge ? cfg.badge(item) : '') +
         '</div>' +
         '<div class="admin-row-actions">' +
-          '<button class="reorder-btn ' + name + '-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move up">' + REORDER_UP_SVG + '</button>' +
-          '<button class="reorder-btn ' + name + '-down" data-idx="' + idx + '"' + (idx === list.length - 1 ? ' disabled' : '') + ' title="Move down">' + REORDER_DOWN_SVG + '</button>' +
+          // Touch/keyboard fallback — hidden on desktop (drag handles win there),
+          // shown on touch devices and when a row is focused via the keyboard.
+          '<button class="reorder-btn touch-reorder ' + name + '-up" data-idx="' + idx + '"' + (idx === 0 ? ' disabled' : '') + ' title="Move up" aria-label="Move up">↑</button>' +
+          '<button class="reorder-btn touch-reorder ' + name + '-down" data-idx="' + idx + '"' + (idx === list.length - 1 ? ' disabled' : '') + ' title="Move down" aria-label="Move down">↓</button>' +
           '<button class="btn btn-sm ' + name + '-edit" data-idx="' + idx + '">Edit</button>' +
           '<button class="btn btn-sm btn-danger ' + name + '-remove" data-idx="' + idx + '" title="Remove">×</button>' +
         '</div>' +
       '</div>';
     }).join('');
+    // Re-apply the live projects filter after a re-render (drag/edit/remove).
+    if (name === 'projects') applyProjectsFilter();
   }
 
   function renderProjects() { renderManager('projects'); }
@@ -2550,6 +2554,63 @@ CREATE POLICY "Admin update portfolio_data"
         var tmp = list[idx]; list[idx] = list[to]; list[to] = tmp;
         writeData();
         renderAfter(name);
+        return;
+      }
+    });
+
+    // Drag-and-drop reordering — grab the grip handle and drop onto another
+    // row (top half = place before, bottom half = place after).
+    var dragState = { from: -1 };
+    container.addEventListener('dragstart', function(e) {
+      if (!e.target.closest('.drag-handle')) { e.preventDefault(); return; }
+      var row = e.target.closest('.admin-row');
+      if (!row) { e.preventDefault(); return; }
+      dragState.from = Array.prototype.indexOf.call(container.children, row);
+      row.classList.add('dragging');
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(dragState.from));
+      } catch (err) {}
+    });
+    container.addEventListener('dragover', function(e) {
+      var row = e.target.closest('.admin-row');
+      if (!row || dragState.from < 0) return;
+      e.preventDefault();
+      try { e.dataTransfer.dropEffect = 'move'; } catch (err) {}
+      var rect = row.getBoundingClientRect();
+      var before = (e.clientY - rect.top) < rect.height / 2;
+      container.querySelectorAll('.admin-row').forEach(function(r) {
+        r.classList.remove('drag-before', 'drag-after');
+      });
+      row.classList.add(before ? 'drag-before' : 'drag-after');
+    });
+    container.addEventListener('drop', function(e) {
+      var row = e.target.closest('.admin-row');
+      if (!row || dragState.from < 0) return;
+      e.preventDefault();
+      var from = dragState.from;
+      var rowIdx = Array.prototype.indexOf.call(container.children, row);
+      var to = row.classList.contains('drag-before') ? rowIdx : rowIdx + 1;
+      var list = readData()[cfg.key];
+      if (from >= 0 && from < list.length && to >= 0 && to <= list.length && from !== to && to - 1 !== from) {
+        var item = list.splice(from, 1)[0];
+        list.splice(to > from ? to - 1 : to, 0, item);
+        writeData();
+      }
+      renderAfter(name);
+      dragState.from = -1;
+    });
+    container.addEventListener('dragend', function() {
+      container.querySelectorAll('.admin-row').forEach(function(r) {
+        r.classList.remove('dragging', 'drag-before', 'drag-after');
+      });
+      dragState.from = -1;
+    });
+    container.addEventListener('dragleave', function(e) {
+      if (!container.contains(e.relatedTarget)) {
+        container.querySelectorAll('.admin-row').forEach(function(r) {
+          r.classList.remove('drag-before', 'drag-after');
+        });
       }
     });
   });
@@ -2759,14 +2820,18 @@ CREATE POLICY "Admin update portfolio_data"
   })();
 
   // Live filter for the projects manager (title / category / tags / status).
+  // Named so renderManager can re-apply it after every re-render.
+  function applyProjectsFilter() {
+    var input = document.getElementById('projects-search');
+    if (!input || !input.value) return;
+    var q = input.value.toLowerCase().trim();
+    document.querySelectorAll('#projects-list .admin-row').forEach(function(row) {
+      row.style.display = (!q || row.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+    });
+  }
   var projectsSearchEl = document.getElementById('projects-search');
   if (projectsSearchEl) {
-    projectsSearchEl.addEventListener('input', function() {
-      var q = projectsSearchEl.value.toLowerCase().trim();
-      document.querySelectorAll('#projects-list .admin-row').forEach(function(row) {
-        row.style.display = (!q || row.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
-      });
-    });
+    projectsSearchEl.addEventListener('input', applyProjectsFilter);
   }
 
   document.getElementById('projects-add').addEventListener('click', function() {
