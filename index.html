@@ -562,6 +562,8 @@
     .hero-badge-card {
       position: relative;
       width: 100%;
+      /* Real ID card proportions — ISO 7810 ID-1: 85.6 x 54 mm (landscape). */
+      aspect-ratio: 1.585;
       margin-top: 6px;
       border-radius: 16px;
       cursor: pointer;
@@ -582,13 +584,10 @@
     .hero-badge-flip {
       display: flex;
       position: relative;
+      height: 100%;
       transform-style: preserve-3d;
       transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
       will-change: transform;
-      /* The back face carries more content (QR + scan + link + identity
-         strip + ID number) than the front, so the card gets a taller
-         minimum height — otherwise the back clips. */
-      min-height: 380px;
     }
     .hero-badge-card.flipped .hero-badge-flip {
       transform: rotateY(180deg);
@@ -666,7 +665,7 @@
       z-index: 1;
       pointer-events: none;
       font-family: var(--font-code);
-      font-size: 34px;
+      font-size: 24px;
       font-weight: 600;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -702,7 +701,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 14px 20px 11px;
+      padding: 10px 20px 8px;
       position: relative;
       z-index: 2;
     }
@@ -742,15 +741,15 @@
       display: flex;
       flex: 1;
       align-items: center;
-      gap: 18px;
-      padding: 6px 20px 14px;
+      gap: 16px;
+      padding: 6px 20px 10px;
       position: relative;
       z-index: 2;
     }
     .hero-badge-photo {
       position: relative;
-      width: 44%;
-      height: 235px;
+      width: 32%;
+      height: 128px;
       align-self: center;
       flex-shrink: 0;
       border-radius: 10px;
@@ -870,8 +869,24 @@
         padding: 1px 7px;
       }
       .hero-badge-photo {
-        width: 46%;
-        height: 200px;
+        width: 34%;
+        height: 104px;
+      }
+      .hero-badge-head,
+      .hero-badge-back-head {
+        padding: 8px 14px 6px;
+      }
+      .hero-badge-body,
+      .hero-badge-back-body {
+        padding: 4px 14px 8px;
+      }
+      .hero-badge-foot,
+      .hero-badge-back-foot {
+        padding: 6px 14px 8px;
+      }
+      .hero-badge-logo {
+        width: 26px;
+        height: 26px;
       }
     }
     /* Card footer — barcode + handle */
@@ -879,14 +894,14 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 11px 20px 13px;
+      padding: 8px 20px 10px;
       border-top: 1px solid rgba(20, 30, 48, 0.09);
       position: relative;
       z-index: 2;
     }
     .hero-badge-barcode {
       flex: 1;
-      height: 20px;
+      height: 14px;
       background: repeating-linear-gradient(
         90deg,
         #1E293B 0 2px,
@@ -928,14 +943,15 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 16px 20px 11px;
+      padding: 10px 20px 8px;
       position: relative;
       z-index: 2;
     }
     .hero-badge-back-body {
       flex: 1;
       display: flex;
-      padding: 6px 20px 14px;
+      flex-direction: column;
+      padding: 4px 20px 8px;
       position: relative;
       z-index: 2;
     }
@@ -945,7 +961,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
     }
     .hero-badge-scan {
       display: flex;
@@ -984,8 +1000,8 @@
     }
     .hero-badge-qr-real {
       display: block;
-      width: 140px;
-      height: 140px;
+      width: 108px;
+      height: 108px;
       padding: 8px;
       border-radius: 8px;
       background: #FFFFFF;
@@ -993,8 +1009,8 @@
     }
     .hero-badge-qr-fallback {
       display: none;
-      width: 140px;
-      height: 140px;
+      width: 108px;
+      height: 108px;
       border-radius: 8px;
       background:
         conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
@@ -1005,7 +1021,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 11px 20px 13px;
+      padding: 8px 20px 10px;
       border-top: 1px solid rgba(20, 30, 48, 0.09);
       position: relative;
       z-index: 2;
@@ -1095,17 +1111,11 @@
       /* Tighter back face on phones — QR 120px, smaller column gap */
       .hero-badge-qr-real,
       .hero-badge-qr-fallback {
-        width: 120px;
-        height: 120px;
-      }
-      .hero-badge-back-body {
-        gap: 14px;
-      }
-      .hero-badge-flip {
-        min-height: 350px;
+        width: 88px;
+        height: 88px;
       }
       .hero-badge-back-center {
-        gap: 8px;
+        gap: 4px;
       }
     }
     @media (prefers-reduced-motion: reduce) {
