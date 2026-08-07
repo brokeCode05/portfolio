@@ -2425,7 +2425,7 @@ CREATE POLICY "Admin update portfolio_data"
       return;
     }
     container.innerHTML = list.map(function(item, idx) {
-      return '<div class="admin-row" draggable="true">' +
+      return '<div class="admin-row">' +
         '<span class="drag-handle" title="Drag to reorder" aria-hidden="true">' + DRAG_GRIP_SVG + '</span>' +
         '<div class="admin-row-main">' +
           '<div class="admin-row-title">' + escapeHtml(cfg.title(item)) + '</div>' +
@@ -2493,36 +2493,52 @@ CREATE POLICY "Admin update portfolio_data"
       }
     });
 
-    // Drag-and-drop reordering — drag any row (top half of the target = place
-    // before, bottom half = place after). Drops work on rows AND in the gaps
-    // between them; the insertion index is captured in dragover so the drop is
-    // reliable no matter where the pointer is released.
-    var dragState = { from: -1, to: -1 };
-    container.addEventListener('dragstart', function(e) {
-      // Drag from anywhere on the row except interactive controls, so the whole
-      // row feels grabbable while Edit/Remove/up-down buttons stay clickable.
-      if (e.target.closest('button, a, input, select, textarea')) { e.preventDefault(); return; }
+    // Pointer-based drag reordering — works with mouse, pen, and touch in every
+    // browser (native HTML5 drag/drop is unreliable for list reordering). Drag
+    // any row; the top half of a row = place before, bottom half = after. Drops
+    // land on rows AND the gaps between them. A 5px movement threshold keeps
+    // ordinary clicks untouched.
+    var dragState = { from: -1, to: -1, row: null, moved: false, sx: 0, sy: 0, pid: null };
+    function clearDragMarks() {
+      container.querySelectorAll('.admin-row').forEach(function(r) {
+        r.classList.remove('dragging', 'drag-before', 'drag-after');
+      });
+    }
+    container.addEventListener('pointerdown', function(e) {
+      if (e.button !== 0) return;
+      if (e.target.closest('button, a, input, select, textarea')) return;
       var row = e.target.closest('.admin-row');
-      if (!row) { e.preventDefault(); return; }
-      dragState.from = Array.prototype.indexOf.call(container.children, row);
+      if (!row) return;
+      var idx = Array.prototype.indexOf.call(container.children, row);
+      if (idx < 0) return;
+      e.preventDefault();
+      clearDragMarks();
+      dragState.from = idx;
       dragState.to = -1;
-      row.classList.add('dragging');
-      try {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', String(dragState.from));
-      } catch (err) {}
+      dragState.moved = false;
+      dragState.sx = e.clientX;
+      dragState.sy = e.clientY;
+      dragState.row = row;
+      dragState.pid = e.pointerId;
     });
-    container.addEventListener('dragover', function(e) {
+    container.addEventListener('pointermove', function(e) {
       if (dragState.from < 0) return;
+      if (!dragState.moved &&
+          Math.abs(e.clientX - dragState.sx) + Math.abs(e.clientY - dragState.sy) < 5) return;
+      if (!dragState.moved) {
+        dragState.moved = true;
+        if (dragState.row) dragState.row.classList.add('dragging');
+        if (dragState.pid !== null && container.setPointerCapture) {
+          try { container.setPointerCapture(dragState.pid); } catch (err) {}
+        }
+      }
+      var rows = container.querySelectorAll('.admin-row');
       var cRect = container.getBoundingClientRect();
-      if (e.clientY < cRect.top || e.clientY > cRect.bottom) {
+      if (!rows.length || e.clientY < cRect.top || e.clientY > cRect.bottom) {
         dragState.to = -1;
+        clearDragMarks();
         return;
       }
-      e.preventDefault();
-      try { e.dataTransfer.dropEffect = 'move'; } catch (err) {}
-      var rows = container.querySelectorAll('.admin-row');
-      if (!rows.length) return;
       // Nearest visible row decides the insertion point (works on rows AND gaps).
       var best = 0, bestDist = Infinity;
       for (var i = 0; i < rows.length; i++) {
@@ -2535,17 +2551,23 @@ CREATE POLICY "Admin update portfolio_data"
       // Map to the real children index so hidden (filtered) rows keep order.
       var realIdx = Array.prototype.indexOf.call(container.children, rows[best]);
       dragState.to = realIdx + (before ? 0 : 1);
-      rows.forEach(function(r) { r.classList.remove('drag-before', 'drag-after'); });
+      clearDragMarks();
       rows[best].classList.add(before ? 'drag-before' : 'drag-after');
     });
-    container.addEventListener('drop', function(e) {
-      if (dragState.from < 0) return;
-      e.preventDefault();
+    container.addEventListener('pointerup', function(e) {
       var from = dragState.from;
       var to = dragState.to;
+      var moved = dragState.moved;
       dragState.from = -1;
       dragState.to = -1;
-      if (to < 0) return;
+      dragState.row = null;
+      dragState.moved = false;
+      dragState.pid = null;
+      clearDragMarks();
+      if (container.releasePointerCapture) {
+        try { container.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+      if (!moved || to < 0) return;
       try {
         var list = readData()[cfg.key] || [];
         if (from >= 0 && from < list.length && to >= 0 && to <= list.length && from !== to && to - 1 !== from) {
@@ -2556,18 +2578,34 @@ CREATE POLICY "Admin update portfolio_data"
       } catch (err) {}
       renderAfter(name);
     });
-    container.addEventListener('dragend', function() {
-      container.querySelectorAll('.admin-row').forEach(function(r) {
-        r.classList.remove('dragging', 'drag-before', 'drag-after');
-      });
+    container.addEventListener('pointercancel', function() {
       dragState.from = -1;
       dragState.to = -1;
+      dragState.row = null;
+      dragState.moved = false;
+      dragState.pid = null;
+      clearDragMarks();
     });
-    container.addEventListener('dragleave', function(e) {
-      if (!container.contains(e.relatedTarget)) {
-        container.querySelectorAll('.admin-row').forEach(function(r) {
-          r.classList.remove('drag-before', 'drag-after');
-        });
+    // Fallback cleanup for browsers without pointer capture: a release outside
+    // the container never reaches the container's pointerup, so reset here.
+    window.addEventListener('pointerup', function(e) {
+      if (dragState.from >= 0 && (dragState.pid === null || e.pointerId === dragState.pid)) {
+        dragState.from = -1;
+        dragState.to = -1;
+        dragState.row = null;
+        dragState.moved = false;
+        dragState.pid = null;
+        clearDragMarks();
+      }
+    });
+    window.addEventListener('pointercancel', function(e) {
+      if (dragState.from >= 0 && (dragState.pid === null || e.pointerId === dragState.pid)) {
+        dragState.from = -1;
+        dragState.to = -1;
+        dragState.row = null;
+        dragState.moved = false;
+        dragState.pid = null;
+        clearDragMarks();
       }
     });
   });
