@@ -553,12 +553,35 @@
       0%, 100% {
         transform: translateY(0) rotate(0deg);
       }
+      30% {
+        transform: translateY(-7px) rotate(-0.5deg);
+      }
       50% {
-        transform: translateY(-8px) rotate(-0.5deg);
+        transform: translateY(-9px) rotate(0.3deg) scale(1.015);
+      }
+      70% {
+        transform: translateY(-3px) rotate(0.7deg);
       }
     }
-    .hero-badge-wrap:hover #hero-badge {
+    /* The card's shadow breathes with the float — deeper at the apex so the
+       lift feels physical. Same duration/timing keeps them in sync. */
+    @keyframes hero-idle-shadow {
+      0%, 100% {
+        filter: drop-shadow(0 16px 20px rgba(10, 14, 22, 0.25));
+      }
+      50% {
+        filter: drop-shadow(0 32px 44px rgba(10, 14, 22, 0.38));
+      }
+    }
+    .hero-badge-wrap:hover #hero-badge,
+    .hero-badge-wrap:hover .hero-badge-card {
       animation-play-state: paused;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #hero-badge,
+      .hero-badge-card {
+        animation: none;
+      }
     }
     /* The PVC card shell */
     .hero-badge-card {
@@ -575,6 +598,7 @@
       transform: perspective(1000px) rotateX(4deg) rotateY(-3deg);
       transform-style: preserve-3d;
       will-change: transform;
+      animation: hero-idle-shadow 7s ease-in-out infinite;
       outline: none;
     }
     .hero-badge-card:focus-visible {
