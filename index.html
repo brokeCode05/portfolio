@@ -419,6 +419,37 @@
       max-width: 560px;
     }
 
+    /* Subtle terminal frame — reuses the site's .terminal-window pieces
+       (header dots + title bar) so the hero text panel matches the ID card
+       and About terminal language, without reintroducing a typing box. */
+    .hero-frame {
+      /* Cap + center so the panel reads as a matched pair with the 420px card */
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .hero-frame:hover {
+      border-color: var(--color-border-hover);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+    .hero-frame-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      padding: var(--space-xl);
+    }
+    .hero-frame-body .hero-title,
+    .hero-frame-body .hero-description,
+    .hero-frame-body .hero-actions {
+      margin-bottom: 0;
+    }
+    @media (max-width: 480px) {
+      .hero-frame-body {
+        padding: var(--space-lg);
+      }
+    }
+
     /* ---- Image Column ---- */
     .hero-media {
       display: flex;
@@ -2054,18 +2085,28 @@
   <section id="hero" class="hero section" aria-label="Introduction">
     <div class="container">
       <div class="hero-layout">
-        <!-- Left: content -->
+        <!-- Left: content — subtle terminal frame (cohesive with the ID card) -->
         <div class="hero-content">
-          <h1 class="hero-title"></h1>
-          <div class="hero-roles">
-            <span class="hero-roles-prompt">~/role</span>
-            <span id="hero-roles-text"></span>
-            <span class="hero-roles-caret" aria-hidden="true">▊</span>
-          </div>
-          <p class="hero-description"></p>
-          <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          <div class="hero-frame terminal-window">
+            <div class="terminal-header" aria-hidden="true">
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-title">~/whoami.txt</span>
+            </div>
+            <div class="hero-frame-body">
+              <h1 class="hero-title"></h1>
+              <div class="hero-roles">
+                <span class="hero-roles-prompt">~/role</span>
+                <span id="hero-roles-text"></span>
+                <span class="hero-roles-caret" aria-hidden="true">▊</span>
+              </div>
+              <p class="hero-description"></p>
+              <div class="hero-actions">
+                <a href="#projects" class="btn btn-primary">View Projects</a>
+                <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+              </div>
+            </div>
           </div>
         </div>
 
