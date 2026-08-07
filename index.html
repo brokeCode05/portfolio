@@ -848,6 +848,7 @@
       color: #64748B;
     }
     .hero-badge-back-link-site {
+      display: inline-block;
       font-family: var(--font-code);
       font-size: 13px;
       font-weight: 600;
@@ -855,11 +856,17 @@
       text-decoration: underline;
       text-underline-offset: 3px;
       text-decoration-color: rgba(15, 23, 42, 0.35);
-      transition: color 0.15s ease, text-decoration-color 0.15s ease;
+      padding: 3px 7px;
+      margin: -3px -7px;
+      border-radius: 4px;
+      transition: color 0.15s ease, text-decoration-color 0.15s ease,
+                  background-color 0.15s ease, transform 0.15s ease;
     }
     .hero-badge-back-link-site:hover {
       color: var(--color-accent-dim);
       text-decoration-color: currentColor;
+      background-color: rgba(20, 30, 48, 0.05);
+      transform: translateY(-1px);
     }
     .hero-badge-qr-real {
       display: block;
@@ -1007,8 +1014,10 @@
       .hero-badge-flip,
       .hero-badge-face,
       .hero-badge-back,
-      .hero-badge-sheen {
+      .hero-badge-sheen,
+      .hero-badge-back-link-site {
         transition: none;
+        transform: none;
       }
       .hero-media-glow {
         animation: none;
