@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807j" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807k" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -323,10 +323,6 @@
                     </div>
                     <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
                     <span class="idp-site-link">brokeCode05.dev</span>
-                    <div class="idp-meta">
-                      <span class="idp-meta-role" id="idp-back-role">Information Technology Student</span>
-                      <span class="idp-meta-role2" id="idp-back-role2"></span>
-                    </div>
                   </div>
                   <div class="idp-foot">
                     <span class="idp-id" id="idp-id">IT-2024-0842</span>
@@ -1649,15 +1645,6 @@ CREATE POLICY "Admin update portfolio_data"
     scanLabelEl.textContent = brand ? 'Scan to connect on ' + brand : 'Scan to connect';
     qrTargetEl.textContent = brand || (qrTarget || 'QR');
 
-    // ── Back face identity strip (mirrors the front) ──
-    var bRole = document.getElementById('idp-back-role');
-    var bRole2 = document.getElementById('idp-back-role2');
-    if (bRole) bRole.textContent = document.getElementById('hero-badge').value || 'Information Technology Student';
-    if (bRole2) {
-      var r2b = document.getElementById('hero-badge2').value;
-      bRole2.textContent = r2b;
-      bRole2.style.display = r2b ? 'block' : 'none';
-    }
 
     // ── Front face preview (live) ──
     var fSchool = document.getElementById('idp-front-school');

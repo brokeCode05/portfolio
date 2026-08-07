@@ -641,29 +641,6 @@ body {
   font-size: 7px;
   color: #64748B;
 }
-.idp-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(20, 30, 48, 0.09);
-  width: 100%;
-}
-.idp-meta-role {
-  font-size: 7px;
-  font-weight: 600;
-  color: #334155;
-  letter-spacing: 0.02em;
-  text-align: center;
-}
-.idp-meta-role2 {
-  font-size: 6px;
-  color: #64748B;
-  letter-spacing: 0.04em;
-  text-align: center;
-}
-
 /* Hero section sub-groups + field-location tags */
 .admin-subgroup {
   display: flex;

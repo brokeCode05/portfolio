@@ -1016,32 +1016,6 @@
       color: #64748B;
       letter-spacing: 0.05em;
     }
-    .hero-badge-back-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(20, 30, 48, 0.09);
-      width: 100%;
-    }
-    .hero-badge-back-role {
-      font-family: var(--font-code);
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #334155;
-      letter-spacing: 0.04em;
-      line-height: 1.3;
-      text-align: center;
-    }
-    .hero-badge-back-role2 {
-      font-family: var(--font-code);
-      font-size: 11px;
-      color: #64748B;
-      letter-spacing: 0.06em;
-      line-height: 1.3;
-      text-align: center;
-    }
     /* Flip hint caption below the card */
     .hero-badge-flip-hint {
       margin-top: 12px;
@@ -1132,16 +1106,6 @@
       }
       .hero-badge-back-center {
         gap: 8px;
-      }
-      .hero-badge-back-meta {
-        gap: 3px;
-        padding-top: 7px;
-      }
-      .hero-badge-back-role {
-        font-size: 11px;
-      }
-      .hero-badge-back-role2 {
-        font-size: 10px;
       }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -2258,10 +2222,6 @@
                         </div>
                         <span class="hero-badge-scan-label" id="hero-badge-scan-label">Scan to connect</span>
                         <a class="hero-badge-back-link-site" href="https://brokeCode05.dev" target="_blank" rel="noopener" tabindex="-1">brokeCode05.dev</a>
-                        <div class="hero-badge-back-meta">
-                          <span class="hero-badge-back-role" id="hero-badge-back-role">Information Technology Student</span>
-                          <span class="hero-badge-back-role2" id="hero-badge-back-role2"></span>
-                        </div>
                       </div>
                     </div>
                     <div class="hero-badge-back-foot">
@@ -3596,14 +3556,6 @@
         if (badgeBackSchoolSub) badgeBackSchoolSub.textContent = schoolSub;
         var badgeBackId = document.querySelector('.hero-badge-back-id');
         if (badgeBackId) badgeBackId.textContent = data.hero.idNumber || 'IT-2024-0842';
-        var badgeBackRole = document.querySelector('.hero-badge-back-role');
-        if (badgeBackRole) badgeBackRole.textContent = data.hero.badge || 'Information Technology Student';
-        var badgeBackRole2 = document.querySelector('.hero-badge-back-role2');
-        if (badgeBackRole2) {
-          var backRole2 = data.hero.badge2 || '';
-          badgeBackRole2.textContent = backRole2;
-          badgeBackRole2.style.display = backRole2 ? 'block' : 'none';
-        }
         var badgeFallback = document.getElementById('hero-badge-photo-fallback');
         if (badgeFallback) badgeFallback.style.display = 'none';
 
