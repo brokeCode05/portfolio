@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807c" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807d" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -209,35 +209,34 @@
         <h2 class="admin-section-title">Hero Section</h2>
         <p class="admin-section-desc">Edit the main hero content shown at the top of your portfolio.</p>
         <div class="admin-card">
-          <div class="form-group">
-            <label>Role Text (shown on ID, under name)</label>
-            <input type="text" id="hero-badge" placeholder="Information Technology Student" />
+          <h3 class="admin-subgroup">1 · ID Card</h3>
+          <p class="admin-subgroup-desc">These fields print on the ID card in the hero.</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name <span class="field-tag" aria-hidden="true">ID · under photo</span></label>
+              <input type="text" id="hero-name" placeholder="John Bryan" />
+            </div>
+            <div class="form-group">
+              <label>Role Text <span class="field-tag" aria-hidden="true">ID · under name</span></label>
+              <input type="text" id="hero-badge" placeholder="Information Technology Student" />
+            </div>
           </div>
           <div class="form-group">
-            <label>Name (shown on ID badge)</label>
-            <input type="text" id="hero-name" placeholder="John Bryan" />
-          </div>
-          <div class="form-group">
-            <label>ID Number (shown on ID badge)</label>
+            <label>ID Number <span class="field-tag" aria-hidden="true">ID · front &amp; back</span></label>
             <input type="text" id="hero-idno" placeholder="IT-2024-0842" />
-          </div>
-          <div class="form-group">
-            <label>QR Code Link (back of ID badge — leave empty to point at your site)</label>
-            <input type="url" id="hero-qrlink" placeholder="https://github.com/brokeCode05" />
-            <small class="form-hint">What the scannable QR on the ID back opens. Any URL works — GitHub, LinkedIn, etc.</small>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Badge Header Title (top of ID)</label>
+              <label>Header Title <span class="field-tag" aria-hidden="true">ID · top strip</span></label>
               <input type="text" id="hero-school" placeholder="Student ID" />
             </div>
             <div class="form-group">
-              <label>Badge Header Subtitle (top of ID)</label>
+              <label>Header Subtitle <span class="field-tag" aria-hidden="true">ID · top strip</span></label>
               <input type="text" id="hero-school-sub" placeholder="brokeCode05.dev" />
             </div>
           </div>
           <div class="form-group">
-            <label>Profile Photo</label>
+            <label>Profile Photo <span class="field-tag" aria-hidden="true">ID · photo</span></label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">📁 Upload Photo<input type="file" id="hero-photo-upload" accept="image/*" style="display:none" /></label>
               <div id="hero-photo-preview" style="display:none;align-items:center;gap:6px">
@@ -246,39 +245,77 @@
               </div>
             </div>
           </div>
+
+          <h3 class="admin-subgroup">2 · QR &amp; Profile Link</h3>
+          <p class="admin-subgroup-desc">The scannable QR printed on the back of the ID.</p>
           <div class="form-group">
-            <label>Headline Title</label>
+            <label>QR Code Link <span class="field-tag" aria-hidden="true">ID back · QR</span></label>
+            <input type="url" id="hero-qrlink" placeholder="https://github.com/brokeCode05" />
+            <small class="form-hint">What scanning the QR opens. Leave empty to point at your site — GitHub, LinkedIn, etc.</small>
+          </div>
+
+          <h3 class="admin-subgroup">3 · Hero Text</h3>
+          <p class="admin-subgroup-desc">The headline and intro beside the card.</p>
+          <div class="form-group">
+            <label>Headline Title <span class="field-tag" aria-hidden="true">Hero · big text</span></label>
             <input type="text" id="hero-title" />
             <div class="char-count">Use <code>&lt;br /&gt;</code> for line breaks</div>
           </div>
           <div class="form-group">
-            <label>Description</label>
+            <label>Description <span class="field-tag" aria-hidden="true">Hero · intro</span></label>
             <textarea id="hero-desc" rows="4"></textarea>
           </div>
-          <div class="form-group">
-            <label>ID Badge Back — Live Preview</label>
-            <p class="form-hint">Updates as you type. Mirrors the back of the badge on your portfolio.</p>
-            <div class="id-back-preview" id="id-back-preview">
-              <div class="idp-card">
-                <div class="idp-head">
-                  <span class="idp-logo" aria-hidden="true">~</span>
-                  <span class="idp-school" id="idp-school">Student ID</span>
-                  <span class="idp-sub" id="idp-sub">brokeCode05.dev</span>
-                </div>
-                <div class="idp-body">
-                  <div class="idp-scan">
-                    <div class="idp-qr" id="idp-qr" aria-hidden="true">
-                      <span class="idp-qr-c1"></span>
-                      <span class="idp-qr-c2"></span>
-                      <span class="idp-qr-c3"></span>
-                      <span class="idp-qr-target" id="idp-qr-target">QR</span>
+
+          <h3 class="admin-subgroup">4 · Live Preview</h3>
+          <p class="admin-subgroup-desc">See exactly what the ID looks like as you type.</p>
+          <div class="idp-preview-grid">
+            <div class="idp-preview-col">
+              <span class="idp-preview-caption">Front</span>
+              <div class="id-front-preview">
+                <div class="idp-card">
+                  <div class="idp-head">
+                    <span class="idp-logo" aria-hidden="true">~</span>
+                    <span class="idp-school" id="idp-front-school">Student ID</span>
+                    <span class="idp-sub" id="idp-front-sub">brokeCode05.dev</span>
+                  </div>
+                  <div class="idp-front-body">
+                    <div class="idp-photo">
+                      <img id="idp-front-photo" alt="" />
+                      <div class="idp-photo-empty" id="idp-front-photo-empty">no photo</div>
+                    </div>
+                    <div class="idp-front-info">
+                      <span class="idp-front-name" id="idp-front-name">John Bryan Capellan</span>
+                      <span class="idp-front-role" id="idp-front-role">Information Technology Student</span>
+                      <span class="idp-front-idno">ID No. <strong id="idp-front-idno">IT-2024-0842</strong></span>
                     </div>
                   </div>
-                  <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
-                  <span class="idp-site-link">brokeCode05.dev</span>
                 </div>
-                <div class="idp-foot">
-                  <span class="idp-id" id="idp-id">IT-2024-0842</span>
+              </div>
+            </div>
+            <div class="idp-preview-col">
+              <span class="idp-preview-caption">Back</span>
+              <div class="id-back-preview" id="id-back-preview">
+                <div class="idp-card">
+                  <div class="idp-head">
+                    <span class="idp-logo" aria-hidden="true">~</span>
+                    <span class="idp-school" id="idp-school">Student ID</span>
+                    <span class="idp-sub" id="idp-sub">brokeCode05.dev</span>
+                  </div>
+                  <div class="idp-body">
+                    <div class="idp-scan">
+                      <div class="idp-qr" id="idp-qr" aria-hidden="true">
+                        <span class="idp-qr-c1"></span>
+                        <span class="idp-qr-c2"></span>
+                        <span class="idp-qr-c3"></span>
+                        <span class="idp-qr-target" id="idp-qr-target">QR</span>
+                      </div>
+                    </div>
+                    <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
+                    <span class="idp-site-link">brokeCode05.dev</span>
+                  </div>
+                  <div class="idp-foot">
+                    <span class="idp-id" id="idp-id">IT-2024-0842</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1471,8 +1508,8 @@ CREATE POLICY "Admin update portfolio_data"
     showToast('Hero saved!', 'success');
   });
 
-  // Live ID-back preview — refresh as hero fields are typed
-  ['hero-name', 'hero-idno', 'hero-qrlink', 'hero-school', 'hero-school-sub'].forEach(function(id) {
+  // Live ID preview (front + back) — refresh as hero fields are typed
+  ['hero-name', 'hero-badge', 'hero-idno', 'hero-qrlink', 'hero-school', 'hero-school-sub'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', updateIdPreview);
   });
@@ -1513,6 +1550,7 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.photo = canvas.toDataURL('image/jpeg', 0.85);
           writeData();
           renderHeroPhotoPreview(d.hero.photo);
+          updateIdPreview();
           showToast('Profile photo uploaded!', 'success');
         };
         img.src = e.target.result;
@@ -1538,6 +1576,7 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.photo = '';
       writeData();
       renderHeroPhotoPreview('');
+      updateIdPreview();
       showToast('Profile photo removed', 'success');
     });
   }
@@ -1586,6 +1625,37 @@ CREATE POLICY "Admin update portfolio_data"
     idEl.textContent = idno;
     scanLabelEl.textContent = brand ? 'Scan to connect on ' + brand : 'Scan to connect';
     qrTargetEl.textContent = brand || (qrTarget || 'QR');
+
+    // ── Front face preview (live) ──
+    var fSchool = document.getElementById('idp-front-school');
+    var fSub = document.getElementById('idp-front-sub');
+    var fName = document.getElementById('idp-front-name');
+    var fRole = document.getElementById('idp-front-role');
+    var fIdno = document.getElementById('idp-front-idno');
+    var fPhoto = document.getElementById('idp-front-photo');
+    var fPhotoEmpty = document.getElementById('idp-front-photo-empty');
+    if (fSchool) fSchool.textContent = (schoolInput && schoolInput.value) || 'Student ID';
+    if (fSub) fSub.textContent = (schoolSubInput && schoolSubInput.value) || 'brokeCode05.dev';
+    if (fName) fName.textContent = document.getElementById('hero-name').value || 'John Bryan Capellan';
+    if (fRole) fRole.textContent = document.getElementById('hero-badge').value || 'Information Technology Student';
+    if (fIdno) fIdno.textContent = document.getElementById('hero-idno').value || 'IT-2024-0842';
+    var photoSrc = '';
+    var pv = document.getElementById('hero-photo-preview');
+    if (pv && pv.style.display !== 'none' && pv.querySelector('img')) photoSrc = pv.querySelector('img').src;
+    if (!photoSrc) {
+      var saved = readData();
+      photoSrc = (saved.hero && saved.hero.photo) || '';
+    }
+    if (fPhoto && fPhotoEmpty) {
+      if (photoSrc) {
+        fPhoto.src = photoSrc;
+        fPhoto.style.display = 'block';
+        fPhotoEmpty.style.display = 'none';
+      } else {
+        fPhoto.style.display = 'none';
+        fPhotoEmpty.style.display = 'flex';
+      }
+    }
   }
 
   // ─── About ─────────────────────────────────

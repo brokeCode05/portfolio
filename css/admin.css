@@ -602,6 +602,130 @@ body {
   color: #64748B;
 }
 
+/* Hero section sub-groups + field-location tags */
+.admin-subgroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--admin-text-secondary);
+  margin: 1.5rem 0 0.15rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+.admin-subgroup:first-of-type {
+  margin-top: 0;
+}
+.admin-subgroup-desc {
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+  opacity: 0.75;
+  margin: 0.15rem 0 0.9rem;
+}
+.field-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--admin-accent);
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* Front + back ID previews side by side */
+.idp-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+.idp-preview-caption {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--admin-text-secondary);
+  margin-bottom: 0.35rem;
+}
+.id-front-preview {
+  margin-top: 0.5rem;
+}
+.idp-front-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 10px;
+}
+.idp-photo {
+  position: relative;
+  width: 52px;
+  aspect-ratio: 3 / 3.6;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #D8DEE7;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(20, 30, 48, 0.25);
+  flex-shrink: 0;
+}
+.idp-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.idp-photo-empty {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 5.5px;
+  color: #94A3B8;
+  text-align: center;
+  padding: 2px;
+}
+.idp-front-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.idp-front-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1E293B;
+  line-height: 1.2;
+}
+.idp-front-role {
+  font-size: 7px;
+  color: #475569;
+  line-height: 1.3;
+}
+.idp-front-idno {
+  font-size: 7px;
+  color: #64748B;
+  margin-top: 2px;
+}
+.idp-front-idno strong {
+  color: #1E293B;
+}
+@media (max-width: 900px) {
+  .idp-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-group label {
   display: block;
   font-size: 0.8125rem;
