@@ -2253,10 +2253,10 @@ details.admin-details > .admin-details-body { padding: 0.25rem 0.875rem 0.875rem
   margin-bottom: 0.5rem;
   background: rgba(255, 255, 255, 0.015);
   cursor: grab;
-}
-.admin-row:active { user-select: none; }
+  user-select: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
+.admin-row:active { user-select: none; cursor: grabbing; }
 .admin-row:hover { border-color: var(--admin-border-hover, #3B4455); background: rgba(255, 255, 255, 0.03); }
 .admin-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .admin-row-title { font-size: 0.875rem; font-weight: 600; color: var(--admin-text-primary); }
