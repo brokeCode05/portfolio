@@ -584,6 +584,10 @@
       transform-style: preserve-3d;
       transition: transform 0.7s cubic-bezier(0.4, 0.1, 0.2, 1);
       will-change: transform;
+      /* The back face carries more content (QR + scan + link + identity
+         strip + ID number) than the front, so the card gets a taller
+         minimum height — otherwise the back clips. */
+      min-height: 380px;
     }
     .hero-badge-card.flipped .hero-badge-flip {
       transform: rotateY(180deg);
@@ -695,6 +699,7 @@
     /* Card body — photo + identity */
     .hero-badge-body {
       display: flex;
+      align-items: center;
       gap: 18px;
       padding: 6px 20px 14px;
       position: relative;
@@ -892,7 +897,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 13px;
+      gap: 10px;
     }
     .hero-badge-scan {
       display: flex;
@@ -931,8 +936,8 @@
     }
     .hero-badge-qr-real {
       display: block;
-      width: 152px;
-      height: 152px;
+      width: 140px;
+      height: 140px;
       padding: 8px;
       border-radius: 8px;
       background: #FFFFFF;
@@ -940,8 +945,8 @@
     }
     .hero-badge-qr-fallback {
       display: none;
-      width: 152px;
-      height: 152px;
+      width: 140px;
+      height: 140px;
       border-radius: 8px;
       background:
         conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
@@ -962,6 +967,45 @@
       font-size: 12px;
       color: #64748B;
       letter-spacing: 0.05em;
+    }
+    .hero-badge-back-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(20, 30, 48, 0.09);
+      width: 100%;
+    }
+    .hero-badge-back-role {
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #334155;
+      letter-spacing: 0.04em;
+      line-height: 1.3;
+      text-align: center;
+    }
+    .hero-badge-back-role2 {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: #64748B;
+      letter-spacing: 0.06em;
+      line-height: 1.3;
+      text-align: center;
+    }
+    .hero-badge-back-stamp {
+      margin-top: 3px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent-dim);
+      border: 1.5px solid var(--color-accent-dim);
+      border-radius: 4px;
+      padding: 2px 8px;
+      line-height: 1.2;
     }
 
     /* Flip hint caption below the card */
@@ -1011,11 +1055,6 @@
       #hero-badge {
         width: 390px;
       }
-      .hero-badge-qr-real,
-      .hero-badge-qr-fallback {
-        width: 140px;
-        height: 140px;
-      }
     }
     @media (max-width: 900px) {
       .hero-layout {
@@ -1037,13 +1076,6 @@
       #hero-badge {
         width: min(390px, 100%);
       }
-      /* Fixed QR would dominate the smaller card — scale it down
-         so the name/links column keeps proportional breathing room. */
-      .hero-badge-qr-real,
-      .hero-badge-qr-fallback {
-        width: 140px;
-        height: 140px;
-      }
     }
     @media (max-width: 480px) {
       #hero-badge {
@@ -1060,6 +1092,26 @@
       }
       .hero-badge-back-body {
         gap: 14px;
+      }
+      .hero-badge-flip {
+        min-height: 350px;
+      }
+      .hero-badge-back-center {
+        gap: 8px;
+      }
+      .hero-badge-back-meta {
+        gap: 3px;
+        padding-top: 7px;
+      }
+      .hero-badge-back-role {
+        font-size: 11px;
+      }
+      .hero-badge-back-role2 {
+        font-size: 10px;
+      }
+      .hero-badge-back-stamp {
+        font-size: 10px;
+        padding: 1px 7px;
       }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -2176,6 +2228,11 @@
                         </div>
                         <span class="hero-badge-scan-label" id="hero-badge-scan-label">Scan to connect</span>
                         <a class="hero-badge-back-link-site" href="https://brokeCode05.dev" target="_blank" rel="noopener" tabindex="-1">brokeCode05.dev</a>
+                        <div class="hero-badge-back-meta">
+                          <span class="hero-badge-back-role" id="hero-badge-back-role">Information Technology Student</span>
+                          <span class="hero-badge-back-role2" id="hero-badge-back-role2"></span>
+                          <span class="hero-badge-back-stamp" aria-hidden="true">VERIFIED</span>
+                        </div>
                       </div>
                     </div>
                     <div class="hero-badge-back-foot">
@@ -3510,6 +3567,14 @@
         if (badgeBackSchoolSub) badgeBackSchoolSub.textContent = schoolSub;
         var badgeBackId = document.querySelector('.hero-badge-back-id');
         if (badgeBackId) badgeBackId.textContent = data.hero.idNumber || 'IT-2024-0842';
+        var badgeBackRole = document.querySelector('.hero-badge-back-role');
+        if (badgeBackRole) badgeBackRole.textContent = data.hero.badge || 'Information Technology Student';
+        var badgeBackRole2 = document.querySelector('.hero-badge-back-role2');
+        if (badgeBackRole2) {
+          var backRole2 = data.hero.badge2 || '';
+          badgeBackRole2.textContent = backRole2;
+          badgeBackRole2.style.display = backRole2 ? 'block' : 'none';
+        }
         var badgeFallback = document.getElementById('hero-badge-photo-fallback');
         if (badgeFallback) badgeFallback.style.display = 'none';
 
