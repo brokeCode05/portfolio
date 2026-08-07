@@ -741,28 +741,31 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 5px;
+      gap: 6px;
       text-align: left;
     }
     .hero-badge-name {
       display: block;
       font-family: var(--font-heading);
-      font-size: 19px;
+      font-size: 22px;
       font-weight: 700;
       color: #0F172A;
-      line-height: 1.2;
+      line-height: 1.15;
       letter-spacing: -0.01em;
     }
     .hero-badge-role {
       display: block;
+      margin-top: 2px;
       font-family: var(--font-code);
-      font-size: 12px;
-      color: #475569;
+      font-size: 12.5px;
+      color: #334155;
       line-height: 1.35;
     }
     .hero-badge-idno {
       display: block;
-      margin-top: 2px;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid rgba(20, 30, 48, 0.10);
       font-family: var(--font-code);
       font-size: 12px;
       color: #64748B;
@@ -772,31 +775,6 @@
       color: #1E293B;
       font-weight: 600;
     }
-    /* QR code (decorative) */
-    .hero-badge-qr {
-      position: relative;
-      width: 38px;
-      height: 38px;
-      margin-top: 6px;
-      flex-shrink: 0;
-      background:
-        conic-gradient(#0F172A 25%, #FFFFFF 0 50%, #0F172A 0 75%, #FFFFFF 0);
-      background-size: 6px 6px;
-      border-radius: 4px;
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
-    }
-    .hero-badge-qr .hero-badge-qr-c1,
-    .hero-badge-qr .hero-badge-qr-c2,
-    .hero-badge-qr .hero-badge-qr-c3 {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #FFFFFF;
-      box-shadow: inset 0 0 0 2px #0F172A;
-    }
-    .hero-badge-qr .hero-badge-qr-c1 { top: 2px; left: 2px; }
-    .hero-badge-qr .hero-badge-qr-c2 { top: 2px; right: 2px; }
-    .hero-badge-qr .hero-badge-qr-c3 { bottom: 2px; left: 2px; }
     /* Card footer — barcode + handle */
     .hero-badge-foot {
       display: flex;
@@ -843,18 +821,23 @@
     .hero-badge-back-body {
       flex: 1;
       display: flex;
-      align-items: center;
-      gap: 18px;
       padding: 6px 20px 14px;
       position: relative;
       z-index: 2;
+    }
+    .hero-badge-back-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
     }
     .hero-badge-scan {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 7px;
-      flex-shrink: 0;
+      gap: 0;
     }
     .hero-badge-scan-label {
       font-family: var(--font-code);
@@ -863,6 +846,20 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #64748B;
+    }
+    .hero-badge-back-link-site {
+      font-family: var(--font-code);
+      font-size: 13px;
+      font-weight: 600;
+      color: #0F172A;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(15, 23, 42, 0.35);
+      transition: color 0.15s ease, text-decoration-color 0.15s ease;
+    }
+    .hero-badge-back-link-site:hover {
+      color: var(--color-accent-dim);
+      text-decoration-color: currentColor;
     }
     .hero-badge-qr-real {
       display: block;
@@ -883,72 +880,14 @@
       background-size: 7px 7px;
       box-shadow: 0 2px 6px rgba(20, 30, 48, 0.18);
     }
-    .hero-badge-back-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .hero-badge-back-name {
-      font-family: var(--font-heading);
-      font-size: 19px;
-      font-weight: 700;
-      color: #0F172A;
-      line-height: 1.2;
-    }
-    .hero-badge-back-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .hero-badge-back-row {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      min-width: 0;
-    }
-    .hero-badge-back-row-label {
-      font-family: var(--font-code);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #64748B;
-      flex-shrink: 0;
-      min-width: 52px;
-    }
-    .hero-badge-back-row-value {
-      font-family: var(--font-code);
-      font-size: 12px;
-      font-weight: 600;
-      color: #0F172A;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
     .hero-badge-back-foot {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      justify-content: center;
       padding: 11px 20px 13px;
       border-top: 1px solid rgba(20, 30, 48, 0.09);
       position: relative;
       z-index: 2;
-    }
-    .hero-badge-stamp {
-      font-family: var(--font-code);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-accent-dim);
-      border: 1.5px solid var(--color-accent-dim);
-      border-radius: 4px;
-      padding: 3px 10px;
-      opacity: 0.85;
-      transform: rotate(-3deg);
     }
     .hero-badge-back-id {
       font-family: var(--font-code);
@@ -2132,11 +2071,6 @@
                         <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
                         <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
                         <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
-                        <div class="hero-badge-qr" aria-hidden="true">
-                          <span class="hero-badge-qr-c1"></span>
-                          <span class="hero-badge-qr-c2"></span>
-                          <span class="hero-badge-qr-c3"></span>
-                        </div>
                       </div>
                     </div>
                     <div class="hero-badge-foot">
@@ -2153,27 +2087,25 @@
                       <span class="hero-badge-school-sub" id="hero-badge-back-school-sub">brokeCode05.dev</span>
                     </div>
                     <div class="hero-badge-back-body">
-                      <div class="hero-badge-scan">
+                      <div class="hero-badge-back-center">
+                        <div class="hero-badge-scan">
+                          <img
+                            id="hero-badge-qr-real"
+                            class="hero-badge-qr-real"
+                            alt="QR code — scan to open my portfolio"
+                            loading="lazy"
+                            width="120"
+                            height="120"
+                            draggable="false"
+                            onerror="window._heroBadgeQrError && window._heroBadgeQrError(this)"
+                          />
+                          <div class="hero-badge-qr-fallback" id="hero-badge-qr-fallback" aria-hidden="true"></div>
+                        </div>
                         <span class="hero-badge-scan-label" id="hero-badge-scan-label">Scan to connect</span>
-                        <img
-                          id="hero-badge-qr-real"
-                          class="hero-badge-qr-real"
-                          alt="QR code — scan to open my portfolio"
-                          loading="lazy"
-                          width="120"
-                          height="120"
-                          draggable="false"
-                          onerror="window._heroBadgeQrError && window._heroBadgeQrError(this)"
-                        />
-                        <div class="hero-badge-qr-fallback" id="hero-badge-qr-fallback" aria-hidden="true"></div>
-                      </div>
-                      <div class="hero-badge-back-info">
-                        <span class="hero-badge-back-name" id="hero-badge-back-name">John Bryan Capellan</span>
-                        <span class="hero-badge-back-meta" id="hero-badge-back-meta"></span>
+                        <a class="hero-badge-back-link-site" href="https://brokeCode05.dev" target="_blank" rel="noopener" tabindex="-1">brokeCode05.dev</a>
                       </div>
                     </div>
                     <div class="hero-badge-back-foot">
-                      <span class="hero-badge-stamp" aria-hidden="true">VERIFIED</span>
                       <span class="hero-badge-back-id">IT-2024-0842</span>
                     </div>
                   </div>
@@ -3260,16 +3192,18 @@
         });
       }
 
-      // Point the back-side QR at the live site (graceful fallback if offline).
-      // renderPortfolio() overrides this with the admin-set QR link when present.
+      // Point the back-side QR + site link at the live site (graceful fallback if offline).
+      // renderPortfolio() overrides the QR with the admin-set QR link when present.
+      var site = window.location.origin + window.location.pathname;
+      if (/index\.html$/.test(site)) site = site.replace(/index\.html$/, '');
+      if (!site || site.indexOf('http') !== 0) site = 'https://brokeCode05.github.io/portfolio/';
       var qr = document.getElementById('hero-badge-qr-real');
       if (qr) {
-        var site = window.location.origin + window.location.pathname;
-        if (/index\.html$/.test(site)) site = site.replace(/index\.html$/, '');
-        if (!site || site.indexOf('http') !== 0) site = 'https://brokeCode05.github.io/portfolio/';
         qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=' +
           encodeURIComponent(site);
       }
+      var backSiteLink = document.querySelector('.hero-badge-back-link-site');
+      if (backSiteLink) backSiteLink.href = site;
 
       // ── 3D mouse tilt (fine pointers only; card follows the cursor) ──
       // The card hangs at a small resting tilt and leans toward the cursor
@@ -3323,17 +3257,25 @@
         setFlipped(!card.classList.contains('flipped'));
       });
       card.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === card) {
           e.preventDefault();
           setFlipped(!card.classList.contains('flipped'));
         }
       });
+
+      // The back-side site link opens the profile instead of flipping the card
+      var backSiteLink = card.querySelector('.hero-badge-back-link-site');
+      if (backSiteLink) {
+        backSiteLink.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
     })();
   </script>
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260807b"></script>
+  <script src="js/portfolio-data.js?v=20260807c"></script>
   <script src="js/ui-upgrade.js?v=20260807a" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3460,7 +3402,7 @@
         var badgeName = document.getElementById('hero-badge-name');
         if (badgeName) badgeName.textContent = data.hero.name || 'John Bryan Capellan';
         var badgeRole = document.getElementById('hero-badge-role');
-        if (badgeRole) badgeRole.textContent = data.hero.status || data.hero.badge || 'Information Technology Student';
+        if (badgeRole) badgeRole.textContent = data.hero.badge || 'Information Technology Student';
         var badgeIdno = document.getElementById('hero-badge-idno');
         if (badgeIdno) badgeIdno.textContent = data.hero.idNumber || 'IT-2024-0842';
         var personName = data.hero.name || 'John Bryan Capellan';
@@ -3468,8 +3410,7 @@
         if (badgeCardEl) {
           badgeCardEl.setAttribute('aria-label', 'Student ID badge — ' + personName + '. Click to flip.');
         }
-        var badgeBackName = document.getElementById('hero-badge-back-name');
-        if (badgeBackName) badgeBackName.textContent = personName;
+
         // Badge header (front + back) — admin-editable school title/subtitle
         var schoolTitle = data.hero.schoolTitle || 'Student ID';
         var schoolSub = data.hero.schoolSub || 'brokeCode05.dev';
@@ -3520,27 +3461,6 @@
           var knownBrands = ['GitHub', 'LinkedIn', 'Facebook', 'Instagram', 'Telegram', 'X / Twitter'];
           badgeFlipHint.textContent =
             (knownBrands.indexOf(qrLabel) > -1) ? 'click to flip — scan my ' + qrLabel : 'click to flip';
-        }
-
-        // Back-side identity rows — mirrors the card's own data (admin-editable).
-        // Location + Status always come first, then any admin-added extra rows.
-        // Rows with empty values are skipped so the back stays clean.
-        var badgeBackMeta = document.getElementById('hero-badge-back-meta');
-        if (badgeBackMeta) {
-          var metaRows = [
-            { label: 'Location', value: data.hero.location || '' },
-            { label: 'Status', value: data.hero.status || '' }
-          ];
-          (data.hero.infoRows || []).forEach(function(row) {
-            if (row && row.label) metaRows.push({ label: row.label, value: row.value || '' });
-          });
-          metaRows = metaRows.filter(function(row) { return row.value; });
-          badgeBackMeta.innerHTML = metaRows.map(function(row) {
-            return '<span class="hero-badge-back-row">' +
-              '<span class="hero-badge-back-row-label">' + escapeHtml(row.label) + '</span>' +
-              '<span class="hero-badge-back-row-value">' + escapeHtml(row.value) + '</span>' +
-              '</span>';
-          }).join('');
         }
 
         // ─── About ────────────────────────────────

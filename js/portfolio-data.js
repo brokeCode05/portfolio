@@ -155,7 +155,7 @@ function loadData() {
   }
   // Return empty data structure — admin panel populates via cloud sync
   return {
-    hero: { badge: '', status: '', title: '', description: '', photo: '', name: '', idNumber: '', qrLink: '', schoolTitle: '', schoolSub: '', location: '', infoRows: [] },
+    hero: { badge: '', title: '', description: '', photo: '', name: '', idNumber: '', qrLink: '', schoolTitle: '', schoolSub: '' },
     about: { bio: '', terminal: { role: '', path: [], philosophy: '', status: '' } },
     techStack: [],
     currently: [],

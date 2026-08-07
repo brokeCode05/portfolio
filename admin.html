@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807b" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807c" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -210,8 +210,8 @@
         <p class="admin-section-desc">Edit the main hero content shown at the top of your portfolio.</p>
         <div class="admin-card">
           <div class="form-group">
-            <label>Badge Text</label>
-            <input type="text" id="hero-badge" />
+            <label>Role Text (shown on ID, under name)</label>
+            <input type="text" id="hero-badge" placeholder="Information Technology Student" />
           </div>
           <div class="form-group">
             <label>Name (shown on ID badge)</label>
@@ -236,22 +236,6 @@
               <input type="text" id="hero-school-sub" placeholder="brokeCode05.dev" />
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Location (shown on ID back)</label>
-              <input type="text" id="hero-location" placeholder="Philippines" />
-            </div>
-            <div class="form-group">
-              <label>Status Text (shown on ID back)</label>
-              <input type="text" id="hero-status" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Extra Info Rows (ID back)</label>
-            <div id="hero-extra-rows"></div>
-            <button type="button" class="btn btn-sm" id="hero-extra-add">+ Add row</button>
-            <small class="form-hint">Extra label/value lines on the ID back — e.g. Phone, Website, Student Year. Location and Status are always shown first.</small>
-          </div>
           <div class="form-group">
             <label>Profile Photo</label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -273,7 +257,7 @@
           </div>
           <div class="form-group">
             <label>ID Badge Back — Live Preview</label>
-            <p class="form-hint">Updates as you type here and in Direct Contact links. Mirrors the back of the badge on your portfolio.</p>
+            <p class="form-hint">Updates as you type. Mirrors the back of the badge on your portfolio.</p>
             <div class="id-back-preview" id="id-back-preview">
               <div class="idp-card">
                 <div class="idp-head">
@@ -283,7 +267,6 @@
                 </div>
                 <div class="idp-body">
                   <div class="idp-scan">
-                    <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
                     <div class="idp-qr" id="idp-qr" aria-hidden="true">
                       <span class="idp-qr-c1"></span>
                       <span class="idp-qr-c2"></span>
@@ -291,13 +274,10 @@
                       <span class="idp-qr-target" id="idp-qr-target">QR</span>
                     </div>
                   </div>
-                  <div class="idp-info">
-                    <span class="idp-name" id="idp-name">John Bryan Capellan</span>
-                    <span class="idp-meta" id="idp-meta"></span>
-                  </div>
+                  <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
+                  <span class="idp-site-link">brokeCode05.dev</span>
                 </div>
                 <div class="idp-foot">
-                  <span class="idp-stamp" aria-hidden="true">VERIFIED</span>
                   <span class="idp-id" id="idp-id">IT-2024-0842</span>
                 </div>
               </div>
@@ -605,7 +585,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260807b"></script>
+<script src="js/portfolio-data.js?v=20260807c"></script>
 <script>
 (function(){
   'use strict';
@@ -1457,14 +1437,11 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('hero-badge').value = d.hero.badge || '';
     document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-idno').value = d.hero.idNumber || '';
-    document.getElementById('hero-location').value = d.hero.location || '';
     document.getElementById('hero-qrlink').value = d.hero.qrLink || '';
     document.getElementById('hero-school').value = d.hero.schoolTitle || '';
     document.getElementById('hero-school-sub').value = d.hero.schoolSub || '';
-    document.getElementById('hero-status').value = d.hero.status || '';
     document.getElementById('hero-title').value = d.hero.title || '';
     document.getElementById('hero-desc').value = d.hero.description || '';
-    renderHeroExtraRows(d.hero.infoRows || []);
     renderHeroPhotoPreview(d.hero.photo || '');
   }
 
@@ -1479,70 +1456,15 @@ CREATE POLICY "Admin update portfolio_data"
     }
   }
 
-  // ─── Hero: extra ID back rows editor ──────
-  var HERO_EXTRA_MAX = 5;
-  function heroExtraRowHTML(label, value) {
-    return '<div class="hero-extra-row">' +
-      '<input type="text" class="hero-extra-label" placeholder="Label (e.g. Phone)" value="' + escapeHtml(label || '') + '" />' +
-      '<input type="text" class="hero-extra-value" placeholder="Value" value="' + escapeHtml(value || '') + '" />' +
-      '<button type="button" class="btn btn-sm hero-extra-remove" title="Remove row" aria-label="Remove row">×</button>' +
-      '</div>';
-  }
-  function renderHeroExtraRows(rows) {
-    var box = document.getElementById('hero-extra-rows');
-    if (!box) return;
-    box.innerHTML = (rows || []).map(function(r) {
-      return heroExtraRowHTML(r && r.label, r && r.value);
-    }).join('');
-    var addBtn = document.getElementById('hero-extra-add');
-    if (addBtn) addBtn.disabled = box.children.length >= HERO_EXTRA_MAX;
-  }
-  function collectHeroExtraRows() {
-    var rows = [];
-    var box = document.getElementById('hero-extra-rows');
-    if (!box) return rows;
-    box.querySelectorAll('.hero-extra-row').forEach(function(el) {
-      var label = el.querySelector('.hero-extra-label').value.trim();
-      var value = el.querySelector('.hero-extra-value').value.trim();
-      if (label && value) rows.push({ label: label, value: value });
-    });
-    return rows;
-  }
-  var heroExtraBox = document.getElementById('hero-extra-rows');
-  if (heroExtraBox) {
-    heroExtraBox.addEventListener('click', function(e) {
-      var btn = e.target.closest('.hero-extra-remove');
-      if (!btn) return;
-      btn.parentNode.remove();
-      var addBtn = document.getElementById('hero-extra-add');
-      if (addBtn) addBtn.disabled = heroExtraBox.children.length >= HERO_EXTRA_MAX;
-      updateIdPreview();
-    });
-  }
-  var heroExtraAdd = document.getElementById('hero-extra-add');
-  if (heroExtraAdd) {
-    heroExtraAdd.addEventListener('click', function() {
-      var box = document.getElementById('hero-extra-rows');
-      if (!box || box.children.length >= HERO_EXTRA_MAX) return;
-      box.insertAdjacentHTML('beforeend', heroExtraRowHTML('', ''));
-      heroExtraAdd.disabled = box.children.length >= HERO_EXTRA_MAX;
-      var last = box.querySelector('.hero-extra-row:last-child .hero-extra-label');
-      if (last) last.focus();
-      updateIdPreview();
-    });
-  }
 
   document.getElementById('hero-save').addEventListener('click', function() {
     var d = readData();
     d.hero.badge = document.getElementById('hero-badge').value;
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
-    d.hero.location = document.getElementById('hero-location').value.trim();
-    d.hero.infoRows = collectHeroExtraRows();
     d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
     d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
     d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
-    d.hero.status = document.getElementById('hero-status').value;
     d.hero.title = document.getElementById('hero-title').value;
     d.hero.description = document.getElementById('hero-desc').value;
     writeData();
@@ -1583,12 +1505,9 @@ CREATE POLICY "Admin update portfolio_data"
           d.hero.badge = document.getElementById('hero-badge').value;
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
-          d.hero.location = document.getElementById('hero-location').value.trim();
-          d.hero.infoRows = collectHeroExtraRows();
           d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
           d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
           d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
-          d.hero.status = document.getElementById('hero-status').value;
           d.hero.title = document.getElementById('hero-title').value;
           d.hero.description = document.getElementById('hero-desc').value;
           d.hero.photo = canvas.toDataURL('image/jpeg', 0.85);
@@ -1611,12 +1530,9 @@ CREATE POLICY "Admin update portfolio_data"
       d.hero.badge = document.getElementById('hero-badge').value;
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
-      d.hero.location = document.getElementById('hero-location').value.trim();
-      d.hero.infoRows = collectHeroExtraRows();
       d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
       d.hero.schoolTitle = document.getElementById('hero-school').value.trim();
       d.hero.schoolSub = document.getElementById('hero-school-sub').value.trim();
-      d.hero.status = document.getElementById('hero-status').value;
       d.hero.title = document.getElementById('hero-title').value;
       d.hero.description = document.getElementById('hero-desc').value;
       d.hero.photo = '';
@@ -1634,14 +1550,12 @@ CREATE POLICY "Admin update portfolio_data"
     var preview = document.getElementById('id-back-preview');
     if (!preview) return;
 
-    var nameEl = document.getElementById('idp-name');
     var idEl = document.getElementById('idp-id');
     var scanLabelEl = document.getElementById('idp-scan-label');
     var qrTargetEl = document.getElementById('idp-qr-target');
-    var metaEl = document.getElementById('idp-meta');
     var schoolEl = document.getElementById('idp-school');
     var schoolSubEl = document.getElementById('idp-sub');
-    if (!nameEl || !idEl || !scanLabelEl || !qrTargetEl || !metaEl) return;
+    if (!idEl || !scanLabelEl || !qrTargetEl) return;
 
     // Badge header (live from the form)
     var schoolInput = document.getElementById('hero-school');
@@ -1650,7 +1564,6 @@ CREATE POLICY "Admin update portfolio_data"
     if (schoolSubEl) schoolSubEl.textContent = (schoolSubInput && schoolSubInput.value) || 'brokeCode05.dev';
 
     // Hero fields (live from the form)
-    var name = document.getElementById('hero-name').value || 'John Bryan Capellan';
     var idno = document.getElementById('hero-idno').value || 'IT-2024-0842';
     var qrRaw = document.getElementById('hero-qrlink').value.trim();
     var qrTarget = qrRaw;
@@ -1670,27 +1583,9 @@ CREATE POLICY "Admin update portfolio_data"
       else brand = host.replace(/^www\./, '');
     }
 
-    nameEl.textContent = name;
     idEl.textContent = idno;
     scanLabelEl.textContent = brand ? 'Scan to connect on ' + brand : 'Scan to connect';
     qrTargetEl.textContent = brand || (qrTarget || 'QR');
-
-    // Identity rows — live from the Location / Status form fields
-    // plus any admin-added extra rows in the editor
-    var locationInput = document.getElementById('hero-location');
-    var statusInput = document.getElementById('hero-status');
-    var rows = [
-      { label: 'Location', value: locationInput ? locationInput.value : '' },
-      { label: 'Status', value: statusInput ? statusInput.value : '' }
-    ];
-    rows = rows.concat(collectHeroExtraRows());
-    rows = rows.filter(function(row) { return row.value; });
-    metaEl.innerHTML = rows.map(function(row) {
-      return '<span class="idp-row">' +
-        '<span class="idp-row-label">' + escapeHtml(row.label) + '</span>' +
-        '<span class="idp-row-value">' + escapeHtml(row.value) + '</span>' +
-        '</span>';
-    }).join('');
   }
 
   // ─── About ─────────────────────────────────

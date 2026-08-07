@@ -532,8 +532,9 @@ body {
 }
 .idp-body {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 3px;
   padding: 4px 12px 10px;
 }
 .idp-scan {
@@ -547,6 +548,13 @@ body {
   font-size: 6.5px;
   letter-spacing: 0.04em;
   color: #64748B;
+}
+.idp-site-link {
+  font-size: 7px;
+  font-weight: 600;
+  color: #1E293B;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .idp-qr {
   position: relative;
@@ -581,89 +589,13 @@ body {
   overflow: hidden;
   word-break: break-all;
 }
-.idp-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.idp-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: #1E293B;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.idp-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-height: 8px;
-}
-.idp-row {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  min-width: 0;
-}
-.idp-row-label {
-  font-size: 6px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #94A3B8;
-  flex-shrink: 0;
-}
-.idp-row-value {
-  font-size: 7px;
-  font-weight: 600;
-  color: #1E293B;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hero-extra-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
-}
-.hero-extra-row input {
-  flex: 1;
-  min-width: 0;
-}
-.hero-extra-row .hero-extra-label {
-  flex: 0 0 40%;
-}
-.hero-extra-remove {
-  flex-shrink: 0;
-  padding: 0 10px;
-}
-#hero-extra-add {
-  margin-top: 2px;
-}
-#hero-extra-add:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 .idp-foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
   padding: 6px 12px 8px;
   border-top: 1px solid rgba(20, 30, 48, 0.09);
-}
-.idp-stamp {
-  font-size: 6.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #0F766E;
-  border: 1px solid rgba(15, 118, 110, 0.4);
-  border-radius: 3px;
-  padding: 1px 4px;
 }
 .idp-id {
   font-size: 7px;
