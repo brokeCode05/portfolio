@@ -419,34 +419,315 @@
       max-width: 560px;
     }
 
-    /* Subtle terminal frame — reuses the site's .terminal-window pieces
-       (header dots + title bar) so the hero text panel matches the ID card
-       and About terminal language, without reintroducing a typing box. */
-    .hero-frame {
-      /* Cap + center so the panel reads as a matched pair with the 420px card */
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    /* ===== Hero ambient scene — layered visuals behind the content ===== */
+    .hero {
+      position: relative;
     }
-    .hero-frame:hover {
-      border-color: var(--color-border-hover);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    .hero .container {
+      position: relative;
+      z-index: 1;
     }
-    .hero-frame-body {
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    /* Soft aurora blobs — slow drifting color fields */
+    .hero-aurora-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.16;
+      animation: hero-aurora-drift 22s ease-in-out infinite alternate;
+    }
+    .hero-aurora-blob.b1 {
+      width: 46%;
+      height: 46%;
+      top: -8%;
+      left: -6%;
+      background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+    }
+    .hero-aurora-blob.b2 {
+      width: 40%;
+      height: 40%;
+      bottom: -10%;
+      right: -4%;
+      background: radial-gradient(circle, var(--color-accent-2) 0%, transparent 70%);
+      opacity: 0.12;
+      animation-delay: -8s;
+    }
+    .hero-aurora-blob.b3 {
+      width: 34%;
+      height: 34%;
+      top: 34%;
+      left: 38%;
+      background: radial-gradient(circle, var(--color-border-hover) 0%, transparent 70%);
+      opacity: 0.1;
+      animation-delay: -15s;
+    }
+    @keyframes hero-aurora-drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(6%, -8%) scale(1.15); }
+    }
+    [data-theme="light"] .hero-aurora-blob {
+      opacity: 0.09;
+    }
+    /* Faint grid, masked to the center */
+    .hero-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--color-accent) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-accent) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.025;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    }
+    /* CRT scanlines — extremely faint */
+    .hero-scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255, 255, 255, 0.028) 3px 4px);
+    }
+    [data-theme="light"] .hero-scanlines {
+      background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(15, 17, 21, 0.03) 3px 4px);
+    }
+    /* Green spotlight that follows the cursor inside the hero */
+    .hero-spotlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 720px;
+      height: 720px;
+      margin: -360px 0 0 -360px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--color-accent) 0%, transparent 60%);
+      opacity: 0.07;
+      will-change: transform;
+    }
+    [data-theme="light"] .hero-spotlight {
+      opacity: 0.05;
+    }
+
+    /* ===== Boot sequence overlay ===== */
+    .hero-boot {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
       display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-      padding: var(--space-xl);
+      align-items: center;
+      justify-content: center;
+      background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+      transition: opacity 0.5s ease, visibility 0.5s ease;
     }
-    .hero-frame-body .hero-title,
-    .hero-frame-body .hero-description,
-    .hero-frame-body .hero-actions {
-      margin-bottom: 0;
+    .hero-boot.is-done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .hero-boot-panel {
+      min-width: 300px;
+      max-width: calc(100vw - 3rem);
+      padding: var(--space-md) var(--space-lg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      background-color: var(--color-surface);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+    .hero-boot-line {
+      margin: 0;
+      font-family: var(--font-code);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .hero-boot-line + .hero-boot-line {
+      margin-top: 4px;
+    }
+    .hero-boot-line .prompt {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+    /* ID card "powers on" — glow spike right after boot */
+    .hero-booted .hero-media-glow {
+      animation: hero-power-glow 1.1s ease-out 1,
+                 hero-glow-pulse 4s ease-in-out 1.1s infinite alternate;
+    }
+    @keyframes hero-power-glow {
+      0% { opacity: 0.03; transform: scale(0.8); }
+      35% { opacity: 0.28; transform: scale(1.15); }
+      100% { opacity: 0.1; transform: scale(1); }
+    }
+
+    /* ===== System status bar (bottom strip) ===== */
+    .hero-sysbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      padding: 7px var(--space-xl);
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      border-top: 1px solid var(--color-border);
+      background-color: color-mix(in srgb, var(--color-bg) 72%, transparent);
+      z-index: 2;
+    }
+    .hero-sysbar-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-sysbar-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      animation: hero-sys-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes hero-sys-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
     }
     @media (max-width: 480px) {
-      .hero-frame-body {
-        padding: var(--space-lg);
+      .hero-sysbar {
+        padding: 7px var(--space-lg);
+      }
+      .hero-sysbar-mid {
+        display: none;
+      }
+    }
+
+    /* ===== Left column: cmd line + readouts ===== */
+    .hero-cmd {
+      margin: 0 0 var(--space-md);
+      font-family: var(--font-code);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+    .hero-cmd .prompt {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+    .hero-cmd-caret {
+      display: inline-block;
+      width: 0.55em;
+      height: 1.05em;
+      margin-left: 2px;
+      background-color: var(--color-accent);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    .hero-content .hero-title {
+      margin-bottom: var(--space-md);
+    }
+    .hero-content .hero-roles {
+      margin-bottom: var(--space-lg);
+    }
+    .hero-content .hero-actions {
+      margin-bottom: 0;
+    }
+    .hero-readouts {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: var(--space-lg);
+    }
+    .hero-readout {
+      margin: 0;
+      font-family: var(--font-code);
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+    }
+    .hero-readout .k {
+      color: var(--color-accent-dim);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .hero-readout .v {
+      color: var(--color-text-primary);
+    }
+
+    /* Gradient shimmer on the name (only where text clipping is supported) */
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      .hero-title {
+        background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-2) 50%, var(--color-accent) 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: hero-name-shimmer 9s linear infinite;
+      }
+    }
+    @keyframes hero-name-shimmer {
+      to { background-position: 200% center; }
+    }
+
+    /* Floating mono tech tags near the ID card */
+    .hero-tech-tag {
+      position: absolute;
+      z-index: 3;
+      pointer-events: none;
+      font-family: var(--font-code);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--color-accent);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      opacity: 0.85;
+      animation: hero-tag-float 7s ease-in-out infinite;
+    }
+    .hero-tech-tag.t1 { top: 12%; left: 5%; }
+    .hero-tech-tag.t2 { top: 32%; right: 3%; animation-delay: -2.4s; }
+    .hero-tech-tag.t3 { bottom: 16%; left: 9%; animation-delay: -4.6s; }
+    @keyframes hero-tag-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-9px) rotate(2deg); }
+    }
+
+    /* Raise the scroll chevron above the system bar */
+    @media (min-width: 769px) {
+      .hero-scroll-indicator {
+        bottom: 3.2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-tech-tag {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-aurora-blob {
+        animation: none;
+      }
+      .hero-title {
+        animation: none;
+        background-position: 0 center;
+      }
+      .hero-tech-tag {
+        animation: none;
+      }
+      .hero-sysbar-dot {
+        animation: none;
+      }
+      .hero-spotlight {
+        opacity: 0;
+      }
+      .hero-cmd-caret {
+        animation: none;
       }
     }
 
@@ -2083,30 +2364,41 @@
 
   <!-- ============ HERO ============ -->
   <section id="hero" class="hero section" aria-label="Introduction">
+    <!-- Ambient layers — the "scene" behind everything -->
+    <div class="hero-bg" aria-hidden="true">
+      <span class="hero-aurora-blob b1"></span>
+      <span class="hero-aurora-blob b2"></span>
+      <span class="hero-aurora-blob b3"></span>
+      <div class="hero-grid-bg"></div>
+      <div class="hero-scanlines"></div>
+      <div class="hero-spotlight" id="hero-spotlight"></div>
+    </div>
+    <!-- One-time boot sequence overlay -->
+    <div class="hero-boot" id="hero-boot" aria-hidden="true">
+      <div class="hero-boot-panel">
+        <div class="hero-boot-out" id="hero-boot-out"></div>
+      </div>
+    </div>
+
     <div class="container">
       <div class="hero-layout">
-        <!-- Left: content — subtle terminal frame (cohesive with the ID card) -->
+        <!-- Left: content -->
         <div class="hero-content">
-          <div class="hero-frame terminal-window">
-            <div class="terminal-header" aria-hidden="true">
-              <span class="terminal-dot"></span>
-              <span class="terminal-dot"></span>
-              <span class="terminal-dot"></span>
-              <span class="terminal-title">~/whoami.txt</span>
-            </div>
-            <div class="hero-frame-body">
-              <h1 class="hero-title"></h1>
-              <div class="hero-roles">
-                <span class="hero-roles-prompt">~/role</span>
-                <span id="hero-roles-text"></span>
-                <span class="hero-roles-caret" aria-hidden="true">▊</span>
-              </div>
-              <p class="hero-description"></p>
-              <div class="hero-actions">
-                <a href="#projects" class="btn btn-primary">View Projects</a>
-                <a href="#contact" class="btn btn-ghost">Get in Touch</a>
-              </div>
-            </div>
+          <p class="hero-cmd" aria-hidden="true"><span class="prompt">$</span> whoami<span class="hero-cmd-caret">▊</span></p>
+          <h1 class="hero-title"></h1>
+          <div class="hero-roles">
+            <span class="hero-roles-prompt">~/role</span>
+            <span id="hero-roles-text"></span>
+            <span class="hero-roles-caret" aria-hidden="true">▊</span>
+          </div>
+          <div class="hero-readouts">
+            <p class="hero-readout"><span class="k">&gt;</span> location: <span class="v">Philippines</span></p>
+            <p class="hero-readout"><span class="k">&gt;</span> status: <span class="v" id="hero-readout-status">online</span></p>
+          </div>
+          <p class="hero-description"></p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">View Projects</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
           </div>
         </div>
 
@@ -2191,13 +2483,19 @@
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
+              </div>              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
             </div>
           </div>
+          <span class="hero-tech-tag t1" aria-hidden="true">linux</span>
+          <span class="hero-tech-tag t2" aria-hidden="true">docker</span>
+          <span class="hero-tech-tag t3" aria-hidden="true">git</span>
         </div>
-
       </div>
+    </div>
+    <div class="hero-sysbar" aria-hidden="true">
+      <span class="hero-sysbar-item"><span class="hero-sysbar-dot"></span> status: online</span>
+      <span class="hero-sysbar-item hero-sysbar-mid">~/portfolio</span>
+      <span class="hero-sysbar-item">v2.0</span>
     </div>
     <a href="#about" class="hero-scroll-indicator" aria-label="Scroll to About">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
@@ -3460,6 +3758,8 @@
         // ─── Hero ─────────────────────────────────
         var titleEl = document.querySelector('.hero-title');
         var descEl = document.querySelector('.hero-description');
+        var statusReadout = document.getElementById('hero-readout-status');
+        if (statusReadout) statusReadout.textContent = data.hero.status || 'online';
 
         if (titleEl) {
           titleEl.innerHTML = (data.hero.title || '').replace(/\n/g, '<br />');
@@ -4288,6 +4588,97 @@
       #chatbot-backdrop { transition: none; }
     }
   </style>
+
+  <!-- Hero: one-time boot sequence + cursor spotlight -->
+  <script>
+    (function () {
+      var hero = document.getElementById('hero');
+      var boot = document.getElementById('hero-boot');
+      if (!hero || !boot) return;
+      var out = document.getElementById('hero-boot-out');
+      // Safety: never leave the dim overlay stuck — if the output box is
+      // missing, finish immediately.
+      if (!out) {
+        hero.classList.add('hero-booted');
+        boot.classList.add('is-done');
+        return;
+      }
+
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function finish() {
+        hero.classList.add('hero-booted');
+        boot.classList.add('is-done');
+        setTimeout(function () { if (boot.parentNode) boot.parentNode.removeChild(boot); }, 600);
+      }
+
+      // Skip for reduced motion, or once per tab session (one-time boot).
+      if (reduce || sessionStorage.getItem('hero-boot-played') === '1') { finish(); return; }
+      sessionStorage.setItem('hero-boot-played', '1');
+
+      var lines = [
+        'init hero … ok',
+        'load modules [████] done',
+        'auth: ID card verified ✓'
+      ];
+      var i = 0;
+      function typeLine() {
+        if (i >= lines.length) { setTimeout(finish, 380); return; }
+        var line = lines[i];
+        var p = document.createElement('p');
+        p.className = 'hero-boot-line';
+        var prompt = document.createElement('span');
+        prompt.className = 'prompt';
+        prompt.textContent = '$';
+        p.appendChild(prompt);
+        p.appendChild(document.createTextNode(' ' + line));
+        out.appendChild(p);
+        i++;
+        setTimeout(typeLine, 200);
+      }
+
+      function start() { setTimeout(typeLine, 150); }
+
+      // Start as the loader fades; fall back to a timer if the loader
+      // already left or its mutation never fires.
+      var loader = document.getElementById('loader');
+      if (loader && !loader.classList.contains('loaded')) {
+        var started = false;
+        var obs = new MutationObserver(function () {
+          if (loader.classList.contains('loaded')) {
+            obs.disconnect();
+            if (!started) { started = true; setTimeout(start, 150); }
+          }
+        });
+        obs.observe(loader, { attributes: true, attributeFilter: ['class'] });
+        setTimeout(function () {
+          if (!started) { started = true; start(); }
+        }, 4000);
+      } else {
+        start();
+      }
+    })();
+
+    (function () {
+      var hero = document.getElementById('hero');
+      var spot = document.getElementById('hero-spotlight');
+      if (!hero || !spot) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var tx = -9999, ty = -9999, x = tx, y = ty, raf = null;
+      function tick() {
+        raf = null;
+        x += (tx - x) * 0.16;
+        y += (ty - y) * 0.16;
+        var r = hero.getBoundingClientRect();
+        spot.style.transform = 'translate3d(' + (x - r.left) + 'px,' + (y - r.top) + 'px,0)';
+        if (Math.abs(tx - x) > 1 || Math.abs(ty - y) > 1) raf = requestAnimationFrame(tick);
+      }
+      hero.addEventListener('mousemove', function (e) {
+        tx = e.clientX; ty = e.clientY;
+        if (!raf) raf = requestAnimationFrame(tick);
+      }, { passive: true });
+    })();
+  </script>
 
 </body>
 </html>
