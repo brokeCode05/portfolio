@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807d" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807f" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -217,9 +217,13 @@
               <input type="text" id="hero-name" placeholder="John Bryan" />
             </div>
             <div class="form-group">
-              <label>Role Text <span class="field-tag" aria-hidden="true">ID · under name</span></label>
+              <label>Role Line 1 <span class="field-tag" aria-hidden="true">ID · under name</span></label>
               <input type="text" id="hero-badge" placeholder="Information Technology Student" />
             </div>
+          </div>
+          <div class="form-group">
+            <label>Role Line 2 <span class="field-tag" aria-hidden="true">ID · under line 1</span></label>
+            <input type="text" id="hero-badge2" placeholder="BSIT Student" />
           </div>
           <div class="form-group">
             <label>ID Number <span class="field-tag" aria-hidden="true">ID · front &amp; back</span></label>
@@ -291,7 +295,9 @@
                     <div class="idp-front-info">
                       <span class="idp-front-name" id="idp-front-name">John Bryan Capellan</span>
                       <span class="idp-front-role" id="idp-front-role">Information Technology Student</span>
+                      <span class="idp-front-role2" id="idp-front-role2"></span>
                       <span class="idp-front-idno">ID No. <strong id="idp-front-idno">IT-2024-0842</strong></span>
+                      <span class="idp-front-stamp" aria-hidden="true">VERIFIED</span>
                     </div>
                   </div>
                 </div>
@@ -627,7 +633,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260807e"></script>
+<script src="js/portfolio-data.js?v=20260807f"></script>
 <script>
 (function(){
   'use strict';
@@ -1477,6 +1483,7 @@ CREATE POLICY "Admin update portfolio_data"
   function loadHero() {
     var d = readData();
     document.getElementById('hero-badge').value = d.hero.badge || '';
+    document.getElementById('hero-badge2').value = d.hero.badge2 || '';
     document.getElementById('hero-name').value = d.hero.name || '';
     document.getElementById('hero-idno').value = d.hero.idNumber || '';
     document.getElementById('hero-qrlink').value = d.hero.qrLink || '';
@@ -1503,6 +1510,7 @@ CREATE POLICY "Admin update portfolio_data"
   document.getElementById('hero-save').addEventListener('click', function() {
     var d = readData();
     d.hero.badge = document.getElementById('hero-badge').value;
+    d.hero.badge2 = document.getElementById('hero-badge2').value;
     d.hero.name = document.getElementById('hero-name').value;
     d.hero.idNumber = document.getElementById('hero-idno').value;
     d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
@@ -1516,7 +1524,7 @@ CREATE POLICY "Admin update portfolio_data"
   });
 
   // Live ID preview (front + back) — refresh as hero fields are typed
-  ['hero-name', 'hero-badge', 'hero-idno', 'hero-qrlink', 'hero-school', 'hero-school-sub'].forEach(function(id) {
+  ['hero-name', 'hero-badge', 'hero-badge2', 'hero-idno', 'hero-qrlink', 'hero-school', 'hero-school-sub'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', updateIdPreview);
   });
@@ -1547,6 +1555,7 @@ CREATE POLICY "Admin update portfolio_data"
           // Merge current form values so unsaved hero text isn't dropped
           var d = readData();
           d.hero.badge = document.getElementById('hero-badge').value;
+          d.hero.badge2 = document.getElementById('hero-badge2').value;
           d.hero.name = document.getElementById('hero-name').value;
           d.hero.idNumber = document.getElementById('hero-idno').value;
           d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
@@ -1574,6 +1583,7 @@ CREATE POLICY "Admin update portfolio_data"
       // Merge current form values so unsaved hero text isn't dropped
       var d = readData();
       d.hero.badge = document.getElementById('hero-badge').value;
+      d.hero.badge2 = document.getElementById('hero-badge2').value;
       d.hero.name = document.getElementById('hero-name').value;
       d.hero.idNumber = document.getElementById('hero-idno').value;
       d.hero.qrLink = document.getElementById('hero-qrlink').value.trim();
@@ -1640,6 +1650,7 @@ CREATE POLICY "Admin update portfolio_data"
     var fSub = document.getElementById('idp-front-sub');
     var fName = document.getElementById('idp-front-name');
     var fRole = document.getElementById('idp-front-role');
+    var fRole2 = document.getElementById('idp-front-role2');
     var fIdno = document.getElementById('idp-front-idno');
     var fPhoto = document.getElementById('idp-front-photo');
     var fPhotoEmpty = document.getElementById('idp-front-photo-empty');
@@ -1647,6 +1658,11 @@ CREATE POLICY "Admin update portfolio_data"
     if (fSub) fSub.textContent = (schoolSubInput && schoolSubInput.value) || 'brokeCode05.dev';
     if (fName) fName.textContent = document.getElementById('hero-name').value || 'John Bryan Capellan';
     if (fRole) fRole.textContent = document.getElementById('hero-badge').value || 'Information Technology Student';
+    if (fRole2) {
+      var r2v = document.getElementById('hero-badge2').value;
+      fRole2.textContent = r2v;
+      fRole2.style.display = r2v ? 'block' : 'none';
+    }
     if (fIdno) fIdno.textContent = document.getElementById('hero-idno').value || 'IT-2024-0842';
     var photoSrc = '';
     var pv = document.getElementById('hero-photo-preview');

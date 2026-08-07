@@ -761,6 +761,13 @@
       color: #334155;
       line-height: 1.35;
     }
+    .hero-badge-role2 {
+      display: block;
+      font-family: var(--font-code);
+      font-size: 12.5px;
+      color: #334155;
+      line-height: 1.35;
+    }
     .hero-badge-idno {
       display: block;
       margin-top: 10px;
@@ -774,6 +781,45 @@
     .hero-badge-idno strong {
       color: #1E293B;
       font-weight: 600;
+    }
+    .hero-badge-stamp {
+      align-self: flex-start;
+      margin-top: 6px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent-dim);
+      border: 1.5px solid var(--color-accent-dim);
+      border-radius: 4px;
+      padding: 2px 9px;
+      opacity: 0.85;
+      transform: rotate(-3deg);
+    }
+    /* Tighten the front info column on small phones so the extra role
+       line + VERIFIED stamp never clip beside the photo */
+    @media (max-width: 480px) {
+      .hero-badge-info {
+        gap: 4px;
+      }
+      .hero-badge-name {
+        font-size: 18px;
+      }
+      .hero-badge-role,
+      .hero-badge-role2 {
+        font-size: 11px;
+      }
+      .hero-badge-idno {
+        margin-top: 6px;
+        padding-top: 6px;
+        font-size: 11px;
+      }
+      .hero-badge-stamp {
+        margin-top: 4px;
+        font-size: 10px;
+        padding: 1px 7px;
+      }
     }
     /* Card footer — barcode + handle */
     .hero-badge-foot {
@@ -2095,7 +2141,9 @@
                       <div class="hero-badge-info">
                         <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
                         <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
+                        <span class="hero-badge-role2" id="hero-badge-role2"></span>
                         <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
+                        <span class="hero-badge-stamp" aria-hidden="true">VERIFIED</span>
                       </div>
                     </div>
                     <div class="hero-badge-foot">
@@ -3307,7 +3355,7 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260807e"></script>
+  <script src="js/portfolio-data.js?v=20260807f"></script>
   <script src="js/ui-upgrade.js?v=20260807e" defer></script>
   <script src="js/chatbot.js?v=20260805b"></script>
   <script>
@@ -3435,6 +3483,12 @@
         if (badgeName) badgeName.textContent = data.hero.name || 'John Bryan Capellan';
         var badgeRole = document.getElementById('hero-badge-role');
         if (badgeRole) badgeRole.textContent = data.hero.badge || 'Information Technology Student';
+        var badgeRole2 = document.getElementById('hero-badge-role2');
+        if (badgeRole2) {
+          var role2 = data.hero.badge2 || '';
+          badgeRole2.textContent = role2;
+          badgeRole2.style.display = role2 ? 'block' : 'none';
+        }
         var badgeIdno = document.getElementById('hero-badge-idno');
         if (badgeIdno) badgeIdno.textContent = data.hero.idNumber || 'IT-2024-0842';
         var personName = data.hero.name || 'John Bryan Capellan';
