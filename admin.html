@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807q" />
+  <link rel="stylesheet" href="css/admin.css?v=20260807r" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -211,7 +211,7 @@
       </button>
       </div>
     </nav>
-    <div class="admin-sidebar-footer" style="display:flex;flex-direction:column;gap:0.5rem">
+    <div class="admin-sidebar-footer">
       <div style="font-size:0.6875rem;color:var(--admin-text-secondary);text-align:center;padding:0 0.5rem" id="auth-email-footer"></div>
       <button class="btn btn-sm" id="admin-signout-btn" style="width:100%;justify-content:center;font-size:0.75rem">Sign Out
       </button>
@@ -708,6 +708,14 @@ CREATE POLICY "Admin update portfolio_data"
       </div>
 
     </div>
+
+    <!-- Save Status Bar — in-flow at the bottom, never covers controls -->
+    <div class="admin-statusbar" id="admin-statusbar">
+      <span class="statusbar-dot" id="statusbar-dot"></span>
+      <span class="statusbar-text" id="statusbar-text">Ready</span>
+      <span class="statusbar-section" id="statusbar-section"></span>
+      <span class="statusbar-shortcut">Ctrl+S</span>
+    </div>
   </div>
 
   <!-- AI Chatbot Test Modal -->
@@ -741,13 +749,6 @@ CREATE POLICY "Admin update portfolio_data"
     </div>
   </div>
 
-  <!-- Save Status Bar (only visible inside dashboard) -->
-  <div class="admin-statusbar" id="admin-statusbar">
-    <span class="statusbar-dot" id="statusbar-dot"></span>
-    <span class="statusbar-text" id="statusbar-text">Ready</span>
-    <span class="statusbar-section" id="statusbar-section"></span>
-    <span class="statusbar-shortcut">Ctrl+S</span>
-  </div>
 </div>
 
 <!-- Confirmation Modal -->
@@ -1087,9 +1088,13 @@ CREATE POLICY "Admin update portfolio_data"
   var statusTimeout = null;
 
   function updateStatusBar(state) {
+    var bar = document.getElementById('admin-statusbar');
     var dot = document.getElementById('statusbar-dot');
     var text = document.getElementById('statusbar-text');
     var section = document.getElementById('statusbar-section');
+    if (state === 'saving' || state === 'saved' || state === 'error') {
+      if (bar) bar.classList.add('active');
+    }
     dot.className = 'statusbar-dot';
     if (state === 'saved') {
       dot.classList.add('saved');
@@ -1098,6 +1103,7 @@ CREATE POLICY "Admin update portfolio_data"
       statusTimeout = setTimeout(function() {
         text.textContent = 'Ready';
         dot.className = 'statusbar-dot saved';
+        if (bar) bar.classList.remove('active');
       }, 5000);
     } else if (state === 'saving') {
       dot.classList.add('saving');
@@ -1821,8 +1827,11 @@ CREATE POLICY "Admin update portfolio_data"
   function markDirty() {
     if (formDirty) return;
     formDirty = true;
+    if (statusTimeout) { clearTimeout(statusTimeout); statusTimeout = null; }
+    var bar = document.getElementById('admin-statusbar');
     var text = document.getElementById('statusbar-text');
     var dot = document.getElementById('statusbar-dot');
+    if (bar) bar.classList.add('active');
     if (text) text.textContent = 'Unsaved changes';
     if (dot) dot.className = 'statusbar-dot dirty';
   }
