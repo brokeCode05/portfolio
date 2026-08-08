@@ -781,8 +781,16 @@
       if (!greeted) {
         greeted = true;
         // Greeting comes from the admin when set, otherwise the default.
+        // When the admin hasn't written one, fall back to a short intro with
+        // a few concrete example questions so visitors know what to ask.
         var help = String(chatConfig().greeting || '').trim() ||
-          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\nOr just type a question below.';
+          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\n' +
+          'Or just type a question below.\n\n' +
+          'Try these questions:\n' +
+          '$ what tech do you use?\n' +
+          '$ show me your latest projects\n' +
+          '$ what are you currently learning?\n' +
+          '$ how can I reach you?';
         setTimeout(function() { botRecord(help); typeBot(help); }, 150);
       }
       setTimeout(function() { inputEl.focus(); }, 50);
