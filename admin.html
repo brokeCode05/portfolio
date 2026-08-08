@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260807u" />
+  <link rel="stylesheet" href="css/admin.css?v=20260808a" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -612,7 +612,7 @@
           <h4 style="margin-bottom:0.75rem">Connection Status</h4>
           <div id="cloud-status">
             <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
-              <span id="cloud-status-icon" style="font-size:1.1rem">⏳</span>
+              <span id="cloud-status-icon" style="display:inline-flex;align-items:center" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
               <span id="cloud-status-text" style="color:var(--admin-text-secondary)">Checking connection...</span>
             </div>
           </div>
@@ -627,7 +627,7 @@
           <div class="admin-details-body">
 
         <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">✅ Secure Mode — No Service Key Needed</h4>
+          <h4 style="margin-bottom:0.75rem">Secure Mode — No Service Key Needed</h4>
           <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6">
             Your Supabase database uses <strong>Row Level Security (RLS)</strong> with your admin password as the write key.
             The <strong>service role key is NEVER stored in the browser</strong>, making this much safer.
@@ -657,7 +657,7 @@ CREATE POLICY "Admin update portfolio_data"
   WITH CHECK (true);
             </code>
             <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:4px">
-              📋 Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL Editor.
+              Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL Editor.
             </p>
           </div>
         </div>
@@ -689,7 +689,7 @@ CREATE POLICY "Admin update portfolio_data"
         </div>
 
         <div class="admin-card" style="background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)">
-          <h4 style="margin-bottom:0.5rem">📖 How It Works</h4>
+          <h4 style="margin-bottom:0.5rem">How It Works</h4>
           <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
             <li><strong>Run the SQL above</strong> in your Supabase SQL Editor (one-time setup)</li>
             <li>Set a <strong>Cloud Sync Password</strong> above (used for write authorization)</li>
@@ -906,7 +906,7 @@ CREATE POLICY "Admin update portfolio_data"
         loginError.textContent = 'Failed: ' + result.error.message;
         return;
       }
-      // ✅ Show success + OTP input
+      // Show success + OTP input
       loginError.textContent = '';
       loginSentMsg.style.display = 'block';
       authEmailDisplay.textContent = email;
@@ -915,7 +915,7 @@ CREATE POLICY "Admin update portfolio_data"
       otpInput.value = '';
       otpError.textContent = '';
       otpInput.focus();
-      showToast('✅ OTP code sent to ' + email + ' — check your inbox!', 'success');
+      showToast('OTP code sent to ' + email + ' — check your inbox!', 'success');
     }).catch(function(err) {
       setLoading(sendOtpBtn, sendText, sendSpinner, false);
       loginError.textContent = 'Could not send. ' + (err.message || '');
@@ -939,10 +939,10 @@ CREATE POLICY "Admin update portfolio_data"
     }).then(function(result) {
       setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
       if (result.error) {
-        otpError.textContent = '❌ ' + result.error.message;
+        otpError.textContent = result.error.message;
         return;
       }
-      showToast('✅ Signed in!', 'success');
+      showToast('Signed in!', 'success');
       showDashboard(email);
     }).catch(function(err) {
       setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
@@ -1016,7 +1016,7 @@ CREATE POLICY "Admin update portfolio_data"
       return;
     }
     setAdminPassword(pw);
-    showToast('✅ Cloud sync password saved!', 'success');
+    showToast('Cloud sync password saved!', 'success');
   });
 
   // ─── GitHub Token ─────────────────────────
@@ -1041,7 +1041,7 @@ CREATE POLICY "Admin update portfolio_data"
         return;
       }
       setGitHubToken(token);
-      showToast('✅ GitHub token saved! Now stats will use authenticated requests (5,000 req/hr).', 'success');
+      showToast('GitHub token saved! Now stats will use authenticated requests (5,000 req/hr).', 'success');
     });
   }
 
@@ -1914,6 +1914,9 @@ CREATE POLICY "Admin update portfolio_data"
 
   // Small inline SVG icon used by upload labels (keeps buttons emoji-free).
   var ICON_FOLDER = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+  var ICON_WARN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  var ICON_LOCK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+  var ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
 
   // ─── Hero ──────────────────────────────────
   function loadHero() {
@@ -3051,11 +3054,11 @@ CREATE POLICY "Admin update portfolio_data"
     var text = document.getElementById('cloud-status-text');
     var savedPw = getAdminPassword();
     if (!savedPw || savedPw === 'admin123') {
-      icon.textContent = '⚠️';
+      icon.innerHTML = ICON_WARN;
       text.textContent = 'Set a Cloud Sync Password above to enable cloud publishing.';
       text.style.color = 'var(--admin-warning)';
     } else {
-      icon.textContent = '🔒';
+      icon.innerHTML = ICON_LOCK;
       text.textContent = 'Password set. Ready to sync.';
       text.style.color = 'var(--admin-accent)';
     }
@@ -3066,8 +3069,8 @@ CREATE POLICY "Admin update portfolio_data"
     if (!pw || pw === 'admin123') return;
     pushToSupabase(data).then(function(ok) {
       if (ok) {
-        showToast('☁️ Synced to cloud!', 'success');
-        document.getElementById('cloud-status-icon').textContent = '✅';
+        showToast('Synced to cloud!', 'success');
+        document.getElementById('cloud-status-icon').innerHTML = ICON_CHECK;
         document.getElementById('cloud-status-text').textContent = 'Last synced: ' + new Date().toLocaleTimeString();
         document.getElementById('cloud-status-text').style.color = 'var(--admin-accent)';
       }
@@ -3078,12 +3081,12 @@ CREATE POLICY "Admin update portfolio_data"
     readData();
     pushToSupabase(data).then(function(ok) {
       if (ok) {
-        showToast('✅ Published to cloud!', 'success');
-        document.getElementById('cloud-status-icon').textContent = '✅';
+        showToast('Published to cloud!', 'success');
+        document.getElementById('cloud-status-icon').innerHTML = ICON_CHECK;
         document.getElementById('cloud-status-text').textContent = 'Published: ' + new Date().toLocaleTimeString();
         document.getElementById('cloud-status-text').style.color = 'var(--admin-accent)';
       } else {
-        showToast('❌ Failed to publish. Did you set the Cloud Sync Password and run the SQL setup?', 'error');
+        showToast('Failed to publish. Did you set the Cloud Sync Password and run the SQL setup?', 'error');
       }
     });
   });
@@ -3093,13 +3096,13 @@ CREATE POLICY "Admin update portfolio_data"
     fetchFromSupabase().then(function(cloudData) {
       if (cloudData && Object.keys(cloudData).length > 1) {
         savePortfolioData(cloudData);
-        showToast('✅ Cloud data loaded! Reloading...', 'success');
+        showToast('Cloud data loaded! Reloading...', 'success');
         setTimeout(function() { location.reload(); }, 1000);
       } else {
-        showToast('⚠️ No cloud data found. Publish first.', 'error');
+        showToast('No cloud data found. Publish first.', 'error');
       }
     }).catch(function() {
-      showToast('❌ Failed to fetch from cloud.', 'error');
+      showToast('Failed to fetch from cloud.', 'error');
     });
   });
 
