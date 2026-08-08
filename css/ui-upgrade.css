@@ -854,3 +854,25 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     animation: none !important;
   }
 }
+
+/* ===== Phase 3 audit fixes ===== */
+.gh-stats-note {
+  margin: var(--space-sm, 0.5rem) 0 0;
+  font-family: var(--font-code, monospace);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #A0A5B0);
+  min-height: 1rem;
+}
+.footer-updated {
+  font-family: var(--font-code, monospace);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #A0A5B0);
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .footer-updated {
+    display: block;
+    margin-top: 0.25rem;
+    white-space: normal;
+  }
+}

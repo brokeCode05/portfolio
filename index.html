@@ -2774,6 +2774,7 @@
                 <span class="gh-stat-label">Stars</span>
               </div>
             </div>
+            <p class="gh-stats-note" id="gh-stats-note" aria-live="polite"></p>
         </div>
         <div class="github-card">
           <h3 class="github-card-title">Streak</h3>
@@ -2855,7 +2856,7 @@
             <label class="form-label" for="contact-message">Message <span class="form-required" aria-hidden="true">*</span></label>
             <textarea class="form-textarea" id="contact-message" name="message" rows="5" maxlength="5000" placeholder="Write your message..." required aria-required="true" aria-describedby="contact-message-error"></textarea>
             <small class="form-error" id="contact-message-error" aria-live="polite"></small>
-            <small class="form-char-count" id="contact-message-count">bytes: 0/5000</small>
+            <small class="form-char-count" id="contact-message-count">characters: 0/5000</small>
           </div>
           <div class="form-field hp-field" aria-hidden="true">
             <label class="form-label" for="contact-website">Website</label>
@@ -2887,7 +2888,7 @@
   <footer class="footer" role="contentinfo">
     <div class="container">
       <div class="footer-inner flex items-center justify-between">
-        <p class="footer-copyright">&copy; 2026 — Built with HTML, CSS &amp; JavaScript</p>
+        <p class="footer-copyright">&copy; 2026 — Built with HTML, CSS &amp; JavaScript <span class="footer-updated" id="footer-updated" hidden></span></p>
         <a href="#hero" class="footer-back" aria-label="Back to top">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 15l-6-6-6 6"/>
@@ -3050,32 +3051,78 @@
         var headers = getGitHubAuthHeaders();
         var userUrl = 'https://api.github.com/users/' + GH_USER;
         var reposUrl = 'https://api.github.com/users/' + GH_USER + '/repos?per_page=100&page=1';
-        var totalStars = 0;
+        var CACHE_KEY = 'portfolio_gh_stats';
+        var CACHE_TTL = 60 * 60 * 1000; // 1 hour — saves the unauthenticated rate budget
 
-        // Fetch user profile
-        fetch(userUrl, { headers: headers })
+        function setNote(text) {
+          var note = document.getElementById('gh-stats-note');
+          if (note) note.textContent = text;
+        }
+
+        function fillStats(user, repos) {
+          var el;
+          if (user && typeof user.public_repos === 'number') {
+            el = document.getElementById('gh-repos');
+            if (el) el.textContent = user.public_repos;
+            el = document.getElementById('gh-followers');
+            if (el) el.textContent = user.followers;
+            el = document.getElementById('gh-following');
+            if (el) el.textContent = user.following;
+          }
+          if (Array.isArray(repos)) {
+            var totalStars = 0;
+            repos.forEach(function(repo) { totalStars += repo.stargazers_count || 0; });
+            el = document.getElementById('gh-stars');
+            if (el) el.textContent = totalStars;
+          }
+        }
+
+        function saveCache(user, repos) {
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+              t: Date.now(),
+              user: user || null,
+              repos: repos || null
+            }));
+          } catch (e) {}
+        }
+
+        // Serve a fresh cache instantly — no em-dash flash, no extra API call.
+        var cached = null;
+        try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) {}
+        if (cached && cached.user) fillStats(cached.user, cached.repos);
+
+        var userFailed = false;
+        var reposFailed = false;
+
+        var p1 = fetch(userUrl, { headers: headers })
           .then(function(r) { return r.json(); })
           .then(function(user) {
-            if (user.message) return;
-            var el = document.getElementById('gh-repos');
-            if (el) el.textContent = (typeof user.public_repos === 'number') ? user.public_repos : '—';
-            el = document.getElementById('gh-followers');
-            if (el) el.textContent = (typeof user.followers === 'number') ? user.followers : '—';
-            el = document.getElementById('gh-following');
-            if (el) el.textContent = (typeof user.following === 'number') ? user.following : '—';
+            if (user && user.message) { userFailed = true; return; } // 404 / rate-limited
+            fillStats(user, null);
+            saveCache(user, null);
           })
-          .catch(function() {});
+          .catch(function() { userFailed = true; });
 
-        // Fetch repos to count total stars
-        fetch(reposUrl, { headers: headers })
+        var p2 = fetch(reposUrl, { headers: headers })
           .then(function(r) { return r.json(); })
           .then(function(repos) {
-            if (!Array.isArray(repos)) return;
-            repos.forEach(function(repo) { totalStars += repo.stargazers_count || 0; });
-            var el = document.getElementById('gh-stars');
-            if (el) el.textContent = (typeof totalStars === 'number') ? totalStars : '—';
+            if (!Array.isArray(repos)) { reposFailed = true; return; }
+            fillStats(null, repos);
+            saveCache(null, repos);
           })
-          .catch(function() {});
+          .catch(function() { reposFailed = true; });
+
+        // Honest fallback: never leave the tiles silently empty.
+        Promise.all([p1, p2]).then(function() {
+          if (userFailed || reposFailed) {
+            setNote(cached && cached.user
+              ? '// github API unavailable — showing cached stats'
+              : '// github API unavailable — refresh to retry');
+          } else {
+            setNote('');
+          }
+        });
       }
 
       function displayGitHub() {
@@ -3256,6 +3303,9 @@
           overlay.classList.add('open');
           menu.classList.add('open');
           window._lockScroll();
+          // Move focus into the drawer (close button) for keyboard users
+          var menuCloseBtn = document.getElementById('nav-menu-close');
+          if (menuCloseBtn) menuCloseBtn.focus();
         }
 
         function closeMenu() {
@@ -3272,12 +3322,15 @@
           if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             hamburger.classList.remove('active');
             menu.classList.remove('open', 'closing');
+            hamburger.focus();
             return;
           }
           closeTimer = setTimeout(function() {
             hamburger.classList.remove('active');
             menu.classList.remove('open', 'closing');
             closeTimer = null;
+            // Return focus to the hamburger once the drawer is gone
+            hamburger.focus();
           }, 460);
         }
 
@@ -4238,6 +4291,20 @@
           contactLinksContainer.innerHTML = renderContactLinks(data);
         }
 
+        // ─── Footer: last updated stamp ─────────
+        var footerUpdated = document.getElementById('footer-updated');
+        if (footerUpdated) {
+          var syncTs = data && (data._syncTimestamp || data.updatedAt);
+          if (syncTs) {
+            var updatedDate = new Date(syncTs);
+            if (!isNaN(updatedDate.getTime())) {
+              footerUpdated.textContent = '— last updated ' +
+                updatedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+              footerUpdated.hidden = false;
+            }
+          }
+        }
+
         // ─── Re-observe new [data-reveal] elements ───
         (function(){
           var reducedMotion = window.matchMedia &&
@@ -4512,15 +4579,15 @@
       typeLine();
     }
 
-    // Message byte counter
+    // Message character counter
     var msgField = fields.message;
     var countEl = document.getElementById('contact-message-count');
-    function updateByteCount(){
-      if (countEl) countEl.textContent = 'bytes: ' + msgField.value.length + '/5000';
+    function updateCharCount(){
+      if (countEl) countEl.textContent = 'characters: ' + msgField.value.length + '/5000';
     }
     if (msgField && countEl) {
-      msgField.addEventListener('input', updateByteCount);
-      updateByteCount();
+      msgField.addEventListener('input', updateCharCount);
+      updateCharCount();
     }
 
     // Prompt typewriter — types the command when the terminal scrolls into view
@@ -4647,7 +4714,7 @@
           stampRateLimit();
           form.reset();
           Object.keys(fields).forEach(function(n){ setError(n, ''); });
-          if (typeof updateByteCount === 'function') updateByteCount();
+          if (typeof updateCharCount === 'function') updateCharCount();
           writeLog([
             { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
             { tag: '[ OK ]', cls: 'log-ok', text: 'message delivered — thanks!' },

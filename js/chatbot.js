@@ -594,12 +594,25 @@
       if (conversation.length > 20) conversation.splice(0, conversation.length - 20);
     }
 
+    // Keep the on-screen thread bounded — long chats drop the oldest lines
+    // instead of growing the DOM forever. (The AI context array above has its
+    // own separate cap, so pruning the visual thread never loses context.)
+    var MAX_VISIBLE_LINES = 40;
+    function pruneChat() {
+      var msgs = bodyEl.querySelectorAll('.chat-msg');
+      var overflow = msgs.length - MAX_VISIBLE_LINES;
+      for (var i = 0; i < overflow; i++) {
+        if (msgs[i] && msgs[i].parentNode === bodyEl) bodyEl.removeChild(msgs[i]);
+      }
+    }
+
     function addLine(who, html) {
       var line = el('div', { 'class': 'chat-msg ' + who },
         '<span class="chat-prompt" aria-hidden="true">' + (who === 'bot' ? botName() + ':~$' : 'you:~$') + '</span>' +
         '<span class="chat-text">' + html + '</span>');
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
+      pruneChat();
     }
 
     // Types the reply out character-by-character (speed scaled to length) so
@@ -612,6 +625,7 @@
         '<span class="chat-text"></span>');
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
+      pruneChat();
       var textEl = line.querySelector('.chat-text');
       var raw = String(text == null ? '' : text);
 
