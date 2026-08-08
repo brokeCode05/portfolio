@@ -1879,7 +1879,11 @@
        The modal's own opacity transition is switched off during closing so the
        fade doesn't mask the card's shrink (the backdrop still fades alone). */
     .idzoom-modal.closing {
+      /* Keep the modal fully visible during the exit so the card's shrink is
+         the only visible motion (the resting opacity is 0; without this the
+         modal would snap invisible the moment .open is removed). */
       transition: none;
+      opacity: 1;
     }
     .idzoom-modal.closing .idzoom-stage {
       animation: idzoom-out 0.32s cubic-bezier(0.5, 0, 0.75, 0.4) both;
@@ -1987,6 +1991,10 @@
     }
     .cert-modal.closing {
       animation: cert-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      /* Pin the window visible during the exit so the shrink isn't masked by
+         the resting opacity 0 / its own 0.3s fade (the backdrop fades alone). */
+      transition: none;
+      opacity: 1;
     }
     @keyframes cert-pop {
       0% {
