@@ -124,20 +124,22 @@ async function submitContactMessage(msg) {
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
-    var headers = {
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal',
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-    };
-    var endpoint = SUPABASE_URL + '/rest/v1/contact_messages';
+    // POST to the contact-submit edge function: it verifies the Turnstile
+    // token server-side (secret key never reaches the browser), then inserts
+    // via the service role. Direct REST inserts are disabled (anon INSERT
+    // policy dropped), so unverified bots get a 403 here.
+    var endpoint = SUPABASE_URL + '/functions/v1/contact-submit';
     var resp = await fetch(endpoint, {
       signal: controller.signal,
       method: 'POST',
-      headers: headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(msg)
     });
     clearTimeout(timeoutId);
+    if (resp.status === 403) {
+      console.log('[contact] Rejected: Turnstile verification failed');
+      return false;
+    }
     return resp.ok;
   } catch(e) {
     console.log('[contact] Submit error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));

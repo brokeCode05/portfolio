@@ -4450,9 +4450,16 @@
     // ---- Spam protection: Cloudflare Turnstile (optional) ----
     // Paste your Cloudflare Turnstile site key here to enable the invisible
     // challenge. Leave empty to skip it — rate limit + honeypot still apply.
-    var CONTACT_TURNSTILE_SITEKEY = '';
+    // Cloudflare Turnstile — the server-verified spam gate. The site key is
+    // public by design (it ships in the page source); the matching SECRET key
+    // lives only in Supabase secrets and is used by the contact-submit edge
+    // function to verify the token. Leave empty to skip the challenge.
+    var CONTACT_TURNSTILE_SITEKEY = '0x4AAAAAAEJ-Y7jYR6izoEbV';
     var turnstileToken = '';
-    var turnstileFallback = false; // soft-fail if the challenge can't complete
+    function turnstileError(text) {
+      var err = document.getElementById('contact-captcha-error');
+      if (err) err.textContent = text;
+    }
     function initTurnstile() {
       var holder = document.getElementById('contact-turnstile');
       var field = document.getElementById('contact-captcha-field');
@@ -4462,17 +4469,17 @@
         if (field) field.classList.add('is-active');
         window.turnstile.render(holder, {
           sitekey: CONTACT_TURNSTILE_SITEKEY,
-          theme: 'dark',
+          theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
           callback: function(token) { turnstileToken = token; },
           'expired-callback': function() { turnstileToken = ''; },
           'error-callback': function() {
             turnstileToken = '';
-            turnstileFallback = true;
+            turnstileError('Security check unavailable — please try again.');
           }
         });
       } catch (e) {
         turnstileToken = '';
-        turnstileFallback = true;
+        turnstileError('Security check unavailable — please try again.');
       }
     }
     if (CONTACT_TURNSTILE_SITEKEY) {
@@ -4480,15 +4487,15 @@
       ts.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
       ts.async = true;
       ts.onload = initTurnstile;
-      ts.onerror = function() { turnstileFallback = true; };
+      ts.onerror = function() {
+        turnstileError('Security check unavailable — use the email link instead.');
+      };
       document.head.appendChild(ts);
-      // Soft-fail: if no token arrives within 10s (script blocked/offline), don't
-      // lock out real visitors — the other layers still protect against spam.
+      // If no token arrives within 10s (script blocked/offline), block the send
+      // with an honest message instead of silently submitting unverified.
       setTimeout(function() {
         if (!turnstileToken) {
-          turnstileFallback = true;
-          var err = document.getElementById('contact-captcha-error');
-          if (err) err.textContent = 'Security check unavailable — sending anyway.';
+          turnstileError('Security check unavailable — use the email link instead.');
         }
       }, 10000);
     }
@@ -4684,7 +4691,7 @@
 
       // Turnstile: if configured and working, a valid challenge token is required.
       // Falls back gracefully if the challenge can't complete (script blocked).
-      if (CONTACT_TURNSTILE_SITEKEY && !turnstileToken && !turnstileFallback) {
+      if (CONTACT_TURNSTILE_SITEKEY && !turnstileToken) {
         submitBtn.classList.add('is-error');
         writeLog([
           { tag: '$', cls: 'log-cmd', text: './send_message.sh --send' },
