@@ -525,6 +525,12 @@
       return pre + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
     });
     out = out.replace(/\u0000(\d+)\u0000/g, function(m, i) { return anchors[+i] || ''; });
+    // One-tap suggestion questions — rendered as clickable terminal lines that
+    // send their text when tapped. Done last so the markdown/auto-link steps
+    // can't wrap the button contents in nested interactive HTML.
+    out = out.replace(/\[\[Q:([\s\S]*?)\]\]/g, function(m, q) {
+      return '<button type="button" class="chat-q">$ ' + q + '</button>';
+    });
     return out;
   }
 
@@ -787,10 +793,10 @@
           'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\n' +
           'Or just type a question below.\n\n' +
           'Try these questions:\n' +
-          '$ what tech do you use?\n' +
-          '$ show me your latest projects\n' +
-          '$ what are you currently learning?\n' +
-          '$ how can I reach you?';
+          '[[Q:what tech do you use?]]\n' +
+          '[[Q:show me your latest projects]]\n' +
+          '[[Q:what are you currently learning?]]\n' +
+          '[[Q:how can I reach you?]]';
         setTimeout(function() { botRecord(help); typeBot(help); }, 150);
       }
       setTimeout(function() { inputEl.focus(); }, 50);
@@ -901,6 +907,12 @@
       if (e.key === 'Escape' && !windowEl.hidden) { e.preventDefault(); closeChat(); }
     });
     bodyEl.addEventListener('click', function(e) {
+      // One-tap suggestion questions in the greeting — send them as a message.
+      var qBtn = e.target.closest('.chat-q');
+      if (qBtn) {
+        send(qBtn.textContent.replace(/^\$\s*/, ''));
+        return;
+      }
       // In-page anchors ([skills](skills) etc.) — close the chat first so the
       // mobile scroll-lock releases, then let the default smooth-scroll jump
       // to the section actually happen.
