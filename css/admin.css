@@ -777,6 +777,13 @@ body {
   border-color: var(--admin-accent);
 }
 
+.form-group input.admin-input-invalid,
+.form-group textarea.admin-input-invalid,
+.form-group select.admin-input-invalid {
+  border-color: var(--admin-danger, #F87171);
+  box-shadow: 0 0 0 1px var(--admin-danger, #F87171);
+}
+
 .form-group textarea {
   min-height: 80px;
   resize: vertical;

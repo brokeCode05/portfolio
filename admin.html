@@ -491,7 +491,7 @@
         <div class="admin-card">
           <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
             <h4>Inbox</h4>
-            <button class="btn btn-sm" id="messages-refresh">↻ Refresh</button>
+            <button class="btn btn-sm" id="messages-refresh" title="Refresh inbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
           </div>
           <div class="messages-toolbar">
             <input type="search" id="messages-search" placeholder="Search messages…" aria-label="Search messages" />
@@ -500,6 +500,7 @@
               <option value="unread">Unread</option>
               <option value="read">Read</option>
             </select>
+            <button class="btn btn-sm" id="messages-mark-read" title="Mark every unread message as read">Mark all read</button>
           </div>
           <div id="messages-inbox" style="display:flex;flex-direction:column;gap:0.75rem">
             <p style="color:var(--admin-text-secondary);font-size:0.875rem">Loading messages…</p>
@@ -517,7 +518,7 @@
             <h4>Overview</h4>
             <div style="display:flex;gap:0.5rem">
               <button class="btn btn-sm btn-danger-ghost" id="chats-clear" title="Delete all chat logs — wipes Chat Insights">Clear Logs</button>
-              <button class="btn btn-sm" id="chats-refresh">↻ Refresh</button>
+              <button class="btn btn-sm" id="chats-refresh" title="Refresh chat insights"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
             </div>
           </div>
           <div id="chats-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin-top:0.75rem"></div>
@@ -616,8 +617,8 @@
             </div>
           </div>
           <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap">
-            <button class="btn btn-primary" id="cloud-publish-btn">📤 Publish to Cloud</button>
-            <button class="btn" id="cloud-fetch-btn">📥 Fetch from Cloud</button>
+            <button class="btn btn-primary" id="cloud-publish-btn" title="Push local data to Supabase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Publish to Cloud</button>
+            <button class="btn" id="cloud-fetch-btn" title="Pull the latest data from Supabase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Fetch from Cloud</button>
           </div>
         </div>
 
@@ -1093,7 +1094,10 @@ CREATE POLICY "Admin update portfolio_data"
     dot.className = 'statusbar-dot';
     if (state === 'saved') {
       dot.classList.add('saved');
-      text.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+      var pw = getAdminPassword();
+      text.textContent = (pw && pw !== 'admin123')
+        ? 'Saved at ' + new Date().toLocaleTimeString() + ' · synced to cloud'
+        : 'Saved locally at ' + new Date().toLocaleTimeString() + ' — publish to update site';
       if (statusTimeout) clearTimeout(statusTimeout);
       statusTimeout = setTimeout(function() {
         text.textContent = 'Ready';
@@ -1383,6 +1387,8 @@ CREATE POLICY "Admin update portfolio_data"
     '</div>';
   }
 
+  var MESSAGES_PAGE = 25;
+  var messagesLoaded = MESSAGES_PAGE;
   function loadMessages() {
     var inbox = document.getElementById('messages-inbox');
     if (!inbox) return;
@@ -1394,12 +1400,14 @@ CREATE POLICY "Admin update portfolio_data"
     supabaseClient.from('contact_messages')
       .select('*, contact_replies(id, body, created_at)')
       .order('created_at', { ascending: false })
+      .limit(messagesLoaded)
       .then(function(result) {
         if (result.error) {
           inbox.innerHTML = '<p style="color:var(--admin-danger,#F87171)">Could not load messages: ' + escapeHtml(result.error.message) + '</p>';
           return;
         }
         var rows = result.data || [];
+        var hasMore = rows.length === messagesLoaded;
         var unread = rows.filter(function(m) { return !m.read; }).length;
         var badge = document.getElementById('messages-nav-count');
         if (badge) badge.textContent = unread ? '(' + unread + ')' : '';
@@ -1409,7 +1417,15 @@ CREATE POLICY "Admin update portfolio_data"
           if (emptyMsg) emptyMsg.style.display = 'none';
           return;
         }
-        inbox.innerHTML = rows.map(renderMessageCard).join('');
+        inbox.innerHTML = rows.map(renderMessageCard).join('') +
+          (hasMore ? '<button class="btn btn-sm" id="messages-load-more" style="align-self:center;margin-top:0.25rem">Load more (' + messagesLoaded + ' loaded)</button>' : '');
+        var loadMoreBtn = document.getElementById('messages-load-more');
+        if (loadMoreBtn) {
+          loadMoreBtn.addEventListener('click', function() {
+            messagesLoaded += MESSAGES_PAGE;
+            loadMessages();
+          });
+        }
         inbox.querySelectorAll('.msg-toggle-read').forEach(function(btn) {
           btn.addEventListener('click', function() {
             var card = btn.closest('.admin-message');
@@ -1665,6 +1681,25 @@ CREATE POLICY "Admin update portfolio_data"
     messagesRefreshBtn.addEventListener('click', loadMessages);
   }
 
+  // Bulk action: mark every unread message as read in one click.
+  var markReadBtn = document.getElementById('messages-mark-read');
+  if (markReadBtn) {
+    markReadBtn.addEventListener('click', function() {
+      if (!supabaseClient) { showToast('Supabase is not available', 'error'); return; }
+      showConfirm('Mark all messages as read?', function(ok) {
+        if (!ok) return;
+        supabaseClient.from('contact_messages')
+          .update({ read: true })
+          .eq('read', false)
+          .then(function(result) {
+            if (result.error) { showToast('Could not update messages', 'error'); return; }
+            showToast('All messages marked as read', 'success');
+            loadMessages();
+          });
+      });
+    });
+  }
+
   // Click a message row to expand/collapse its body + actions (compact inbox).
   var inboxToggleEl = document.getElementById('messages-inbox');
   if (inboxToggleEl) {
@@ -1721,6 +1756,8 @@ CREATE POLICY "Admin update portfolio_data"
     if (greetEl) greetEl.value = cfg.greeting || '';
   }
   function saveChatConfig() {
+    if (!requireField(document.getElementById('chatbot-name'), 'Bot name')) return;
+    if (!requireField(document.getElementById('chatbot-greeting'), 'Greeting message')) return;
     var d = readData();
     d.chatConfig = Object.assign({}, d.chatConfig || {}, {
       enabled: (document.getElementById('chatbot-enabled') || {}).checked !== false,
@@ -1792,8 +1829,8 @@ CREATE POLICY "Admin update portfolio_data"
   // ─── Navigation ────────────────────────────
   function switchSection(id) {
     if (id === currentSection) return;
-    if (formDirty && !window.confirm('You have unsaved changes. Leave this section without saving?')) return;
-    currentSection = id;
+    function go() {
+      currentSection = id;
     document.querySelectorAll('.admin-section').forEach(function(el) { el.classList.remove('active'); });
     document.getElementById('section-' + id).classList.add('active');
     if (id === 'dashboard') renderDashboard();
@@ -1804,6 +1841,12 @@ CREATE POLICY "Admin update portfolio_data"
     document.querySelector('.admin-nav-btn[data-section="' + id + '"]').classList.add('active');
     document.getElementById('section-title').textContent =
       document.querySelector('.admin-nav-btn[data-section="' + id + '"] span:last-child').textContent;
+    }
+    if (formDirty) {
+      showConfirm('You have unsaved changes. Leave this section without saving?', function(ok) { if (ok) go(); });
+      return;
+    }
+    go();
   }
 
   document.querySelectorAll('.admin-nav-btn').forEach(function(btn) {
@@ -1856,6 +1899,22 @@ CREATE POLICY "Admin update portfolio_data"
     updateStatusBar('saved');
   }
 
+  // Required-field check for admin forms — marks the input invalid, focuses it
+  // and toasts so an accidental wipe can't silently blank a section.
+  function requireField(el, label) {
+    if (!el) return true;
+    var ok = (el.value || '').trim().length > 0;
+    el.classList.toggle('admin-input-invalid', !ok);
+    if (!ok) {
+      showToast(label + ' is required', 'error');
+      el.focus();
+    }
+    return ok;
+  }
+
+  // Small inline SVG icon used by upload labels (keeps buttons emoji-free).
+  var ICON_FOLDER = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+
   // ─── Hero ──────────────────────────────────
   function loadHero() {
     var d = readData();
@@ -1892,6 +1951,8 @@ CREATE POLICY "Admin update portfolio_data"
 
 
   document.getElementById('hero-save').addEventListener('click', function() {
+    if (!requireField(document.getElementById('hero-name'), 'Name') ||
+        !requireField(document.getElementById('hero-title'), 'Hero title')) return;
     var d = readData();
     d.hero.badge = document.getElementById('hero-badge').value;
     d.hero.badge2 = document.getElementById('hero-badge2').value;
@@ -2040,6 +2101,7 @@ CREATE POLICY "Admin update portfolio_data"
   }
 
   document.getElementById('about-save').addEventListener('click', function() {
+    if (!requireField(document.getElementById('about-bio'), 'Introduction')) return;
     var d = readData();
     d.about.bio = document.getElementById('about-bio').value;
     d.about.terminal.role = document.getElementById('about-role').value;
@@ -2139,7 +2201,7 @@ CREATE POLICY "Admin update portfolio_data"
       '<input type="text" class="inline-edit-name" value="' + name + '" placeholder="Name" />' +
       '<input type="text" class="inline-edit-brand" value="' + brand + '" placeholder="Brand slug" />' +
       '<input type="text" class="inline-edit-logourl" value="' + logoUrl + '" placeholder="Logo URL" />' +
-      '<label class="inline-upload-label" title="Upload logo">📁<input type="file" class="inline-edit-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
+      '<label class="inline-upload-label" title="Upload logo">' + ICON_FOLDER + '<input type="file" class="inline-edit-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
       previewHtml +
       '<button class="btn btn-sm btn-primary inline-save" data-idx="' + idx + '" style="flex-shrink:0">Save</button>' +
       '<button class="btn btn-sm inline-cancel" data-idx="' + idx + '" style="flex-shrink:0">Cancel</button>' +
@@ -2151,7 +2213,7 @@ CREATE POLICY "Admin update portfolio_data"
       '<input type="text" class="inline-add-name" placeholder="Name" />' +
       '<input type="text" class="inline-add-brand" placeholder="Brand slug" />' +
       '<input type="text" class="inline-add-logourl" placeholder="Logo URL" />' +
-      '<label class="inline-upload-label" title="Upload logo">📁<input type="file" class="inline-add-upload" accept="image/*" data-add="1" style="display:none" /></label>' +
+      '<label class="inline-upload-label" title="Upload logo">' + ICON_FOLDER + '<input type="file" class="inline-add-upload" accept="image/*" data-add="1" style="display:none" /></label>' +
       '<div class="inline-logo-preview inline-add-preview" style="display:none"><img /><button class="inline-add-clear">×</button></div>' +
       '<button class="btn btn-sm btn-primary inline-add-save" style="flex-shrink:0">Save</button>' +
       '<button class="btn btn-sm inline-add-cancel" style="flex-shrink:0">Cancel</button>' +
@@ -2362,6 +2424,10 @@ CREATE POLICY "Admin update portfolio_data"
         d.currently.push(btn.dataset.tag);
       }
     });
+    if (!d.currently.length) {
+      showToast('Add at least one currently item', 'error');
+      return;
+    }
     writeData();
     showToast('Currently saved!', 'success');
   });
@@ -2667,8 +2733,8 @@ CREATE POLICY "Admin update portfolio_data"
         '<div class="form-group"><label for="im-desc">Short Description</label><textarea id="im-desc" rows="3">' + e(item.description || '') + '</textarea></div>' +
         '<div class="form-group"><label for="im-tags">Technologies (comma separated)</label><input type="text" id="im-tags" value="' + e((item.tags || []).join(', ')) + '" placeholder="HTML, CSS, JavaScript" /></div>' +
         '<div class="form-row">' +
-          '<div class="form-group"><label for="im-live">Live URL</label><input type="text" id="im-live" value="' + e((item.links && item.links.live) || '') + '" placeholder="https://…" /></div>' +
-          '<div class="form-group"><label for="im-repo">GitHub URL</label><input type="text" id="im-repo" value="' + e((item.links && item.links.repo) || '') + '" placeholder="https://github.com/…" /></div>' +
+          '<div class="form-group"><label for="im-live">Live URL</label><input type="text" id="im-live" value="' + e((item.links && item.links.live) || '') + '" placeholder="https://…" /><p class="form-hint" style="margin-top:0.25rem">Full link incl. https:// — shown as the live demo button.</p></div>' +
+          '<div class="form-group"><label for="im-repo">GitHub URL</label><input type="text" id="im-repo" value="' + e((item.links && item.links.repo) || '') + '" placeholder="https://github.com/…" /><p class="form-hint" style="margin-top:0.25rem">Full link incl. https:// — shown as the repo button.</p></div>' +
         '</div>';
     }
     if (name === 'certs') {
@@ -2683,7 +2749,7 @@ CREATE POLICY "Admin update portfolio_data"
         '</div>' +
         '<div class="form-group"><label>Certificate Image</label>' +
           '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
-            '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">📁 Upload<input type="file" id="cert-modal-upload" accept="image/*" style="display:none" /></label>' +
+            '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">' + ICON_FOLDER + ' Upload<input type="file" id="cert-modal-upload" accept="image/*" style="display:none" /></label>' +
             '<div id="cert-modal-preview" style="display:flex;align-items:center;gap:8px">' + imgHtml + '</div>' +
           '</div>' +
         '</div>';
@@ -2713,7 +2779,7 @@ CREATE POLICY "Admin update portfolio_data"
           '<div class="form-group"><label for="im-icon">Icon</label><select id="im-icon">' + iconOpts + '</select></div>' +
         '</div>' +
         '<div class="form-group"><label for="im-value">Display Text</label><input type="text" id="im-value" value="' + e(item.value || '') + '" placeholder="linkedin.com/in/username" /></div>' +
-        '<div class="form-group"><label for="im-url">URL</label><input type="text" id="im-url" value="' + e(item.url || '') + '" placeholder="https://linkedin.com/in/username" /></div>';
+        '<div class="form-group"><label for="im-url">URL</label><input type="text" id="im-url" value="' + e(item.url || '') + '" placeholder="https://linkedin.com/in/username" /><p class="form-hint" style="margin-top:0.25rem">Full link incl. https:// (mailto: works for email).</p></div>';
     }
     if (name === 'faq') {
       return '<div class="form-group"><label for="im-topic">Topic (optional — shown in Chat Insights)</label><input type="text" id="im-topic" value="' + e(item.topic || '') + '" placeholder="e.g. pricing" /></div>' +
@@ -2756,6 +2822,7 @@ CREATE POLICY "Admin update portfolio_data"
     var item = list[itemModalIndex];
     if (!item) { closeItemModal(); return; }
     if (itemModalType === 'projects') {
+      if (!requireField(document.getElementById('im-title'), 'Project name')) return;
       item.title = imVal('im-title');
       item.category = imVal('im-category') || 'Uncategorized';
       item.status = imVal('im-status') || 'published';
@@ -2765,25 +2832,30 @@ CREATE POLICY "Admin update portfolio_data"
       item.links.live = imVal('im-live');
       item.links.repo = imVal('im-repo');
     } else if (itemModalType === 'certs') {
+      if (!requireField(document.getElementById('im-name'), 'Certificate name')) return;
       item.name = imVal('im-name');
       item.issuer = imVal('im-issuer');
       item.date = imVal('im-date');
       item.path = certModalPath;
     } else if (itemModalType === 'experience') {
+      if (!requireField(document.getElementById('im-role'), 'Role') || !requireField(document.getElementById('im-company'), 'Company / Organization')) return;
       item.role = imVal('im-role');
       item.company = imVal('im-company');
       item.date = imVal('im-date');
       item.bullets = imVal('im-bullets').split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
     } else if (itemModalType === 'learning') {
+      if (!requireField(document.getElementById('im-year'), 'Year') || !requireField(document.getElementById('im-title'), 'Title')) return;
       item.year = imVal('im-year');
       item.title = imVal('im-title');
       item.description = imVal('im-desc');
     } else if (itemModalType === 'contact-links') {
+      if (!requireField(document.getElementById('im-label'), 'Label') || !requireField(document.getElementById('im-url'), 'URL')) return;
       item.label = imVal('im-label');
       item.value = imVal('im-value');
       item.url = imVal('im-url');
       item.icon = imVal('im-icon') || 'generic';
     } else if (itemModalType === 'faq') {
+      if (!requireField(document.getElementById('im-answer'), 'Answer')) return;
       item.topic = imVal('im-topic');
       item.keywords = imVal('im-keywords');
       item.answer = imVal('im-answer');
