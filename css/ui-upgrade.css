@@ -876,3 +876,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
     white-space: normal;
   }
 }
+/* Hidden stamp must stay hidden even on mobile (author rules beat [hidden]) */
+.footer-updated[hidden] {
+  display: none !important;
+}

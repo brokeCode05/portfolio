@@ -3092,6 +3092,12 @@
         try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) {}
         if (cached && cached.user) fillStats(cached.user, cached.repos);
 
+        // Fresh cache within the TTL: skip the network entirely and keep the
+        // unauthenticated rate budget (60 req/hr) for when it actually matters.
+        if (cached && cached.user && cached.t && (Date.now() - cached.t) < CACHE_TTL) {
+          return;
+        }
+
         var userFailed = false;
         var reposFailed = false;
 
