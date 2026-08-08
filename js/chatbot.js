@@ -537,7 +537,11 @@
       'aria-label': 'Open chat assistant',
       'aria-expanded': 'false',
       'aria-controls': WIN_ID
-    }, '<span class="chatbot-launcher-dot" aria-hidden="true"></span><span class="chatbot-launcher-icon" aria-hidden="true">&gt;_</span><span class="chatbot-launcher-label">ask bryan</span>');
+    }, '<span class="chatbot-launcher-label">ask bryan</span>' +
+       '<span class="chatbot-launcher-bubble" aria-hidden="true">' +
+         '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+         '<i class="chatbot-launcher-dot" aria-hidden="true"></i>' +
+       '</span>');
 
     var windowEl = el('div', { 'id': WIN_ID, 'role': 'dialog', 'aria-label': 'Portfolio chat assistant', 'hidden': 'hidden' });
     windowEl.innerHTML =
@@ -558,7 +562,15 @@
     // Dimmed backdrop behind the mobile bottom sheet — tapping it dismisses
     // the chat (desktop keeps the floating panel, so it's hidden there via CSS).
     var backdropEl = el('div', { 'id': 'chatbot-backdrop', 'aria-hidden': 'true' });
-    document.body.appendChild(backdropEl);
+    // Intro callout — introduces the assistant shortly after load so visitors
+    // notice the chat head (auto-retires, returns on hover / after closing).
+    var calloutEl = el('button', {
+      'id': 'chatbot-callout',
+      'type': 'button',
+      'aria-label': 'Open chat assistant'
+    }, 'Hey, I\'m online — ask me anything about Bryan' +
+       '<span class="chatbot-callout-caret" aria-hidden="true"></span>');
+    document.body.appendChild(calloutEl);
     document.body.appendChild(launcher);
     document.body.appendChild(windowEl);
 
@@ -780,6 +792,7 @@
       var titleEl = windowEl.querySelector('.chatbot-title');
       if (titleEl) titleEl.textContent = botName() + ':~$ ./assistant --help';
       windowEl.hidden = false;
+      hideCallout();
       backdropEl.classList.add('is-open');
       // On mobile the sheet is a modal — lock page scroll like the other modals.
       if (global.matchMedia && global.matchMedia('(max-width: 480px)').matches) {
@@ -814,6 +827,11 @@
         windowEl.hidden = true;
         windowEl.classList.remove('closing');
         closeTimer = null;
+        // Re-introduce the assistant once the chat has closed.
+        setTimeout(function() {
+          showCallout();
+          calloutAutoHide = setTimeout(hideCallout, 6000);
+        }, 700);
       }, 460);
     }
 
@@ -823,6 +841,33 @@
     });
     backdropEl.addEventListener('click', closeChat);
     document.getElementById('chatbot-close').addEventListener('click', closeChat);
+
+    // ── Intro callout bubble ────────────────────────────────────
+    var calloutAutoHide = null;
+    function showCallout() {
+      if (calloutAutoHide) { clearTimeout(calloutAutoHide); calloutAutoHide = null; }
+      if (launcher.style.display === 'none' || !windowEl.hidden) return;
+      calloutEl.classList.add('show');
+      calloutEl.removeAttribute('aria-hidden');
+    }
+    function hideCallout() {
+      if (calloutAutoHide) { clearTimeout(calloutAutoHide); calloutAutoHide = null; }
+      calloutEl.classList.remove('show');
+      calloutEl.setAttribute('aria-hidden', 'true');
+    }
+    // Introduce the assistant shortly after load, then let the bubble retire.
+    setTimeout(function() {
+      showCallout();
+      calloutAutoHide = setTimeout(hideCallout, 8000);
+    }, 1800);
+    launcher.addEventListener('mouseenter', function() { if (windowEl.hidden) showCallout(); });
+    launcher.addEventListener('mouseleave', hideCallout);
+    calloutEl.addEventListener('mouseenter', showCallout);
+    calloutEl.addEventListener('mouseleave', hideCallout);
+    calloutEl.addEventListener('click', function() {
+      ensureAudio();
+      if (windowEl.hidden || closeTimer) openChat(); else closeChat();
+    });
 
     // ── Sound toggle (persisted per visitor) ─────────────────
     var soundBtn = document.getElementById('chatbot-sound');
@@ -872,6 +917,7 @@
     function applyEnabled() {
       if (!botEnabled()) {
         launcher.style.display = 'none';
+        hideCallout();
         if (!windowEl.hidden) closeChat();
       }
     }
