@@ -1914,7 +1914,8 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .idzoom-stage,
-      .idzoom-cap { animation: none; }
+      .idzoom-cap,
+      .cert-modal { animation: none; }
     }
 
     /* ===== Certificate Viewer Modal ===== */
@@ -1925,7 +1926,7 @@
       z-index: 200;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
     }
@@ -1934,6 +1935,7 @@
       pointer-events: auto;
     }
     .cert-overlay.open ~ .cert-modal {
+      animation: cert-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
       transform: translate(-50%, -50%) scale(1);
       opacity: 1;
       pointer-events: auto;
@@ -1942,7 +1944,7 @@
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.92);
+      transform: translate(-50%, -50%) scale(0.72) translateY(22px);
       opacity: 0;
       z-index: 201;
       width: min(940px, calc(100vw - 2rem));
@@ -1951,12 +1953,38 @@
       border: 1px solid var(--color-border);
       border-radius: var(--border-radius);
       box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                  opacity 0.25s ease;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
       pointer-events: none;
+    }
+    .cert-modal.closing {
+      animation: cert-out 0.22s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+    }
+    @keyframes cert-pop {
+      0% {
+        transform: translate(-50%, -50%) scale(0.72) translateY(22px) rotate(1.2deg);
+        opacity: 0;
+      }
+      55% {
+        transform: translate(-50%, -50%) scale(1.02) translateY(-4px) rotate(-0.4deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1) translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    @keyframes cert-out {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.7) translateY(14px) rotate(-1deg);
+        opacity: 0;
+      }
     }
     .cert-modal-header {
       display: flex;
@@ -3495,6 +3523,13 @@
 
       function openModal(index) {
         if (overlay.classList.contains('open')) return;
+        // Cancel any pending close timer and leftover closing state so a rapid
+        // reopen plays the pop cleanly.
+        if (window._certCloseTimer) {
+          clearTimeout(window._certCloseTimer);
+          window._certCloseTimer = null;
+        }
+        modal.classList.remove('closing');
         refreshCertData();
         if (index < 0 || index >= certData.length) return;
         modal.removeAttribute('hidden');
@@ -3509,6 +3544,8 @@
       }
 
       function closeModal() {
+        // Guard against double-close while the exit animation runs.
+        if (window._certCloseTimer) return;
         if (typingTimer) {
           clearInterval(typingTimer);
           typingTimer = null;
@@ -3521,13 +3558,19 @@
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         if (typeof window._unlockScroll === 'function') window._unlockScroll();
-        modal.setAttribute('hidden', '');
-        cmdLine.innerHTML = '';
-        certImg.classList.remove('loaded');
-        certImg.src = '';
-        resetZoom();
-        clearStatus();
-        currentIndex = -1;
+        // Play the shrink-away exit while the backdrop fades, then finish cleanup.
+        modal.classList.add('closing');
+        window._certCloseTimer = setTimeout(function() {
+          modal.classList.remove('closing');
+          modal.setAttribute('hidden', '');
+          cmdLine.innerHTML = '';
+          certImg.classList.remove('loaded');
+          certImg.src = '';
+          resetZoom();
+          clearStatus();
+          currentIndex = -1;
+          window._certCloseTimer = null;
+        }, 330);
       }
 
       // Global function called by onclick on cert cards
