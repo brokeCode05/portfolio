@@ -814,7 +814,7 @@
         windowEl.hidden = true;
         windowEl.classList.remove('closing');
         closeTimer = null;
-      }, 360);
+      }, 460);
     }
 
     launcher.addEventListener('click', function() {

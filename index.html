@@ -1253,7 +1253,7 @@
       .nav-menu-mobile { height: 100dvh; }
     }
     .nav-menu-mobile.open {
-      animation: nav-menu-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: nav-menu-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
       transform: translateX(0);
       opacity: 1;
       pointer-events: auto;
@@ -1266,12 +1266,15 @@
     }
     /* Closing: slide back out with a subtle fade+scale (hide is deferred in JS) */
     .nav-menu-mobile.closing {
-      animation: nav-menu-out 0.24s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      animation: nav-menu-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both;
       visibility: visible;
       pointer-events: none;
     }
+    /* Time-reversed mirror of nav-menu-in: slides back out through the
+       overshoot and returns to the off-screen start pose. */
     @keyframes nav-menu-out {
       0%   { opacity: 1; transform: translateX(0) scale(1); }
+      40%  { opacity: 1; transform: translateX(-10px) scale(1); }
       100% { opacity: 0; transform: translateX(100%) scale(0.96); }
     }
     .nav-menu-mobile .nav-link {
@@ -3253,7 +3256,7 @@
         function closeMenu() {
           // Exit animation already running — ignore repeat calls.
           if (closeTimer) return;
-          hamburger.classList.remove('active');
+          // Keep the X icon while the drawer slides out (deferred below).
           hamburger.setAttribute('aria-expanded', 'false');
           hamburger.setAttribute('aria-label', 'Open menu');
           overlay.classList.remove('open');
@@ -3262,13 +3265,15 @@
           // Reduced-motion users get an instant hide; everyone else waits for
           // the slide-out to finish before removing .open (which hides it).
           if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            hamburger.classList.remove('active');
             menu.classList.remove('open', 'closing');
             return;
           }
           closeTimer = setTimeout(function() {
+            hamburger.classList.remove('active');
             menu.classList.remove('open', 'closing');
             closeTimer = null;
-          }, 340);
+          }, 460);
         }
 
         hamburger.addEventListener('click', function() {
@@ -4673,7 +4678,7 @@
       font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
       color: var(--color-text-primary, #E8EAED);
       transform-origin: bottom right;
-      animation: chat-window-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: chat-window-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     /* Animations DO run when `hidden` toggles (unlike transitions) — pop-in on open */
     @keyframes chat-window-in {
@@ -4684,12 +4689,15 @@
     #chatbot-window[hidden] { display: none; }
     /* Closing: shrink away toward the launcher (hide is deferred in JS) */
     #chatbot-window.closing {
-      animation: chat-window-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      animation: chat-window-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both;
       pointer-events: none;
     }
+    /* Time-reversed mirror of chat-window-in: drifts back through the overshoot
+       and returns to the pose the panel rose from. */
     @keyframes chat-window-out {
       0%   { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(10px) scale(0.7); }
+      45%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+      100% { opacity: 0; transform: translateY(16px) scale(0.7); }
     }
 
     /* Dimmed backdrop behind the mobile bottom sheet — tap it to dismiss.
@@ -4828,17 +4836,20 @@
         border-radius: 16px 16px 0 0;
         border-bottom: none;
         transform-origin: bottom center;
-        animation: chat-sheet-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation: chat-sheet-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
       }
       @keyframes chat-sheet-in {
         0%   { opacity: 0; transform: translateY(100%) scale(0.96); }
         65%  { opacity: 1; transform: translateY(-1.2%) scale(1); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
       }
-      #chatbot-window.closing { animation: chat-sheet-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+      #chatbot-window.closing { animation: chat-sheet-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+      /* Time-reversed mirror of chat-sheet-in: slides back down through the
+         overshoot and returns to the start pose while fading. */
       @keyframes chat-sheet-out {
         0%   { opacity: 1; transform: translateY(0) scale(1); }
-        100% { opacity: 0; transform: translateY(100%) scale(0.97); }
+        35%  { opacity: 1; transform: translateY(-1.2%) scale(1); }
+        100% { opacity: 0; transform: translateY(100%) scale(0.96); }
       }
       /* Grabber handle so it reads as a dismissible sheet */
       #chatbot-window::before {
