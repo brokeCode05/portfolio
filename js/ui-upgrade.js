@@ -132,7 +132,7 @@
       var r = card.getBoundingClientRect();
       var px = (e.clientX - r.left) / r.width;
       var py = (e.clientY - r.top) / r.height;
-      var t = tiltDegrees(px, py, 6);
+      var t = tiltDegrees(px, py, 8);
       card.style.setProperty('--rx', t.rx + 'deg');
       card.style.setProperty('--ry', t.ry + 'deg');
     }, { passive: true });

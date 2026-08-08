@@ -236,6 +236,14 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .cert-card {
   display: block;
   padding: 0;
+  /* Children sit on their own plane (translateZ) so the hover tilt reads as
+     real depth — matches the 3D flip-up viewer. No overflow:hidden here so
+     the 3D context isn't flattened. */
+  transform-style: preserve-3d;
+  /* The global [data-reveal] rule sets will-change: transform, opacity, which
+     per CSS Transforms 2 forces transform-style to flat (killing the 3D
+     depth). Clear it for cert cards so preserve-3d actually engages. */
+  will-change: auto;
   /* opacity keeps the scroll-reveal fade working (equal specificity,
      ui-upgrade loads later, so omit it here and the fade snaps) */
   transition: opacity var(--transition-slow),
@@ -263,6 +271,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   gap: var(--space-md);
   padding: var(--space-lg);
   border-radius: inherit;
+  /* Lift the card face off the plane so the hover tilt shows real depth */
+  transform: translateZ(18px);
 }
 /* Blinking block cursor after the title, like a caret in a terminal */
 .cert-card:hover .cert-card-title::after,
@@ -308,7 +318,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   transition: border-color var(--transition-fast),
     box-shadow var(--transition-base),
     opacity var(--transition-slow),
-    transform 0.16s ease-out;
+    transform 0.14s ease-out;
 }
 
 /* ── GitHub cards: terminal focus frame on hover ─────────────
