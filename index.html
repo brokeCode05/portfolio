@@ -4688,6 +4688,18 @@
       60%  { opacity: 1; transform: translateY(-6px) scale(1.08); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+    /* Attention wiggle — plays once when the intro callout retires */
+    #chatbot-launcher.wiggle .chatbot-launcher-bubble {
+      animation: chat-head-wiggle 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes chat-head-wiggle {
+      0%   { transform: rotate(0deg) scale(1); }
+      20%  { transform: rotate(-8deg) scale(1.08); }
+      40%  { transform: rotate(7deg) scale(1.12); }
+      60%  { transform: rotate(-5deg) scale(1.05); }
+      80%  { transform: rotate(3deg) scale(1.02); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
     @keyframes chat-dot-pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.35; }
@@ -4957,6 +4969,7 @@
     @media (prefers-reduced-motion: reduce) {
       #chatbot-window, #chatbot-window.closing, .chat-chip { animation: none; }
       #chatbot-launcher { animation: none; }
+      #chatbot-launcher.wiggle .chatbot-launcher-bubble { animation: none; }
       .chatbot-launcher-dot, .chatbot-callout-caret, .chat-text .cursor { animation: none; }
       #chatbot-backdrop, #chatbot-callout { transition: none; }
     }

@@ -830,7 +830,7 @@
         // Re-introduce the assistant once the chat has closed.
         setTimeout(function() {
           showCallout();
-          calloutAutoHide = setTimeout(hideCallout, 6000);
+          retireCallout(6000);
         }, 700);
       }, 460);
     }
@@ -855,10 +855,31 @@
       calloutEl.classList.remove('show');
       calloutEl.setAttribute('aria-hidden', 'true');
     }
+    // Retire the callout after a delay, then give the chat head a quick
+    // attention wiggle so it doesn't just sit there once the bubble leaves.
+    function retireCallout(afterMs) {
+      if (calloutAutoHide) { clearTimeout(calloutAutoHide); }
+      calloutAutoHide = setTimeout(function() {
+        calloutAutoHide = null;
+        hideCallout();
+        bounceHead();
+      }, afterMs);
+    }
+    function bounceHead() {
+      if (launcher.style.display === 'none' || !windowEl.hidden) return;
+      launcher.classList.remove('wiggle');
+      void launcher.offsetWidth; // restart the animation even on rapid re-trigger
+      launcher.classList.add('wiggle');
+      // Fallback cleanup — reduced-motion users never fire animationend.
+      setTimeout(function() { launcher.classList.remove('wiggle'); }, 750);
+    }
+    launcher.addEventListener('animationend', function(e) {
+      if (e.animationName === 'chat-head-wiggle') launcher.classList.remove('wiggle');
+    });
     // Introduce the assistant shortly after load, then let the bubble retire.
     setTimeout(function() {
       showCallout();
-      calloutAutoHide = setTimeout(hideCallout, 8000);
+      retireCallout(8000);
     }, 1800);
     launcher.addEventListener('mouseenter', function() { if (windowEl.hidden) showCallout(); });
     launcher.addEventListener('mouseleave', hideCallout);
