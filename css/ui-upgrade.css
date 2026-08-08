@@ -722,6 +722,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .about-terminal .terminal-body {
   max-height: 24rem;
   overflow-y: auto;
+  overflow-x: auto;
 }
 .terminal-body .about-term-form {
   display: flex;
@@ -766,6 +767,9 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 @media (max-width: 768px) {
   .hero-stats { grid-template-columns: repeat(2, 1fr); }
   .hero-roles { font-size: var(--text-base); }
+  /* Phase 5 fix: guard against horizontal page scroll on tablet widths
+     (481-768px) where the old 480px-only container rule didn't apply. */
+  body { overflow-x: hidden; }
 }
 @media (max-width: 480px) {
   .hero-stats { gap: var(--space-sm); }

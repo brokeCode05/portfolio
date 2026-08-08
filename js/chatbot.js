@@ -794,7 +794,7 @@
       hideCallout();
       backdropEl.classList.add('is-open');
       // On mobile the sheet is a modal — lock page scroll like the other modals.
-      if (global.matchMedia && global.matchMedia('(max-width: 480px)').matches) {
+      if (global.matchMedia && global.matchMedia('(max-width: 600px)').matches) {
         global.document.body.classList.add('modal-open');
       }
       launcher.setAttribute('aria-expanded', 'true');
