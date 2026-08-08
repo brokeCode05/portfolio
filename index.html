@@ -1875,13 +1875,18 @@
       55%  { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(-0.5deg); }
       100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
     }
-    /* Exit: the card shrinks away while the backdrop fades — mirrors the pop. */
+    /* Exit: the card shrinks away while the backdrop fades — mirrors the pop.
+       The modal's own opacity transition is switched off during closing so the
+       fade doesn't mask the card's shrink (the backdrop still fades alone). */
+    .idzoom-modal.closing {
+      transition: none;
+    }
     .idzoom-modal.closing .idzoom-stage {
-      animation: idzoom-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      animation: idzoom-out 0.32s cubic-bezier(0.5, 0, 0.75, 0.4) both;
     }
     @keyframes idzoom-out {
       0%   { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: scale(0.55) translateY(26px) rotate(-2deg); }
+      100% { opacity: 0; transform: scale(0.45) translateY(30px) rotate(-2.5deg); }
     }
     .idzoom-cap {
       display: flex;
