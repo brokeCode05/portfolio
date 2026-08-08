@@ -551,7 +551,6 @@
         '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
       '</div>' +
       '<div class="chatbot-body" id="chatbot-body" role="log" aria-live="polite"></div>' +
-      '<div class="chatbot-chips" id="chatbot-chips"></div>' +
       '<form class="chatbot-input-row" id="chatbot-form">' +
         '<span class="chatbot-prompt" aria-hidden="true">➜</span>' +
         '<input id="chatbot-input" type="text" autocomplete="off" spellcheck="false" aria-label="Type your question" placeholder="ask me about skills, projects..." />' +
@@ -574,7 +573,6 @@
     document.body.appendChild(windowEl);
 
     var bodyEl = document.getElementById('chatbot-body');
-    var chipsEl = document.getElementById('chatbot-chips');
     var inputEl = document.getElementById('chatbot-input');
     var openState = false;
     var greeted = false;
@@ -656,23 +654,6 @@
       }, startDelay);
     }
 
-    function showChips() {
-      // Suggested questions come from the admin (chatConfig.suggested), falling
-      // back to the built-in quick-pick chips when none are configured.
-      var suggested = chatConfig().suggested;
-      var list = Array.isArray(suggested)
-        ? suggested.map(function(s) { return String(s || '').trim(); }).filter(Boolean)
-        : [];
-      if (!list.length) list = ['skills', 'projects', 'experience', 'contact'];
-      list.slice(0, 8).forEach(function(label) {
-        var chip = el('button', { 'type': 'button', 'class': 'chat-chip' }, label);
-        chip.addEventListener('click', function() { send(label); });
-        chipsEl.appendChild(chip);
-      });
-    }
-
-    function clearChips() { chipsEl.innerHTML = ''; }
-
     // If the AI is unavailable (quota, timeout, network), fall back to the
     // built-in rules before escalating — keeps the bot useful during outages.
     function rulesFallback(text, aiTopic) {
@@ -680,7 +661,7 @@
       if (rule) {
         logChat(text, rule.topic, true, false);
         botRecord(rule.text);
-        typeBot(rule.text, showChips);
+        typeBot(rule.text);
       } else {
         escalate(text, aiTopic);
       }
@@ -699,7 +680,7 @@
       try { last = parseInt(localStorage.getItem('chat_ai_last') || '0', 10) || 0; } catch (e) {}
       if (now - last < 5000) {
         botRecord('Give me a moment — ask again in a few seconds.');
-        typeBot('Give me a moment — ask again in a few seconds.', showChips);
+        typeBot('Give me a moment — ask again in a few seconds.');
         return;
       }
       try { localStorage.setItem('chat_ai_last', String(now)); } catch (e) {}
@@ -729,7 +710,7 @@
             var answerText = String(result.data.text).slice(0, 900);
             logChat(text, result.data.topic || 'ai', true, false);
             botRecord(answerText);
-            typeBot(answerText, showChips);
+            typeBot(answerText);
           } else if (result.status === 429) {
             // Daily AI quota exhausted — log it distinctly so Chat Insights
             // shows why instead of a generic unanswered question.
@@ -751,14 +732,13 @@
     function escalate(text, topic) {
       logChat(text, topic || null, false, true);
       botRecord(UNANSWERED);
-      typeBot(UNANSWERED, showChips);
+      typeBot(UNANSWERED);
     }
 
     function send(text) {
       text = String(text || '').trim();
       if (!text) return;
       ensureAudio();
-      clearChips();
       // The visitor's message becomes the latest — drop the caret from earlier replies.
       bodyEl.querySelectorAll('.chat-msg .chat-text .cursor').forEach(function(c) { c.remove(); });
       addLine('user', esc(text));
@@ -770,7 +750,7 @@
       if (faq) {
         logChat(text, faq.topic, true, false);
         botRecord(faq.text);
-        typeBot(faq.text, showChips);
+        typeBot(faq.text);
       } else {
         aiAnswer(text);
       }
@@ -802,8 +782,8 @@
         greeted = true;
         // Greeting comes from the admin when set, otherwise the default.
         var help = String(chatConfig().greeting || '').trim() ||
-          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), certifications, or how to [contact](contact) him.\n\nOr just type a question below.';
-        setTimeout(function() { botRecord(help); typeBot(help, showChips); }, 150);
+          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\nOr just type a question below.';
+        setTimeout(function() { botRecord(help); typeBot(help); }, 150);
       }
       setTimeout(function() { inputEl.focus(); }, 50);
     }

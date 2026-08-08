@@ -4852,25 +4852,6 @@
     }
     @keyframes chat-blink { 50% { opacity: 0; } }
 
-    .chatbot-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0 0.8rem 0.65rem; }
-    .chat-chip {
-      background: none; border: 1px solid var(--color-border, #2A2D35); color: var(--color-text-secondary, #A0A5B0); border-radius: 999px;
-      font: 500 0.7rem/1 var(--font-code, ui-monospace, monospace);
-      padding: 0.32rem 0.65rem; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background-color 0.15s;
-      animation: chat-chip-in 0.22s ease backwards;
-    }
-    .chat-chip:nth-child(1) { animation-delay: 0.02s; }
-    .chat-chip:nth-child(2) { animation-delay: 0.06s; }
-    .chat-chip:nth-child(3) { animation-delay: 0.1s; }
-    .chat-chip:nth-child(4) { animation-delay: 0.14s; }
-    @keyframes chat-chip-in {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .chat-chip:hover { border-color: var(--color-accent, #4ADE80); color: var(--color-accent, #4ADE80); }
-    .chat-chip:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; }
-
     .chatbot-input-row {
       display: flex; gap: 0.4rem; align-items: center;
       padding: 0.6rem 0.8rem; border-top: 1px solid var(--color-border, #2A2D35); background: var(--color-surface, #111418);
@@ -4939,7 +4920,6 @@
         bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
         max-width: min(230px, calc(100vw - 1.5rem));
       }
-      .chat-chip { padding: 0.4rem 0.75rem; }
       #chatbot-send { padding: 0.3rem 0.65rem; }
       /* Keep the send row clear of the iOS home indicator */
       .chatbot-input-row { padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
@@ -4955,7 +4935,7 @@
       #chatbot-window { max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); }
     }
     @media (prefers-reduced-motion: reduce) {
-      #chatbot-window, #chatbot-window.closing, .chat-chip { animation: none; }
+      #chatbot-window, #chatbot-window.closing { animation: none; }
       #chatbot-launcher { animation: none; }
       #chatbot-launcher.wiggle .chatbot-launcher-bubble { animation: none; }
       .chatbot-launcher-dot, .chatbot-callout-caret, .chat-text .cursor { animation: none; }
