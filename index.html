@@ -1993,9 +1993,9 @@
       pointer-events: none;
     }
     .cert-modal.closing {
-      animation: cert-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      animation: cert-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both;
       /* Pin the window visible during the exit so the shrink isn't masked by
-         the resting opacity 0 / its own 0.3s fade (the backdrop fades alone). */
+         the resting opacity 0 / its own fade (the backdrop fades alone). */
       transition: none;
       opacity: 1;
     }
@@ -2013,13 +2013,19 @@
         opacity: 1;
       }
     }
+    /* Time-reversed mirror of cert-pop: the window drifts back through the
+       overshoot pose and settles down into the pose it rose from. */
     @keyframes cert-out {
       0% {
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
       }
+      45% {
+        transform: translate(-50%, -50%) scale(1.02) translateY(-3px);
+        opacity: 1;
+      }
       100% {
-        transform: translate(-50%, -50%) scale(0.7) translateY(14px);
+        transform: translate(-50%, -50%) scale(0.72) translateY(18px);
         opacity: 0;
       }
     }
@@ -3635,7 +3641,7 @@
           clearStatus();
           currentIndex = -1;
           window._certCloseTimer = null;
-        }, 380);
+        }, 460);
       }
 
       // Global function called by onclick on cert cards
