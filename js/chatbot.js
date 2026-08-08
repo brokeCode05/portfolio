@@ -567,6 +567,8 @@
     var inputEl = document.getElementById('chatbot-input');
     var openState = false;
     var greeted = false;
+    // Set while the exit animation plays; openChat() cancels it for rapid reopen.
+    var closeTimer = null;
     // Session conversation (most recent last) — sent to the AI so follow-up
     // questions ("what about projects?") make sense in context.
     var conversation = [];
@@ -770,6 +772,9 @@
         launcher.style.display = 'none';
         return;
       }
+      // Cancel any pending close so a rapid reopen replays the pop cleanly.
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      windowEl.classList.remove('closing');
       // Repaint the header title so an admin bot-name change shows up without
       // a full page reload (prompts already read botName() per message).
       var titleEl = windowEl.querySelector('.chatbot-title');
@@ -792,15 +797,29 @@
     }
 
     function closeChat() {
-      windowEl.hidden = true;
+      // Exit animation already running — ignore repeat calls.
+      if (closeTimer) return;
+      windowEl.classList.add('closing');
       backdropEl.classList.remove('is-open');
       global.document.body.classList.remove('modal-open');
       launcher.setAttribute('aria-expanded', 'false');
+      // Reduced-motion users get an instant hide; everyone else waits for the
+      // shrink-away exit (and backdrop fade) to finish before display:none.
+      if (global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        windowEl.hidden = true;
+        windowEl.classList.remove('closing');
+        return;
+      }
+      closeTimer = setTimeout(function() {
+        windowEl.hidden = true;
+        windowEl.classList.remove('closing');
+        closeTimer = null;
+      }, 360);
     }
 
     launcher.addEventListener('click', function() {
       ensureAudio();
-      if (windowEl.hidden) openChat(); else closeChat();
+      if (windowEl.hidden || closeTimer) openChat(); else closeChat();
     });
     backdropEl.addEventListener('click', closeChat);
     document.getElementById('chatbot-close').addEventListener('click', closeChat);

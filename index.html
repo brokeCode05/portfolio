@@ -1217,7 +1217,7 @@
       z-index: 98;
       opacity: 0;
       pointer-events: none;
-      transition: opacity var(--transition-base);
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
     }
@@ -1235,7 +1235,8 @@
       border-left: 1px solid var(--color-border);
       z-index: 99;
       transform: translateX(100%);
-      transition: transform var(--transition-base);
+      opacity: 0;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       flex-direction: column;
       padding: calc(var(--nav-height) + var(--space-lg)) var(--space-lg)
@@ -1252,9 +1253,26 @@
       .nav-menu-mobile { height: 100dvh; }
     }
     .nav-menu-mobile.open {
+      animation: nav-menu-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
       transform: translateX(0);
+      opacity: 1;
       pointer-events: auto;
       visibility: visible;
+    }
+    @keyframes nav-menu-in {
+      0%   { opacity: 0; transform: translateX(100%) scale(0.96); }
+      60%  { opacity: 1; transform: translateX(-10px) scale(1); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    /* Closing: slide back out with a subtle fade+scale (hide is deferred in JS) */
+    .nav-menu-mobile.closing {
+      animation: nav-menu-out 0.24s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      visibility: visible;
+      pointer-events: none;
+    }
+    @keyframes nav-menu-out {
+      0%   { opacity: 1; transform: translateX(0) scale(1); }
+      100% { opacity: 0; transform: translateX(100%) scale(0.96); }
     }
     .nav-menu-mobile .nav-link {
       display: block;
@@ -1350,7 +1368,8 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .hamburger-line { transition: none; }
-      .nav-menu-mobile, .nav-overlay { transition: none; }
+      .nav-menu-mobile, .nav-menu-mobile.open, .nav-menu-mobile.closing,
+      .nav-overlay { transition: none; animation: none; }
     }
 
     /* ===== Loading Screen ===== */
@@ -3202,8 +3221,13 @@
         if (window._scrollLock === 0) document.body.classList.remove('modal-open');
       };
 
+      var closeTimer = null;
+
       function openMenu() {
           if (menu.classList.contains('open')) return;
+          // Cancel any pending close so a rapid reopen replays the pop cleanly.
+          if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+          menu.classList.remove('closing');
           hamburger.classList.add('active');
           hamburger.setAttribute('aria-expanded', 'true');
           hamburger.setAttribute('aria-label', 'Close menu');
@@ -3213,16 +3237,28 @@
         }
 
         function closeMenu() {
+          // Exit animation already running — ignore repeat calls.
+          if (closeTimer) return;
           hamburger.classList.remove('active');
           hamburger.setAttribute('aria-expanded', 'false');
           hamburger.setAttribute('aria-label', 'Open menu');
           overlay.classList.remove('open');
-          menu.classList.remove('open');
+          menu.classList.add('closing');
           window._unlockScroll();
+          // Reduced-motion users get an instant hide; everyone else waits for
+          // the slide-out to finish before removing .open (which hides it).
+          if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            menu.classList.remove('open', 'closing');
+            return;
+          }
+          closeTimer = setTimeout(function() {
+            menu.classList.remove('open', 'closing');
+            closeTimer = null;
+          }, 340);
         }
 
         hamburger.addEventListener('click', function() {
-          if (menu.classList.contains('open')) {
+          if (menu.classList.contains('open') && !closeTimer) {
             closeMenu();
           } else {
             openMenu();
@@ -4610,14 +4646,24 @@
       font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
       color: var(--color-text-primary, #E8EAED);
       transform-origin: bottom right;
-      animation: chat-window-in 0.18s ease;
+      animation: chat-window-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     /* Animations DO run when `hidden` toggles (unlike transitions) — pop-in on open */
     @keyframes chat-window-in {
-      from { opacity: 0; transform: translateY(8px) scale(0.98); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      0%   { opacity: 0; transform: translateY(16px) scale(0.7); }
+      55%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     #chatbot-window[hidden] { display: none; }
+    /* Closing: shrink away toward the launcher (hide is deferred in JS) */
+    #chatbot-window.closing {
+      animation: chat-window-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      pointer-events: none;
+    }
+    @keyframes chat-window-out {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(10px) scale(0.7); }
+    }
 
     /* Dimmed backdrop behind the mobile bottom sheet — tap it to dismiss.
        Desktop keeps the floating panel, so it's switched off at 481px+. */
@@ -4626,7 +4672,7 @@
       background: rgba(0,0,0,0.45);
       -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
       opacity: 0; pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
     #chatbot-backdrop.is-open { opacity: 1; pointer-events: auto; }
     @media (min-width: 481px) { #chatbot-backdrop { display: none; } }
@@ -4755,11 +4801,17 @@
         border-radius: 16px 16px 0 0;
         border-bottom: none;
         transform-origin: bottom center;
-        animation: chat-sheet-in 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        animation: chat-sheet-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
       }
       @keyframes chat-sheet-in {
-        from { transform: translateY(100%); }
-        to   { transform: translateY(0); }
+        0%   { opacity: 0; transform: translateY(100%) scale(0.96); }
+        65%  { opacity: 1; transform: translateY(-1.2%) scale(1); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      #chatbot-window.closing { animation: chat-sheet-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+      @keyframes chat-sheet-out {
+        0%   { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(100%) scale(0.97); }
       }
       /* Grabber handle so it reads as a dismissible sheet */
       #chatbot-window::before {
@@ -4786,7 +4838,7 @@
       #chatbot-window { max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); }
     }
     @media (prefers-reduced-motion: reduce) {
-      #chatbot-window, .chat-chip { animation: none; }
+      #chatbot-window, #chatbot-window.closing, .chat-chip { animation: none; }
       .chatbot-launcher-dot, .chat-text .cursor { animation: none; }
       #chatbot-backdrop { transition: none; }
     }
