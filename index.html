@@ -1886,11 +1886,14 @@
       opacity: 1;
     }
     .idzoom-modal.closing .idzoom-stage {
-      animation: idzoom-out 0.32s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      animation: idzoom-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both;
     }
+    /* Time-reversed mirror of idzoom-pop: the card drifts back through the
+       overshoot pose and settles down into the exact pose it rose from. */
     @keyframes idzoom-out {
       0%   { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: scale(0.45) translateY(30px) rotate(-2.5deg); }
+      45%  { opacity: 1; transform: scale(1.03) translateY(-4px) rotate(-0.5deg); }
+      100% { opacity: 0; transform: scale(0.72) translateY(22px) rotate(1.5deg); }
     }
     .idzoom-cap {
       display: flex;
@@ -3892,7 +3895,7 @@
             idModal.classList.remove('closing');
             idBody.innerHTML = '';
             idCloseTimer = null;
-          }, 360);
+          }, 460);
           if (expandBtn) expandBtn.focus();
         }
         expandBtn.addEventListener('click', function(e) {
