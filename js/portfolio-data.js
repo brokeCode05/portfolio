@@ -165,7 +165,7 @@ function loadData() {
     learning: [],
     contactLinks: [],
     chatFaq: [],
-    chatConfig: { enabled: true, botName: '', greeting: '', suggested: [] }
+    chatConfig: { enabled: true, botName: '', greeting: '' }
   };
 }
 

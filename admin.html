@@ -574,11 +574,6 @@
               <input type="text" id="chatbot-name" placeholder="bryan-bot" maxlength="32" />
               <p class="form-hint">Shown in the chat header and command prompts.</p>
             </div>
-            <div class="form-group">
-              <label for="chatbot-suggested">Suggested questions (comma-separated)</label>
-              <input type="text" id="chatbot-suggested" placeholder="skills, projects, experience, contact" maxlength="200" />
-              <p class="form-hint">Shown under the chat as one-tap question chips. Leave empty for the defaults.</p>
-            </div>
           </div>
         </details>
 
@@ -1721,20 +1716,16 @@ CREATE POLICY "Admin update portfolio_data"
     var enabled = document.getElementById('chatbot-enabled');
     var nameEl = document.getElementById('chatbot-name');
     var greetEl = document.getElementById('chatbot-greeting');
-    var suggEl = document.getElementById('chatbot-suggested');
     if (enabled) enabled.checked = cfg.enabled !== false;
     if (nameEl) nameEl.value = cfg.botName || '';
     if (greetEl) greetEl.value = cfg.greeting || '';
-    if (suggEl) suggEl.value = Array.isArray(cfg.suggested) ? cfg.suggested.join(', ') : '';
   }
   function saveChatConfig() {
     var d = readData();
     d.chatConfig = Object.assign({}, d.chatConfig || {}, {
       enabled: (document.getElementById('chatbot-enabled') || {}).checked !== false,
       botName: (document.getElementById('chatbot-name') || {}).value || '',
-      greeting: (document.getElementById('chatbot-greeting') || {}).value || '',
-      suggested: String((document.getElementById('chatbot-suggested') || {}).value || '')
-        .split(',').map(function(s) { return s.trim(); }).filter(Boolean)
+      greeting: (document.getElementById('chatbot-greeting') || {}).value || ''
     });
     writeData();
     showToast('Chatbot settings saved', 'success');

@@ -42,9 +42,9 @@
   }
 
   // ── Admin-editable settings (data.chatConfig from the admin dashboard) ──
-  // The admin can set the bot name, greeting, suggested questions, and an
-  // on/off switch. Everything else (FAQ, portfolio knowledge) is read live
-  // from the same data that powers the site, so there's nothing to duplicate.
+  // The admin can set the bot name, greeting, and an on/off switch. Everything
+  // else (FAQ, portfolio knowledge) is read live from the same data that
+  // powers the site, so there's nothing to duplicate.
   function chatConfig() {
     var d = getData();
     return (d && d.chatConfig) || {};
