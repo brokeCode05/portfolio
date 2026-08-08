@@ -46,6 +46,11 @@
 
   <!-- Skills progress bar cards styles -->
   <style>
+    /* ===== Radius tokens — cards stay 6px, floating windows 12px ===== */
+    :root {
+      --radius-card: 6px;
+      --radius-window: 12px;
+    }
     /* ===== Hero: Buttons ===== */
     .hero-actions .btn {
       width: 100%;
@@ -603,7 +608,7 @@
     }
     .hero-badge-card:focus-visible {
       outline: none;
-      border-radius: 14px;
+      border-radius: var(--radius-window);
       box-shadow: var(--focus-ring, 0 0 0 2px rgba(74, 222, 128, 0.5));
     }
     /* Flip stage — rotates 180° on click; the faces swap via backface-visibility */
@@ -624,7 +629,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      border-radius: 14px;
+      border-radius: var(--radius-window);
       overflow: hidden;
       background:
         linear-gradient(160deg, #FFFFFF 0%, #F2F4F7 45%, #E4E8EE 100%);
@@ -645,7 +650,7 @@
     .hero-badge-back {
       position: absolute;
       inset: 0;
-      border-radius: 14px;
+      border-radius: var(--radius-window);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -705,7 +710,7 @@
     .hero-badge-sheen {
       position: absolute;
       inset: 0;
-      border-radius: 14px;
+      border-radius: var(--radius-window);
       pointer-events: none;
       z-index: 4;
       background: linear-gradient(
@@ -3022,11 +3027,11 @@
       var ghImages = {
         streak: {
           dark: 'https://github-readme-streak-stats-eight.vercel.app/?user=' + GH_USER + '&hide_border=true&background=171A21&stroke=2B313D&ring=4ADE80&fire=4ADE80&currStreakNum=F5F7FA&sideNums=A7B0BE&currStreakLabel=4ADE80&sideLabels=A7B0BE&dates=A7B0BE',
-          light: 'https://github-readme-streak-stats-eight.vercel.app/?user=' + GH_USER + '&hide_border=true&background=FFFFFF&stroke=E5E7EB&ring=059669&fire=059669&currStreakNum=1A1D23&sideNums=6B7280&currStreakLabel=059669&sideLabels=6B7280&dates=6B7280'
+          light: 'https://github-readme-streak-stats-eight.vercel.app/?user=' + GH_USER + '&hide_border=true&background=FFFFFF&stroke=E5E7EB&ring=047857&fire=047857&currStreakNum=1A1D23&sideNums=6B7280&currStreakLabel=047857&sideLabels=6B7280&dates=6B7280'
         },
         graph: {
           dark: 'https://github-readme-activity-graph.vercel.app/graph?username=' + GH_USER + '&theme=react-dark&hide_border=true&bg_color=171A21&color=4ADE80&line=4ADE80&point=2DA05A&area=true',
-          light: 'https://github-readme-activity-graph.vercel.app/graph?username=' + GH_USER + '&hide_border=true&bg_color=FFFFFF&color=059669&line=059669&point=047857&area=true'
+          light: 'https://github-readme-activity-graph.vercel.app/graph?username=' + GH_USER + '&hide_border=true&bg_color=FFFFFF&color=047857&line=047857&point=047857&area=true'
         }
       };
 
@@ -4146,9 +4151,18 @@
             '<span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">\u258A</span></span>';
         }
 
+        // ─── Section visibility ───────────────────
+        // A section with no content hides itself — a heading over nothing
+        // looks broken. Restored automatically once data exists again.
+        function syncSection(container) {
+          if (!container) return;
+          var sec = container.closest('section');
+          if (sec) sec.style.display = container.innerHTML.trim() ? '' : 'none';
+        }
+
         // ─── Skills ───────────────────────────────
         var techGrid = document.getElementById('tech-stack-grid');
-        if (techGrid && data.techStack && data.techStack.length) {
+        if (techGrid) {
           techGrid.innerHTML = renderTechStack(data);
           // Event delegation on the grid container — persists across re-renders
           if (!techGrid._toggleReady) {
@@ -4175,30 +4189,47 @@
         var learningList = document.querySelector('.skill-learning .learning-list');
         if (learningList) {
           learningList.innerHTML = renderCurrently(data);
+          // Hide just the Currently block when it's empty — the Skills section
+          // itself stays if the tech stack still has content.
+          var curWrap = learningList.closest('.skill-learning');
+          if (curWrap) curWrap.style.display = learningList.innerHTML.trim() ? '' : 'none';
+        }
+
+        // Skills section visibility: hide the WHOLE section only when both the
+        // tech stack AND the Currently block are empty (they share one section).
+        var skillsSection = (techGrid && techGrid.closest('section')) || (learningList && learningList.closest('section'));
+        if (skillsSection) {
+          var stackEmpty = !(techGrid && techGrid.innerHTML.trim());
+          var currentlyEmpty = !(learningList && learningList.innerHTML.trim());
+          skillsSection.style.display = (stackEmpty && currentlyEmpty) ? 'none' : '';
         }
 
         // ─── Projects ─────────────────────────────
         var projectsGrid = document.querySelector('.projects-grid');
         if (projectsGrid) {
           projectsGrid.innerHTML = renderProjects(data);
+          syncSection(projectsGrid);
         }
 
         // ─── Certs ────────────────────────────────
         var certsGrid = document.querySelector('.certs-grid');
         if (certsGrid) {
           certsGrid.innerHTML = renderCerts(data);
+          syncSection(certsGrid);
         }
 
         // ─── Learning Journey ────────────────────
         var learningContainer = document.querySelector('#learning .timeline');
         if (learningContainer) {
           learningContainer.innerHTML = renderLearningJourney(data);
+          syncSection(learningContainer);
         }
 
         // ─── Experience ───────────────────────────
         var experienceContainer = document.querySelector('#experience .timeline');
         if (experienceContainer) {
           experienceContainer.innerHTML = renderExperience(data);
+          syncSection(experienceContainer);
         }
 
         // ─── Direct Contact ─────────────────────
@@ -4644,7 +4675,7 @@
       padding: 0; background: none; border: none; cursor: pointer;
       animation: chat-head-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
     }
-    #chatbot-launcher:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; border-radius: 14px; }
+    #chatbot-launcher:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; border-radius: var(--radius-window); }
     /* The chat head — a mini terminal window: dark squircle, three traffic
        dots, a green chat glyph, and an online badge on the corner. */
     .chatbot-launcher-bubble {
@@ -4653,7 +4684,7 @@
       background: var(--color-bg, #0A0C10);
       color: var(--color-accent, #4ADE80);
       border: 1px solid rgba(74,222,128,0.5);
-      border-radius: 14px;
+      border-radius: var(--radius-window);
       box-shadow: 0 8px 26px rgba(0,0,0,0.5), 0 0 18px rgba(74,222,128,0.22), 0 0 0 1px rgba(74,222,128,0.25);
       transition: transform 0.16s ease-out, border-color 0.2s, box-shadow 0.2s;
     }
@@ -4702,7 +4733,7 @@
       padding: 0.7rem 1rem;
       background: var(--color-bg, #0A0C10);
       border: 1px solid var(--color-accent, #4ADE80);
-      border-radius: 10px;
+      border-radius: var(--radius-window);
       color: var(--color-text-primary, #E8EAED);
       font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
       text-align: left; cursor: pointer;
@@ -4745,7 +4776,7 @@
       max-height: min(400px, calc(100vh - 8.2rem));
       max-height: min(400px, calc(100dvh - 8.2rem));
       display: flex; flex-direction: column;
-      background: var(--color-bg, #0A0C10); border: 1px solid var(--color-border, #2A2D35); border-radius: 12px;
+      background: var(--color-bg, #0A0C10); border: 1px solid var(--color-border, #2A2D35); border-radius: var(--radius-window);
       box-shadow: 0 14px 44px rgba(0,0,0,0.55); overflow: hidden;
       font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
       color: var(--color-text-primary, #E8EAED);

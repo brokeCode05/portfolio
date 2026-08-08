@@ -17,13 +17,13 @@
 }
 [data-theme="light"] {
   --color-accent-2: #0E7490;
-  --ui-glow-green: rgba(5, 150, 105, 0.07);
+  --ui-glow-green: rgba(4, 120, 87, 0.07);
   --ui-glow-cyan:  rgba(14, 116, 144, 0.06);
-  --ui-grid-line:  rgba(5, 150, 105, 0.05);
-  --ui-spotlight:  rgba(5, 150, 105, 0.06);
+  --ui-grid-line:  rgba(4, 120, 87, 0.05);
+  --ui-spotlight:  rgba(4, 120, 87, 0.06);
   --ui-spotlight-2: rgba(14, 116, 144, 0.04);
   --ui-surface-alt: rgba(255, 255, 255, 0.55);
-  --ui-ring: rgba(5, 150, 105, 0.20);
+  --ui-ring: rgba(4, 120, 87, 0.20);
 }
 
 /* ════════════════════════════════════════════════════════════
