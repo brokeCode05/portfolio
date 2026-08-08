@@ -69,12 +69,15 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 -- Step 6: Enable RLS
 ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
 
--- Step 7: Allow public insert — anyone can submit the contact form
-CREATE POLICY "Public insert contact_messages"
-  ON contact_messages
-  FOR INSERT
-  TO anon
-  WITH CHECK (true);
+-- Step 7: NO public insert — contact messages are function-only.
+-- The contact-submit edge function (supabase/functions/contact-submit) verifies
+-- a Cloudflare Turnstile token server-side (TURNSTILE_SECRET_KEY), then inserts
+-- via the service role (bypasses RLS). Keeping the anon INSERT policy closed is
+-- what stops bots from writing straight to the table with the public key.
+--
+-- Deploy the function first (see the deploy notes at the top of
+-- supabase/functions/contact-submit/index.ts), then run this:
+DROP POLICY IF EXISTS "Public insert contact_messages" ON contact_messages;
 
 -- Step 8: Only the signed-in admin (Supabase Auth OTP session) can read messages
 CREATE POLICY "Admin read contact_messages"
@@ -103,9 +106,10 @@ CREATE POLICY "Admin delete contact_messages"
 --   Run this section after Steps 5-10
 --   ===================================================
 
--- Step 11: Store the Turnstile challenge token on each message (for audit; the
--- Edge Function verifies it before insert when configured). Nullable so direct
--- REST inserts keep working when the Edge Function is not deployed.
+-- Step 11: Store the Turnstile challenge token on each message (for audit).
+-- The contact-submit edge function verifies the token with Cloudflare
+-- siteverify before inserting; the token is kept here as a record of that
+-- verification. There is no direct REST insert path anymore (Step 7).
 ALTER TABLE contact_messages
   ADD COLUMN IF NOT EXISTS turnstile_token text;
 
@@ -139,9 +143,9 @@ CREATE TRIGGER contact_messages_flood_guard_trigger
 
 -- Step 13: Email the owner when a new message arrives.
 -- Uses Supabase's built-in pg_net extension so the email fires on ANY insert,
--- whether the message came via direct REST, the `contact` edge function, or
--- the admin panel. The notify edge function (supabase/functions/notify) does
--- the actual sending via EmailJS (the owner's connected Gmail account).
+-- whether the message came via the contact-submit edge function or any other
+-- verified path. The notify edge function (supabase/functions/notify) does the
+-- actual sending via EmailJS (the owner's connected Gmail account).
 
 -- 13a. Enable pg_net (standard Supabase extension).
 create extension if not exists pg_net;
