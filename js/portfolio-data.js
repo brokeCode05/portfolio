@@ -53,6 +53,9 @@ const SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
 
 async function fetchFromSupabase() {
+  // Returns { ok:true, data } on success (data may be null if nothing is
+  // published yet) and { ok:false, error } on network/timeout failure so
+  // callers can distinguish "no data" from "couldn't reach Supabase".
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
@@ -64,16 +67,18 @@ async function fetchFromSupabase() {
       }
     });
     clearTimeout(timeoutId);
-    if (!resp.ok) return null;
+    if (!resp.ok) return { ok: false, error: 'HTTP ' + resp.status };
     var rows = await resp.json();
     if (rows && rows.length > 0 && rows[0].json_data) {
-      return rows[0].json_data;
+      return { ok: true, data: rows[0].json_data };
     }
+    return { ok: true, data: null };
   } catch(e) {
     console.log('[cloud-sync] Fetch error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+    return { ok: false, error: e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || 'network error') };
+  } finally {
+    clearTimeout(timeoutId);
   }
-  clearTimeout(timeoutId);
-  return null;
 }
 
 async function pushToSupabase(data) {
@@ -438,6 +443,20 @@ function importDataJSON(file, callback) {
   reader.onload = function(e) {
     try {
       var data = JSON.parse(e.target.result);
+      // Shape guard — only accept a real portfolio payload. A random valid JSON
+      // file (array, string, wrong keys) would otherwise silently overwrite the
+      // entire portfolio with garbage and blank the live site.
+      var REQUIRED_KEYS = ['hero', 'about', 'projects', 'experience', 'contactLinks', 'chatConfig'];
+      var missing = [];
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        missing = REQUIRED_KEYS;
+      } else {
+        missing = REQUIRED_KEYS.filter(function(k) { return data[k] === undefined; });
+      }
+      if (missing.length) {
+        if (callback) callback('Not a valid portfolio export — missing required sections: ' + missing.join(', ') + '. Import cancelled.');
+        return;
+      }
       savePortfolioData(data);
       if (callback) callback(null, data);
     } catch(err) {

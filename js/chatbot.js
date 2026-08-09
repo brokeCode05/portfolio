@@ -643,6 +643,10 @@
     // typing (rendered button/link only appears at the end) so raw syntax never
     // flashes on screen.
     function typeBot(text, done) {
+      // Note: typingReply is set by send() before any reply-producing path.
+      // typeBot must NOT set it here — the initial greeting calls typeBot
+      // directly (not via send), and the visitor must still be able to type
+      // while the greeting plays out.
       var line = el('div', { 'class': 'chat-msg bot' },
         '<span class="chat-prompt" aria-hidden="true">' + botName() + ':~$</span>' +
         '<span class="chat-text"></span>');
@@ -660,6 +664,7 @@
         if (bodyEl.lastElementChild === line) {
           textEl.insertAdjacentHTML('beforeend', '<span class="cursor" aria-hidden="true"></span>');
         }
+        typingReply = false;
         blip();
         haptic();
         if (done) done();
@@ -778,9 +783,16 @@
       typeBot(UNANSWERED);
     }
 
+    // Set while a reply is being produced (AI fetch or typewriter) so rapid
+    // sends can't stack duplicate calls. Cleared when typeBot finishes.
+    var typingReply = false;
+
     function send(text) {
       text = String(text || '').trim();
       if (!text) return;
+      // Busy guard — ignore sends while the bot is still answering the last one.
+      if (typingReply) return;
+      typingReply = true;
       ensureAudio();
       // The visitor's message becomes the latest — drop the caret from earlier replies.
       bodyEl.querySelectorAll('.chat-msg .chat-text .cursor').forEach(function(c) { c.remove(); });

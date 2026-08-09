@@ -4023,9 +4023,9 @@
 
   <!-- Portfolio Data Override (admin dashboard support) -->
   <script src="js/tech-icons.js?v=20260730"></script>
-  <script src="js/portfolio-data.js?v=20260808a"></script>
+  <script src="js/portfolio-data.js?v=20260809b"></script>
   <script src="js/ui-upgrade.js?v=20260807e" defer></script>
-  <script src="js/chatbot.js?v=20260809a"></script>
+  <script src="js/chatbot.js?v=20260809b"></script>
   <script>
   (function(){
     'use strict';
@@ -4366,9 +4366,14 @@
       if (typeof fetchFromSupabase === 'function') {
         console.log('[cloud-sync] Fetching from Supabase...');
         fetchFromSupabase()
-          .then(function(cloudData) {
+          .then(function(result) {
             if (resolved) { console.log('[cloud-sync] Already resolved, skipping'); return; }
             resolved = true;
+
+            var cloudData = (result && result.ok) ? result.data : null;
+            if (result && !result.ok) {
+              console.log('[cloud-sync] Fetch failed:', result.error || 'unknown error');
+            }
 
             console.log('[cloud-sync] Cloud data received:', cloudData ? 'keys=' + Object.keys(cloudData).join(',') : 'null');
 

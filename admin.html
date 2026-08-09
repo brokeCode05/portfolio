@@ -3081,9 +3081,6 @@ CREATE POLICY "Admin update portfolio_data"
         location.reload();
       });
     });
-    resetPortfolioData();
-    data = loadData();
-    location.reload();
   });
 
   // ─── Cloud Sync Functions ──────────────────
@@ -3131,7 +3128,12 @@ CREATE POLICY "Admin update portfolio_data"
 
   document.getElementById('cloud-fetch-btn').addEventListener('click', function() {
     showToast('⏳ Fetching from cloud...', '');
-    fetchFromSupabase().then(function(cloudData) {
+    fetchFromSupabase().then(function(result) {
+      if (!result || !result.ok) {
+        showToast('Failed to fetch from cloud' + (result && result.error ? ': ' + result.error : '. Check your connection.'), 'error');
+        return;
+      }
+      var cloudData = result.data;
       if (cloudData && Object.keys(cloudData).length > 1) {
         savePortfolioData(cloudData);
         showToast('Cloud data loaded! Reloading...', 'success');
