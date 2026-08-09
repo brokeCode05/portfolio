@@ -16,27 +16,27 @@ CREATE POLICY "Public read portfolio_data"
   TO anon
   USING (true);
 
--- Step 3: Allow write access via admin password header
--- The admin panel sends your admin password as a custom header (x-portfolio-secret)
--- Only requests with the correct password can write to the database
-CREATE POLICY "Admin write portfolio_data"
-  ON portfolio_data
-  FOR INSERT
-  TO anon
-  WITH CHECK (true);
+-- Step 3: WRITES ARE FUNCTION-ONLY (security fix).
+-- The old policies below were a vulnerability: they allowed anonymous
+-- INSERT/UPDATE with WITH CHECK (true), and the x-portfolio-secret header was
+-- NEVER validated by the database — anyone with the public anon key (which
+-- ships in the page source) could overwrite the live portfolio.
+--
+-- The write path now goes through the portfolio-sync edge function
+-- (supabase/functions/portfolio-sync), which compares the admin password
+-- against the PORTFOLIO_SYNC_SECRET server-side secret and upserts via the
+-- service role (bypasses RLS). Run these two DROPs to close the old hole
+-- (idempotent — safe to run anytime):
 
-CREATE POLICY "Admin update portfolio_data"
-  ON portfolio_data
-  FOR UPDATE
-  TO anon
-  USING (id = 1)
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "Admin write portfolio_data" ON portfolio_data;
+DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
 
--- Note: The x-portfolio-secret header validation is handled by the application code.
--- These policies allow anonymous INSERT/UPDATE but are restricted by the app
--- which only sends write requests from the authenticated admin panel.
--- For additional security, you can add header-based checks using Supabase's
--- built-in request header functions in a future update.
+-- Deploy the function first (from repo root):
+--   npx supabase link --project-ref YOUR_PROJECT_REF
+--   npx supabase secrets set PORTFOLIO_SYNC_SECRET=the_same_password_you_type_in_admin
+--   npx supabase functions deploy portfolio-sync --no-verify-jwt
+--
+-- Public SELECT (Step 2) stays open so visitors can still read the portfolio.
 
 -- Step 4: Verify your setup
 -- Run this to confirm RLS is enabled
@@ -343,9 +343,16 @@ create trigger chat_logs_flood_guard_trigger
 -- by spam. Only the service role (used by the edge function) can access it.
 
 create table if not exists chat_ai_usage (
-  usage_date date primary key,
-  request_count integer not null default 0
+  usage_date date not null,
+  client_ip text not null default 'unknown',
+  request_count integer not null default 0,
+  primary key (usage_date, client_ip)
 );
+
+-- If you created this table before the per-IP fix, migrate it instead:
+--   ALTER TABLE chat_ai_usage DROP CONSTRAINT chat_ai_usage_pkey;
+--   ALTER TABLE chat_ai_usage ADD COLUMN IF NOT EXISTS client_ip text NOT NULL DEFAULT 'unknown';
+--   ALTER TABLE chat_ai_usage ADD PRIMARY KEY (usage_date, client_ip);
 
 alter table chat_ai_usage enable row level security;
 -- No policies: RLS is on with no anon/authenticated access, so only the

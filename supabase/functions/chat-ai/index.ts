@@ -70,16 +70,33 @@ Deno.serve(async (req) => {
     : []
 
   // ── Daily quota guard (service role, bypasses RLS) ─────────
+  // Two caps: a GLOBAL daily limit (protects the free tier) and a PER-IP daily
+  // limit (stops one script from exhausting the global cap in minutes). The
+  // table is keyed by (usage_date, client_ip); the global check sums across
+  // today's rows. Client-supplied IP is untrusted, so we take it from the
+  // x-forwarded-for header set by the platform (first value = client IP).
   const dailyLimit = parseInt(Deno.env.get('CHAT_AI_DAILY_LIMIT') || '500', 10) || 500
+  const perIpLimit = parseInt(Deno.env.get('CHAT_AI_PER_IP_LIMIT') || '30', 10) || 30
   const admin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
   const today = new Date().toISOString().slice(0, 10)
+  const clientIp = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim().slice(0, 64) || 'unknown'
+
   const { data: usageRow } = await admin
     .from('chat_ai_usage')
     .select('request_count')
     .eq('usage_date', today)
+    .eq('client_ip', clientIp)
     .maybeSingle()
-  if (usageRow && usageRow.request_count >= dailyLimit) {
+  const { data: globalRows } = await admin
+    .from('chat_ai_usage')
+    .select('request_count')
+    .eq('usage_date', today)
+  const globalCount = (globalRows || []).reduce(function(sum, r) { return sum + (r.request_count || 0); }, 0)
+  if (globalCount >= dailyLimit) {
     return json({ error: 'AI daily limit reached' }, 429)
+  }
+  if (usageRow && usageRow.request_count >= perIpLimit) {
+    return json({ error: 'AI limit reached for this device — try again tomorrow' }, 429)
   }
 
   // ── Ask Groq ───────────────────────────────────────────────
@@ -159,10 +176,10 @@ Deno.serve(async (req) => {
     }
   }
 
-  // ── Count the request (upsert today's row) ─────────────────
+  // ── Count the request (upsert today's per-IP row) ──────────
   const upsertResult = await admin.from('chat_ai_usage').upsert(
-    { usage_date: today, request_count: (usageRow ? usageRow.request_count : 0) + 1 },
-    { onConflict: 'usage_date' },
+    { usage_date: today, client_ip: clientIp, request_count: (usageRow ? usageRow.request_count : 0) + 1 },
+    { onConflict: 'usage_date,client_ip' },
   )
   if (upsertResult.error) {
     console.error('chat_ai_usage upsert failed:', upsertResult.error.message)

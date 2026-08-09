@@ -82,7 +82,11 @@ async function fetchFromSupabase() {
 }
 
 async function pushToSupabase(data) {
-  // Uses the admin password as a custom header that the RLS policy checks
+  // Writes go through the portfolio-sync edge function, which compares the
+  // admin password against a server-side secret (PORTFOLIO_SYNC_SECRET) and
+  // upserts via the service role. Direct REST writes are closed (the old
+  // open anon policies are dropped), so the public anon key alone can no
+  // longer overwrite the portfolio.
   var adminPw = getAdminPassword();
   if (!adminPw) return false;
   var now = new Date().toISOString();
@@ -91,18 +95,14 @@ async function pushToSupabase(data) {
   var controller = new AbortController();
   var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
   try {
-    var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data', {
+    var resp = await fetch(SUPABASE_URL + '/functions/v1/portfolio-sync', {
       signal: controller.signal,
       method: 'POST',
       headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates',
         'x-portfolio-secret': adminPw
       },
       body: JSON.stringify({
-        id: 1,
         json_data: data,
         updated_at: now
       })

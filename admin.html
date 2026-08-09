@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Content-Security-Policy (defense-in-depth). Supabase-js is loaded from the
+       CDN, so script-src allows it; connect-src only allows the project's own
+       Supabase host (REST + functions + realtime websocket). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://mnsgwitzgwhmiccbojck.supabase.co wss://mnsgwitzgwhmiccbojck.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <!-- Prevent the browser from serving a stale cached copy of this admin page -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -11,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260809a" />
+  <link rel="stylesheet" href="css/admin.css?v=20260810a" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -646,17 +650,15 @@ CREATE POLICY "Public read portfolio_data"
   TO anon
   USING (true);
 
--- 3. Allow write access only with the correct password header
-CREATE POLICY "Admin write portfolio_data"
-  ON portfolio_data FOR INSERT
-  TO anon
-  WITH CHECK (true);
+-- 3. SECURITY FIX — writes are function-only. The old "Admin write" policies
+--    allowed anonymous INSERT/UPDATE and never validated the password header,
+--    so anyone with the public key could overwrite the site. Drop them:
+DROP POLICY IF EXISTS "Admin write portfolio_data" ON portfolio_data;
+DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
 
-CREATE POLICY "Admin update portfolio_data"
-  ON portfolio_data FOR UPDATE
-  TO anon
-  USING (id = 1)
-  WITH CHECK (true);
+--    Writes now go through the portfolio-sync edge function, which checks the
+--    password against PORTFOLIO_SYNC_SECRET server-side. Public SELECT (step 2)
+--    stays open so visitors can still read the portfolio.
             </code>
             <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:4px">
               Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL Editor.
@@ -668,7 +670,8 @@ CREATE POLICY "Admin update portfolio_data"
           <h4 style="margin-bottom:0.75rem">Cloud Sync Password</h4>
           <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
             Set a <strong>secret password</strong> used to authorize cloud sync writes. This is NOT your login password — 
-            it's sent as a custom header that your Supabase RLS policy checks.
+            it's sent as a custom header that the <code>portfolio-sync</code> edge function checks server-side
+            (matching the <code>PORTFOLIO_SYNC_SECRET</code> secret). Direct REST writes are closed.
           </p>
           <div class="form-group">
             <input type="password" id="cloud-password-input" placeholder="Enter a secret cloud sync password" />
@@ -776,7 +779,7 @@ CREATE POLICY "Admin update portfolio_data"
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260807f"></script>
+<script src="js/portfolio-data.js?v=20260810a"></script>
 <script>
 (function(){
   'use strict';
@@ -1955,6 +1958,20 @@ CREATE POLICY "Admin update portfolio_data"
   var ICON_LOCK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
   var ICON_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
 
+  // Shared upload guard — accept="image/*" is a hint, not a check. Reject
+  // non-images and oversized files before the FileReader ever fires.
+  function validImageFile(file) {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      showToast('Please choose an image file (JPG, PNG, SVG, WEBP).', 'error');
+      return false;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Image is too large — max 2MB. Please resize it and try again.', 'error');
+      return false;
+    }
+    return true;
+  }
+
   // ─── Hero ──────────────────────────────────
   function loadHero() {
     var d = readData();
@@ -2020,6 +2037,7 @@ CREATE POLICY "Admin update portfolio_data"
     heroPhotoInput.addEventListener('change', function() {
       var file = this.files[0];
       if (!file) return;
+      if (!validImageFile(file)) { this.value = ''; return; }
       var reader = new FileReader();
       reader.onload = function(e) {
         var img = new Image();
@@ -2400,6 +2418,7 @@ CREATE POLICY "Admin update portfolio_data"
   function handleInlineUpload(input, callback) {
     var file = input.files[0];
     if (!file) return;
+    if (!validImageFile(file)) { input.value = ''; return; }
     var reader = new FileReader();
     reader.onload = function(e) {
       var img = new Image();
@@ -2912,6 +2931,7 @@ CREATE POLICY "Admin update portfolio_data"
     input.addEventListener('change', function() {
       var file = input.files[0];
       if (!file) return;
+      if (!validImageFile(file)) { input.value = ''; return; }
       var reader = new FileReader();
       reader.onload = function(e) {
         var img = new Image();
