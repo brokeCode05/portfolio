@@ -1044,6 +1044,10 @@
     [data-theme="light"] .hero-badge-back {
       filter: drop-shadow(0 12px 22px rgba(20, 30, 48, 0.16));
     }
+    /* Slightly deepen the portrait so it doesn't wash out on the light card */
+    [data-theme="light"] #hero-badge-img {
+      filter: contrast(1.05) saturate(1.05);
+    }
     [data-theme="light"] .hero-badge-card:hover .hero-badge-face,
     [data-theme="light"] .hero-badge-card:hover .hero-badge-back {
       filter: drop-shadow(0 16px 30px rgba(20, 30, 48, 0.22));

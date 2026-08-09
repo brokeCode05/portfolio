@@ -66,7 +66,6 @@ function setAdminPassword(pw) {
     localStorage.setItem(ADMIN_PASSWORD_KEY, pw);
   } catch (e) {}
 }
-
 function getGitHubToken() {
   try {
     return localStorage.getItem(GITHUB_TOKEN_KEY) || '';
@@ -78,6 +77,23 @@ function getGitHubToken() {
 function setGitHubToken(token) {
   try {
     localStorage.setItem(GITHUB_TOKEN_KEY, token);
+  } catch (e) {}
+}
+
+// ─── Optional admin passcode (second factor on top of OTP) ───
+var ADMIN_PASSCODE_KEY = 'portfolio_admin_passcode';
+
+function getAdminPasscode() {
+  try {
+    return localStorage.getItem(ADMIN_PASSCODE_KEY) || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function setAdminPasscode(pw) {
+  try {
+    localStorage.setItem(ADMIN_PASSCODE_KEY, pw);
   } catch (e) {}
 }
 

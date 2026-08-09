@@ -40,6 +40,14 @@
   var verifyOtpText = document.getElementById('verify-otp-text');
   var verifyOtpSpinner = document.getElementById('verify-otp-spinner');
   var backToEmailBtn = document.getElementById('back-to-email-btn');
+  var loginStepPasscode = document.getElementById('login-step-passcode');
+  var passcodeInput = document.getElementById('passcode-input');
+  var passcodeError = document.getElementById('passcode-error');
+  var verifyPasscodeBtn = document.getElementById('verify-passcode-btn');
+  var verifyPasscodeText = document.getElementById('verify-passcode-text');
+  var verifyPasscodeSpinner = document.getElementById('verify-passcode-spinner');
+  var adminPasscodeInput = document.getElementById('admin-passcode-input');
+  var adminPasscodeSaveBtn = document.getElementById('admin-passcode-save-btn');
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
   var statusBar = document.getElementById('admin-statusbar');
@@ -53,7 +61,20 @@
       .then(function (result) {
         var session = result.data.session;
         if (session && session.user && session.user.email === ADMIN_EMAIL) {
-          showDashboard(session.user.email);
+          // Honor the optional passcode gate on session restore too, so the
+          // second factor applies every time the dashboard is unlocked.
+          var passcode = getAdminPasscode();
+          if (passcode && loginStepPasscode) {
+            showLogin();
+            loginStepEmail.style.display = 'none';
+            loginStepOtp.style.display = 'none';
+            loginStepPasscode.style.display = 'block';
+            passcodeInput.value = '';
+            passcodeError.textContent = '';
+            passcodeInput.focus();
+          } else {
+            showDashboard(session.user.email);
+          }
         } else {
           showLogin();
         }
@@ -69,9 +90,12 @@
     if (statusBar) statusBar.style.display = 'none';
     loginStepEmail.style.display = 'block';
     loginStepOtp.style.display = 'none';
+    if (loginStepPasscode) loginStepPasscode.style.display = 'none';
     loginSentMsg.style.display = 'none';
     loginError.textContent = '';
     otpError.textContent = '';
+    if (passcodeError) passcodeError.textContent = '';
+    if (passcodeInput) passcodeInput.value = '';
   }
 
   function showDashboard(email) {
@@ -193,6 +217,16 @@
           otpError.textContent = result.error.message;
           return;
         }
+        // Optional second factor — if a passcode is set, ask for it next.
+        var passcode = getAdminPasscode();
+        if (passcode && loginStepPasscode) {
+          loginStepOtp.style.display = 'none';
+          loginStepPasscode.style.display = 'block';
+          passcodeInput.value = '';
+          passcodeError.textContent = '';
+          passcodeInput.focus();
+          return;
+        }
         showToast('Signed in!', 'success');
         showDashboard(email);
       })
@@ -200,6 +234,31 @@
         setLoading(verifyOtpBtn, verifyOtpText, verifyOtpSpinner, false);
         otpError.textContent = 'Verification failed: ' + (err.message || '');
       });
+  }
+
+  // Step 3: admin passcode unlock
+  function verifyPasscode() {
+    if (!passcodeInput || !passcodeError) return;
+    var entered = passcodeInput.value;
+    if (!entered) {
+      passcodeError.textContent = 'Enter your admin passcode.';
+      return;
+    }
+    setLoading(verifyPasscodeBtn, verifyPasscodeText, verifyPasscodeSpinner, true);
+    setTimeout(function () {
+      setLoading(verifyPasscodeBtn, verifyPasscodeText, verifyPasscodeSpinner, false);
+      var saved = getAdminPasscode();
+      if (entered === saved) {
+        passcodeError.textContent = '';
+        var email = authEmailInput.value.trim();
+        showToast('Signed in!', 'success');
+        showDashboard(email);
+      } else {
+        passcodeError.textContent = 'Incorrect passcode.';
+        passcodeInput.value = '';
+        passcodeInput.focus();
+      }
+    }, 400);
   }
 
   // Sign Out
@@ -224,6 +283,15 @@
   });
 
   verifyOtpBtn.addEventListener('click', verifyOtpCode);
+  if (verifyPasscodeBtn) verifyPasscodeBtn.addEventListener('click', verifyPasscode);
+  if (passcodeInput) {
+    passcodeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        verifyPasscode();
+      }
+    });
+  }
 
   otpInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') verifyOtpCode();
@@ -271,6 +339,28 @@
     setAdminPassword(pw);
     showToast('Cloud sync password saved!', 'success');
   });
+
+  // ─── Optional admin passcode (second factor) ───
+  if (adminPasscodeInput) {
+    var savedAdminPasscode = getAdminPasscode();
+    if (savedAdminPasscode) adminPasscodeInput.value = savedAdminPasscode;
+  }
+  if (adminPasscodeSaveBtn) {
+    adminPasscodeSaveBtn.addEventListener('click', function () {
+      var pw = adminPasscodeInput.value.trim();
+      if (!pw) {
+        setAdminPasscode('');
+        showToast('Passcode removed — login is OTP-only again.', 'success');
+        return;
+      }
+      if (pw.length < 4) {
+        showToast('Passcode must be at least 4 characters.', 'error');
+        return;
+      }
+      setAdminPasscode(pw);
+      showToast("Admin passcode saved — you'll be asked for it after the access code.", 'success');
+    });
+  }
 
   // ─── Password / token visibility toggles ───────
   document.querySelectorAll('.pw-toggle').forEach(function (btn) {
@@ -3181,8 +3271,8 @@
       .then(function (result) {
         if (!result || !result.ok) {
           showToast(
-            'Failed to fetch from cloud' +
-              (result && result.error ? ': ' + result.error : '. Check your connection.'),
+            'Cloud unreachable — your local changes are kept safe. ' +
+              (result && result.error ? result.error : 'Check your connection and try again.'),
             'error'
           );
           return;
@@ -3199,7 +3289,7 @@
         }
       })
       .catch(function () {
-        showToast('Failed to fetch from cloud.', 'error');
+        showToast('Cloud unreachable — your local changes are kept safe. Check your connection.', 'error');
       });
   });
 
