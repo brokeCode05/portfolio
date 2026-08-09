@@ -119,7 +119,7 @@
           nq.indexOf('good evening') !== -1;
       },
       answer: function() {
-        return 'Hey! I\'m the portfolio assistant. I can answer questions about Bryan\'s skills, projects, experience, certifications, and how to contact him.\n\nType `help` for the full list, or just ask away.';
+        return 'Hey! I\'m ' + botName() + ', the portfolio assistant. I can answer questions about Bryan\'s skills, projects, experience, certifications, and how to contact him.\n\nType `help` for the full list, or just ask away.';
       }
     },
     {

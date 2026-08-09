@@ -214,6 +214,22 @@
       var cmdEl = document.getElementById('contact-cmd');
       var cursorEl = document.getElementById('contact-cursor');
       if (!terminal || !cmdEl || !cursorEl) return;
+      // Data-driven recipient — keep the terminal command in sync with the
+      // admin-editable contact email instead of a hardcoded address.
+      (function(){
+        var email = '';
+        var pd = (typeof getPortfolioData === 'function') ? getPortfolioData() : null;
+        var links = (pd && pd.contactLinks && pd.contactLinks.length)
+          ? pd.contactLinks
+          : (typeof DEFAULT_CONTACT_LINKS !== 'undefined' ? DEFAULT_CONTACT_LINKS : []);
+        for (var i = 0; i < links.length; i++) {
+          if ((links[i].label || '').toLowerCase() === 'email' && links[i].value) {
+            email = links[i].value;
+            break;
+          }
+        }
+        if (email) cmdEl.textContent = './send_message.sh --to=' + email;
+      })();
       var full = cmdEl.textContent;
       var started = false;
       function type(){
