@@ -19,3 +19,11 @@ jobs:
 
       - name: Run checks
         run: node tests/check.js
+
+      - name: Format check (Prettier)
+        run: npx --yes prettier@3 --check "js/*.js" "tests/*.js"
+
+      - name: Minify verification (esbuild)
+        run: |
+          npm install --no-save esbuild >/dev/null 2>&1
+          npx esbuild js/chatbot.js js/portfolio-render.js js/portfolio-data.js js/github-widgets.js js/id-card.js js/contact-form.js js/ui-upgrade.js js/admin.js --minify --outdir=/tmp/min >/dev/null && echo "✓ all JS minifies cleanly"

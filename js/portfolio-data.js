@@ -25,7 +25,9 @@ var PORTFOLIO_META = {
 var PORTFOLIO_DEBUG = false;
 function dbg() {
   if (PORTFOLIO_DEBUG) {
-    try { console.log.apply(console, arguments); } catch(e) {}
+    try {
+      console.log.apply(console, arguments);
+    } catch (e) {}
   }
 }
 
@@ -37,7 +39,7 @@ function getPortfolioData() {
   try {
     var stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return JSON.parse(stored);
-  } catch(e) {}
+  } catch (e) {}
   return null;
 }
 
@@ -52,19 +54,31 @@ function resetPortfolioData() {
 }
 
 function getAdminPassword() {
-  try { return localStorage.getItem(ADMIN_PASSWORD_KEY) || ''; } catch(e) { return ''; }
+  try {
+    return localStorage.getItem(ADMIN_PASSWORD_KEY) || '';
+  } catch (e) {
+    return '';
+  }
 }
 
 function setAdminPassword(pw) {
-  try { localStorage.setItem(ADMIN_PASSWORD_KEY, pw); } catch(e) {}
+  try {
+    localStorage.setItem(ADMIN_PASSWORD_KEY, pw);
+  } catch (e) {}
 }
 
 function getGitHubToken() {
-  try { return localStorage.getItem(GITHUB_TOKEN_KEY) || ''; } catch(e) { return ''; }
+  try {
+    return localStorage.getItem(GITHUB_TOKEN_KEY) || '';
+  } catch (e) {
+    return '';
+  }
 }
 
 function setGitHubToken(token) {
-  try { localStorage.setItem(GITHUB_TOKEN_KEY, token); } catch(e) {}
+  try {
+    localStorage.setItem(GITHUB_TOKEN_KEY, token);
+  } catch (e) {}
 }
 
 // ─── Supabase Cloud Sync (Secure) ─────────────────────
@@ -72,20 +86,23 @@ function setGitHubToken(token) {
 // Service key is NEVER stored in the browser.
 
 const SUPABASE_URL = 'https://mnsgwitzgwhmiccbojck.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
 
 async function fetchFromSupabase() {
   // Returns { ok:true, data } on success (data may be null if nothing is
   // published yet) and { ok:false, error } on network/timeout failure so
   // callers can distinguish "no data" from "couldn't reach Supabase".
   var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+  var timeoutId = setTimeout(function () {
+    controller.abort();
+  }, 8000);
   try {
     var resp = await fetch(SUPABASE_URL + '/rest/v1/portfolio_data?id=eq.1&select=json_data', {
       signal: controller.signal,
       headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + SUPABASE_ANON_KEY
       }
     });
     clearTimeout(timeoutId);
@@ -95,9 +112,9 @@ async function fetchFromSupabase() {
       return { ok: true, data: rows[0].json_data };
     }
     return { ok: true, data: null };
-  } catch(e) {
-    console.error('[cloud-sync] Fetch error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
-    return { ok: false, error: e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || 'network error') };
+  } catch (e) {
+    console.error('[cloud-sync] Fetch error:', e.name === 'AbortError' ? 'Timeout (8s)' : e.message || e);
+    return { ok: false, error: e.name === 'AbortError' ? 'Timeout (8s)' : e.message || 'network error' };
   } finally {
     clearTimeout(timeoutId);
   }
@@ -115,7 +132,9 @@ async function pushToSupabase(data) {
   // Stamp the data with our sync timestamp so the next sync can compare
   data._syncTimestamp = now;
   var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+  var timeoutId = setTimeout(function () {
+    controller.abort();
+  }, 8000);
   try {
     var resp = await fetch(SUPABASE_URL + '/functions/v1/portfolio-sync', {
       signal: controller.signal,
@@ -135,8 +154,8 @@ async function pushToSupabase(data) {
       savePortfolioData(data);
     }
     return resp.ok;
-  } catch(e) {
-    console.error('[cloud-sync] Push error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+  } catch (e) {
+    console.error('[cloud-sync] Push error:', e.name === 'AbortError' ? 'Timeout (8s)' : e.message || e);
   }
   clearTimeout(timeoutId);
   return false;
@@ -149,7 +168,9 @@ async function pushToSupabase(data) {
 // straight to the REST endpoint (no edge function in the path).
 async function submitContactMessage(msg) {
   var controller = new AbortController();
-  var timeoutId = setTimeout(function() { controller.abort(); }, 8000);
+  var timeoutId = setTimeout(function () {
+    controller.abort();
+  }, 8000);
   try {
     // POST to the contact-submit edge function: it verifies the Turnstile
     // token server-side (secret key never reaches the browser), then inserts
@@ -168,8 +189,8 @@ async function submitContactMessage(msg) {
       return false;
     }
     return resp.ok;
-  } catch(e) {
-    console.error('[contact] Submit error:', e.name === 'AbortError' ? 'Timeout (8s)' : (e.message || e));
+  } catch (e) {
+    console.error('[contact] Submit error:', e.name === 'AbortError' ? 'Timeout (8s)' : e.message || e);
   }
   clearTimeout(timeoutId);
   return false;
@@ -184,7 +205,19 @@ function loadData() {
   }
   // Return empty data structure — admin panel populates via cloud sync
   return {
-    hero: { badge: '', badge2: '', title: '', description: '', photo: '', name: '', idNumber: '', qrLink: '', schoolTitle: '', schoolSub: '', roles: [] },
+    hero: {
+      badge: '',
+      badge2: '',
+      title: '',
+      description: '',
+      photo: '',
+      name: '',
+      idNumber: '',
+      qrLink: '',
+      schoolTitle: '',
+      schoolSub: '',
+      roles: []
+    },
     about: { bio: '', terminal: { role: '', path: [], philosophy: '', status: '' } },
     techStack: [],
     currently: [],
@@ -198,16 +231,11 @@ function loadData() {
   };
 }
 
-
-
 // Fallback contact links shown when no data is configured yet
 var DEFAULT_CONTACT_LINKS = [
   { label: 'Email', value: 'jhnbryn05@gmail.com', url: 'mailto:jhnbryn05@gmail.com', icon: 'email' },
   { label: 'GitHub', value: 'github.com/brokeCode05', url: 'https://github.com/brokeCode05', icon: 'github' }
 ];
-
-
-
 
 function escapeHtml(str) {
   var div = document.createElement('div');
@@ -232,7 +260,7 @@ function exportDataJSON() {
 
 function importDataJSON(file, callback) {
   var reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     try {
       var data = JSON.parse(e.target.result);
       // Shape guard — only accept a real portfolio payload. A random valid JSON
@@ -243,19 +271,26 @@ function importDataJSON(file, callback) {
       if (!data || typeof data !== 'object' || Array.isArray(data)) {
         missing = REQUIRED_KEYS;
       } else {
-        missing = REQUIRED_KEYS.filter(function(k) { return data[k] === undefined; });
+        missing = REQUIRED_KEYS.filter(function (k) {
+          return data[k] === undefined;
+        });
       }
       if (missing.length) {
-        if (callback) callback('Not a valid portfolio export — missing required sections: ' + missing.join(', ') + '. Import cancelled.');
+        if (callback)
+          callback(
+            'Not a valid portfolio export — missing required sections: ' +
+              missing.join(', ') +
+              '. Import cancelled.'
+          );
         return;
       }
       savePortfolioData(data);
       if (callback) callback(null, data);
-    } catch(err) {
+    } catch (err) {
       if (callback) callback('Invalid JSON file: ' + err.message);
     }
   };
-  reader.onerror = function() {
+  reader.onerror = function () {
     if (callback) callback('Failed to read file');
   };
   reader.readAsText(file);

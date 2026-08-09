@@ -35,7 +35,7 @@ function report(name, ok, detail) {
 
 function checkJS() {
   console.log('1. JS syntax (node --check)');
-  const files = fs.readdirSync(path.join(ROOT, 'js')).filter(f => f.endsWith('.js'));
+  const files = fs.readdirSync(path.join(ROOT, 'js')).filter((f) => f.endsWith('.js'));
   let ok = true;
   for (const f of files) {
     try {
@@ -68,7 +68,7 @@ function checkInlineScripts() {
 
 function checkCSS() {
   console.log('3. CSS brace balance');
-  const files = fs.readdirSync(path.join(ROOT, 'css')).filter(f => f.endsWith('.css'));
+  const files = fs.readdirSync(path.join(ROOT, 'css')).filter((f) => f.endsWith('.css'));
   let ok = true;
   for (const f of files) {
     const css = fs.readFileSync(path.join(ROOT, 'css', f), 'utf8');
@@ -85,11 +85,13 @@ function checkCSS() {
 function checkNavHrefs() {
   console.log('4. Nav hrefs resolve to section ids');
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const hrefs = [...html.matchAll(/href="#([a-z0-9-]+)"/g)].map(m => m[1]);
-  const missing = hrefs.filter(h => !html.includes('id="' + h + '"'));
-  report(hrefs.length + ' anchor hrefs checked, ' + (hrefs.length - missing.length) + ' resolve',
+  const hrefs = [...html.matchAll(/href="#([a-z0-9-]+)"/g)].map((m) => m[1]);
+  const missing = hrefs.filter((h) => !html.includes('id="' + h + '"'));
+  report(
+    hrefs.length + ' anchor hrefs checked, ' + (hrefs.length - missing.length) + ' resolve',
     missing.length === 0,
-    missing.length ? 'missing ids: ' + missing.join(', ') : '');
+    missing.length ? 'missing ids: ' + missing.join(', ') : ''
+  );
 }
 
 function checkCacheBusters() {
@@ -97,7 +99,7 @@ function checkCacheBusters() {
   let ok = true;
   for (const page of ['index.html', 'admin.html']) {
     const html = fs.readFileSync(path.join(ROOT, page), 'utf8');
-    const versions = [...html.matchAll(/\?v=([0-9a-z]+)/g)].map(m => m[1]);
+    const versions = [...html.matchAll(/\?v=([0-9a-z]+)/g)].map((m) => m[1]);
     const uniq = [...new Set(versions)];
     if (uniq.length > 1) {
       ok = false;
@@ -112,8 +114,8 @@ function checkAssetsExist() {
   let ok = true;
   for (const page of ['index.html', 'admin.html']) {
     const html = fs.readFileSync(path.join(ROOT, page), 'utf8');
-    const refs = [...html.matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)/g)].map(m => m[1]);
-    const missing = refs.filter(r => !fs.existsSync(path.join(ROOT, r)));
+    const refs = [...html.matchAll(/(?:src|href)="((?:js|css)\/[^"?]+)/g)].map((m) => m[1]);
+    const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));
     if (missing.length) {
       ok = false;
       console.log('    ' + page + ' missing: ' + missing.join(', '));
@@ -127,28 +129,211 @@ function makeEl(id) {
   return {
     id: id || '',
     children: [],
-    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    classList: {
+      add() {},
+      remove() {},
+      toggle() {},
+      contains() {
+        return false;
+      }
+    },
     style: { setProperty() {}, removeProperty() {} },
     dataset: {},
     attributes: {},
-    setAttribute(k, v) { this.attributes[k] = String(v); },
-    getAttribute(k) { return this.attributes[k] || null; },
-    removeAttribute(k) { delete this.attributes[k]; },
+    setAttribute(k, v) {
+      this.attributes[k] = String(v);
+    },
+    getAttribute(k) {
+      return this.attributes[k] || null;
+    },
+    removeAttribute(k) {
+      delete this.attributes[k];
+    },
     addEventListener() {},
     removeEventListener() {},
-    appendChild(c) { this.children.push(c); return c; },
-    removeChild(c) { const i = this.children.indexOf(c); if (i >= 0) this.children.splice(i, 1); },
-    insertBefore(c) { this.children.push(c); },
-    cloneNode() { return makeEl(this.id); },
-    querySelector() { return null; },
-    querySelectorAll() { return []; },
-    closest() { return null; },
+    appendChild(c) {
+      this.children.push(c);
+      return c;
+    },
+    removeChild(c) {
+      const i = this.children.indexOf(c);
+      if (i >= 0) this.children.splice(i, 1);
+    },
+    insertBefore(c) {
+      this.children.push(c);
+    },
+    cloneNode() {
+      return makeEl(this.id);
+    },
+    querySelector() {
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+    closest() {
+      return null;
+    },
     focus() {},
     click() {},
-    getBoundingClientRect() { return { top: 0, left: 0, width: 100, height: 100 }; },
-    textContent: '', innerHTML: '', value: '', type: 'text', src: '',
-    hidden: false, disabled: false, tabIndex: 0, width: 100, height: 100,
+    getBoundingClientRect() {
+      return { top: 0, left: 0, width: 100, height: 100 };
+    },
+    textContent: '',
+    innerHTML: '',
+    value: '',
+    type: 'text',
+    src: '',
+    hidden: false,
+    disabled: false,
+    tabIndex: 0,
+    width: 100,
+    height: 100
   };
+}
+
+function checkUnitTests() {
+  console.log('7. Pure-function unit tests');
+  let failures = 0; // escapeHtml needs document, so load portfolio-data.js with the DOM stub.
+  const elements = {};
+  // Mini div stub: appendChild(textNode) records text; reading .innerHTML
+  // returns the HTML-escaped form — so the real escapeHtml() implementation
+  // can be exercised end to end.
+  function makeEscDiv() {
+    const node = { text: '' };
+    const div = {
+      appendChild(child) {
+        if (child && child.text !== undefined) node.text += String(child.text);
+        return child;
+      },
+      get innerHTML() {
+        return String(node.text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      },
+      set innerHTML(v) {
+        node.text = String(v);
+      }
+    };
+    return div;
+  }
+  const docStub = {
+    getElementById(id) {
+      if (!elements[id]) elements[id] = makeEl(id);
+      return elements[id];
+    },
+    createElement(tag) {
+      return tag === 'div' ? makeEscDiv() : makeEl(tag);
+    },
+    createTextNode(t) {
+      return { text: String(t) };
+    },
+    querySelector() {
+      return null;
+    },
+    querySelectorAll() {
+      return [];
+    },
+    addEventListener() {},
+    body: makeEl('body'),
+    documentElement: makeEl('html'),
+    head: makeEl('head')
+  };
+  const ls = {
+    _d: {},
+    getItem(k) {
+      return this._d[k] ?? null;
+    },
+    setItem(k, v) {
+      this._d[k] = String(v);
+    },
+    removeItem(k) {
+      delete this._d[k];
+    }
+  };
+  const win = {
+    document: docStub,
+    localStorage: ls,
+    addEventListener() {},
+    console,
+    matchMedia() {
+      return { matches: false, addEventListener() {} };
+    },
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    location: { origin: 'x', pathname: '/', href: 'x/' },
+    getComputedStyle() {
+      return {
+        getPropertyValue() {
+          return '';
+        }
+      };
+    }
+  };
+  win.window = win;
+  win.globalThis = win;
+  win.self = win;
+  const sandbox = {
+    window: win,
+    document: docStub,
+    localStorage: ls,
+    console,
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    location: win.location,
+    navigator: { userAgent: 'node' }
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/portfolio-data.js'), 'utf8'), sandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/portfolio-render.js'), 'utf8'), sandbox);
+
+  const esc = vm.runInContext("typeof escapeHtml === 'function' ? escapeHtml : null", sandbox);
+  const cases = [
+    ['<script>alert(1)</script>', '&lt;script&gt;alert(1)&lt;/script&gt;'],
+    ['a & b "c" \'d\'', 'a &amp; b &quot;c&quot; &#39;d&#39;'],
+    ['plain text', 'plain text']
+  ];
+  for (const [input, expected] of cases) {
+    try {
+      if (!esc) throw new Error('escapeHtml undefined');
+      if (esc(input) !== expected) throw new Error('got: ' + esc(input));
+    } catch (e) {
+      failures++;
+      console.log('    escapeHtml(' + JSON.stringify(input) + ') ' + e.message.slice(0, 80));
+    }
+  }
+
+  // renderContactLinks takes the whole data object (reads data.contactLinks)
+  try {
+    const htmlOut = vm.runInContext(
+      "renderContactLinks({contactLinks:[{label:'Email',value:'x@y.com',url:'mailto:x@y.com',icon:'email'}]});",
+      sandbox
+    );
+    if (typeof htmlOut !== 'string' || htmlOut.indexOf('mailto:x@y.com') === -1) {
+      throw new Error('email link missing');
+    }
+  } catch (e) {
+    failures++;
+    console.log('    renderContactLinks ' + e.message.slice(0, 80));
+  }
+
+  // PORTFOLIO_META is the single source of truth
+  try {
+    const meta = vm.runInContext("typeof PORTFOLIO_META !== 'undefined' ? PORTFOLIO_META : null", sandbox);
+    if (!meta || !meta.ghUser) throw new Error('PORTFOLIO_META.ghUser missing');
+  } catch (e) {
+    failures++;
+    console.log('    PORTFOLIO_META ' + e.message.slice(0, 80));
+  }
+
+  report('escapeHtml + renderContactLinks + PORTFOLIO_META unit tests', failures === 0);
 }
 
 function checkLoadOrder() {
@@ -165,62 +350,131 @@ function checkLoadOrder() {
 
   const elements = {};
   const documentStub = {
-    getElementById(id) { if (!elements[id]) elements[id] = makeEl(id); return elements[id]; },
-    querySelector() { return makeEl(); },
-    querySelectorAll() { return []; },
-    createElement(tag) { return makeEl(tag); },
-    createTextNode(t) { return { text: t }; },
+    getElementById(id) {
+      if (!elements[id]) elements[id] = makeEl(id);
+      return elements[id];
+    },
+    querySelector() {
+      return makeEl();
+    },
+    querySelectorAll() {
+      return [];
+    },
+    createElement(tag) {
+      return makeEl(tag);
+    },
+    createTextNode(t) {
+      return { text: t };
+    },
     addEventListener() {},
     body: makeEl('body'),
     documentElement: makeEl('html'),
-    head: makeEl('head'),
+    head: makeEl('head')
   };
   const localStorageStub = {
     _d: {},
-    getItem(k) { return this._d[k] !== undefined ? this._d[k] : null; },
-    setItem(k, v) { this._d[k] = String(v); },
-    removeItem(k) { delete this._d[k]; },
+    getItem(k) {
+      return this._d[k] !== undefined ? this._d[k] : null;
+    },
+    setItem(k, v) {
+      this._d[k] = String(v);
+    },
+    removeItem(k) {
+      delete this._d[k];
+    }
   };
   const windowStub = {
     addEventListener() {},
-    matchMedia() { return { matches: false, addEventListener() {} }; },
-    requestAnimationFrame(cb) { cb && cb(); },
-    getComputedStyle() { return { getPropertyValue() { return ''; } }; },
-    location: { origin: 'https://example.com', pathname: '/portfolio/index.html', href: 'https://example.com/portfolio/index.html' },
+    matchMedia() {
+      return { matches: false, addEventListener() {} };
+    },
+    requestAnimationFrame(cb) {
+      cb && cb();
+    },
+    getComputedStyle() {
+      return {
+        getPropertyValue() {
+          return '';
+        }
+      };
+    },
+    location: {
+      origin: 'https://example.com',
+      pathname: '/portfolio/index.html',
+      href: 'https://example.com/portfolio/index.html'
+    },
     localStorage: localStorageStub,
     document: documentStub,
-    MutationObserver: function () { this.observe = function () {}; this.disconnect = function () {}; },
-    Image: function () { return makeEl('img'); },
-    FileReader: function () { this.readAsDataURL = function () {}; this.readAsText = function () {}; },
+    MutationObserver: function () {
+      this.observe = function () {};
+      this.disconnect = function () {};
+    },
+    Image: function () {
+      return makeEl('img');
+    },
+    FileReader: function () {
+      this.readAsDataURL = function () {};
+      this.readAsText = function () {};
+    },
     Blob: function () {},
-    URL: { createObjectURL() { return 'blob:x'; }, revokeObjectURL() {} },
-    AbortController: function () { this.abort = function () {}; },
-    setTimeout, clearTimeout, setInterval, clearInterval,
+    URL: {
+      createObjectURL() {
+        return 'blob:x';
+      },
+      revokeObjectURL() {}
+    },
+    AbortController: function () {
+      this.abort = function () {};
+    },
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
     console,
     fetch: async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '{}' }),
-    crypto: { getRandomValues(a) { return a; } },
+    crypto: {
+      getRandomValues(a) {
+        return a;
+      }
+    }
   };
   windowStub.window = windowStub;
   windowStub.globalThis = windowStub;
   windowStub.self = windowStub;
 
   const sandbox = {
-    window: windowStub, document: documentStub, localStorage: localStorageStub,
-    console, setTimeout, clearTimeout, setInterval, clearInterval,
-    fetch: windowStub.fetch, Image: windowStub.Image, FileReader: windowStub.FileReader,
-    Blob: windowStub.Blob, URL: windowStub.URL, AbortController: windowStub.AbortController,
-    MutationObserver: windowStub.MutationObserver, matchMedia: windowStub.matchMedia,
-    requestAnimationFrame: windowStub.requestAnimationFrame, getComputedStyle: windowStub.getComputedStyle,
+    window: windowStub,
+    document: documentStub,
+    localStorage: localStorageStub,
+    console,
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    fetch: windowStub.fetch,
+    Image: windowStub.Image,
+    FileReader: windowStub.FileReader,
+    Blob: windowStub.Blob,
+    URL: windowStub.URL,
+    AbortController: windowStub.AbortController,
+    MutationObserver: windowStub.MutationObserver,
+    matchMedia: windowStub.matchMedia,
+    requestAnimationFrame: windowStub.requestAnimationFrame,
+    getComputedStyle: windowStub.getComputedStyle,
     location: windowStub.location,
     navigator: { userAgent: 'node' },
-    crypto: windowStub.crypto,
+    crypto: windowStub.crypto
   };
   vm.createContext(sandbox);
 
   let ok = true;
   for (const f of order) {
     const abs = path.join(ROOT, f);
-    if (!fs.existsSync(abs)) { ok = false; console.log('    missing: ' + f); continue; }
+    if (!fs.existsSync(abs)) {
+      ok = false;
+      console.log('    missing: ' + f);
+      continue;
+    }
     try {
       vm.runInContext(fs.readFileSync(abs, 'utf8'), sandbox, { filename: f });
     } catch (e) {
@@ -239,11 +493,12 @@ checkCSS();
 checkNavHrefs();
 checkCacheBusters();
 checkAssetsExist();
+checkUnitTests();
 checkLoadOrder();
 
 console.log('\n' + RESULTS.pass + ' passed, ' + RESULTS.fail + ' failed');
 if (RESULTS.fail) {
-  console.log('\nFailures:\n' + ERRORS.map(e => '  - ' + e).join('\n'));
+  console.log('\nFailures:\n' + ERRORS.map((e) => '  - ' + e).join('\n'));
   process.exit(1);
 }
 process.exit(0);

@@ -12,7 +12,7 @@
  * Unanswered questions escalate: the bot recommends the contact
  * form so the visitor reaches Bryan directly.
  */
-(function(global) {
+(function (global) {
   'use strict';
 
   // ── AI config ───────────────────────────────────────────────
@@ -37,7 +37,9 @@
 
   // ── Helpers ─────────────────────────────────────────────────
   function getData() {
-    try { if (typeof loadData === 'function') return loadData(); } catch (e) {}
+    try {
+      if (typeof loadData === 'function') return loadData();
+    } catch (e) {}
     return null;
   }
 
@@ -66,7 +68,11 @@
   }
 
   function normalize(s) {
-    return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   // ── Compact portfolio profile sent to the AI as grounding ──
@@ -74,29 +80,36 @@
     var d = getData() || {};
     var bits = [];
     if (d.about && d.about.bio) bits.push('Bio: ' + String(d.about.bio).slice(0, 400));
-    var stack = (d.techStack || []).map(function(s) { return s.name; }).slice(0, 30);
+    var stack = (d.techStack || [])
+      .map(function (s) {
+        return s.name;
+      })
+      .slice(0, 30);
     if (stack.length) bits.push('Skills: ' + stack.join(', '));
-    var projs = (d.projects || []).slice(0, 8).map(function(p) {
+    var projs = (d.projects || []).slice(0, 8).map(function (p) {
       return p.title + (p.description ? ' - ' + String(p.description).slice(0, 120) : '');
     });
     if (projs.length) bits.push('Projects: ' + projs.join(' | '));
-    var exp = (d.experience || []).slice(0, 5).map(function(x) {
-      return (x.role || x.title || '') + (x.company ? ' @ ' + x.company : '') +
-        ((x.period || x.date) ? ' (' + (x.period || x.date) + ')' : '');
+    var exp = (d.experience || []).slice(0, 5).map(function (x) {
+      return (
+        (x.role || x.title || '') +
+        (x.company ? ' @ ' + x.company : '') +
+        (x.period || x.date ? ' (' + (x.period || x.date) + ')' : '')
+      );
     });
     if (exp.length) bits.push('Experience: ' + exp.join(' | '));
-    var certs = (d.certifications || []).slice(0, 8).map(function(c) {
+    var certs = (d.certifications || []).slice(0, 8).map(function (c) {
       var parts = [c.title || c.issuer || 'Certification'];
       if (c.issuer && c.title) parts.push(c.issuer);
       if (c.date) parts.push(c.date);
       return parts.join(' — ');
     });
     if (certs.length) bits.push('Certifications: ' + certs.join(' | '));
-    var learn = (d.learning || []).slice(0, 5).map(function(m) {
+    var learn = (d.learning || []).slice(0, 5).map(function (m) {
       return (m.year ? m.year + ' ' : '') + (m.title || 'Milestone');
     });
     if (learn.length) bits.push('Learning: ' + learn.join(' | '));
-    var links = (d.contactLinks || []).slice(0, 8).map(function(l) {
+    var links = (d.contactLinks || []).slice(0, 8).map(function (l) {
       return (l.label || 'Link') + ': ' + (l.value || l.url || '');
     });
     if (links.length) bits.push('Contact: ' + links.join(' | '));
@@ -110,125 +123,222 @@
   var RULES = [
     {
       topic: 'greeting',
-      match: function(nq) {
+      match: function (nq) {
         if (nq.length > 24) return false;
         var t = nq.split(' ').filter(Boolean);
-        return t.some(function(w) { return ['hi', 'hello', 'hey', 'yo', 'sup'].indexOf(w) !== -1; }) ||
+        return (
+          t.some(function (w) {
+            return ['hi', 'hello', 'hey', 'yo', 'sup'].indexOf(w) !== -1;
+          }) ||
           nq.indexOf('good morning') !== -1 ||
           nq.indexOf('good afternoon') !== -1 ||
-          nq.indexOf('good evening') !== -1;
+          nq.indexOf('good evening') !== -1
+        );
       },
-      answer: function() {
-        return 'Hey! I\'m ' + botName() + ', the portfolio assistant. I can answer questions about Bryan\'s skills, projects, experience, certifications, and how to contact him.\n\nType `help` for the full list, or just ask away.';
+      answer: function () {
+        return (
+          "Hey! I'm " +
+          botName() +
+          ", the portfolio assistant. I can answer questions about Bryan's skills, projects, experience, certifications, and how to contact him.\n\nType `help` for the full list, or just ask away."
+        );
       }
     },
     {
       topic: 'help',
-      keywords: ['help', 'what can you do', 'commands', 'options', 'how do i use', 'how does this work', 'start over'],
-      answer: function() {
-        return 'Here\'s what I can answer:\n\nskills · projects · experience · certifications · learning\navailability · education · location · resume · contact\n\nJust type a question in plain words — no special commands needed.';
+      keywords: [
+        'help',
+        'what can you do',
+        'commands',
+        'options',
+        'how do i use',
+        'how does this work',
+        'start over'
+      ],
+      answer: function () {
+        return "Here's what I can answer:\n\nskills · projects · experience · certifications · learning\navailability · education · location · resume · contact\n\nJust type a question in plain words — no special commands needed.";
       }
     },
     {
       topic: 'skills',
-      keywords: ['skill', 'skills', 'stack', 'tech stack', 'technology', 'technologies', 'programming language', 'languages', 'framework', 'expertise', 'proficient', 'what do you know', 'tools'],
-      answer: function() {
+      keywords: [
+        'skill',
+        'skills',
+        'stack',
+        'tech stack',
+        'technology',
+        'technologies',
+        'programming language',
+        'languages',
+        'framework',
+        'expertise',
+        'proficient',
+        'what do you know',
+        'tools'
+      ],
+      answer: function () {
         var d = getData();
         var stack = (d && d.techStack) || [];
         if (!stack.length) {
-          return 'Bryan hasn\'t listed his tech stack in the data yet — check the Skills section on this page for the live list.';
+          return "Bryan hasn't listed his tech stack in the data yet — check the Skills section on this page for the live list.";
         }
         var groups = {};
-        stack.forEach(function(item) {
+        stack.forEach(function (item) {
           var cat = (item && item.category) || 'Other';
           (groups[cat] = groups[cat] || []).push(item.name);
         });
-        var lines = Object.keys(groups).map(function(cat) {
+        var lines = Object.keys(groups).map(function (cat) {
           return cat + ': ' + groups[cat].join(', ');
         });
-        return 'Here\'s what Bryan works with:\n\n' + lines.join('\n');
+        return "Here's what Bryan works with:\n\n" + lines.join('\n');
       }
     },
     {
       topic: 'projects',
-      keywords: ['project', 'projects', 'portfolio pieces', 'what have you built', 'what did you build', 'built anything', 'showcase', 'work sample', 'github repo', 'repos'],
-      answer: function() {
+      keywords: [
+        'project',
+        'projects',
+        'portfolio pieces',
+        'what have you built',
+        'what did you build',
+        'built anything',
+        'showcase',
+        'work sample',
+        'github repo',
+        'repos'
+      ],
+      answer: function () {
         var d = getData();
         var list = (d && d.projects) || [];
         if (!list.length) {
           return 'No projects are listed in the data yet — the Projects section on this page is the live list.';
         }
-        return list.map(function(p) {
-          var line = (p.title || 'Untitled') + ' — ' + String(p.description || '').slice(0, 140);
-          if (p.links) {
-            if (p.links.live) line += ' [Live demo](' + p.links.live + ')';
-            if (p.links.repo) line += ' [Code](' + p.links.repo + ')';
-          }
-          return line;
-        }).join('\n\n');
+        return list
+          .map(function (p) {
+            var line = (p.title || 'Untitled') + ' — ' + String(p.description || '').slice(0, 140);
+            if (p.links) {
+              if (p.links.live) line += ' [Live demo](' + p.links.live + ')';
+              if (p.links.repo) line += ' [Code](' + p.links.repo + ')';
+            }
+            return line;
+          })
+          .join('\n\n');
       }
     },
     {
       topic: 'experience',
-      keywords: ['experience', 'job', 'jobs', 'work history', 'employment', 'company', 'companies', 'intern', 'internship', 'worked at', 'career', 'professional'],
-      answer: function() {
+      keywords: [
+        'experience',
+        'job',
+        'jobs',
+        'work history',
+        'employment',
+        'company',
+        'companies',
+        'intern',
+        'internship',
+        'worked at',
+        'career',
+        'professional'
+      ],
+      answer: function () {
         var d = getData();
         var list = (d && d.experience) || [];
         if (!list.length) {
-          return 'Bryan hasn\'t added work experience to the data yet — the Experience section on this page is the live list.';
+          return "Bryan hasn't added work experience to the data yet — the Experience section on this page is the live list.";
         }
-        return list.map(function(x) {
-          var line = (x.role || x.title || 'Role') + (x.company ? ' @ ' + x.company : '');
-          if (x.period || x.date) line += ' (' + (x.period || x.date) + ')';
-          if (x.description) line += ' — ' + String(x.description).slice(0, 120);
-          return line;
-        }).join('\n\n');
+        return list
+          .map(function (x) {
+            var line = (x.role || x.title || 'Role') + (x.company ? ' @ ' + x.company : '');
+            if (x.period || x.date) line += ' (' + (x.period || x.date) + ')';
+            if (x.description) line += ' — ' + String(x.description).slice(0, 120);
+            return line;
+          })
+          .join('\n\n');
       }
     },
     {
       topic: 'certs',
-      keywords: ['cert', 'certs', 'certification', 'certifications', 'credential', 'credentials', 'training', 'course', 'courses'],
-      answer: function() {
+      keywords: [
+        'cert',
+        'certs',
+        'certification',
+        'certifications',
+        'credential',
+        'credentials',
+        'training',
+        'course',
+        'courses'
+      ],
+      answer: function () {
         var d = getData();
         var list = (d && d.certifications) || [];
         if (!list.length) {
           return 'No certifications are listed yet — the Certifications section on this page is the live list.';
         }
-        return list.map(function(c) {
-          var parts = [c.title || c.issuer || 'Certification'];
-          if (c.issuer && c.title) parts.push(c.issuer);
-          if (c.date) parts.push(c.date);
-          return parts.join(' — ');
-        }).join('\n');
+        return list
+          .map(function (c) {
+            var parts = [c.title || c.issuer || 'Certification'];
+            if (c.issuer && c.title) parts.push(c.issuer);
+            if (c.date) parts.push(c.date);
+            return parts.join(' — ');
+          })
+          .join('\n');
       }
     },
     {
       topic: 'learning',
-      keywords: ['learning', 'currently learning', 'studying', 'roadmap', 'milestone', 'milestones', 'self study'],
-      answer: function() {
+      keywords: [
+        'learning',
+        'currently learning',
+        'studying',
+        'roadmap',
+        'milestone',
+        'milestones',
+        'self study'
+      ],
+      answer: function () {
         var d = getData();
         var list = (d && d.learning) || [];
         if (!list.length) {
-          return 'Bryan hasn\'t added learning milestones yet — the Learning Journey section on this page is the live list.';
+          return "Bryan hasn't added learning milestones yet — the Learning Journey section on this page is the live list.";
         }
-        return 'Bryan\'s learning journey:\n\n' + list.map(function(m) {
-          return (m.year ? m.year + ' — ' : '') + (m.title || 'Milestone') + (m.description ? ': ' + String(m.description).slice(0, 160) : '');
-        }).join('\n');
+        return (
+          "Bryan's learning journey:\n\n" +
+          list
+            .map(function (m) {
+              return (
+                (m.year ? m.year + ' — ' : '') +
+                (m.title || 'Milestone') +
+                (m.description ? ': ' + String(m.description).slice(0, 160) : '')
+              );
+            })
+            .join('\n')
+        );
       }
     },
     {
       topic: 'education',
       keywords: ['education', 'school', 'university', 'college', 'degree', 'studied', 'graduate'],
-      answer: function() {
-        return 'I don\'t have education details in the portfolio data. His Learning Journey section is close — and the contact form is the best way to ask Bryan directly. [[CONTACT]]';
+      answer: function () {
+        return "I don't have education details in the portfolio data. His Learning Journey section is close — and the contact form is the best way to ask Bryan directly. [[CONTACT]]";
       }
     },
     {
       // Catch-all for "about" questions — placed after the content rules so
       // specific topics ("tell me about your projects") win over "tell me about".
       topic: 'about',
-      keywords: ['who are you', 'who is bryan', 'about you', 'about bryan', 'tell me about', 'introduce', 'yourself', 'bio', 'about me'],
-      answer: function() {
+      keywords: [
+        'who are you',
+        'who is bryan',
+        'about you',
+        'about bryan',
+        'tell me about',
+        'introduce',
+        'yourself',
+        'bio',
+        'about me'
+      ],
+      answer: function () {
         var d = getData();
         var bio = d && d.about && (d.about.bio || (d.about.terminal && d.about.terminal.role) || '');
         if (bio) return String(bio).slice(0, 600);
@@ -237,68 +347,122 @@
     },
     {
       topic: 'availability',
-      keywords: ['hire', 'hiring', 'available', 'freelance', 'freelancing', 'contract', 'job offer', 'opportunities', 'collaborate', 'collaboration', 'work together', 'part-time', 'full-time', 'rate', 'pricing', 'how much'],
-      answer: function() {
-        return 'Bryan is open to opportunities and collaborations. The best way to start a conversation is the contact form — tell him what you have in mind and he\'ll get back to you. [[CONTACT]]';
+      keywords: [
+        'hire',
+        'hiring',
+        'available',
+        'freelance',
+        'freelancing',
+        'contract',
+        'job offer',
+        'opportunities',
+        'collaborate',
+        'collaboration',
+        'work together',
+        'part-time',
+        'full-time',
+        'rate',
+        'pricing',
+        'how much'
+      ],
+      answer: function () {
+        return "Bryan is open to opportunities and collaborations. The best way to start a conversation is the contact form — tell him what you have in mind and he'll get back to you. [[CONTACT]]";
       }
     },
     {
       topic: 'contact',
-      keywords: ['contact', 'email', 'reach', 'get in touch', 'talk to', 'social', 'github', 'linkedin', 'facebook', 'instagram', 'twitter', 'connect', 'message him'],
-      answer: function() {
+      keywords: [
+        'contact',
+        'email',
+        'reach',
+        'get in touch',
+        'talk to',
+        'social',
+        'github',
+        'linkedin',
+        'facebook',
+        'instagram',
+        'twitter',
+        'connect',
+        'message him'
+      ],
+      answer: function () {
         var d = getData();
         var links = (d && d.contactLinks) || [];
-        var lines = links.map(function(l) {
+        var lines = links.map(function (l) {
           var label = l.label || 'Link';
           var value = l.value || l.url || '';
           if (/^https?:\/\//i.test(value) || /^mailto:/i.test(value)) {
-            return label + ': [' + value.replace(/^mailto:/i, '').replace(/^https?:\/\//i, '') + '](' + value + ')';
+            return (
+              label + ': [' + value.replace(/^mailto:/i, '').replace(/^https?:\/\//i, '') + '](' + value + ')'
+            );
           }
           return label + ': ' + value;
         });
-        if (lines.length) return 'You can reach Bryan here:\n\n' + lines.join('\n') + '\n\nOr use the contact form on this page. [[CONTACT]]';
+        if (lines.length)
+          return (
+            'You can reach Bryan here:\n\n' +
+            lines.join('\n') +
+            '\n\nOr use the contact form on this page. [[CONTACT]]'
+          );
         return 'Use the contact form on this page to reach Bryan directly. [[CONTACT]]';
       }
     },
     {
       topic: 'location',
       keywords: ['where are you', 'location', 'based', 'time zone', 'country', 'city', 'remote'],
-      answer: function() {
-        return 'Bryan\'s location isn\'t stored in my data — check the About section, or ask him directly via the contact form. [[CONTACT]]';
+      answer: function () {
+        return "Bryan's location isn't stored in my data — check the About section, or ask him directly via the contact form. [[CONTACT]]";
       }
     },
     {
       topic: 'resume',
-      keywords: ['resume', 'cv', 'curriculum', 'download resume', 'download pdf', 'portfolio pdf', 'photo download'],
-      answer: function() {
-        return 'Bryan\'s resume isn\'t available as a download on this site — but you can ask him directly for a copy (or any other details) via the contact form. [[CONTACT]]';
+      keywords: [
+        'resume',
+        'cv',
+        'curriculum',
+        'download resume',
+        'download pdf',
+        'portfolio pdf',
+        'photo download'
+      ],
+      answer: function () {
+        return "Bryan's resume isn't available as a download on this site — but you can ask him directly for a copy (or any other details) via the contact form. [[CONTACT]]";
       }
     },
     {
       topic: 'thanks',
-      match: function(nq) {
+      match: function (nq) {
         if (nq.length > 30) return false;
         var t = nq.split(' ').filter(Boolean);
-        return t.some(function(w) { return ['thanks', 'thank', 'thx', 'ty', 'appreciate', 'awesome', 'great', 'cool', 'nice'].indexOf(w) !== -1; });
+        return t.some(function (w) {
+          return (
+            ['thanks', 'thank', 'thx', 'ty', 'appreciate', 'awesome', 'great', 'cool', 'nice'].indexOf(w) !==
+            -1
+          );
+        });
       },
-      answer: function() {
+      answer: function () {
         return 'Happy to help! If you have more questions, just ask — or use the contact form to reach Bryan directly. [[CONTACT]]';
       }
     },
     {
       topic: 'bye',
-      match: function(nq) {
+      match: function (nq) {
         if (nq.length > 24) return false;
         var t = nq.split(' ').filter(Boolean);
-        return t.some(function(w) { return ['bye', 'goodbye', 'farewell', 'seeya'].indexOf(w) !== -1; });
+        return t.some(function (w) {
+          return ['bye', 'goodbye', 'farewell', 'seeya'].indexOf(w) !== -1;
+        });
       },
-      answer: function() {
+      answer: function () {
         return 'Take care! Reopen me anytime from the corner tab.';
       }
     }
   ];
 
-  var UNANSWERED = 'Hmm, that one is beyond my FAQ knowledge — I\'m just the portfolio bot. Let me connect you with Bryan directly. [[CONTACT]]';
+  var UNANSWERED =
+    "Hmm, that one is beyond my FAQ knowledge — I'm just the portfolio bot. Let me connect you with Bryan directly. [[CONTACT]]";
 
   // ── Custom FAQ entries from portfolio data (admin-editable) ──
   // Stored on data.chatFaq as { topic?, keywords: 'a, b, c', answer: '...' }.
@@ -306,13 +470,18 @@
   function faqRulesFromData(data) {
     var list = (data && data.chatFaq) || [];
     return list
-      .filter(function(f) {
+      .filter(function (f) {
         return f && String(f.keywords || '').trim() && String(f.answer || '').trim();
       })
-      .map(function(f) {
+      .map(function (f) {
         // Keywords are comma-separated (a comma segment can be a multi-word
         // phrase like "how much" — splitting on spaces would break that).
-        var kws = String(f.keywords).split(',').map(function(k) { return k.trim().toLowerCase(); }).filter(Boolean);
+        var kws = String(f.keywords)
+          .split(',')
+          .map(function (k) {
+            return k.trim().toLowerCase();
+          })
+          .filter(Boolean);
         return {
           // Topic falls back to the first keyword (or 'custom') so Chat Insights
           // can group untitled entries usefully.
@@ -330,7 +499,11 @@
     if (!nq) return null;
     var custom = faqRulesFromData(data);
     for (var c = 0; c < custom.length; c++) {
-      if (custom[c].keywords.some(function(k) { return nq.indexOf(k) !== -1; })) {
+      if (
+        custom[c].keywords.some(function (k) {
+          return nq.indexOf(k) !== -1;
+        })
+      ) {
         return { topic: custom[c].topic, answered: true, text: custom[c].answer };
       }
     }
@@ -343,7 +516,11 @@
     if (!nq) return null;
     for (var i = 0; i < RULES.length; i++) {
       var rule = RULES[i];
-      var hit = rule.match ? rule.match(nq) : rule.keywords.some(function(k) { return nq.indexOf(k) !== -1; });
+      var hit = rule.match
+        ? rule.match(nq)
+        : rule.keywords.some(function (k) {
+            return nq.indexOf(k) !== -1;
+          });
       if (hit) return { topic: rule.topic, answered: true, text: String(rule.answer(data) || '') };
     }
     return null;
@@ -351,8 +528,9 @@
 
   // Combined FAQ-then-rules matcher (kept for tests / back-compat).
   function matchRule(text, data) {
-    return matchFaq(text, data) || matchRulesOnly(text, data) ||
-      { topic: null, answered: false, text: UNANSWERED };
+    return (
+      matchFaq(text, data) || matchRulesOnly(text, data) || { topic: null, answered: false, text: UNANSWERED }
+    );
   }
 
   // ── Logging (fire-and-forget → Supabase chat_logs) ──────────
@@ -370,15 +548,20 @@
       }
       var headers = {
         'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        Prefer: 'return=minimal',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: 'Bearer ' + SUPABASE_ANON_KEY
       };
       fetch(SUPABASE_URL + '/rest/v1/chat_logs', {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(entry)
-      }).catch(function() {}).then(function() { logInFlight = false; flushLog(); });
+      })
+        .catch(function () {})
+        .then(function () {
+          logInFlight = false;
+          flushLog();
+        });
     } catch (e) {
       logInFlight = false;
     }
@@ -399,10 +582,14 @@
   // plays after the visitor has interacted (opened the chat / sent a message),
   // which also satisfies browser autoplay policies. A header toggle mutes it.
   var SOUND_KEY = 'portfolio_chat_sound_v1';
-  var SOUND_ON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
-  var SOUND_OFF_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+  var SOUND_ON_SVG =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+  var SOUND_OFF_SVG =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
   var soundEnabled = true;
-  try { soundEnabled = global.localStorage.getItem(SOUND_KEY) !== 'off'; } catch (e) {}
+  try {
+    soundEnabled = global.localStorage.getItem(SOUND_KEY) !== 'off';
+  } catch (e) {}
   var audioCtx = null;
 
   // Create/resume the AudioContext inside a user gesture (unlocks audio).
@@ -466,7 +653,10 @@
 
   function el(tag, attrs, html) {
     var node = document.createElement(tag);
-    if (attrs) Object.keys(attrs).forEach(function(k) { node.setAttribute(k, attrs[k]); });
+    if (attrs)
+      Object.keys(attrs).forEach(function (k) {
+        node.setAttribute(k, attrs[k]);
+      });
     if (html != null) node.innerHTML = html;
     return node;
   }
@@ -474,18 +664,24 @@
   // Protocol-less domain matcher, e.g. facebook.com/john.bryan.1217.
   // The TLD must be 2+ alpha chars and NOT be followed by another dot-label
   // (so version strings like 2.0.1 and names like john.bryan.1217 never match).
-  var BARE_DOMAIN = '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2,})(?!\\.[0-9])(?!\\w)(?::\\d+)?(?:\\/[^\\s<>()\\[\\]]*)?';
+  var BARE_DOMAIN =
+    '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+(?:[a-z]{2,})(?!\\.[0-9])(?!\\w)(?::\\d+)?(?:\\/[^\\s<>()\\[\\]]*)?';
   var BARE_DOMAIN_RE = new RegExp('^' + BARE_DOMAIN + '$', 'i');
   // word.js / app.ts-style tokens are file extensions, not real sites — they
   // are checked against the captured URL in the callbacks below.
   var EXT_DOMAIN_RE = /\.(?:js|ts|jsx|tsx|vue|svelte|css|html|htm|py|rb|sh|md|txt|json|xml)(?:$|\/)/i;
-  var BARE_URL_RE = new RegExp('(^|[\\s(>[])((?:https?:\\/\\/|www\\.)[^\\s<>()\\[\\]]+|' + BARE_DOMAIN + ')', 'gi');
+  var BARE_URL_RE = new RegExp(
+    '(^|[\\s(>[])((?:https?:\\/\\/|www\\.)[^\\s<>()\\[\\]]+|' + BARE_DOMAIN + ')',
+    'gi'
+  );
 
   function renderBotText(text) {
-    var contactCTA = '<button type="button" class="chat-cta" data-action="contact">[ contact bryan ]</button>';
+    var contactCTA =
+      '<button type="button" class="chat-cta" data-action="contact">[ contact bryan ]</button>';
     var out = esc(text)
-      .split('[[CONTACT]]').join(contactCTA)
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(m, label, url) {
+      .split('[[CONTACT]]')
+      .join(contactCTA)
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (m, label, url) {
         url = String(url).trim();
         // label/url are already escaped by the esc(text) above, so inserting
         // them directly is safe and avoids double-escaping (& in URLs).
@@ -510,11 +706,11 @@
     // links. Existing <a> tags from the markdown step are parked first so
     // nothing gets double-wrapped.
     var anchors = [];
-    out = out.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, function(a) {
+    out = out.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, function (a) {
       anchors.push(a);
       return '\u0000' + (anchors.length - 1) + '\u0000';
     });
-    out = out.replace(BARE_URL_RE, function(m, pre, url) {
+    out = out.replace(BARE_URL_RE, function (m, pre, url) {
       url = url.replace(/[.,;:!?]+$/, '');
       // file-extension-looking tokens (node.js, app.ts) are not real sites —
       // leave them as plain text instead of linking to a squatting domain.
@@ -524,11 +720,13 @@
       var href = /^https?:\/\//i.test(url) ? url : 'https://' + url;
       return pre + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
     });
-    out = out.replace(/\u0000(\d+)\u0000/g, function(m, i) { return anchors[+i] || ''; });
+    out = out.replace(/\u0000(\d+)\u0000/g, function (m, i) {
+      return anchors[+i] || '';
+    });
     // One-tap suggestion questions — rendered as clickable terminal lines that
     // send their text when tapped. Done last so the markdown/auto-link steps
     // can't wrap the button contents in nested interactive HTML.
-    out = out.replace(/\[\[Q:([\s\S]*?)\]\]/g, function(m, q) {
+    out = out.replace(/\[\[Q:([\s\S]*?)\]\]/g, function (m, q) {
       return '<button type="button" class="chat-q">$ ' + q + '</button>';
     });
     return out;
@@ -537,25 +735,36 @@
   function buildWidget() {
     if (document.getElementById(LAUNCHER_ID)) return;
 
-    var launcher = el('button', {
-      'id': LAUNCHER_ID,
-      'type': 'button',
-      'aria-label': 'Open chat assistant',
-      'aria-expanded': 'false',
-      'aria-controls': WIN_ID
-    }, '<span class="chatbot-launcher-bubble" aria-hidden="true">' +
-         '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
-         '<i class="chatbot-launcher-dot" aria-hidden="true"></i>' +
-       '</span>');
+    var launcher = el(
+      'button',
+      {
+        id: LAUNCHER_ID,
+        type: 'button',
+        'aria-label': 'Open chat assistant',
+        'aria-expanded': 'false',
+        'aria-controls': WIN_ID
+      },
+      '<span class="chatbot-launcher-bubble" aria-hidden="true">' +
+        '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+        '<i class="chatbot-launcher-dot" aria-hidden="true"></i>' +
+        '</span>'
+    );
 
-    var windowEl = el('div', { 'id': WIN_ID, 'role': 'dialog', 'aria-label': 'Portfolio chat assistant', 'hidden': 'hidden' });
+    var windowEl = el('div', {
+      id: WIN_ID,
+      role: 'dialog',
+      'aria-label': 'Portfolio chat assistant',
+      hidden: 'hidden'
+    });
 
     // Focus trap — keeps Tab cycling inside the chat window (a11y). Only fires
     // while focus is inside the open dialog; once the window closes, the
     // hidden attribute removes it from the focus order entirely.
-    windowEl.addEventListener('keydown', function(e) {
+    windowEl.addEventListener('keydown', function (e) {
       if (e.key !== 'Tab') return;
-      var focusables = windowEl.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var focusables = windowEl.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
       if (!focusables.length) return;
       var first = focusables[0];
       var last = focusables[focusables.length - 1];
@@ -574,29 +783,37 @@
     });
     windowEl.innerHTML =
       '<div class="chatbot-header">' +
-        '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
-        '<span class="chatbot-title">' + botName() + ':~$ ./assistant --help</span>' +
-        '<button type="button" id="chatbot-sound" aria-label="Mute reply sound" aria-pressed="true" title="Toggle reply sound">' + SOUND_ON_SVG + '</button>' +
-        '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
+      '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +
+      '<span class="chatbot-title">' +
+      botName() +
+      ':~$ ./assistant --help</span>' +
+      '<button type="button" id="chatbot-sound" aria-label="Mute reply sound" aria-pressed="true" title="Toggle reply sound">' +
+      SOUND_ON_SVG +
+      '</button>' +
+      '<button type="button" id="chatbot-close" aria-label="Close chat">×</button>' +
       '</div>' +
       '<div class="chatbot-body" id="chatbot-body" role="log" aria-live="polite"></div>' +
       '<form class="chatbot-input-row" id="chatbot-form">' +
-        '<span class="chatbot-prompt" aria-hidden="true">➜</span>' +
-        '<input id="chatbot-input" type="text" autocomplete="off" spellcheck="false" aria-label="Type your question" placeholder="ask me about skills, projects..." />' +
-        '<button type="submit" id="chatbot-send" aria-label="Send">↵</button>' +
+      '<span class="chatbot-prompt" aria-hidden="true">➜</span>' +
+      '<input id="chatbot-input" type="text" autocomplete="off" spellcheck="false" aria-label="Type your question" placeholder="ask me about skills, projects..." />' +
+      '<button type="submit" id="chatbot-send" aria-label="Send">↵</button>' +
       '</form>';
 
     // Dimmed backdrop behind the mobile bottom sheet — tapping it dismisses
     // the chat (desktop keeps the floating panel, so it's hidden there via CSS).
-    var backdropEl = el('div', { 'id': 'chatbot-backdrop', 'aria-hidden': 'true' });
+    var backdropEl = el('div', { id: 'chatbot-backdrop', 'aria-hidden': 'true' });
     // Intro callout — introduces the assistant shortly after load so visitors
     // notice the chat head (auto-retires, returns on hover / after closing).
-    var calloutEl = el('button', {
-      'id': 'chatbot-callout',
-      'type': 'button',
-      'aria-label': 'Open chat assistant'
-    }, 'Hey, I\'m online — ask me anything about Bryan' +
-       '<span class="chatbot-callout-caret" aria-hidden="true"></span>');
+    var calloutEl = el(
+      'button',
+      {
+        id: 'chatbot-callout',
+        type: 'button',
+        'aria-label': 'Open chat assistant'
+      },
+      "Hey, I'm online — ask me anything about Bryan" +
+        '<span class="chatbot-callout-caret" aria-hidden="true"></span>'
+    );
     document.body.appendChild(calloutEl);
     document.body.appendChild(launcher);
     document.body.appendChild(windowEl);
@@ -630,9 +847,16 @@
     }
 
     function addLine(who, html) {
-      var line = el('div', { 'class': 'chat-msg ' + who },
-        '<span class="chat-prompt" aria-hidden="true">' + (who === 'bot' ? botName() + ':~$' : 'you:~$') + '</span>' +
-        '<span class="chat-text">' + html + '</span>');
+      var line = el(
+        'div',
+        { class: 'chat-msg ' + who },
+        '<span class="chat-prompt" aria-hidden="true">' +
+          (who === 'bot' ? botName() + ':~$' : 'you:~$') +
+          '</span>' +
+          '<span class="chat-text">' +
+          html +
+          '</span>'
+      );
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
       pruneChat();
@@ -647,9 +871,14 @@
       // typeBot must NOT set it here — the initial greeting calls typeBot
       // directly (not via send), and the visitor must still be able to type
       // while the greeting plays out.
-      var line = el('div', { 'class': 'chat-msg bot' },
-        '<span class="chat-prompt" aria-hidden="true">' + botName() + ':~$</span>' +
-        '<span class="chat-text"></span>');
+      var line = el(
+        'div',
+        { class: 'chat-msg bot' },
+        '<span class="chat-prompt" aria-hidden="true">' +
+          botName() +
+          ':~$</span>' +
+          '<span class="chat-text"></span>'
+      );
       bodyEl.appendChild(line);
       bodyEl.scrollTop = bodyEl.scrollHeight;
       pruneChat();
@@ -671,21 +900,21 @@
       }
 
       var reduced = false;
-      try { reduced = !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+      try {
+        reduced = !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) {}
       if (reduced || !raw) {
         render();
         return;
       }
 
       // Plain-text version for the typed phase: CTA and link tokens are masked.
-      var masked = raw
-        .replace(/\[\[CONTACT\]\]/g, '')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+      var masked = raw.replace(/\[\[CONTACT\]\]/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
 
       // Short "thinking" pause before typing starts (longer replies pause a beat).
       var startDelay = 200 + Math.min(300, masked.length * 1.2);
       var cursorHTML = '<span class="cursor" aria-hidden="true"></span>';
-      setTimeout(function() {
+      setTimeout(function () {
         var i = 0;
         var out = '';
         (function tick() {
@@ -695,7 +924,10 @@
           // visitor sends a new question mid-type, the caret moves on).
           textEl.innerHTML = out + (bodyEl.lastElementChild === line ? cursorHTML : '');
           bodyEl.scrollTop = bodyEl.scrollHeight;
-          if (i >= masked.length) { render(); return; }
+          if (i >= masked.length) {
+            render();
+            return;
+          }
           var jitter = 0.75 + Math.random() * 0.5;
           setTimeout(tick, typeDelayFor(masked.length) * jitter);
         })();
@@ -725,34 +957,55 @@
       // daily cap (chat_ai_usage) is the real quota guard.
       var now = Date.now();
       var last = 0;
-      try { last = parseInt(localStorage.getItem('chat_ai_last') || '0', 10) || 0; } catch (e) {}
+      try {
+        last = parseInt(localStorage.getItem('chat_ai_last') || '0', 10) || 0;
+      } catch (e) {}
       if (now - last < 5000) {
         botRecord('Give me a moment — ask again in a few seconds.');
         typeBot('Give me a moment — ask again in a few seconds.');
         return;
       }
-      try { localStorage.setItem('chat_ai_last', String(now)); } catch (e) {}
+      try {
+        localStorage.setItem('chat_ai_last', String(now));
+      } catch (e) {}
 
       // Timeout so a slow/hung AI never leaves the typing indicator spinning.
       var controller = new AbortController();
-      var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
+      var timeoutId = setTimeout(function () {
+        controller.abort();
+      }, 15000);
       // Last ~6 turns as conversation context (markers stripped). Exclude the
       // just-pushed current question (sent separately as `question`) so it
       // isn't duplicated in the prompt.
-      var history = conversation.slice(-7, -1).map(function(m) {
+      var history = conversation.slice(-7, -1).map(function (m) {
         return {
           role: m.role === 'user' ? 'user' : 'assistant',
-          content: String(m.content || '').replace(/\[\[CONTACT\]\]/g, '').slice(0, 400)
+          content: String(m.content || '')
+            .replace(/\[\[CONTACT\]\]/g, '')
+            .slice(0, 400)
         };
       });
       fetch(CHAT_AI_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({ question: String(text).slice(0, 500), context: buildAiContext(), history: history })
+        body: JSON.stringify({
+          question: String(text).slice(0, 500),
+          context: buildAiContext(),
+          history: history
+        })
       })
-        .then(function(resp) { return resp.json().catch(function() { return {}; }).then(function(data) { return { status: resp.status, ok: resp.ok, data: data }; }); })
-        .then(function(result) {
+        .then(function (resp) {
+          return resp
+            .json()
+            .catch(function () {
+              return {};
+            })
+            .then(function (data) {
+              return { status: resp.status, ok: resp.ok, data: data };
+            });
+        })
+        .then(function (result) {
           if (result.ok && result.data && result.data.text) {
             // Topic comes from the AI's own classification (falls back to 'ai').
             var answerText = String(result.data.text).slice(0, 900);
@@ -767,14 +1020,16 @@
             rulesFallback(text, null);
           }
         })
-        .catch(function(err) {
+        .catch(function (err) {
           if (err && err.name === 'AbortError') {
             rulesFallback(text, 'ai-timeout');
             return;
           }
           rulesFallback(text, null);
         })
-        .then(function() { clearTimeout(timeoutId); });
+        .then(function () {
+          clearTimeout(timeoutId);
+        });
     }
 
     function escalate(text, topic) {
@@ -795,7 +1050,9 @@
       typingReply = true;
       ensureAudio();
       // The visitor's message becomes the latest — drop the caret from earlier replies.
-      bodyEl.querySelectorAll('.chat-msg .chat-text .cursor').forEach(function(c) { c.remove(); });
+      bodyEl.querySelectorAll('.chat-msg .chat-text .cursor').forEach(function (c) {
+        c.remove();
+      });
       addLine('user', esc(text));
       inputEl.value = '';
       conversation.push({ role: 'user', content: text });
@@ -819,7 +1076,10 @@
         return;
       }
       // Cancel any pending close so a rapid reopen replays the pop cleanly.
-      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
       windowEl.classList.remove('closing');
       // Repaint the header title so an admin bot-name change shows up without
       // a full page reload (prompts already read botName() per message).
@@ -838,17 +1098,23 @@
         // Greeting comes from the admin when set, otherwise the default.
         // When the admin hasn't written one, fall back to a short intro with
         // a few concrete example questions so visitors know what to ask.
-        var help = String(chatConfig().greeting || '').trim() ||
-          'Welcome to the portfolio assistant! Ask me about Bryan\'s [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\n' +
-          'Or just type a question below.\n\n' +
-          'Try these questions:\n' +
-          '[[Q:what tech do you use?]]\n' +
-          '[[Q:show me your latest projects]]\n' +
-          '[[Q:what are you currently learning?]]\n' +
-          '[[Q:how can I reach you?]]';
-        setTimeout(function() { botRecord(help); typeBot(help); }, 150);
+        var help =
+          String(chatConfig().greeting || '').trim() ||
+          "Welcome to the portfolio assistant! Ask me about Bryan's [skills](skills), [projects](projects), [experience](experience), [certifications](certifications), or how to [contact](contact) him.\n\n" +
+            'Or just type a question below.\n\n' +
+            'Try these questions:\n' +
+            '[[Q:what tech do you use?]]\n' +
+            '[[Q:show me your latest projects]]\n' +
+            '[[Q:what are you currently learning?]]\n' +
+            '[[Q:how can I reach you?]]';
+        setTimeout(function () {
+          botRecord(help);
+          typeBot(help);
+        }, 150);
       }
-      setTimeout(function() { inputEl.focus(); }, 50);
+      setTimeout(function () {
+        inputEl.focus();
+      }, 50);
     }
 
     function closeChat() {
@@ -865,21 +1131,22 @@
         windowEl.classList.remove('closing');
         return;
       }
-      closeTimer = setTimeout(function() {
+      closeTimer = setTimeout(function () {
         windowEl.hidden = true;
         windowEl.classList.remove('closing');
         closeTimer = null;
         // Re-introduce the assistant once the chat has closed.
-        setTimeout(function() {
+        setTimeout(function () {
           showCallout();
           retireCallout(6000);
         }, 700);
       }, 460);
     }
 
-    launcher.addEventListener('click', function() {
+    launcher.addEventListener('click', function () {
       ensureAudio();
-      if (windowEl.hidden || closeTimer) openChat(); else closeChat();
+      if (windowEl.hidden || closeTimer) openChat();
+      else closeChat();
     });
     backdropEl.addEventListener('click', closeChat);
     document.getElementById('chatbot-close').addEventListener('click', closeChat);
@@ -887,21 +1154,29 @@
     // ── Intro callout bubble ────────────────────────────────────
     var calloutAutoHide = null;
     function showCallout() {
-      if (calloutAutoHide) { clearTimeout(calloutAutoHide); calloutAutoHide = null; }
+      if (calloutAutoHide) {
+        clearTimeout(calloutAutoHide);
+        calloutAutoHide = null;
+      }
       if (launcher.style.display === 'none' || !windowEl.hidden) return;
       calloutEl.classList.add('show');
       calloutEl.removeAttribute('aria-hidden');
     }
     function hideCallout() {
-      if (calloutAutoHide) { clearTimeout(calloutAutoHide); calloutAutoHide = null; }
+      if (calloutAutoHide) {
+        clearTimeout(calloutAutoHide);
+        calloutAutoHide = null;
+      }
       calloutEl.classList.remove('show');
       calloutEl.setAttribute('aria-hidden', 'true');
     }
     // Retire the callout after a delay, then give the chat head a quick
     // attention wiggle so it doesn't just sit there once the bubble leaves.
     function retireCallout(afterMs) {
-      if (calloutAutoHide) { clearTimeout(calloutAutoHide); }
-      calloutAutoHide = setTimeout(function() {
+      if (calloutAutoHide) {
+        clearTimeout(calloutAutoHide);
+      }
+      calloutAutoHide = setTimeout(function () {
         calloutAutoHide = null;
         hideCallout();
         bounceHead();
@@ -913,23 +1188,28 @@
       void launcher.offsetWidth; // restart the animation even on rapid re-trigger
       launcher.classList.add('wiggle');
       // Fallback cleanup — reduced-motion users never fire animationend.
-      setTimeout(function() { launcher.classList.remove('wiggle'); }, 750);
+      setTimeout(function () {
+        launcher.classList.remove('wiggle');
+      }, 750);
     }
-    launcher.addEventListener('animationend', function(e) {
+    launcher.addEventListener('animationend', function (e) {
       if (e.animationName === 'chat-head-wiggle') launcher.classList.remove('wiggle');
     });
     // Introduce the assistant shortly after load, then let the bubble retire.
-    setTimeout(function() {
+    setTimeout(function () {
       showCallout();
       retireCallout(8000);
     }, 1800);
-    launcher.addEventListener('mouseenter', function() { if (windowEl.hidden) showCallout(); });
+    launcher.addEventListener('mouseenter', function () {
+      if (windowEl.hidden) showCallout();
+    });
     launcher.addEventListener('mouseleave', hideCallout);
     calloutEl.addEventListener('mouseenter', showCallout);
     calloutEl.addEventListener('mouseleave', hideCallout);
-    calloutEl.addEventListener('click', function() {
+    calloutEl.addEventListener('click', function () {
       ensureAudio();
-      if (windowEl.hidden || closeTimer) openChat(); else closeChat();
+      if (windowEl.hidden || closeTimer) openChat();
+      else closeChat();
     });
 
     // ── Sound toggle (persisted per visitor) ─────────────────
@@ -940,22 +1220,30 @@
         soundBtn.setAttribute('aria-pressed', soundEnabled ? 'true' : 'false');
         soundBtn.setAttribute('aria-label', soundEnabled ? 'Mute reply sound' : 'Enable reply sound');
       }
-      soundBtn.addEventListener('click', function() {
+      soundBtn.addEventListener('click', function () {
         soundEnabled = !soundEnabled;
-        try { global.localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch (e) {}
+        try {
+          global.localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off');
+        } catch (e) {}
         paintSoundBtn();
-        if (soundEnabled) { ensureAudio(); blip(); }
+        if (soundEnabled) {
+          ensureAudio();
+          blip();
+        }
       });
       paintSoundBtn();
     }
-    document.getElementById('chatbot-form').addEventListener('submit', function(e) {
+    document.getElementById('chatbot-form').addEventListener('submit', function (e) {
       e.preventDefault();
       send(inputEl.value);
     });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !windowEl.hidden) { e.preventDefault(); closeChat(); }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !windowEl.hidden) {
+        e.preventDefault();
+        closeChat();
+      }
     });
-    bodyEl.addEventListener('click', function(e) {
+    bodyEl.addEventListener('click', function (e) {
       // One-tap suggestion questions in the greeting — send them as a message.
       var qBtn = e.target.closest('.chat-q');
       if (qBtn) {
@@ -976,7 +1264,10 @@
         var contact = document.getElementById('contact');
         if (contact && contact.scrollIntoView) contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
         var nameField = document.getElementById('contact-name');
-        if (nameField && nameField.focus) setTimeout(function() { nameField.focus(); }, 600);
+        if (nameField && nameField.focus)
+          setTimeout(function () {
+            nameField.focus();
+          }, 600);
       }
     });
 

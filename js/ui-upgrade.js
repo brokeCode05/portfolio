@@ -29,7 +29,9 @@
   var SPOTLIGHT_SELECTOR = '.project-card, .skill-compact-card, .cert-card, .github-card, .github-graph-wrap';
 
   // ── Pure helpers (exported for headless tests) ─────────────
-  function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
+  function easeOutQuad(t) {
+    return 1 - (1 - t) * (1 - t);
+  }
 
   // Build the stat map from portfolio data (zeros are omitted).
   function statTargets(data) {
@@ -53,12 +55,18 @@
 
   // ── Feature gates ──────────────────────────────────────────
   function reducedMotion() {
-    try { return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); }
-    catch (e) { return false; }
+    try {
+      return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    } catch (e) {
+      return false;
+    }
   }
   function finePointer() {
-    try { return !!(global.matchMedia && global.matchMedia('(pointer: fine)').matches); }
-    catch (e) { return true; }
+    try {
+      return !!(global.matchMedia && global.matchMedia('(pointer: fine)').matches);
+    } catch (e) {
+      return true;
+    }
   }
 
   // ── Cursor spotlight ───────────────────────────────────────
@@ -69,7 +77,11 @@
     glow.setAttribute('aria-hidden', 'true');
     document.body.appendChild(glow);
     document.body.classList.add('ui-cursor-on');
-    var tx = -9999, ty = -9999, x = tx, y = ty, raf = null;
+    var tx = -9999,
+      ty = -9999,
+      x = tx,
+      y = ty,
+      raf = null;
     function tick() {
       x += (tx - x) * 0.14;
       y += (ty - y) * 0.14;
@@ -77,28 +89,42 @@
       if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) {
         raf = requestAnimationFrame(tick);
       } else {
-        x = tx; y = ty; raf = null;
+        x = tx;
+        y = ty;
+        raf = null;
       }
     }
-    document.addEventListener('mousemove', function (e) {
-      tx = e.clientX; ty = e.clientY;
-      if (raf === null) raf = requestAnimationFrame(tick);
-    }, { passive: true });
+    document.addEventListener(
+      'mousemove',
+      function (e) {
+        tx = e.clientX;
+        ty = e.clientY;
+        if (raf === null) raf = requestAnimationFrame(tick);
+      },
+      { passive: true }
+    );
     document.addEventListener('mouseleave', function () {
-      if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+      if (raf !== null) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
     });
   }
 
   // ── Card spotlight vars (rendered by CSS) ──────────────────
   function cardSpotlight() {
     if (!finePointer()) return;
-    document.addEventListener('mousemove', function (e) {
-      var card = e.target && e.target.closest ? e.target.closest(SPOTLIGHT_SELECTOR) : null;
-      if (!card) return;
-      var r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    }, { passive: true });
+    document.addEventListener(
+      'mousemove',
+      function (e) {
+        var card = e.target && e.target.closest ? e.target.closest(SPOTLIGHT_SELECTOR) : null;
+        if (!card) return;
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', e.clientX - r.left + 'px');
+        card.style.setProperty('--my', e.clientY - r.top + 'px');
+      },
+      { passive: true }
+    );
   }
 
   // ── Cert card 3D tilt ─────────────────────────────────────
@@ -125,23 +151,38 @@
       current.style.setProperty('--ry', '0deg');
       current = null;
     }
-    document.addEventListener('mousemove', function (e) {
-      var card = e.target && e.target.closest ? e.target.closest('.cert-card') : null;
-      if (!card || !card.classList.contains('revealed')) { reset(); return; }
-      if (card !== current) { reset(); current = card; }
-      var r = card.getBoundingClientRect();
-      var px = (e.clientX - r.left) / r.width;
-      var py = (e.clientY - r.top) / r.height;
-      var t = tiltDegrees(px, py, 8);
-      card.style.setProperty('--rx', t.rx + 'deg');
-      card.style.setProperty('--ry', t.ry + 'deg');
-    }, { passive: true });
+    document.addEventListener(
+      'mousemove',
+      function (e) {
+        var card = e.target && e.target.closest ? e.target.closest('.cert-card') : null;
+        if (!card || !card.classList.contains('revealed')) {
+          reset();
+          return;
+        }
+        if (card !== current) {
+          reset();
+          current = card;
+        }
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width;
+        var py = (e.clientY - r.top) / r.height;
+        var t = tiltDegrees(px, py, 8);
+        card.style.setProperty('--rx', t.rx + 'deg');
+        card.style.setProperty('--ry', t.ry + 'deg');
+      },
+      { passive: true }
+    );
     window.addEventListener('blur', reset, { passive: true });
   }
 
   // ── Filter helpers (pure — exported for tests) ────────────
   function parseTags(s) {
-    return String(s || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    return String(s || '')
+      .split(',')
+      .map(function (t) {
+        return t.trim();
+      })
+      .filter(Boolean);
   }
   function matchesFilter(tags, key) {
     return key === 'all' || tags.indexOf(key) !== -1;
@@ -159,7 +200,10 @@
     el.classList.add('ui-hide');
     // Reduced-motion fades are instant — collapse immediately so nothing
     // occupies space invisibly for FILTER_MS.
-    if (reducedMotion()) { el.style.display = 'none'; return; }
+    if (reducedMotion()) {
+      el.style.display = 'none';
+      return;
+    }
     setTimeout(function () {
       if (el.classList.contains('ui-hide')) el.style.display = 'none';
     }, FILTER_MS);
@@ -204,13 +248,19 @@
     if (!grid) return;
     var rows = Array.prototype.slice.call(grid.querySelectorAll('.tech-marquee-row'));
     if (!rows.length) return;
-    var seen = {}, cats = [];
+    var seen = {},
+      cats = [];
     rows.forEach(function (r) {
       var c = r.getAttribute('data-cat') || 'Other';
-      if (!seen[c]) { seen[c] = true; cats.push(c); }
+      if (!seen[c]) {
+        seen[c] = true;
+        cats.push(c);
+      }
     });
     var labels = cats.map(function (c) {
-      var row = rows.filter(function (r) { return r.getAttribute('data-cat') === c; })[0];
+      var row = rows.filter(function (r) {
+        return r.getAttribute('data-cat') === c;
+      })[0];
       var lab = row && row.querySelector('.tech-marquee-label');
       return { key: c, label: lab ? lab.textContent.trim() : c };
     });
@@ -240,7 +290,9 @@
     if (!cards.length) return;
     var tags = {};
     cards.forEach(function (c) {
-      parseTags(c.getAttribute('data-tags')).forEach(function (t) { tags[t] = true; });
+      parseTags(c.getAttribute('data-tags')).forEach(function (t) {
+        tags[t] = true;
+      });
     });
     var tagList = Object.keys(tags).sort();
     if (!tagList.length) return;
@@ -248,19 +300,26 @@
     empty.className = 'filter-empty';
     empty.textContent = '// no projects match this filter';
     grid.parentNode.insertBefore(empty, grid);
-    var bar = buildFilterBar([{ key: 'all', label: 'All' }].concat(tagList.map(function (t) { return { key: t, label: t }; })), {
-      label: '~/filter',
-      ariaLabel: 'Filter projects by technology',
-      onPick: function (key) {
-        var visible = 0;
-        cards.forEach(function (c) {
-          var match = matchesFilter(parseTags(c.getAttribute('data-tags')), key);
-          toggleEl(c, match);
-          if (match) visible++;
-        });
-        empty.style.display = (key === 'all' || visible > 0) ? 'none' : 'block';
+    var bar = buildFilterBar(
+      [{ key: 'all', label: 'All' }].concat(
+        tagList.map(function (t) {
+          return { key: t, label: t };
+        })
+      ),
+      {
+        label: '~/filter',
+        ariaLabel: 'Filter projects by technology',
+        onPick: function (key) {
+          var visible = 0;
+          cards.forEach(function (c) {
+            var match = matchesFilter(parseTags(c.getAttribute('data-tags')), key);
+            toggleEl(c, match);
+            if (match) visible++;
+          });
+          empty.style.display = key === 'all' || visible > 0 ? 'none' : 'block';
+        }
       }
-    });
+    );
     grid.parentNode.insertBefore(bar, grid);
   }
 
@@ -268,7 +327,9 @@
   // Pure command resolver — returns { lines: [...], clear: bool }.
   function aboutCommand(raw, data) {
     var lines = [];
-    var cmd = String(raw || '').trim().toLowerCase();
+    var cmd = String(raw || '')
+      .trim()
+      .toLowerCase();
     var d = data || {};
     if (cmd === 'help' || cmd === '?') {
       lines.push('available: help, skills, contact, status, projects, clear, cat about.txt');
@@ -288,8 +349,13 @@
         });
       }
     } else if (cmd === 'contact') {
-      var links = (d.contactLinks && d.contactLinks.length) ? d.contactLinks
-        : [{ label: 'Email', value: 'jhnbryn05@gmail.com' }, { label: 'GitHub', value: 'github.com/brokeCode05' }];
+      var links =
+        d.contactLinks && d.contactLinks.length
+          ? d.contactLinks
+          : [
+              { label: 'Email', value: 'jhnbryn05@gmail.com' },
+              { label: 'GitHub', value: 'github.com/brokeCode05' }
+            ];
       links.forEach(function (l) {
         lines.push((l.label || 'Link') + ': ' + (l.value || l.url || ''));
       });
@@ -298,8 +364,13 @@
       lines.push('status: ' + (status || 'unknown'));
     } else if (cmd === 'projects') {
       var pj = d.projects || [];
-      if (!pj.length) { lines.push('no projects yet'); }
-      else { pj.forEach(function (p) { lines.push('- ' + (p.title || 'untitled')); }); }
+      if (!pj.length) {
+        lines.push('no projects yet');
+      } else {
+        pj.forEach(function (p) {
+          lines.push('- ' + (p.title || 'untitled'));
+        });
+      }
     } else if (cmd === 'clear') {
       return { lines: [], clear: true };
     } else if (cmd === 'cat about.txt') {
@@ -321,8 +392,11 @@
     if (!terminal) return;
     var body = terminal.querySelector('.terminal-body');
     if (!body) return;
-    var ready = false, busy = false, input = null;
-    var history = [], histIdx = -1;
+    var ready = false,
+      busy = false,
+      input = null;
+    var history = [],
+      histIdx = -1;
 
     function makeInputLine() {
       var form = document.createElement('form');
@@ -341,7 +415,10 @@
       form.appendChild(prompt);
       form.appendChild(document.createTextNode(' '));
       form.appendChild(input);
-      form.addEventListener('submit', function (e) { e.preventDefault(); runInput(); });
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        runInput();
+      });
       input.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowUp') {
           e.preventDefault();
@@ -353,8 +430,12 @@
           e.preventDefault();
           if (histIdx >= 0) {
             histIdx++;
-            if (histIdx >= history.length) { histIdx = -1; input.value = ''; }
-            else { input.value = history[histIdx]; }
+            if (histIdx >= history.length) {
+              histIdx = -1;
+              input.value = '';
+            } else {
+              input.value = history[histIdx];
+            }
           }
         }
       });
@@ -371,7 +452,11 @@
     }
 
     function typeText(el, text, done) {
-      if (reducedMotion() || !text) { el.textContent = text; if (done) done(); return; }
+      if (reducedMotion() || !text) {
+        el.textContent = text;
+        if (done) done();
+        return;
+      }
       var i = 0;
       var timer = setInterval(function () {
         i++;
@@ -400,17 +485,26 @@
         if (input) input.focus();
         return;
       }
-      if (!res.lines.length) { if (input) input.focus(); return; }
+      if (!res.lines.length) {
+        if (input) input.focus();
+        return;
+      }
       busy = true;
       var idx = 0;
       function next() {
-        if (idx >= res.lines.length) { busy = false; if (input) input.focus(); return; }
+        if (idx >= res.lines.length) {
+          busy = false;
+          if (input) input.focus();
+          return;
+        }
         var text = res.lines[idx++];
         var out = document.createElement('span');
         out.className = 'line output' + (text.charAt(0) === ' ' ? ' indent' : '');
         body.insertBefore(out, inputForm);
         body.scrollTop = body.scrollHeight;
-        typeText(out, text, function () { setTimeout(next, 90); });
+        typeText(out, text, function () {
+          setTimeout(next, 90);
+        });
       }
       next();
     }
@@ -440,7 +534,9 @@
       });
       // preventScroll: focusing the input when the typewriter finishes must
       // not yank the page back to About if the visitor already scrolled away.
-      setTimeout(function () { if (input) input.focus({ preventScroll: true }); }, 350);
+      setTimeout(function () {
+        if (input) input.focus({ preventScroll: true });
+      }, 350);
     }
 
     // Upgrade immediately if reduced motion (typewriter never runs, so the
@@ -509,8 +605,14 @@
   // ── Hero role rotator (type / hold / delete cycle) ─────────
   function heroRoles(textEl, roles) {
     if (!textEl || !roles || !roles.length) return;
-    if (reducedMotion()) { textEl.textContent = roles[0]; return; }
-    var idx = 0, pos = 0, deleting = false, timer = null;
+    if (reducedMotion()) {
+      textEl.textContent = roles[0];
+      return;
+    }
+    var idx = 0,
+      pos = 0,
+      deleting = false,
+      timer = null;
     function tick() {
       var word = roles[idx];
       if (!deleting) {
@@ -551,9 +653,16 @@
       }
       ticking = false;
     }
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }, { passive: true });
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
   }
 
   // ── Back-to-top with circular progress ring ────────────────
@@ -568,9 +677,13 @@
     function onScroll() {
       var st = window.scrollY || document.documentElement.scrollTop;
       var max = document.documentElement.scrollHeight - window.innerHeight;
-      var p = max > 0 ? Math.min(100, Math.round(st / max * 100)) : 0;
+      var p = max > 0 ? Math.min(100, Math.round((st / max) * 100)) : 0;
       btn.style.setProperty('--p', p + '%');
-      if (st > 420) { btn.classList.add('visible'); } else { btn.classList.remove('visible'); }
+      if (st > 420) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();

@@ -1067,6 +1067,24 @@ body {
   border-color: var(--admin-accent);
 }
 
+.admin-toast .toast-action {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--admin-accent);
+  border: 1px solid var(--admin-accent);
+  border-radius: var(--admin-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-toast .toast-action:hover {
+  background: var(--admin-accent);
+  color: var(--admin-bg);
+}
+
 .admin-toast.error {
   border-color: var(--admin-danger);
   color: var(--admin-danger);
