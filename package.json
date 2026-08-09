@@ -1,0 +1,10 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "John Bryan Capellan — personal portfolio (vanilla HTML/CSS/JS + Supabase)",
+  "scripts": {
+    "test": "node tests/check.js"
+  },
+  "license": "UNLICENSED"
+}
