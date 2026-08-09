@@ -2528,3 +2528,55 @@ body.modal-open { overflow: hidden; }
   font-size: 10px;
   color: #334155;
 }
+
+/* Skip link — hidden until keyboard focus (a11y). */
+.admin-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0.75rem;
+  z-index: 10000;
+  padding: 0.55rem 1rem;
+  background: var(--admin-accent, #4ADE80);
+  color: var(--admin-bg, #0F1115);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  border-radius: var(--admin-radius, 8px);
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.admin-skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Not useful while the login screen is up — only show it inside the dashboard. */
+body:has(#login-screen:not([hidden])) .admin-skip-link {
+  display: none;
+}
+
+/* The skip-link target is a landmark, not an interactive element — no ring. */
+#admin-main:focus {
+  outline: none;
+}
+
+/* Keyboard-only focus ring — accent outline without double rings on click. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--admin-accent, #4ADE80);
+  outline-offset: 2px;
+}
+
+/* Respect the OS reduced-motion setting (a11y). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

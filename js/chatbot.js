@@ -549,6 +549,29 @@
        '</span>');
 
     var windowEl = el('div', { 'id': WIN_ID, 'role': 'dialog', 'aria-label': 'Portfolio chat assistant', 'hidden': 'hidden' });
+
+    // Focus trap — keeps Tab cycling inside the chat window (a11y). Only fires
+    // while focus is inside the open dialog; once the window closes, the
+    // hidden attribute removes it from the focus order entirely.
+    windowEl.addEventListener('keydown', function(e) {
+      if (e.key !== 'Tab') return;
+      var focusables = windowEl.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      var active = global.document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !windowEl.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !windowEl.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
     windowEl.innerHTML =
       '<div class="chatbot-header">' +
         '<span class="chatbot-dots" aria-hidden="true"><i></i><i></i><i></i></span>' +

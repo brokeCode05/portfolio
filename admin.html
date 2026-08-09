@@ -11,10 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260808a" />
+  <link rel="stylesheet" href="css/admin.css?v=20260809a" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<a class="admin-skip-link" href="#admin-main">Skip to content</a>
 
 <!-- ============ LOGIN ============ -->
 <div id="login-screen" class="admin-login">
@@ -222,7 +224,7 @@
   </aside>
 
   <!-- Main Content -->
-  <div class="admin-main">
+  <div class="admin-main" id="admin-main" tabindex="-1">
     <div class="admin-topbar">
       <button class="topbar-menu-btn" id="topbar-menu-btn" type="button" title="Menu" aria-label="Open menu">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -1056,6 +1058,28 @@ CREATE POLICY "Admin update portfolio_data"
   // ─── Confirmation Modal ────────────────────
   var confirmCallback = null;
 
+  // Shared focus trap for admin dialogs — keeps Tab cycling inside the open
+  // modal so keyboard users can't escape into the page behind it (a11y).
+  window.trapFocus = window.trapFocus || function(e, container) {
+    if (e.key !== 'Tab') return;
+    var focusables = container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    var active = document.activeElement;
+    if (e.shiftKey) {
+      if (active === first || !container.contains(active)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !container.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
   function showConfirm(message, callback) {
     document.getElementById('confirm-message').textContent = message;
     document.getElementById('confirm-overlay').classList.add('open');
@@ -1063,6 +1087,18 @@ CREATE POLICY "Admin update portfolio_data"
     document.getElementById('confirm-ok-btn').focus();
   }
 
+  // Escape + focus trap for the confirm dialog (a11y).
+  document.addEventListener('keydown', function(e) {
+    var ov = document.getElementById('confirm-overlay');
+    if (!ov || !ov.classList.contains('open')) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      ov.classList.remove('open');
+      confirmCallback = null;
+    } else if (e.key === 'Tab' && window.trapFocus) {
+      window.trapFocus(e, ov);
+    }
+  });
   document.getElementById('confirm-ok-btn').addEventListener('click', function() {
     document.getElementById('confirm-overlay').classList.remove('open');
     if (confirmCallback) { var cb = confirmCallback; confirmCallback = null; cb(true); }
@@ -1290,6 +1326,7 @@ CREATE POLICY "Admin update portfolio_data"
       backdrop.addEventListener('click', function(e) { if (e.target === backdrop) closeChatTest(); });
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && !backdrop.hidden) closeChatTest();
+        else if (e.key === 'Tab' && !backdrop.hidden && window.trapFocus) window.trapFocus(e, backdrop);
       });
     }
     var sendBtn = document.getElementById('chat-test-send');
@@ -2201,9 +2238,9 @@ CREATE POLICY "Admin update portfolio_data"
       ? '<div class="inline-logo-preview"><img src="' + logoSrc + '" /><button class="inline-logo-clear" data-idx="' + idx + '">×</button></div>'
       : '';
     return '<div class="item-row item-row-editing" data-edit-idx="' + idx + '">' +
-      '<input type="text" class="inline-edit-name" value="' + name + '" placeholder="Name" />' +
-      '<input type="text" class="inline-edit-brand" value="' + brand + '" placeholder="Brand slug" />' +
-      '<input type="text" class="inline-edit-logourl" value="' + logoUrl + '" placeholder="Logo URL" />' +
+      '<input type="text" class="inline-edit-name" value="' + name + '" placeholder="Name" aria-label="Technology name" />' +
+      '<input type="text" class="inline-edit-brand" value="' + brand + '" placeholder="Brand slug" aria-label="Brand slug" />' +
+      '<input type="text" class="inline-edit-logourl" value="' + logoUrl + '" placeholder="Logo URL" aria-label="Logo URL" />' +
       '<label class="inline-upload-label" title="Upload logo">' + ICON_FOLDER + '<input type="file" class="inline-edit-upload" accept="image/*" data-idx="' + idx + '" style="display:none" /></label>' +
       previewHtml +
       '<button class="btn btn-sm btn-primary inline-save" data-idx="' + idx + '" style="flex-shrink:0">Save</button>' +
@@ -2213,9 +2250,9 @@ CREATE POLICY "Admin update portfolio_data"
 
   function renderInlineAddForm(existingHtml, cat) {
     var formHtml = '<div class="item-row item-row-editing" data-add-cat="' + cat.replace(/\"/g, '&quot;') + '">' +
-      '<input type="text" class="inline-add-name" placeholder="Name" />' +
-      '<input type="text" class="inline-add-brand" placeholder="Brand slug" />' +
-      '<input type="text" class="inline-add-logourl" placeholder="Logo URL" />' +
+      '<input type="text" class="inline-add-name" placeholder="Name" aria-label="Technology name" />' +
+      '<input type="text" class="inline-add-brand" placeholder="Brand slug" aria-label="Brand slug" />' +
+      '<input type="text" class="inline-add-logourl" placeholder="Logo URL" aria-label="Logo URL" />' +
       '<label class="inline-upload-label" title="Upload logo">' + ICON_FOLDER + '<input type="file" class="inline-add-upload" accept="image/*" data-add="1" style="display:none" /></label>' +
       '<div class="inline-logo-preview inline-add-preview" style="display:none"><img /><button class="inline-add-clear">×</button></div>' +
       '<button class="btn btn-sm btn-primary inline-add-save" style="flex-shrink:0">Save</button>' +
@@ -2921,6 +2958,7 @@ CREATE POLICY "Admin update portfolio_data"
     backdrop.addEventListener('click', function(e) { if (e.target === backdrop) closeItemModal(); });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && !backdrop.hidden) closeItemModal();
+      else if (e.key === 'Tab' && !backdrop.hidden && window.trapFocus) window.trapFocus(e, backdrop);
     });
   })();
 

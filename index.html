@@ -1632,7 +1632,7 @@
     }
     .tech-logo-name {
       font-family: var(--font-code);
-      font-size: 9px;
+      font-size: 11px;
       color: var(--color-text-secondary);
       text-align: center;
       white-space: nowrap;
@@ -1650,7 +1650,7 @@
       .tech-marquee-track { gap: var(--space-lg); }
       .tech-logo { width: 60px; }
       .tech-logo svg { width: 26px; height: 26px; }
-      .tech-logo-name { font-size: 8px; }
+      .tech-logo-name { font-size: 10px; }
     }
     @media (max-width: 480px) {
       .tech-logo { width: 50px; }
@@ -2790,7 +2790,7 @@
         <img class="github-graph-img" id="gh-graph" alt="GitHub Contribution Graph" loading="lazy" onerror="this.onerror=null;this.style.display='none';var f=document.getElementById('gh-graph-fallback');if(f)f.style.display='block'" />
         <div class="github-fallback" id="gh-graph-fallback" style="display:none;text-align:center;padding:2rem 1rem;color:var(--color-text-secondary);font-family:var(--font-code);font-size:var(--text-xs)">
           <p style="margin-bottom:0.5rem">Contribution graph unavailable</p>
-          <p style="font-size:0.75rem;opacity:0.6">Try disabling ad/tracker blockers for this site, or</p>
+          <p style="font-size:0.75rem;opacity:0.78">Try disabling ad/tracker blockers for this site, or</p>
           <a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline">visit GitHub profile →</a>
         </div>
       </div>
@@ -3444,6 +3444,27 @@
     })();
 
     // ---- Certificate Viewer ----
+    // Shared focus trap for dialogs — keeps Tab cycling inside the open
+    // modal so keyboard users can't escape into the page behind it (a11y).
+    window.trapFocus = window.trapFocus || function(e, container) {
+      if (e.key !== 'Tab') return;
+      var focusables = container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      var active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !container.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last || !container.contains(active)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
     (function(){
       var overlay = document.getElementById('cert-overlay');
       var modal = document.getElementById('cert-modal');
@@ -3614,6 +3635,7 @@
           // After typing finishes, load the image
           certImg.style.display = '';
           certImg.src = cert.path;
+          certImg.alt = (cert.name || 'Certificate') + (cert.issuer ? ' — ' + cert.issuer : '') + ' certificate';
           if (!cert.path) {
             typeStatus('[ ERR ] no image on file', false);
           }
@@ -3748,6 +3770,8 @@
         if (!overlay.classList.contains('open')) return;
         if (e.key === 'Escape') {
           closeModal();
+        } else if (e.key === 'Tab') {
+          window.trapFocus(e, modal);
         } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
           showCert(currentIndex - 1, true);
         } else if (e.key === 'ArrowRight' && currentIndex < certData.length - 1) {
@@ -3989,6 +4013,9 @@
         });
         document.addEventListener('keydown', function(e) {
           if (e.key === 'Escape' && !idOverlay.hidden) closeIdZoom();
+          else if (e.key === 'Tab' && !idOverlay.hidden) {
+            if (window.trapFocus) window.trapFocus(e, idModal);
+          }
         });
       }
     })();
@@ -3998,7 +4025,7 @@
   <script src="js/tech-icons.js?v=20260730"></script>
   <script src="js/portfolio-data.js?v=20260808a"></script>
   <script src="js/ui-upgrade.js?v=20260807e" defer></script>
-  <script src="js/chatbot.js?v=20260808b"></script>
+  <script src="js/chatbot.js?v=20260809a"></script>
   <script>
   (function(){
     'use strict';
@@ -4909,7 +4936,7 @@
     .chatbot-dots i:nth-child(2) { background: #FBBF24; }
     .chatbot-dots i:nth-child(3) { background: #34D399; }
     .chatbot-title {
-      flex: 1; font-size: 0.72rem; color: var(--color-text-secondary, #A0A5B0);
+      flex: 1; font-size: 0.75rem; color: var(--color-text-secondary, #A0A5B0);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em;
     }
     #chatbot-close,
