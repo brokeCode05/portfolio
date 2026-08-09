@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260810a" />
+  <link rel="stylesheet" href="css/admin.css?v=20260810b" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -674,7 +674,10 @@ DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
             (matching the <code>PORTFOLIO_SYNC_SECRET</code> secret). Direct REST writes are closed.
           </p>
           <div class="form-group">
-            <input type="password" id="cloud-password-input" placeholder="Enter a secret cloud sync password" />
+            <div class="password-wrap">
+              <input type="password" id="cloud-password-input" placeholder="Enter a secret cloud sync password" />
+              <button type="button" class="pw-toggle" data-toggle-for="cloud-password-input" aria-label="Show password" title="Show password">Show</button>
+            </div>
           </div>
           <button class="btn btn-primary" id="cloud-save-password-btn">Save Password</button>
         </div>
@@ -688,7 +691,10 @@ DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
             Stored in your browser only — never shared.
           </p>
           <div class="form-group">
-            <input type="password" id="github-token-input" placeholder="ghp_... or github_pat_..." />
+            <div class="password-wrap">
+              <input type="password" id="github-token-input" placeholder="ghp_... or github_pat_..." />
+              <button type="button" class="pw-toggle" data-toggle-for="github-token-input" aria-label="Show token" title="Show token">Show</button>
+            </div>
           </div>
           <button class="btn btn-primary" id="github-token-save-btn">Save Token</button>
         </div>
@@ -1022,6 +1028,19 @@ DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
     }
     setAdminPassword(pw);
     showToast('Cloud sync password saved!', 'success');
+  });
+
+  // ─── Password / token visibility toggles ───────
+  document.querySelectorAll('.pw-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var input = document.getElementById(btn.getAttribute('data-toggle-for'));
+      if (!input) return;
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.textContent = show ? 'Hide' : 'Show';
+      btn.setAttribute('aria-label', (show ? 'Hide' : 'Show') + ' password');
+      input.focus();
+    });
   });
 
   // ─── GitHub Token ─────────────────────────

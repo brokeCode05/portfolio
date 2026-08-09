@@ -471,6 +471,41 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Password / token visibility toggle */
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 3.75rem;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--admin-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--admin-radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.pw-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pw-toggle:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+
 .form-hint {
   display: block;
   margin-top: 4px;
