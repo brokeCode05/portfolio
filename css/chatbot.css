@@ -1,0 +1,314 @@
+    /* ===== Terminal Chatbot Widget ===== */
+    #chatbot-launcher {
+      position: fixed; right: 1rem; bottom: 1rem;
+      bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); z-index: 999;
+      display: inline-flex; align-items: center;
+      padding: 0; background: none; border: none; cursor: pointer;
+      animation: chat-head-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+    }
+    #chatbot-launcher:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; border-radius: var(--radius-window); }
+    /* The chat head — a mini terminal window: dark squircle, three traffic
+       dots, a green chat glyph, and an online badge on the corner. */
+    .chatbot-launcher-bubble {
+      position: relative; width: 58px; height: 58px; flex-shrink: 0;
+      display: grid; place-items: center;
+      background: var(--color-bg, #0A0C10);
+      color: var(--color-accent, #4ADE80);
+      border: 1px solid rgba(74,222,128,0.5);
+      border-radius: var(--radius-window);
+      box-shadow: 0 8px 26px rgba(0,0,0,0.5), 0 0 18px rgba(74,222,128,0.22), 0 0 0 1px rgba(74,222,128,0.25);
+      transition: transform 0.16s ease-out, border-color 0.2s, box-shadow 0.2s;
+    }
+    #chatbot-launcher:hover .chatbot-launcher-bubble {
+      transform: translateY(-3px) scale(1.05);
+      border-color: var(--color-accent, #4ADE80);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 0 22px rgba(74,222,128,0.25);
+    }
+    #chatbot-launcher:active .chatbot-launcher-bubble { transform: translateY(0) scale(0.96); }
+    /* Pulsing online-status badge on the window corner */
+    .chatbot-launcher-dot {
+      position: absolute; top: -3px; right: -3px; width: 13px; height: 13px;
+      border-radius: 50%;
+      background: #22C55E;
+      border: 2.5px solid var(--color-bg, #0A0C10);
+      animation: chat-dot-pulse 2s ease-in-out infinite;
+    }
+    /* Springy entrance — the head pops up from the corner */
+    @keyframes chat-head-in {
+      0%   { opacity: 0; transform: translateY(26px) scale(0.4); }
+      60%  { opacity: 1; transform: translateY(-6px) scale(1.08); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    /* Attention wiggle — plays once when the intro callout retires */
+    #chatbot-launcher.wiggle .chatbot-launcher-bubble {
+      animation: chat-head-wiggle 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes chat-head-wiggle {
+      0%   { transform: rotate(0deg) scale(1); }
+      20%  { transform: rotate(-8deg) scale(1.08); }
+      40%  { transform: rotate(7deg) scale(1.12); }
+      60%  { transform: rotate(-5deg) scale(1.05); }
+      80%  { transform: rotate(3deg) scale(1.02); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    @keyframes chat-dot-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    /* Intro callout bubble — points at the chat head */
+    #chatbot-callout {
+      position: fixed; right: 1.25rem; z-index: 998;
+      bottom: 5.2rem;
+      bottom: calc(5.2rem + env(safe-area-inset-bottom, 0px));
+      max-width: min(300px, calc(100vw - 2rem));
+      padding: 0.7rem 1rem;
+      background: var(--color-bg, #0A0C10);
+      border: 1px solid var(--color-accent, #4ADE80);
+      border-radius: var(--radius-window);
+      color: var(--color-text-primary, #E8EAED);
+      font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
+      text-align: left; cursor: pointer;
+      box-shadow: 0 12px 34px rgba(0,0,0,0.55), 0 0 20px rgba(74,222,128,0.14);
+      opacity: 0; visibility: hidden;
+      transform: translateY(10px) scale(0.94);
+      transform-origin: bottom right;
+      transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  visibility 0.32s;
+    }
+    #chatbot-callout.show {
+      opacity: 1; visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+    /* Tail pointing down at the chat head */
+    #chatbot-callout::after {
+      content: ''; position: absolute; right: 20px; bottom: -7px;
+      width: 12px; height: 12px;
+      background: var(--color-bg, #0A0C10);
+      border-right: 1px solid var(--color-accent, #4ADE80);
+      border-bottom: 1px solid var(--color-accent, #4ADE80);
+      transform: rotate(45deg);
+    }
+    .chatbot-callout-caret {
+      display: inline-block; width: 0.55em; height: 1.05em;
+      margin-left: 3px; vertical-align: -0.18em;
+      background: var(--color-accent, #4ADE80);
+      animation: chat-caret-blink 1.1s steps(2, start) infinite;
+    }
+    @keyframes chat-caret-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    #chatbot-window {
+      position: fixed; right: 1rem; bottom: 5.2rem;
+      bottom: calc(5.2rem + env(safe-area-inset-bottom, 0px)); z-index: 999;
+      width: min(340px, calc(100vw - 2rem));
+      max-height: min(400px, calc(100vh - 8.2rem));
+      max-height: min(400px, calc(100dvh - 8.2rem));
+      display: flex; flex-direction: column;
+      background: var(--color-bg, #0A0C10); border: 1px solid var(--color-border, #2A2D35); border-radius: var(--radius-window);
+      box-shadow: 0 14px 44px rgba(0,0,0,0.55); overflow: hidden;
+      font: 400 0.78rem/1.55 var(--font-code, ui-monospace, monospace);
+      color: var(--color-text-primary, #E8EAED);
+      transform-origin: bottom right;
+      animation: chat-window-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    /* Animations DO run when `hidden` toggles (unlike transitions) — pop-in on open */
+    @keyframes chat-window-in {
+      0%   { opacity: 0; transform: translateY(16px) scale(0.7); }
+      55%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #chatbot-window[hidden] { display: none; }
+    /* Closing: shrink away toward the launcher (hide is deferred in JS) */
+    #chatbot-window.closing {
+      animation: chat-window-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+      pointer-events: none;
+    }
+    /* Time-reversed mirror of chat-window-in: drifts back through the overshoot
+       and returns to the pose the panel rose from. */
+    @keyframes chat-window-out {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      45%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+      100% { opacity: 0; transform: translateY(16px) scale(0.7); }
+    }
+
+    /* Dimmed backdrop behind the mobile bottom sheet — tap it to dismiss.
+       Desktop keeps the floating panel, so it's switched off at 481px+. */
+    #chatbot-backdrop {
+      position: fixed; inset: 0; z-index: 998;
+      background: rgba(0,0,0,0.45);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #chatbot-backdrop.is-open { opacity: 1; pointer-events: auto; }
+    @media (min-width: 481px) { #chatbot-backdrop { display: none; } }
+
+    .chatbot-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--color-border, #2A2D35); background: var(--color-surface, #111418);
+      flex-shrink: 0;
+    }
+    /* Terminal traffic-light dots (matches the site's other terminal windows) */
+    .chatbot-dots { display: inline-flex; gap: 4px; flex-shrink: 0; }
+    .chatbot-dots i {
+      display: block; width: 9px; height: 9px; border-radius: 50%;
+    }
+    .chatbot-dots i:nth-child(1) { background: #F87171; }
+    .chatbot-dots i:nth-child(2) { background: #FBBF24; }
+    .chatbot-dots i:nth-child(3) { background: #34D399; }
+    .chatbot-title {
+      flex: 1; font-size: 0.75rem; color: var(--color-text-secondary, #A0A5B0);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em;
+    }
+    #chatbot-close,
+    #chatbot-sound {
+      background: none; border: none; color: var(--color-text-secondary, #A0A5B0);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; padding: 0.15rem 0.3rem; border-radius: 4px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+    #chatbot-close { font-size: 1.15rem; line-height: 1; }
+    #chatbot-close:hover { color: var(--color-danger, #F87171); background: rgba(248,113,113,0.1); }
+    #chatbot-close:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 1px; }
+    #chatbot-sound:hover { color: var(--color-accent, #4ADE80); background: rgba(74,222,128,0.12); }
+    #chatbot-sound:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 1px; }
+    #chatbot-sound[aria-pressed="false"] { opacity: 0.55; }
+
+    .chatbot-body {
+      flex: 1; min-height: 0; overflow-y: auto; padding: 0.8rem;
+      display: flex; flex-direction: column; gap: 0.7rem;
+      font-size: 0.78rem;
+      scrollbar-width: thin; scrollbar-color: var(--color-border, #2A2D35) transparent;
+    }
+    .chatbot-body::-webkit-scrollbar { width: 6px; }
+    .chatbot-body::-webkit-scrollbar-thumb { background: var(--color-border, #2A2D35); border-radius: 3px; }
+    .chatbot-body::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover, #3A3D45); }
+    .chatbot-body::-webkit-scrollbar-track { background: transparent; }
+
+    .chat-msg { display: flex; gap: 0.5rem; max-width: 100%; }
+    .chat-prompt { color: var(--color-accent-dim, #3bca6f); flex-shrink: 0; user-select: none; }
+    .chat-msg.user { justify-content: flex-end; }
+    .chat-msg.user .chat-prompt { color: var(--color-text-secondary, #A0A5B0); }
+    .chat-text { white-space: pre-wrap; word-break: break-word; min-width: 0; }
+    /* Subtle chip on visitor messages so the two roles read instantly */
+    .chat-msg.user .chat-text {
+      background: var(--color-surface-hover, #1A1D27);
+      padding: 0.4rem 0.65rem; border-radius: 8px 8px 2px 8px;
+    }
+    .chat-text a { color: var(--color-accent, #4ADE80); text-decoration: underline; }
+    .chat-cta {
+      margin-top: 0.4rem; background: none; border: 1px solid var(--color-accent, #4ADE80); color: var(--color-accent, #4ADE80);
+      border-radius: 4px; padding: 0.25rem 0.6rem;
+      font: 600 0.72rem/1.4 var(--font-code, ui-monospace, monospace);
+      cursor: pointer; transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    }
+    .chat-cta:hover { background: var(--color-accent, #4ADE80); color: var(--color-bg, #0A0C10); box-shadow: 0 0 10px var(--color-accent-subtle, rgba(74,222,128,0.3)); }
+    .chat-cta:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; }
+    /* One-tap suggestion questions inside the greeting — green command lines */
+    .chat-q {
+      display: inline-block; background: none; border: none; padding: 0;
+      font: inherit; color: var(--color-accent, #4ADE80); cursor: pointer;
+      border-bottom: 1px dashed rgba(74,222,128,0.35); line-height: 1.7;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .chat-q:hover { border-bottom-color: var(--color-accent, #4ADE80); }
+    .chat-q:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; border-radius: 3px; }
+    /* Blinking caret that stays at the end of every bot reply (terminal-style) */
+    .chat-text .cursor {
+      display: inline-block; width: 0.5em; height: 1em; background: var(--color-accent, #4ADE80);
+      margin-left: 2px; vertical-align: text-bottom; animation: chat-blink 1s step-end infinite;
+    }
+    @keyframes chat-blink { 50% { opacity: 0; } }
+
+    .chatbot-input-row {
+      display: flex; gap: 0.4rem; align-items: center;
+      padding: 0.6rem 0.8rem; border-top: 1px solid var(--color-border, #2A2D35); background: var(--color-surface, #111418);
+      flex-shrink: 0; transition: border-color 0.15s;
+    }
+    .chatbot-input-row:focus-within { border-top-color: var(--color-accent, #4ADE80); }
+    .chatbot-prompt { color: var(--color-accent, #4ADE80); font-weight: 700; flex-shrink: 0; }
+    #chatbot-input {
+      flex: 1; min-width: 0; background: none; border: none; outline: none;
+      color: var(--color-text-primary, #E8EAED); caret-color: var(--color-accent, #4ADE80);
+      font: 400 0.78rem/1.4 var(--font-code, ui-monospace, monospace);
+    }
+    #chatbot-input::placeholder { color: var(--color-text-secondary, #A0A5B0); opacity: 0.6; }
+    #chatbot-send {
+      background: none; border: 1px solid var(--color-border, #2A2D35); color: var(--color-accent, #4ADE80); border-radius: 6px;
+      font-weight: 700; cursor: pointer; padding: 0.2rem 0.55rem;
+      transition: border-color 0.15s, background-color 0.15s, color 0.15s, transform 0.1s;
+    }
+    #chatbot-send:hover { border-color: var(--color-accent, #4ADE80); background: var(--color-accent, #4ADE80); color: var(--color-bg, #0A0C10); }
+    #chatbot-send:active { transform: scale(0.94); }
+    #chatbot-send:focus-visible { outline: 2px solid var(--color-accent, #4ADE80); outline-offset: 2px; }
+
+    /* Light theme — the heavy dark shadow would look out of place */
+    [data-theme="light"] #chatbot-window { box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+    [data-theme="light"] #chatbot-launcher:hover { box-shadow: 0 0 14px var(--color-accent-subtle, rgba(74,222,128,0.3)); }
+
+    /* Mobile: the chat becomes a full-width bottom sheet sliding up from the
+       bottom (replaces the floating panel on phones). Close via × or Escape. */
+    @media (max-width: 600px) {
+      #chatbot-window {
+        left: 0; right: 0; bottom: 0; width: auto;
+        height: 88vh;
+        height: min(88dvh, 100vh);
+        max-height: none;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+        transform-origin: bottom center;
+        animation: chat-sheet-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      @keyframes chat-sheet-in {
+        0%   { opacity: 0; transform: translateY(100%) scale(0.96); }
+        65%  { opacity: 1; transform: translateY(-1.2%) scale(1); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      #chatbot-window.closing { animation: chat-sheet-out 0.4s cubic-bezier(0.5, 0, 0.75, 0.4) both; }
+      /* Time-reversed mirror of chat-sheet-in: slides back down through the
+         overshoot and returns to the start pose while fading. */
+      @keyframes chat-sheet-out {
+        0%   { opacity: 1; transform: translateY(0) scale(1); }
+        35%  { opacity: 1; transform: translateY(-1.2%) scale(1); }
+        100% { opacity: 0; transform: translateY(100%) scale(0.96); }
+      }
+      /* Grabber handle so it reads as a dismissible sheet */
+      #chatbot-window::before {
+        content: '';
+        position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+        width: 42px; height: 4px; border-radius: 2px;
+        background: var(--color-border-hover, #3A3D45); z-index: 1;
+      }
+      .chatbot-header { padding-top: 0.72rem; }
+      #chatbot-launcher { right: 0.5rem; }
+      .chatbot-launcher-bubble { width: 54px; height: 54px; }
+      #chatbot-callout {
+        right: 0.75rem;
+        bottom: 4.9rem;
+        bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
+        max-width: min(230px, calc(100vw - 1.5rem));
+      }
+      #chatbot-send { padding: 0.3rem 0.65rem; }
+      /* Keep the send row clear of the iOS home indicator */
+      .chatbot-input-row { padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
+    }
+    @media (max-width: 360px) {
+      .chatbot-title { max-width: 120px; }
+      /* Keep top clearance for the sheet grabber on small phones */
+      .chatbot-header { padding: 0.72rem 0.65rem 0.5rem; }
+    }
+    /* Short desktop windows — keep the floating panel fully visible above the
+       launcher (mobile ≤600px already uses the full-height bottom sheet). */
+    @media (max-height: 480px) and (min-width: 601px) {
+      #chatbot-window { max-height: calc(100vh - 8.5rem); max-height: calc(100dvh - 8.5rem); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #chatbot-window, #chatbot-window.closing { animation: none; }
+      #chatbot-launcher { animation: none; }
+      #chatbot-launcher.wiggle .chatbot-launcher-bubble { animation: none; }
+      .chatbot-launcher-dot, .chatbot-callout-caret, .chat-text .cursor { animation: none; }
+      #chatbot-backdrop, #chatbot-callout { transition: none; }
+    }

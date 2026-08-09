@@ -131,19 +131,32 @@ Deno.serve(async (req) => {
     { role: 'user', content: question },
   ]
 
-  const res = await fetch(GROQ_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.7,
-      max_tokens: 500,
-    }),
-  })
+  // 15s hard timeout so a hung Groq response can't hold the function open.
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
+
+  let res
+  try {
+    res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 500,
+      }),
+      signal: controller.signal,
+    })
+  } catch (e) {
+    clearTimeout(timeoutId)
+    const timedOut = e && e.name === 'AbortError'
+    return json({ error: timedOut ? 'AI request timed out' : 'AI request failed' }, 504)
+  }
+  clearTimeout(timeoutId)
 
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
