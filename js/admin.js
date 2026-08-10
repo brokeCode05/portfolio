@@ -140,11 +140,19 @@
     otpError.textContent = '';
   }
 
-  // Login step indicator — highlights the current step (Email → Code → Passcode).
+  // Login step indicator — the current step is highlighted and every step
+  // before it is marked done (checked off), so the flow reads left to right.
   function setLoginStep(step) {
-    var map = { email: 'step-pill-email', otp: 'step-pill-otp', passcode: 'step-pill-passcode' };
+    var order = ['email', 'otp', 'passcode'];
+    var idx = order.indexOf(step);
+    var labels = { email: '1 · Email', otp: '2 · Code', passcode: '3 · Passcode' };
+    var doneLabels = { email: '✓ Email', otp: '✓ Code', passcode: '✓ Passcode' };
     document.querySelectorAll('.login-step-pill').forEach(function (el) {
-      el.classList.toggle('active', el.id === map[step]);
+      var elStep = el.id.replace('step-pill-', '');
+      var elIdx = order.indexOf(elStep);
+      el.classList.toggle('active', elIdx === idx);
+      el.classList.toggle('done', elIdx < idx);
+      el.textContent = elIdx < idx ? doneLabels[elStep] : labels[elStep];
     });
   }
 

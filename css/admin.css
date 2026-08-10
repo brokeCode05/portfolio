@@ -326,6 +326,13 @@ body {
   opacity: 1;
 }
 
+.login-step-pill.done {
+  color: var(--admin-accent);
+  border-color: rgba(74, 222, 128, 0.35);
+  background: rgba(74, 222, 128, 0.05);
+  opacity: 0.85;
+}
+
 /* ─── Passcode step (2FA header) ───────────── */
 .login-passcode-head {
   display: flex;
