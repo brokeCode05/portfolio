@@ -48,6 +48,10 @@
   var verifyPasscodeSpinner = document.getElementById('verify-passcode-spinner');
   var adminPasscodeInput = document.getElementById('admin-passcode-input');
   var adminPasscodeSaveBtn = document.getElementById('admin-passcode-save-btn');
+
+  // ─── Passcode lockout settings ───────────────────
+  var PASSCODE_MAX_FAILS = 5;
+  var PASSCODE_LOCK_MS = 5 * 60 * 1000; // 5-minute lock after 5 wrong attempts
   var signOutBtn = document.getElementById('admin-signout-btn');
   var authEmailFooter = document.getElementById('auth-email-footer');
   var statusBar = document.getElementById('admin-statusbar');
@@ -72,6 +76,7 @@
             passcodeInput.value = '';
             passcodeError.textContent = '';
             passcodeInput.focus();
+            applyPasscodeGate();
           } else {
             showDashboard(session.user.email);
           }
@@ -225,6 +230,7 @@
           passcodeInput.value = '';
           passcodeError.textContent = '';
           passcodeInput.focus();
+          applyPasscodeGate();
           return;
         }
         showToast('Signed in!', 'success');
@@ -239,6 +245,10 @@
   // Step 3: admin passcode unlock
   function verifyPasscode() {
     if (!passcodeInput || !passcodeError) return;
+    if (getPasscodeLockUntil() > Date.now()) {
+      applyPasscodeGate();
+      return;
+    }
     var entered = passcodeInput.value;
     if (!entered) {
       passcodeError.textContent = 'Enter your admin passcode.';
@@ -250,15 +260,81 @@
       var saved = getAdminPasscode();
       if (entered === saved) {
         passcodeError.textContent = '';
+        setPasscodeFailures(0); // correct entry resets the counter
         var email = authEmailInput.value.trim();
         showToast('Signed in!', 'success');
         showDashboard(email);
       } else {
-        passcodeError.textContent = 'Incorrect passcode.';
+        var fails = getPasscodeFailures() + 1;
+        setPasscodeFailures(fails);
         passcodeInput.value = '';
-        passcodeInput.focus();
+        if (fails >= PASSCODE_MAX_FAILS) {
+          // Lock the step — the lock window itself becomes the gate.
+          setPasscodeLockUntil(Date.now() + PASSCODE_LOCK_MS);
+          setPasscodeFailures(0);
+          applyPasscodeGate();
+        } else {
+          passcodeError.textContent =
+            'Incorrect passcode. ' + (PASSCODE_MAX_FAILS - fails) + ' attempts left.';
+          passcodeInput.focus();
+        }
       }
     }, 400);
+  }
+
+  // ─── Passcode lockout UI ──────────────────────
+  // Disables the passcode step with a live countdown until the lock expires,
+  // then hands back a fresh set of attempts. Called every time the step is
+  // shown (fresh OTP verify or session restore) so a lock survives reloads.
+  var passcodeLockTimer = null;
+
+  function applyPasscodeGate() {
+    if (!passcodeInput || !verifyPasscodeBtn) return;
+    passcodeInput.disabled = false;
+    verifyPasscodeBtn.disabled = false;
+    if (passcodeLockTimer) {
+      clearInterval(passcodeLockTimer);
+      passcodeLockTimer = null;
+    }
+    var until = getPasscodeLockUntil();
+    if (until <= 0) return;
+    if (until <= Date.now()) {
+      // Lock expired — reset and let the user try again.
+      setPasscodeFailures(0);
+      setPasscodeLockUntil(0);
+      passcodeError.textContent = '';
+      passcodeInput.focus();
+      return;
+    }
+    setPasscodeLocked(Math.ceil((until - Date.now()) / 1000));
+  }
+
+  function setPasscodeLocked(seconds) {
+    passcodeInput.disabled = true;
+    verifyPasscodeBtn.disabled = true;
+    function tick() {
+      if (seconds <= 0) {
+        clearInterval(passcodeLockTimer);
+        passcodeLockTimer = null;
+        passcodeInput.disabled = false;
+        verifyPasscodeBtn.disabled = false;
+        passcodeError.textContent = '';
+        setPasscodeFailures(0);
+        setPasscodeLockUntil(0);
+        passcodeInput.focus();
+        return;
+      }
+      passcodeError.textContent = 'Too many incorrect attempts. Try again in ' + fmtLock(seconds) + '.';
+      seconds--;
+    }
+    tick();
+    passcodeLockTimer = setInterval(tick, 1000);
+  }
+
+  function fmtLock(s) {
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return m > 0 ? m + 'm ' + r + 's' : r + 's';
   }
 
   // Sign Out
@@ -350,6 +426,8 @@
       var pw = adminPasscodeInput.value.trim();
       if (!pw) {
         setAdminPasscode('');
+        setPasscodeFailures(0);
+        setPasscodeLockUntil(0);
         showToast('Passcode removed — login is OTP-only again.', 'success');
         return;
       }
@@ -358,6 +436,8 @@
         return;
       }
       setAdminPasscode(pw);
+      setPasscodeFailures(0);
+      setPasscodeLockUntil(0);
       showToast("Admin passcode saved — you'll be asked for it after the access code.", 'success');
     });
   }

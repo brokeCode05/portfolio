@@ -97,6 +97,45 @@ function setAdminPasscode(pw) {
   } catch (e) {}
 }
 
+// ─── Passcode lockout (brute-force guard) ────────────
+// Tracks wrong attempts plus a lock window so someone hammering the passcode
+// step gets blocked after 5 failures. Stored next to the passcode itself;
+// clearing site data clears both (you would re-set the passcode anyway).
+var PASSCODE_FAIL_KEY = 'portfolio_passcode_failures';
+var PASSCODE_LOCK_KEY = 'portfolio_passcode_lock_until';
+
+function getPasscodeFailures() {
+  try {
+    return parseInt(localStorage.getItem(PASSCODE_FAIL_KEY) || '0', 10) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function setPasscodeFailures(n) {
+  try {
+    localStorage.setItem(PASSCODE_FAIL_KEY, String(n));
+  } catch (e) {}
+}
+
+function getPasscodeLockUntil() {
+  try {
+    return parseInt(localStorage.getItem(PASSCODE_LOCK_KEY) || '0', 10) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+function setPasscodeLockUntil(ts) {
+  try {
+    if (ts > 0) {
+      localStorage.setItem(PASSCODE_LOCK_KEY, String(ts));
+    } else {
+      localStorage.removeItem(PASSCODE_LOCK_KEY);
+    }
+  } catch (e) {}
+}
+
 // ─── Supabase Cloud Sync (Secure) ─────────────────────
 // Uses Row Level Security (RLS) with admin password header
 // Service key is NEVER stored in the browser.

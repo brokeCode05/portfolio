@@ -333,7 +333,23 @@ function checkUnitTests() {
     console.log('    PORTFOLIO_META ' + e.message.slice(0, 80));
   }
 
-  report('escapeHtml + renderContactLinks + PORTFOLIO_META unit tests', failures === 0);
+  // Passcode lockout storage helpers round-trip
+  try {
+    vm.runInContext(
+      'setPasscodeFailures(3); setPasscodeLockUntil(123456);' +
+        'if (getPasscodeFailures() !== 3) throw new Error("failures not stored");' +
+        'if (getPasscodeLockUntil() !== 123456) throw new Error("lock not stored");' +
+        'setPasscodeFailures(0); setPasscodeLockUntil(0);' +
+        'if (getPasscodeFailures() !== 0) throw new Error("reset failed");' +
+        'if (getPasscodeLockUntil() !== 0) throw new Error("lock clear failed");',
+      sandbox
+    );
+  } catch (e) {
+    failures++;
+    console.log('    passcode lockout helpers ' + e.message.slice(0, 80));
+  }
+
+  report('escapeHtml + renderContactLinks + PORTFOLIO_META + passcode lockout unit tests', failures === 0);
 }
 
 function checkLoadOrder() {
