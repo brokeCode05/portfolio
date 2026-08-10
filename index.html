@@ -1,735 +1,1070 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <!-- Meta -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Content-Security-Policy (defense-in-depth). The site is vanilla JS with
+  <head>
+    <!-- Meta -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Content-Security-Policy (defense-in-depth). The site is vanilla JS with
        inline scripts by design, so script-src keeps 'unsafe-inline'; this still
        locks down where the page can connect, load images/frames from, and what
        it can embed. Tune the connect-src list if you add services. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://mnsgwitzgwhmiccbojck.supabase.co wss://mnsgwitzgwhmiccbojck.supabase.co https://api.github.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
-  <title>John Bryan Capellan — BSIT Student &amp; Home Lab Builder</title>
-  <meta name="description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
-  <meta name="robots" content="index, follow" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://mnsgwitzgwhmiccbojck.supabase.co wss://mnsgwitzgwhmiccbojck.supabase.co https://api.github.com https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <title>John Bryan Capellan — BSIT Student &amp; Home Lab Builder</title>
+    <meta
+      name="description"
+      content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects."
+    />
+    <meta name="robots" content="index, follow" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
-  <meta property="og:description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://brokeCode05.github.io" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
+    <meta
+      property="og:description"
+      content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://brokeCode05.github.io" />
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
-  <meta name="twitter:description" content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects." />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="John Bryan Capellan — BSIT Student &amp; Home Lab Builder" />
+    <meta
+      name="twitter:description"
+      content="BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects."
+    />
 
-  <!-- Inline theme script (prevents FOUC) -->
-  <script>
-    (function(){
-      var t = localStorage.getItem('portfolio-theme');
-      if (!t) { t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; }
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+    <!-- Inline theme script (prevents FOUC) -->
+    <script>
+      (function () {
+        var t = localStorage.getItem('portfolio-theme');
+        if (!t) {
+          t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
 
-  <!-- Fonts -->
-  <link rel="preload" as="image" href="img/johnbryan.jpg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preload" as="image" href="img/johnbryan.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Preload critical CSS -->
-  <link rel="preload" href="css/style.min.css?v=20260810q" as="style" />
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="css/style.min.css?v=20260810r" as="style" />
 
-  <!-- Styles (minified) -->
-  <link rel="stylesheet" href="css/style.min.css?v=20260810q" />
+    <!-- Styles (minified) -->
+    <link rel="stylesheet" href="css/style.min.css?v=20260810r" />
 
-  <!-- Cache busting: force CDN to re-serve updated files -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+    <!-- Cache busting: force CDN to re-serve updated files -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
-  <!-- Skills progress bar cards styles -->
-  <link rel="stylesheet" href="css/site-extras.css?v=20260810q" />
-  <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
-  <link rel="stylesheet" href="css/ui-upgrade.css?v=20260810q" />
+    <!-- Skills progress bar cards styles -->
+    <link rel="stylesheet" href="css/site-extras.css?v=20260810r" />
+    <!-- Phase 1 UI upgrade — loaded after the inline styles so overrides win -->
+    <link rel="stylesheet" href="css/ui-upgrade.css?v=20260810r" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E" />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23171A21'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='18' font-weight='bold' fill='%234ADE80'%3E~%3C/text%3E%3C/svg%3E"
+    />
 
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "John Bryan Capellan",
-    "jobTitle": "BSIT Student",
-    "description": "BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects.",
-    "url": "https://brokeCode05.github.io",
-    "sameAs": [
-      "https://github.com/brokeCode05"
-    ],
-    "knowsAbout": [
-      "Linux Administration",
-      "Networking",
-      "Cybersecurity",
-      "System Administration",
-      "Web Development",
-      "Home Lab"
-    ]
-  }
-  </script>
-</head>
-<body>
-
-  <!-- ===== LOADING SCREEN ===== -->
-  <div id="loader">
-    <div class="loader-terminal">
-      <div class="loader-bar-wrap">
-        <div class="loader-bar" id="loader-bar"></div>
-      </div>
-      <div class="loader-content" id="loader-content">
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Initializing kernel...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Loading system modules...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Starting session manager...</div>
-        <div class="loader-line"><span class="loader-warn"> WARN </span> Configuring network interfaces...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Mounting filesystems...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Loading shell environment...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Initializing portfolio modules...</div>
-        <div class="loader-line"><span class="loader-ok">  OK  </span> Ready.</div>
-        <div class="loader-cursor-line">
-          <span class="loader-prompt">brokeCode05@portfolio:~$</span> <span class="loader-blink">▊</span>
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "John Bryan Capellan",
+        "jobTitle": "BSIT Student",
+        "description": "BS Information Technology student passionate about Linux, networking, system administration, and cybersecurity. Building skills through hands-on home lab projects.",
+        "url": "https://brokeCode05.github.io",
+        "sameAs": ["https://github.com/brokeCode05"],
+        "knowsAbout": [
+          "Linux Administration",
+          "Networking",
+          "Cybersecurity",
+          "System Administration",
+          "Web Development",
+          "Home Lab"
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loader">
+      <div class="loader-terminal">
+        <div class="loader-bar-wrap">
+          <div class="loader-bar" id="loader-bar"></div>
         </div>
-      </div>
-      <div class="loader-watermark">portfolio v2.0</div>
-    </div>
-  </div>
-
-  <!-- Scroll progress indicator -->
-  <div class="scroll-progress" role="progressbar" aria-hidden="true"></div>
-
-  <!-- Skip to content (accessibility) -->
-  <a href="#main-content" class="skip-link">Skip to content</a>
-
-  <!-- ============ NAVBAR ============ -->
-  <header class="navbar" role="banner" aria-label="Site navigation">
-    <div class="navbar-inner container">
-      <a href="#hero" class="navbar-logo" aria-label="Home">
-        <span class="navbar-logo-code">~</span>
-        <span class="navbar-logo-text">/portfolio</span>
-      </a>
-      <nav aria-label="Main navigation">
-        <ul class="navbar-links">
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#skills" class="nav-link">Tech Stack</a></li>
-          <li><a href="#projects" class="nav-link">Projects</a></li>
-          <li><a href="#certifications" class="nav-link">Certs</a></li>
-          <li><a href="#learning" class="nav-link">Learning</a></li>
-          <li><a href="#experience" class="nav-link">Experience</a></li>
-          <li><a href="#github" class="nav-link">GitHub</a></li>
-          <li><a href="#contact" class="nav-link">Contact</a></li>
-          <li>
-            <button class="theme-toggle" aria-label="Switch to light mode" title="Toggle dark/light mode" aria-pressed="false">
-              <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/>
-                <line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/>
-                <line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-              </svg>
-              <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </button>
-          </li>
-        </ul>
-      </nav>
-      <button class="hamburger" aria-label="Open menu" aria-expanded="false">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-    </div>
-    <!-- Mobile menu overlay + panel -->
-    <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
-    <div class="nav-menu-mobile" id="nav-menu-mobile" role="dialog" aria-modal="true" aria-label="Navigation menu">
-      <div class="nav-menu-mobile-head">
-        <span class="nav-menu-mobile-title">Menu</span>
-        <button type="button" class="nav-menu-close" id="nav-menu-close" aria-label="Close menu">&times;</button>
-      </div>
-      <a href="#about" class="nav-link">About</a>
-      <a href="#skills" class="nav-link">Tech Stack</a>
-      <a href="#projects" class="nav-link">Projects</a>
-      <a href="#certifications" class="nav-link">Certs</a>
-      <a href="#learning" class="nav-link">Learning</a>
-      <a href="#experience" class="nav-link">Experience</a>
-      <a href="#github" class="nav-link">GitHub</a>
-      <a href="#contact" class="nav-link">Contact</a>
-      <button id="mobile-theme-toggle" class="theme-toggle" aria-label="Switch to light mode" title="Toggle dark/light mode" aria-pressed="false">
-        <svg class="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <svg class="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <span class="theme-toggle-text">Toggle theme</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- ============ MAIN CONTENT ============ -->
-  <main id="main-content">
-
-  <!-- ============ HERO ============ -->
-  <section id="hero" class="hero section" aria-label="Introduction">
-    <div class="container">
-      <div class="hero-layout">
-        <!-- Left: content -->
-        <div class="hero-content">
-          <h1 class="hero-title"></h1>
-          <div class="hero-roles">
-            <span class="hero-roles-prompt">~/role</span>
-            <span id="hero-roles-text"></span>
-            <span class="hero-roles-caret" aria-hidden="true">▊</span>
+        <div class="loader-content" id="loader-content">
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Initializing kernel...
           </div>
-          <p class="hero-description"></p>
-          <div class="hero-actions">
-            <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Loading system modules...
+          </div>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Starting session manager...
+          </div>
+          <div class="loader-line">
+            <span class="loader-warn">WARN</span>
+            Configuring network interfaces...
+          </div>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Mounting filesystems...
+          </div>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Loading shell environment...
+          </div>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Initializing portfolio modules...
+          </div>
+          <div class="loader-line">
+            <span class="loader-ok">OK</span>
+            Ready.
+          </div>
+          <div class="loader-cursor-line">
+            <span class="loader-prompt">brokeCode05@portfolio:~$</span>
+            <span class="loader-blink">▊</span>
           </div>
         </div>
+        <div class="loader-watermark">portfolio v2.0</div>
+      </div>
+    </div>
 
-        <!-- Right: the ID badge -->
-        <div class="hero-media" id="hero-media" data-parallax>
-          <!-- Background effects -->
-          <div class="hero-media-glow" aria-hidden="true"></div>
-          <div class="hero-media-bg" aria-hidden="true"></div>
-          <div class="hero-media-grid" aria-hidden="true"></div>
+    <!-- Scroll progress indicator -->
+    <div class="scroll-progress" role="progressbar" aria-hidden="true"></div>
 
-          <!-- Interactive student ID badge -->
-          <div class="hero-badge-wrap" id="hero-badge-wrap">
-            <!-- ID wrapper styled via #hero-badge; the .hero-badge class in style.min.css is the (unused) pill style -->
-            <div id="hero-badge">
-              <div class="hero-badge-card" id="hero-badge-card" role="button" tabindex="0" aria-label="Student ID badge — John Bryan Capellan. Click to flip, or use the corner button to enlarge." aria-pressed="false">
-                <div class="hero-badge-flip" id="hero-badge-flip">
-                  <div class="hero-badge-face" id="hero-badge-face">
-                    <div class="hero-badge-head">
-                      <span class="hero-badge-logo" aria-hidden="true">~</span>
-                      <span class="hero-badge-school" id="hero-badge-school">Student ID</span>
-                      <span class="hero-badge-school-sub" id="hero-badge-school-sub">brokeCode05.dev</span>
-                    </div>
-                    <div class="hero-badge-body">
-                      <div class="hero-badge-photo" id="hero-badge-photo">
-                        <img
-                          id="hero-badge-img"
-                          src="img/johnbryan.jpg"
-                          alt="Profile photo"
-                          fetchpriority="high"
-                          draggable="false"
-                          onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
-                        />
-                        <div class="hero-badge-photo-fallback" id="hero-badge-photo-fallback" aria-hidden="true">~/avatar — not found</div>
-                      </div>
-                      <div class="hero-badge-info">
-                        <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
-                        <span class="hero-badge-role" id="hero-badge-role">Information Technology Student</span>
-                        <span class="hero-badge-role2" id="hero-badge-role2"></span>
-                        <span class="hero-badge-idno">ID No. <strong id="hero-badge-idno">IT-2024-0842</strong></span>
-                        <span class="hero-badge-stamp" aria-hidden="true">VERIFIED</span>
-                      </div>
-                    </div>
-                    <div class="hero-badge-foot">
-                      <span class="hero-badge-barcode" aria-hidden="true"></span>
-                      <a class="hero-badge-handle" href="https://github.com/brokeCode05" target="_blank" rel="noopener">github.com/brokeCode05</a>
-                    </div>
-                    <div class="hero-badge-sheen" aria-hidden="true"></div>
-                  </div>
+    <!-- Skip to content (accessibility) -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
 
-                  <div class="hero-badge-back" id="hero-badge-back" aria-hidden="true">
-                    <div class="hero-badge-back-head">
-                      <span class="hero-badge-logo" aria-hidden="true">~</span>
-                      <span class="hero-badge-school" id="hero-badge-back-school">Student ID</span>
-                      <span class="hero-badge-school-sub" id="hero-badge-back-school-sub">brokeCode05.dev</span>
-                    </div>
-                    <div class="hero-badge-back-body">
-                      <div class="hero-badge-back-center">
-                        <div class="hero-badge-scan">
-                          <img
-                            id="hero-badge-qr-real"
-                            class="hero-badge-qr-real"
-                            alt="QR code — scan to open my portfolio"
-                            loading="lazy"
-                            width="120"
-                            height="120"
-                            draggable="false"
-                            onerror="window._heroBadgeQrError && window._heroBadgeQrError(this)"
-                          />
-                          <div class="hero-badge-qr-fallback" id="hero-badge-qr-fallback" aria-hidden="true"></div>
+    <!-- ============ NAVBAR ============ -->
+    <header class="navbar" role="banner" aria-label="Site navigation">
+      <div class="navbar-inner container">
+        <a href="#hero" class="navbar-logo" aria-label="Home">
+          <span class="navbar-logo-code">~</span>
+          <span class="navbar-logo-text">/portfolio</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <ul class="navbar-links">
+            <li><a href="#about" class="nav-link">About</a></li>
+            <li><a href="#skills" class="nav-link">Tech Stack</a></li>
+            <li><a href="#projects" class="nav-link">Projects</a></li>
+            <li><a href="#certifications" class="nav-link">Certs</a></li>
+            <li><a href="#learning" class="nav-link">Learning</a></li>
+            <li><a href="#experience" class="nav-link">Experience</a></li>
+            <li><a href="#github" class="nav-link">GitHub</a></li>
+            <li><a href="#contact" class="nav-link">Contact</a></li>
+            <li>
+              <button
+                class="theme-toggle"
+                aria-label="Switch to light mode"
+                title="Toggle dark/light mode"
+                aria-pressed="false"
+              >
+                <svg
+                  class="theme-icon-sun"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+                <svg
+                  class="theme-icon-moon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <button class="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+      <!-- Mobile menu overlay + panel -->
+      <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+      <div
+        class="nav-menu-mobile"
+        id="nav-menu-mobile"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+      >
+        <div class="nav-menu-mobile-head">
+          <span class="nav-menu-mobile-title">Menu</span>
+          <button type="button" class="nav-menu-close" id="nav-menu-close" aria-label="Close menu">
+            &times;
+          </button>
+        </div>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Tech Stack</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#certifications" class="nav-link">Certs</a>
+        <a href="#learning" class="nav-link">Learning</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#github" class="nav-link">GitHub</a>
+        <a href="#contact" class="nav-link">Contact</a>
+        <button
+          id="mobile-theme-toggle"
+          class="theme-toggle"
+          aria-label="Switch to light mode"
+          title="Toggle dark/light mode"
+          aria-pressed="false"
+        >
+          <svg
+            class="theme-icon-sun"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <svg
+            class="theme-icon-moon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <span class="theme-toggle-text">Toggle theme</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main id="main-content">
+      <!-- ============ HERO ============ -->
+      <section id="hero" class="hero section" aria-label="Introduction">
+        <div class="container">
+          <div class="hero-layout">
+            <!-- Left: content -->
+            <div class="hero-content">
+              <h1 class="hero-title"></h1>
+              <div class="hero-roles">
+                <span class="hero-roles-prompt">~/role</span>
+                <span id="hero-roles-text"></span>
+                <span class="hero-roles-caret" aria-hidden="true">▊</span>
+              </div>
+              <p class="hero-description"></p>
+              <div class="hero-actions">
+                <a href="#projects" class="btn btn-primary">View Projects</a>
+                <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+              </div>
+            </div>
+
+            <!-- Right: the ID badge -->
+            <div class="hero-media" id="hero-media" data-parallax>
+              <!-- Background effects -->
+              <div class="hero-media-glow" aria-hidden="true"></div>
+              <div class="hero-media-bg" aria-hidden="true"></div>
+              <div class="hero-media-grid" aria-hidden="true"></div>
+
+              <!-- Interactive student ID badge -->
+              <div class="hero-badge-wrap" id="hero-badge-wrap">
+                <!-- ID wrapper styled via #hero-badge; the .hero-badge class in style.min.css is the (unused) pill style -->
+                <div id="hero-badge">
+                  <div
+                    class="hero-badge-card"
+                    id="hero-badge-card"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Student ID badge — John Bryan Capellan. Click to flip, or use the corner button to enlarge."
+                    aria-pressed="false"
+                  >
+                    <div class="hero-badge-flip" id="hero-badge-flip">
+                      <div class="hero-badge-face" id="hero-badge-face">
+                        <div class="hero-badge-head">
+                          <span class="hero-badge-logo" aria-hidden="true">~</span>
+                          <span class="hero-badge-school" id="hero-badge-school">Student ID</span>
+                          <span class="hero-badge-school-sub" id="hero-badge-school-sub">
+                            brokeCode05.dev
+                          </span>
                         </div>
-                        <span class="hero-badge-scan-label" id="hero-badge-scan-label">Scan to connect</span>
-                        <a class="hero-badge-back-link-site" href="https://brokeCode05.dev" target="_blank" rel="noopener" tabindex="-1">brokeCode05.dev</a>
+                        <div class="hero-badge-body">
+                          <div class="hero-badge-photo" id="hero-badge-photo">
+                            <img
+                              id="hero-badge-img"
+                              src="img/johnbryan.jpg"
+                              alt="Profile photo"
+                              fetchpriority="high"
+                              draggable="false"
+                              onerror="window._heroBadgeImgError && window._heroBadgeImgError(this)"
+                            />
+                            <div
+                              class="hero-badge-photo-fallback"
+                              id="hero-badge-photo-fallback"
+                              aria-hidden="true"
+                            >
+                              ~/avatar — not found
+                            </div>
+                          </div>
+                          <div class="hero-badge-info">
+                            <span class="hero-badge-name" id="hero-badge-name">John Bryan Capellan</span>
+                            <span class="hero-badge-role" id="hero-badge-role">
+                              Information Technology Student
+                            </span>
+                            <span class="hero-badge-role2" id="hero-badge-role2"></span>
+                            <span class="hero-badge-idno">
+                              ID No.
+                              <strong id="hero-badge-idno">IT-2024-0842</strong>
+                            </span>
+                            <span class="hero-badge-stamp" aria-hidden="true">VERIFIED</span>
+                          </div>
+                        </div>
+                        <div class="hero-badge-foot">
+                          <span class="hero-badge-barcode" aria-hidden="true"></span>
+                          <a
+                            class="hero-badge-handle"
+                            href="https://github.com/brokeCode05"
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            github.com/brokeCode05
+                          </a>
+                        </div>
+                        <div class="hero-badge-sheen" aria-hidden="true"></div>
+                      </div>
+
+                      <div class="hero-badge-back" id="hero-badge-back" aria-hidden="true">
+                        <div class="hero-badge-back-head">
+                          <span class="hero-badge-logo" aria-hidden="true">~</span>
+                          <span class="hero-badge-school" id="hero-badge-back-school">Student ID</span>
+                          <span class="hero-badge-school-sub" id="hero-badge-back-school-sub">
+                            brokeCode05.dev
+                          </span>
+                        </div>
+                        <div class="hero-badge-back-body">
+                          <div class="hero-badge-back-center">
+                            <div class="hero-badge-scan">
+                              <img
+                                id="hero-badge-qr-real"
+                                class="hero-badge-qr-real"
+                                alt="QR code — scan to open my portfolio"
+                                loading="lazy"
+                                width="120"
+                                height="120"
+                                draggable="false"
+                                onerror="window._heroBadgeQrError && window._heroBadgeQrError(this)"
+                              />
+                              <div
+                                class="hero-badge-qr-fallback"
+                                id="hero-badge-qr-fallback"
+                                aria-hidden="true"
+                              ></div>
+                            </div>
+                            <span class="hero-badge-scan-label" id="hero-badge-scan-label">
+                              Scan to connect
+                            </span>
+                            <a
+                              class="hero-badge-back-link-site"
+                              href="https://brokeCode05.dev"
+                              target="_blank"
+                              rel="noopener"
+                              tabindex="-1"
+                            >
+                              brokeCode05.dev
+                            </a>
+                          </div>
+                        </div>
+                        <div class="hero-badge-back-foot">
+                          <span class="hero-badge-back-id">IT-2024-0842</span>
+                        </div>
                       </div>
                     </div>
-                    <div class="hero-badge-back-foot">
-                      <span class="hero-badge-back-id">IT-2024-0842</span>
-                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="hero-badge-expand"
+                    id="hero-badge-expand"
+                    aria-label="View ID card enlarged"
+                    title="View enlarged"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M15 3h6v6" />
+                      <path d="M9 21H3v-6" />
+                      <path d="M21 3l-7 7" />
+                      <path d="M3 21l7-7" />
+                    </svg>
+                  </button>
+                  <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="#about" class="hero-scroll-indicator" aria-label="Scroll to About">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </a>
+      </section>
+
+      <!-- ============ ABOUT ============ -->
+      <section id="about" class="about section" aria-label="About me">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="about">
+            <h2>About</h2>
+            <p>Who I am, what I do, and a terminal you can poke around in.</p>
+          </div>
+          <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
+            <div class="about-text">
+              <p></p>
+            </div>
+            <div class="about-terminal">
+              <div class="terminal-window">
+                <div class="terminal-header">
+                  <span class="terminal-dot"></span>
+                  <span class="terminal-dot"></span>
+                  <span class="terminal-dot"></span>
+                  <span class="terminal-title">~/about — zsh</span>
+                </div>
+                <div class="terminal-body">
+                  <span class="line">
+                    <span class="prompt">$</span>
+                    cat about.txt
+                  </span>
+                  <span class="line output">{</span>
+                  <span class="line output indent">"role": "BSIT Student",</span>
+                  <span class="line output indent">"path": ["Web Dev", "Networking", "Security"],</span>
+                  <span class="line output indent">"philosophy": "Just love to learn.",</span>
+                  <span class="line output indent">"status": "Exploring"</span>
+                  <span class="line output">}</span>
+                  <span class="line cursor-line">
+                    <span class="prompt">$</span>
+                    <span class="cursor" aria-hidden="true">▊</span>
+                  </span>
+                </div>
+              </div>
+              <!-- Interactive commands — wired by ui-upgrade.js -->
+              <div class="about-cmd-bar" role="group" aria-label="Terminal commands">
+                <span class="about-cmd-label" aria-hidden="true">~/cmd</span>
+                <button type="button" class="filter-chip" data-cmd="help">help</button>
+                <button type="button" class="filter-chip" data-cmd="skills">skills</button>
+                <button type="button" class="filter-chip" data-cmd="contact">contact</button>
+                <button type="button" class="filter-chip" data-cmd="status">status</button>
+                <button type="button" class="filter-chip" data-cmd="projects">projects</button>
+                <button type="button" class="filter-chip" data-cmd="clear">clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TECH STACK ============ -->
+      <section id="skills" class="skills section" aria-label="Tech Stack">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="tech-stack">
+            <h2>Tech Stack</h2>
+            <p>Technologies and tools I work with regularly.</p>
+          </div>
+
+          <div class="tech-marquee" data-reveal data-reveal-delay="100" id="tech-stack-grid">
+            <!-- Populated by portfolio-data.js renderTechStack() -->
+          </div>
+
+          <!-- Currently -->
+          <div class="skill-learning" data-reveal data-reveal-delay="100">
+            <h3 class="skill-card-title">Currently</h3>
+            <p class="skill-learning-desc">Topics, courses, and resources I'm actively exploring.</p>
+            <div class="learning-list">
+              <!-- Populated by portfolio-data.js renderCurrently() -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PROJECTS ============ -->
+      <section id="projects" class="projects section" aria-label="Projects">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="projects">
+            <h2>Featured Projects</h2>
+            <p>Home lab projects focused on security monitoring and system administration.</p>
+          </div>
+          <div class="projects-grid grid grid-cols-2">
+            <!-- Populated by portfolio-data.js renderProjects() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CERTIFICATIONS ============ -->
+      <section id="certifications" class="certifications section" aria-label="Certifications">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="certifications">
+            <h2>Certifications</h2>
+            <p>Foundational certifications in programming, web development, and cybersecurity.</p>
+          </div>
+          <div class="certs-grid grid grid-cols-2">
+            <!-- Populated by portfolio-data.js renderCerts() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ LEARNING JOURNEY ============ -->
+      <section id="learning" class="learning section" aria-label="Learning journey">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="learning">
+            <h2>Learning Journey</h2>
+            <p>Key milestones in my academic and self-directed learning path.</p>
+          </div>
+          <div class="timeline">
+            <!-- Populated by portfolio-data.js renderLearningJourney() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ EXPERIENCE ============ -->
+      <section id="experience" class="experience section" aria-label="Experience">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="experience">
+            <h2>Experience</h2>
+            <p>Professional background in customer service and exam administration.</p>
+          </div>
+          <div class="timeline">
+            <!-- Populated by portfolio-data.js renderExperience() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GITHUB ============ -->
+      <section id="github" class="github section" aria-label="GitHub Activity">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="github">
+            <h2>GitHub Activity</h2>
+            <p>Open source activity and contributions.</p>
+          </div>
+          <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
+            <div class="github-card gh-stats-card">
+              <h3 class="github-card-title">Stats</h3>
+              <div class="gh-stats-grid" id="gh-stats-container">
+                <div class="gh-stat-item">
+                  <span class="gh-stat-value" id="gh-repos">—</span>
+                  <span class="gh-stat-label">Repos</span>
+                </div>
+                <div class="gh-stat-item">
+                  <span class="gh-stat-value" id="gh-followers">—</span>
+                  <span class="gh-stat-label">Followers</span>
+                </div>
+                <div class="gh-stat-item">
+                  <span class="gh-stat-value" id="gh-following">—</span>
+                  <span class="gh-stat-label">Following</span>
+                </div>
+                <div class="gh-stat-item">
+                  <span class="gh-stat-value" id="gh-stars">—</span>
+                  <span class="gh-stat-label">Stars</span>
+                </div>
+              </div>
+              <p class="gh-stats-note" id="gh-stats-note" aria-live="polite"></p>
+            </div>
+            <div class="github-card">
+              <h3 class="github-card-title">Streak</h3>
+              <img
+                class="github-img"
+                id="gh-streak"
+                alt="GitHub Streak"
+                loading="lazy"
+                onerror="
+                  this.onerror = null;
+                  this.style.display = 'none';
+                  var f = document.getElementById('gh-streak-fallback');
+                  if (f) f.style.display = 'block';
+                "
+              />
+              <div
+                class="github-fallback"
+                id="gh-streak-fallback"
+                style="
+                  display: none;
+                  text-align: center;
+                  padding: 1rem;
+                  color: var(--color-text-secondary);
+                  font-family: var(--font-code);
+                  font-size: var(--text-xs);
+                "
+              >
+                <p style="margin-bottom: 0.5rem">Streak image unavailable</p>
+                <a
+                  href="https://github.com/brokeCode05"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="color: var(--color-accent); text-decoration: underline"
+                >
+                  View profile →
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="github-graph-wrap" data-reveal data-reveal-delay="200">
+            <h3 class="github-card-title">Contribution Graph</h3>
+            <img
+              class="github-graph-img"
+              id="gh-graph"
+              alt="GitHub Contribution Graph"
+              loading="lazy"
+              onerror="
+                this.onerror = null;
+                this.style.display = 'none';
+                var f = document.getElementById('gh-graph-fallback');
+                if (f) f.style.display = 'block';
+              "
+            />
+            <div
+              class="github-fallback"
+              id="gh-graph-fallback"
+              style="
+                display: none;
+                text-align: center;
+                padding: 2rem 1rem;
+                color: var(--color-text-secondary);
+                font-family: var(--font-code);
+                font-size: var(--text-xs);
+              "
+            >
+              <p style="margin-bottom: 0.5rem">Contribution graph unavailable</p>
+              <p style="font-size: 0.75rem; opacity: 0.78">
+                Try disabling ad/tracker blockers for this site, or
+              </p>
+              <a
+                href="https://github.com/brokeCode05"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="color: var(--color-accent); text-decoration: underline"
+              >
+                visit GitHub profile →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CONTACT ============ -->
+      <section id="contact" class="contact section" aria-label="Contact">
+        <div class="container">
+          <div class="section-header" data-reveal data-label="contact">
+            <h2>Contact</h2>
+            <p>Get in touch for collaboration, opportunities, or questions.</p>
+          </div>
+          <div class="contact-grid" data-reveal data-reveal-delay="100">
+            <div class="contact-info">
+              <div class="contact-group">
+                <p class="contact-group-label">About / Introduction</p>
+                <p class="contact-text">
+                  I'm always open to connecting with fellow learners, discussing IT and cybersecurity, or
+                  exploring opportunities to collaborate. If you have a project in mind, an opportunity to
+                  share, or just a question, feel free to reach out.
+                </p>
+              </div>
+
+              <div class="contact-group">
+                <p class="contact-group-label">Direct Contact</p>
+                <div class="contact-links flex flex-col gap-md" id="contact-links">
+                  <!-- Populated by portfolio-data.js renderContactLinks() -->
+                </div>
+              </div>
+            </div>
+
+            <div class="contact-aside">
+              <div class="contact-group">
+                <p class="contact-group-label">Send a Message</p>
+                <div class="terminal-window contact-terminal" id="contact-terminal">
+                  <div class="terminal-header">
+                    <span class="terminal-dot"></span>
+                    <span class="terminal-dot"></span>
+                    <span class="terminal-dot"></span>
+                    <span class="terminal-title">~/portfolio/contact — zsh</span>
+                  </div>
+                  <div class="terminal-body contact-terminal-body">
+                    <p class="contact-prompt" aria-hidden="true">
+                      <span class="prompt">$</span>
+                      <span class="contact-cmd" id="contact-cmd">./send_message.sh --to=jhnbryn05</span>
+                      <span class="contact-cursor" id="contact-cursor"></span>
+                    </p>
+                    <form class="contact-form" id="contact-form" novalidate>
+                      <div class="form-field">
+                        <label class="form-label" for="contact-name">
+                          Name
+                          <span class="form-required" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                          class="form-input"
+                          type="text"
+                          id="contact-name"
+                          name="name"
+                          placeholder="Your name"
+                          required
+                          aria-required="true"
+                          autocomplete="name"
+                          aria-describedby="contact-name-error"
+                        />
+                        <small class="form-error" id="contact-name-error" aria-live="polite"></small>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label" for="contact-email">
+                          Email
+                          <span class="form-required" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                          class="form-input"
+                          type="email"
+                          id="contact-email"
+                          name="email"
+                          placeholder="you@example.com"
+                          required
+                          aria-required="true"
+                          autocomplete="email"
+                          aria-describedby="contact-email-error"
+                        />
+                        <small class="form-error" id="contact-email-error" aria-live="polite"></small>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label" for="contact-subject">
+                          Subject
+                          <span class="form-required" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                          class="form-input"
+                          type="text"
+                          id="contact-subject"
+                          name="subject"
+                          placeholder="What is this about?"
+                          required
+                          aria-required="true"
+                          aria-describedby="contact-subject-error"
+                        />
+                        <small class="form-error" id="contact-subject-error" aria-live="polite"></small>
+                      </div>
+                      <div class="form-field">
+                        <label class="form-label" for="contact-message">
+                          Message
+                          <span class="form-required" aria-hidden="true">*</span>
+                        </label>
+                        <textarea
+                          class="form-textarea"
+                          id="contact-message"
+                          name="message"
+                          rows="5"
+                          maxlength="5000"
+                          placeholder="Write your message..."
+                          required
+                          aria-required="true"
+                          aria-describedby="contact-message-error"
+                        ></textarea>
+                        <small class="form-error" id="contact-message-error" aria-live="polite"></small>
+                        <small class="form-char-count" id="contact-message-count">characters: 0/5000</small>
+                      </div>
+                      <div class="form-field hp-field" aria-hidden="true">
+                        <label class="form-label" for="contact-website">Website</label>
+                        <input
+                          class="form-input"
+                          type="text"
+                          id="contact-website"
+                          name="website"
+                          tabindex="-1"
+                          autocomplete="off"
+                        />
+                      </div>
+                      <div class="form-field contact-captcha" id="contact-captcha-field">
+                        <div id="contact-turnstile"></div>
+                        <small class="form-error" id="contact-captcha-error" aria-live="polite"></small>
+                      </div>
+                      <div class="form-actions">
+                        <button type="submit" class="btn btn-primary form-submit" id="contact-submit">
+                          <span class="form-submit-spinner" aria-hidden="true"></span>
+                          <span id="contact-submit-label">Send Message</span>
+                        </button>
+                        <div
+                          class="form-status terminal-log"
+                          id="contact-form-status"
+                          role="status"
+                          aria-live="polite"
+                        ></div>
+                      </div>
+                    </form>
                   </div>
                 </div>
-              </div>              <button type="button" class="hero-badge-expand" id="hero-badge-expand" aria-label="View ID card enlarged" title="View enlarged">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
-              </button>
-              <div class="hero-badge-flip-hint" aria-hidden="true">click to flip</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <a href="#about" class="hero-scroll-indicator" aria-label="Scroll to About">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-    </a>
-  </section>
-
-  <!-- ============ ABOUT ============ -->
-  <section id="about" class="about section" aria-label="About me">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="about">
-        <h2>About</h2>
-        <p>Who I am, what I do, and a terminal you can poke around in.</p>
-      </div>
-      <div class="about-grid grid grid-cols-2" data-reveal data-reveal-delay="100">        <div class="about-text">
-          <p></p>
-        </div>
-        <div class="about-terminal">
-          <div class="terminal-window">
-            <div class="terminal-header">
-              <span class="terminal-dot"></span>
-              <span class="terminal-dot"></span>
-              <span class="terminal-dot"></span>
-              <span class="terminal-title">~/about — zsh</span>
-            </div>
-            <div class="terminal-body">
-              <span class="line"><span class="prompt">$</span> cat about.txt</span>
-              <span class="line output">{</span>
-              <span class="line output indent">"role": "BSIT Student",</span>
-              <span class="line output indent">"path": ["Web Dev", "Networking", "Security"],</span>
-              <span class="line output indent">"philosophy": "Just love to learn.",</span>
-              <span class="line output indent">"status": "Exploring"</span>
-              <span class="line output">}</span>
-              <span class="line cursor-line"><span class="prompt">$</span> <span class="cursor" aria-hidden="true">▊</span></span>
-            </div>
-          </div>
-          <!-- Interactive commands — wired by ui-upgrade.js -->
-          <div class="about-cmd-bar" role="group" aria-label="Terminal commands">
-            <span class="about-cmd-label" aria-hidden="true">~/cmd</span>
-            <button type="button" class="filter-chip" data-cmd="help">help</button>
-            <button type="button" class="filter-chip" data-cmd="skills">skills</button>
-            <button type="button" class="filter-chip" data-cmd="contact">contact</button>
-            <button type="button" class="filter-chip" data-cmd="status">status</button>
-            <button type="button" class="filter-chip" data-cmd="projects">projects</button>
-            <button type="button" class="filter-chip" data-cmd="clear">clear</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============ TECH STACK ============ -->
-  <section id="skills" class="skills section" aria-label="Tech Stack">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="tech-stack">
-        <h2>Tech Stack</h2>
-        <p>Technologies and tools I work with regularly.</p>
-      </div>
-
-      <div class="tech-marquee" data-reveal data-reveal-delay="100" id="tech-stack-grid">
-        <!-- Populated by portfolio-data.js renderTechStack() -->
-      </div>
-
-      <!-- Currently -->
-      <div class="skill-learning" data-reveal data-reveal-delay="100">
-        <h3 class="skill-card-title">Currently</h3>
-        <p class="skill-learning-desc">
-          Topics, courses, and resources I'm actively exploring.
-        </p>
-        <div class="learning-list">
-          <!-- Populated by portfolio-data.js renderCurrently() -->
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============ PROJECTS ============ -->
-  <section id="projects" class="projects section" aria-label="Projects">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="projects">
-        <h2>Featured Projects</h2>
-        <p>Home lab projects focused on security monitoring and system administration.</p>
-      </div>
-      <div class="projects-grid grid grid-cols-2">
-        <!-- Populated by portfolio-data.js renderProjects() -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CERTIFICATIONS ============ -->
-  <section id="certifications" class="certifications section" aria-label="Certifications">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="certifications">
-        <h2>Certifications</h2>
-        <p>Foundational certifications in programming, web development, and cybersecurity.</p>
-      </div>
-      <div class="certs-grid grid grid-cols-2">
-        <!-- Populated by portfolio-data.js renderCerts() -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ LEARNING JOURNEY ============ -->
-  <section id="learning" class="learning section" aria-label="Learning journey">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="learning">
-        <h2>Learning Journey</h2>
-        <p>Key milestones in my academic and self-directed learning path.</p>
-      </div>
-      <div class="timeline">
-        <!-- Populated by portfolio-data.js renderLearningJourney() -->
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============ EXPERIENCE ============ -->
-  <section id="experience" class="experience section" aria-label="Experience">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="experience">
-        <h2>Experience</h2>
-        <p>Professional background in customer service and exam administration.</p>
-      </div>
-      <div class="timeline">
-        <!-- Populated by portfolio-data.js renderExperience() -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ GITHUB ============ -->
-  <section id="github" class="github section" aria-label="GitHub Activity">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="github">
-        <h2>GitHub Activity</h2>
-        <p>Open source activity and contributions.</p>
-      </div>
-      <div class="github-grid grid grid-cols-2" data-reveal data-reveal-delay="100">
-        <div class="github-card gh-stats-card">
-          <h3 class="github-card-title">Stats</h3>
-          <div class="gh-stats-grid" id="gh-stats-container">
-              <div class="gh-stat-item">
-                <span class="gh-stat-value" id="gh-repos">—</span>
-                <span class="gh-stat-label">Repos</span>
-              </div>
-              <div class="gh-stat-item">
-                <span class="gh-stat-value" id="gh-followers">—</span>
-                <span class="gh-stat-label">Followers</span>
-              </div>
-              <div class="gh-stat-item">
-                <span class="gh-stat-value" id="gh-following">—</span>
-                <span class="gh-stat-label">Following</span>
-              </div>
-              <div class="gh-stat-item">
-                <span class="gh-stat-value" id="gh-stars">—</span>
-                <span class="gh-stat-label">Stars</span>
-              </div>
-            </div>
-            <p class="gh-stats-note" id="gh-stats-note" aria-live="polite"></p>
-        </div>
-        <div class="github-card">
-          <h3 class="github-card-title">Streak</h3>
-          <img class="github-img" id="gh-streak" alt="GitHub Streak" loading="lazy" onerror="this.onerror=null;this.style.display='none';var f=document.getElementById('gh-streak-fallback');if(f)f.style.display='block'" />
-          <div class="github-fallback" id="gh-streak-fallback" style="display:none;text-align:center;padding:1rem;color:var(--color-text-secondary);font-family:var(--font-code);font-size:var(--text-xs)">
-            <p style="margin-bottom:0.5rem">Streak image unavailable</p>
-            <a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline">View profile →</a>
-          </div>
-        </div>
-      </div>
-      <div class="github-graph-wrap" data-reveal data-reveal-delay="200">
-        <h3 class="github-card-title">Contribution Graph</h3>
-        <img class="github-graph-img" id="gh-graph" alt="GitHub Contribution Graph" loading="lazy" onerror="this.onerror=null;this.style.display='none';var f=document.getElementById('gh-graph-fallback');if(f)f.style.display='block'" />
-        <div class="github-fallback" id="gh-graph-fallback" style="display:none;text-align:center;padding:2rem 1rem;color:var(--color-text-secondary);font-family:var(--font-code);font-size:var(--text-xs)">
-          <p style="margin-bottom:0.5rem">Contribution graph unavailable</p>
-          <p style="font-size:0.75rem;opacity:0.78">Try disabling ad/tracker blockers for this site, or</p>
-          <a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);text-decoration:underline">visit GitHub profile →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CONTACT ============ -->
-  <section id="contact" class="contact section" aria-label="Contact">
-    <div class="container">
-      <div class="section-header" data-reveal data-label="contact">
-        <h2>Contact</h2>
-        <p>Get in touch for collaboration, opportunities, or questions.</p>
-      </div>
-      <div class="contact-grid" data-reveal data-reveal-delay="100">
-        <div class="contact-info">
-          <div class="contact-group">
-            <p class="contact-group-label">About / Introduction</p>
-            <p class="contact-text">
-              I'm always open to connecting with fellow learners, discussing
-              IT and cybersecurity, or exploring opportunities to collaborate.
-              If you have a project in mind, an opportunity to share, or just a
-              question, feel free to reach out.
-            </p>
-          </div>
-
-          <div class="contact-group">
-            <p class="contact-group-label">Direct Contact</p>
-            <div class="contact-links flex flex-col gap-md" id="contact-links">
-              <!-- Populated by portfolio-data.js renderContactLinks() -->
-            </div>
-          </div>
-        </div>
-
-        <div class="contact-aside">
-          <div class="contact-group">
-            <p class="contact-group-label">Send a Message</p>
-            <div class="terminal-window contact-terminal" id="contact-terminal">
-              <div class="terminal-header">
-                <span class="terminal-dot"></span>
-                <span class="terminal-dot"></span>
-                <span class="terminal-dot"></span>
-                <span class="terminal-title">~/portfolio/contact — zsh</span>
-              </div>
-              <div class="terminal-body contact-terminal-body">
-                <p class="contact-prompt" aria-hidden="true"><span class="prompt">$</span> <span class="contact-cmd" id="contact-cmd">./send_message.sh --to=jhnbryn05</span><span class="contact-cursor" id="contact-cursor"></span></p>
-                <form class="contact-form" id="contact-form" novalidate>
-          <div class="form-field">
-            <label class="form-label" for="contact-name">Name <span class="form-required" aria-hidden="true">*</span></label>
-            <input class="form-input" type="text" id="contact-name" name="name" placeholder="Your name" required aria-required="true" autocomplete="name" aria-describedby="contact-name-error" />
-            <small class="form-error" id="contact-name-error" aria-live="polite"></small>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="contact-email">Email <span class="form-required" aria-hidden="true">*</span></label>
-            <input class="form-input" type="email" id="contact-email" name="email" placeholder="you@example.com" required aria-required="true" autocomplete="email" aria-describedby="contact-email-error" />
-            <small class="form-error" id="contact-email-error" aria-live="polite"></small>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="contact-subject">Subject <span class="form-required" aria-hidden="true">*</span></label>
-            <input class="form-input" type="text" id="contact-subject" name="subject" placeholder="What is this about?" required aria-required="true" aria-describedby="contact-subject-error" />
-            <small class="form-error" id="contact-subject-error" aria-live="polite"></small>
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="contact-message">Message <span class="form-required" aria-hidden="true">*</span></label>
-            <textarea class="form-textarea" id="contact-message" name="message" rows="5" maxlength="5000" placeholder="Write your message..." required aria-required="true" aria-describedby="contact-message-error"></textarea>
-            <small class="form-error" id="contact-message-error" aria-live="polite"></small>
-            <small class="form-char-count" id="contact-message-count">characters: 0/5000</small>
-          </div>
-          <div class="form-field hp-field" aria-hidden="true">
-            <label class="form-label" for="contact-website">Website</label>
-            <input class="form-input" type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off" />
-          </div>
-          <div class="form-field contact-captcha" id="contact-captcha-field">
-            <div id="contact-turnstile"></div>
-            <small class="form-error" id="contact-captcha-error" aria-live="polite"></small>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary form-submit" id="contact-submit">
-              <span class="form-submit-spinner" aria-hidden="true"></span>
-              <span id="contact-submit-label">Send Message</span>
-            </button>
-            <div class="form-status terminal-log" id="contact-form-status" role="status" aria-live="polite"></div>
-          </div>
-        </form>
               </div>
             </div>
           </div>
         </div>
+      </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <div class="footer-inner flex items-center justify-between">
+          <p class="footer-copyright">
+            &copy; 2026 — Built with HTML, CSS &amp; JavaScript
+            <span class="footer-updated" id="footer-updated" hidden></span>
+          </p>
+          <a href="#hero" class="footer-back" aria-label="Back to top">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 15l-6-6-6 6" />
+            </svg>
+            <span>Back to top</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </footer>
 
-  </main>
+    <!-- JavaScript (minified) -->
+    <script src="js/main.min.js?v=20260810r" defer></script>
 
-  <!-- ============ FOOTER ============ -->
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-inner flex items-center justify-between">
-        <p class="footer-copyright">&copy; 2026 — Built with HTML, CSS &amp; JavaScript <span class="footer-updated" id="footer-updated" hidden></span></p>
-        <a href="#hero" class="footer-back" aria-label="Back to top">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 15l-6-6-6 6"/>
-          </svg>
-          <span>Back to top</span>
-        </a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- JavaScript (minified) -->
-  <script src="js/main.min.js?v=20260810q" defer></script>
-
-  <!-- Loading screen JS -->
-  <script>
-  (function(){
-    var loader = document.getElementById('loader');
-    if (!loader) return;
-    var bar = document.getElementById('loader-bar');
-    var progress = 0;
-    var spinnerChars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-    var spinnerIdx = 0;
-    var spinnerEl = document.createElement('span');
-    spinnerEl.style.cssText = 'display:inline-block;width:1.2em;color:#4ADE80;font-size:14px';
-    var cursorLine = document.querySelector('.loader-cursor-line');
-    if (cursorLine) {
-      cursorLine.insertBefore(spinnerEl, cursorLine.firstChild);
-    }
-    var spinnerInterval = setInterval(function() {
-      spinnerIdx = (spinnerIdx + 1) % spinnerChars.length;
-      spinnerEl.textContent = spinnerChars[spinnerIdx] + ' ';
-    }, 100);
-
-    // Progress bar — keeps animating until data is ready
-    var interval = setInterval(function() {
-      if (progress >= 99) {
-        // Keep pulsing at 99% while waiting for cloud sync
-        bar.style.opacity = 0.6;
-        return;
-      }
-      var increment = progress < 50 ? Math.random() * 6 + 4 : Math.random() * 3 + 1;
-      progress = Math.min(progress + increment, 99);
-      if (bar) bar.style.width = progress + '%';
-    }, 250);
-
-    // Add a "Syncing..." line that appears after the cursor
-    var syncLine = document.createElement('div');
-    syncLine.className = 'loader-line';
-    syncLine.style.cssText = 'opacity:0;animation:loader-fade-in 0.25s ease 2s forwards;color:#F59E0B';
-    syncLine.innerHTML = '<span class="loader-warn"> SYNC </span> Fetching portfolio data from cloud...';
-    var content = document.getElementById('loader-content');
-    if (content) content.appendChild(syncLine);
-
-    // Global hideLoader — called by portfolio init script when data is ready
-    window.hideLoader = function() {
-      if (progress >= 100) return;
-      clearInterval(interval);
-      clearInterval(spinnerInterval);
-      progress = 100;
-      if (bar) {
-        bar.style.width = '100%';
-        bar.style.opacity = '1';
-      }
-      // Update sync line status
-      if (syncLine) {
-        syncLine.innerHTML = '<span class="loader-ok">  OK  </span> Portfolio data synced! Ready.';
-      }
-      setTimeout(function() {
-        spinnerEl.textContent = '✓ ';
-        setTimeout(function() {
-          loader.classList.add('loaded');
-          setTimeout(function() { loader.style.display = 'none'; }, 600);
-        }, 400);
-      }, 300);
-    };
-
-    // Safety net — hide loader after 12s even if data never arrives
-    setTimeout(function() {
-      if (progress < 100 && typeof window.hideLoader === 'function') {
-        if (syncLine) {
-          syncLine.innerHTML = '<span class="loader-warn"> WARN </span> Using local data (cloud unavailable).';
+    <!-- Loading screen JS -->
+    <script>
+      (function () {
+        var loader = document.getElementById('loader');
+        if (!loader) return;
+        var bar = document.getElementById('loader-bar');
+        var progress = 0;
+        var spinnerChars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+        var spinnerIdx = 0;
+        var spinnerEl = document.createElement('span');
+        spinnerEl.style.cssText = 'display:inline-block;width:1.2em;color:#4ADE80;font-size:14px';
+        var cursorLine = document.querySelector('.loader-cursor-line');
+        if (cursorLine) {
+          cursorLine.insertBefore(spinnerEl, cursorLine.firstChild);
         }
-        setTimeout(window.hideLoader, 800);
-      }
-    }, 12000);
-  })();
-  </script>
+        var spinnerInterval = setInterval(function () {
+          spinnerIdx = (spinnerIdx + 1) % spinnerChars.length;
+          spinnerEl.textContent = spinnerChars[spinnerIdx] + ' ';
+        }, 100);
 
-  <!-- ID Card Viewer Modal (enlarge the hero ID) -->
-  <div class="idzoom-overlay" id="idzoom-overlay" hidden></div>
-  <div class="idzoom-modal" id="idzoom-modal" role="dialog" aria-modal="true" aria-label="Student ID card — enlarged" hidden>
-    <button type="button" class="idzoom-close" id="idzoom-close" aria-label="Close viewer">&times;</button>
-    <div class="idzoom-body" id="idzoom-body"></div>
-    <div class="idzoom-cap">
-      <span class="idzoom-hint">click the card to flip · esc to close</span>
-      <button type="button" class="idzoom-flip-btn" id="idzoom-flip">Flip</button>
-    </div>
-  </div>
+        // Progress bar — keeps animating until data is ready
+        var interval = setInterval(function () {
+          if (progress >= 99) {
+            // Keep pulsing at 99% while waiting for cloud sync
+            bar.style.opacity = 0.6;
+            return;
+          }
+          var increment = progress < 50 ? Math.random() * 6 + 4 : Math.random() * 3 + 1;
+          progress = Math.min(progress + increment, 99);
+          if (bar) bar.style.width = progress + '%';
+        }, 250);
 
-  <!-- Certificate Viewer Modal -->
-  <div class="cert-overlay" id="cert-overlay" aria-hidden="true"></div>
-  <div class="cert-modal" id="cert-modal" role="dialog" aria-modal="true" aria-labelledby="cert-modal-filename" hidden>
-    <div class="cert-modal-header">
-      <span class="cert-modal-dot red"></span>
-      <span class="cert-modal-dot yellow"></span>
-      <span class="cert-modal-dot green"></span>
-      <span class="cert-modal-title">~/certificates/<span class="cert-highlight" id="cert-modal-filename"></span></span>
-    </div>
-    <div class="cert-modal-body">
-      <div class="cert-command-line" id="cert-command-line"></div>
-      <div class="cert-status-line" id="cert-status-line" aria-live="polite"></div>
-      <div class="cert-image-wrap" id="cert-image-wrap">
-        <img id="cert-modal-image" src="" alt="Certificate" loading="lazy" />
-        <div class="scanlines" aria-hidden="true"></div>
-        <span class="cert-zoom-hint" id="cert-zoom-hint" aria-hidden="true">[click to zoom · scroll to adjust]</span>
+        // Add a "Syncing..." line that appears after the cursor
+        var syncLine = document.createElement('div');
+        syncLine.className = 'loader-line';
+        syncLine.style.cssText = 'opacity:0;animation:loader-fade-in 0.25s ease 2s forwards;color:#F59E0B';
+        syncLine.innerHTML = '<span class="loader-warn"> SYNC </span> Fetching portfolio data from cloud...';
+        var content = document.getElementById('loader-content');
+        if (content) content.appendChild(syncLine);
+
+        // Global hideLoader — called by portfolio init script when data is ready
+        window.hideLoader = function () {
+          if (progress >= 100) return;
+          clearInterval(interval);
+          clearInterval(spinnerInterval);
+          progress = 100;
+          if (bar) {
+            bar.style.width = '100%';
+            bar.style.opacity = '1';
+          }
+          // Update sync line status
+          if (syncLine) {
+            syncLine.innerHTML = '<span class="loader-ok">  OK  </span> Portfolio data synced! Ready.';
+          }
+          setTimeout(function () {
+            spinnerEl.textContent = '✓ ';
+            setTimeout(function () {
+              loader.classList.add('loaded');
+              setTimeout(function () {
+                loader.style.display = 'none';
+              }, 600);
+            }, 400);
+          }, 300);
+        };
+
+        // Safety net — hide loader after 12s even if data never arrives
+        setTimeout(function () {
+          if (progress < 100 && typeof window.hideLoader === 'function') {
+            if (syncLine) {
+              syncLine.innerHTML =
+                '<span class="loader-warn"> WARN </span> Using local data (cloud unavailable).';
+            }
+            setTimeout(window.hideLoader, 800);
+          }
+        }, 12000);
+      })();
+    </script>
+
+    <!-- ID Card Viewer Modal (enlarge the hero ID) -->
+    <div class="idzoom-overlay" id="idzoom-overlay" hidden></div>
+    <div
+      class="idzoom-modal"
+      id="idzoom-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Student ID card — enlarged"
+      hidden
+    >
+      <button type="button" class="idzoom-close" id="idzoom-close" aria-label="Close viewer">&times;</button>
+      <div class="idzoom-body" id="idzoom-body"></div>
+      <div class="idzoom-cap">
+        <span class="idzoom-hint">click the card to flip · esc to close</span>
+        <button type="button" class="idzoom-flip-btn" id="idzoom-flip">Flip</button>
       </div>
     </div>
-    <div class="cert-modal-footer">
-      <div class="cert-nav">
-        <button class="cert-nav-btn" id="cert-prev" aria-label="Previous certificate">◀ Prev</button>
+
+    <!-- Certificate Viewer Modal -->
+    <div class="cert-overlay" id="cert-overlay" aria-hidden="true"></div>
+    <div
+      class="cert-modal"
+      id="cert-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Certificate viewer"
+      hidden
+    >
+      <button type="button" class="cert-close-btn" id="cert-close-btn" aria-label="Close viewer">
+        &times;
+      </button>
+      <div class="cert-modal-body">
+        <div class="cert-image-wrap" id="cert-image-wrap">
+          <img id="cert-modal-image" src="" alt="Certificate" loading="lazy" />
+          <div class="scanlines" aria-hidden="true"></div>
+          <span class="cert-zoom-hint" id="cert-zoom-hint" aria-hidden="true">
+            [click to zoom · scroll to adjust]
+          </span>
+        </div>
+      </div>
+      <div class="cert-modal-footer">
+        <button class="cert-nav-btn" id="cert-prev" aria-label="Previous certificate">‹</button>
         <span class="cert-nav-counter" id="cert-counter"></span>
-        <button class="cert-nav-btn" id="cert-next" aria-label="Next certificate">Next ▶</button>
-      </div>
-      <div class="cert-tools">
-        <a class="cert-download" id="cert-download" href="#" download>$ save</a>
-        <span class="cert-zoom-label" id="cert-zoom-label" aria-live="polite">[zoom 100%]</span>
-        <button class="cert-close-btn" id="cert-close-btn">$ _ close <span class="key-hint">[ESC]</span></button>
+        <button class="cert-nav-btn" id="cert-next" aria-label="Next certificate">›</button>
       </div>
     </div>
-  </div>
 
-  <!-- Project Screenshot Viewer -->
-  <div class="shot-overlay" id="shot-overlay" aria-hidden="true"></div>
-  <div class="shot-modal" id="shot-modal" role="dialog" aria-modal="true" aria-label="Project screenshot viewer" hidden>
-    <button type="button" class="shot-close" id="shot-close" aria-label="Close viewer">&times;</button>
-    <div class="shot-stage">
-      <img id="shot-img" src="" alt="Project screenshot" />
+    <!-- Project Screenshot Viewer -->
+    <div class="shot-overlay" id="shot-overlay" aria-hidden="true"></div>
+    <div
+      class="shot-modal"
+      id="shot-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Project screenshot viewer"
+      hidden
+    >
+      <button type="button" class="shot-close" id="shot-close" aria-label="Close viewer">&times;</button>
+      <div class="shot-stage">
+        <img id="shot-img" src="" alt="Project screenshot" />
+      </div>
+      <div class="shot-cap">
+        <span class="shot-path" id="shot-path"></span>
+        <span class="shot-hint">esc to close</span>
+      </div>
     </div>
-    <div class="shot-cap">
-      <span class="shot-path" id="shot-path"></span>
-      <span class="shot-hint">esc to close</span>
-    </div>
-  </div>
 
-  <!-- GitHub & Skills widget scripts -->
-  <script src="js/github-widgets.js?v=20260810q"></script>
-  <!-- Hero ID badge interactions (split out of github-widgets.js) -->
-  <script src="js/id-card.js?v=20260810q"></script>
+    <!-- GitHub & Skills widget scripts -->
+    <script src="js/github-widgets.js?v=20260810r"></script>
+    <!-- Hero ID badge interactions (split out of github-widgets.js) -->
+    <script src="js/id-card.js?v=20260810r"></script>
 
-  <!-- Portfolio Data Override (admin dashboard support) -->
-  <script src="js/tech-icons.js?v=20260810q"></script>
-  <script src="js/portfolio-data.js?v=20260810q"></script>
-  <script src="js/ui-upgrade.js?v=20260810q" defer></script>
-  <script src="js/chatbot.js?v=20260810q"></script>
-  <script src="js/portfolio-render.js?v=20260810q"></script>
+    <!-- Portfolio Data Override (admin dashboard support) -->
+    <script src="js/tech-icons.js?v=20260810r"></script>
+    <script src="js/portfolio-data.js?v=20260810r"></script>
+    <script src="js/ui-upgrade.js?v=20260810r" defer></script>
+    <script src="js/chatbot.js?v=20260810r"></script>
+    <script src="js/portfolio-render.js?v=20260810r"></script>
 
-  <!-- Contact form: frontend-only validation + demo states (no backend yet) -->
-  <script src="js/contact-form.js?v=20260810q"></script>
+    <!-- Contact form: frontend-only validation + demo states (no backend yet) -->
+    <script src="js/contact-form.js?v=20260810r"></script>
 
-  <!-- Terminal Chatbot Widget -->
-  <link rel="stylesheet" href="css/chatbot.css?v=20260810q" />
-
-</body>
+    <!-- Terminal Chatbot Widget -->
+    <link rel="stylesheet" href="css/chatbot.css?v=20260810r" />
+  </body>
 </html>
