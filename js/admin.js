@@ -48,6 +48,8 @@
   var verifyPasscodeSpinner = document.getElementById('verify-passcode-spinner');
   var adminPasscodeInput = document.getElementById('admin-passcode-input');
   var adminPasscodeSaveBtn = document.getElementById('admin-passcode-save-btn');
+  var passcodeMainEl = document.getElementById('passcode-main');
+  var forgotPasscodeBtn = document.getElementById('forgot-passcode-btn');
 
   // ─── Passcode lockout settings ───────────────────
   var PASSCODE_MAX_FAILS = 5;
@@ -101,6 +103,12 @@
     otpError.textContent = '';
     if (passcodeError) passcodeError.textContent = '';
     if (passcodeInput) passcodeInput.value = '';
+    // Never start a login inside the recovery panel.
+    if (passcodeMainEl) passcodeMainEl.style.display = '';
+    if (forgotPasscodeBtn) forgotPasscodeBtn.style.display = '';
+    var recoveryPanelEl = document.getElementById('passcode-recovery');
+    if (recoveryPanelEl) recoveryPanelEl.hidden = true;
+    resetRecoveryPanel();
   }
 
   function showDashboard(email) {
@@ -335,6 +343,180 @@
     var m = Math.floor(s / 60);
     var r = s % 60;
     return m > 0 ? m + 'm ' + r + 's' : r + 's';
+  }
+
+  // ─── Passcode recovery (forgot passcode → fresh OTP → reset) ───
+  // Lets the owner prove live email access with a NEW 8-digit code, then
+  // clears the passcode AND any lockout. The passcode is browser-local, so a
+  // fresh server-verified OTP is the reset proof. Built lazily on first click.
+  var RECOVERY_COOLDOWN_KEY = 'portfolio_recovery_last_sent';
+  var RECOVERY_COOLDOWN_MS = 60000; // 60s between recovery emails
+
+  function recoveryCooldownRemaining() {
+    try {
+      var last = parseInt(localStorage.getItem(RECOVERY_COOLDOWN_KEY) || '0', 10);
+      var remain = RECOVERY_COOLDOWN_MS - (Date.now() - last);
+      return remain > 0 ? remain : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function resetRecoveryPanel() {
+    var send = document.getElementById('recovery-send-btn');
+    var row = document.getElementById('recovery-code-row');
+    var err = document.getElementById('recovery-error');
+    var input = document.getElementById('recovery-input');
+    if (send) send.style.display = '';
+    if (row) row.style.display = 'none';
+    if (err) err.textContent = '';
+    if (input) input.value = '';
+  }
+
+  function buildRecoveryPanel() {
+    var panel = document.getElementById('passcode-recovery');
+    if (!panel || panel.dataset.built) return;
+    panel.dataset.built = '1';
+    panel.innerHTML =
+      '<p class="field-hint" style="margin:0 0 0.75rem;font-size:0.75rem;line-height:1.5">' +
+      "Forgot it? We'll email a new access code to <strong>" +
+      ADMIN_EMAIL +
+      "</strong> to confirm it's you. Entering it clears the passcode — you can set a new one in Cloud Sync settings.</p>" +
+      '<div class="login-error" id="recovery-error"></div>' +
+      '<button class="login-btn" id="recovery-send-btn"><span id="recovery-send-text">Send Recovery Code</span><span class="login-spinner" id="recovery-send-spinner"></span></button>' +
+      '<div id="recovery-code-row" style="display:none;margin-top:0.75rem">' +
+      '<div class="login-field-group" style="margin-bottom:0.75rem">' +
+      '<label class="login-field-label">Recovery Code</label>' +
+      '<input type="text" id="recovery-input" maxlength="8" placeholder="00000000" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" />' +
+      '</div>' +
+      '<button class="login-btn" id="recovery-verify-btn"><span id="recovery-verify-text">Verify &amp; Reset Passcode</span><span class="login-spinner" id="recovery-verify-spinner"></span></button>' +
+      '</div>' +
+      '<button type="button" class="login-btn-secondary" id="recovery-back-btn" style="margin-top:0.5rem">← Back to passcode</button>';
+
+    var sendBtn = document.getElementById('recovery-send-btn');
+    var verifyBtn = document.getElementById('recovery-verify-btn');
+    var backBtn = document.getElementById('recovery-back-btn');
+    var input = document.getElementById('recovery-input');
+    if (sendBtn) sendBtn.addEventListener('click', sendRecoveryCode);
+    if (verifyBtn) verifyBtn.addEventListener('click', verifyRecoveryCode);
+    if (backBtn) {
+      backBtn.addEventListener('click', function () {
+        if (passcodeMainEl) passcodeMainEl.style.display = '';
+        if (forgotPasscodeBtn) forgotPasscodeBtn.style.display = '';
+        panel.hidden = true;
+        resetRecoveryPanel();
+        passcodeInput.focus();
+      });
+    }
+    if (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') verifyRecoveryCode();
+      });
+    }
+  }
+
+  function sendRecoveryCode() {
+    var err = document.getElementById('recovery-error');
+    var send = document.getElementById('recovery-send-btn');
+    var text = document.getElementById('recovery-send-text');
+    var spin = document.getElementById('recovery-send-spinner');
+    var row = document.getElementById('recovery-code-row');
+    if (!supabaseClient) {
+      if (err) err.textContent = 'Supabase is not initialized';
+      return;
+    }
+    var cd = recoveryCooldownRemaining();
+    if (cd > 0) {
+      if (err) err.textContent = 'Please wait ' + Math.ceil(cd / 1000) + 's before requesting another code.';
+      return;
+    }
+    if (send) setLoading(send, text, spin, true);
+    if (err) err.textContent = '⏳ Sending a recovery code to ' + ADMIN_EMAIL + '...';
+    supabaseClient.auth
+      .signInWithOtp({
+        email: ADMIN_EMAIL,
+        options: { shouldCreateUser: true }
+      })
+      .then(function (result) {
+        if (send) setLoading(send, text, spin, false);
+        if (result.error) {
+          if (err) err.textContent = 'Failed: ' + result.error.message;
+          return;
+        }
+        try {
+          localStorage.setItem(RECOVERY_COOLDOWN_KEY, String(Date.now()));
+        } catch (e) {}
+        if (err) err.textContent = '';
+        // Keep the button visible so a wrong/expired code can be re-sent
+        // (the 60s cooldown above stops spam).
+        if (text) text.textContent = 'Resend code';
+        if (row) row.style.display = 'block';
+        var input = document.getElementById('recovery-input');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+        showToast('Recovery code sent to ' + ADMIN_EMAIL + ' — check your inbox!', 'success');
+      })
+      .catch(function (err2) {
+        if (send) setLoading(send, text, spin, false);
+        if (err) err.textContent = 'Could not send. ' + (err2.message || '');
+      });
+  }
+
+  function verifyRecoveryCode() {
+    var err = document.getElementById('recovery-error');
+    var verify = document.getElementById('recovery-verify-btn');
+    var text = document.getElementById('recovery-verify-text');
+    var spin = document.getElementById('recovery-verify-spinner');
+    var input = document.getElementById('recovery-input');
+    var code = (input && input.value.trim()) || '';
+    if (!code || code.length !== 8) {
+      if (err) err.textContent = 'Please enter the full 8-digit code from your email.';
+      return;
+    }
+    if (verify) setLoading(verify, text, spin, true);
+    supabaseClient.auth
+      .verifyOtp({ email: ADMIN_EMAIL, token: code, type: 'email' })
+      .then(function (result) {
+        if (verify) setLoading(verify, text, spin, false);
+        if (result.error) {
+          if (err) err.textContent = result.error.message;
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+          return;
+        }
+        // Server-confirmed: clear the passcode and any lockout, then go in.
+        setAdminPasscode('');
+        setPasscodeFailures(0);
+        setPasscodeLockUntil(0);
+        if (passcodeLockTimer) {
+          clearInterval(passcodeLockTimer);
+          passcodeLockTimer = null;
+        }
+        showToast('Passcode removed — set a new one in Cloud Sync settings.', 'success');
+        showDashboard(ADMIN_EMAIL);
+      })
+      .catch(function (err2) {
+        if (verify) setLoading(verify, text, spin, false);
+        if (err) err.textContent = 'Verification failed: ' + (err2.message || '');
+      });
+  }
+
+  if (forgotPasscodeBtn) {
+    forgotPasscodeBtn.addEventListener('click', function () {
+      buildRecoveryPanel();
+      var panel = document.getElementById('passcode-recovery');
+      if (!panel) return;
+      if (passcodeMainEl) passcodeMainEl.style.display = 'none';
+      forgotPasscodeBtn.style.display = 'none';
+      panel.hidden = false;
+      resetRecoveryPanel();
+      var sendBtn = document.getElementById('recovery-send-btn');
+      if (sendBtn) sendBtn.focus();
+    });
   }
 
   // Sign Out
