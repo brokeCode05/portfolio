@@ -3094,6 +3094,7 @@
   var itemModalType = null;
   var itemModalIndex = -1;
   var certModalPath = '';
+  var projShotPath = '';
 
   function imVal(id) {
     var el = document.getElementById(id);
@@ -3135,6 +3136,22 @@
         '<div class="form-group"><label for="im-repo">GitHub URL</label><input type="text" id="im-repo" value="' +
         e((item.links && item.links.repo) || '') +
         '" placeholder="https://github.com/…" /><p class="form-hint" style="margin-top:0.25rem">Full link incl. https:// — shown as the repo button.</p></div>' +
+        '</div>' +
+        '<div class="form-group"><label>Screenshot</label>' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+        '<label class="btn btn-sm" style="cursor:pointer;flex-shrink:0">' +
+        ICON_FOLDER +
+        ' Upload<input type="file" id="proj-shot-upload" accept="image/*" style="display:none" /></label>' +
+        '<div id="proj-shot-preview" style="display:flex;align-items:center;gap:8px">' +
+        (projShotPath
+          ? '<img src="' +
+            e(projShotPath) +
+            '" style="max-width:150px;max-height:84px;border-radius:4px;object-fit:cover" alt="Project screenshot preview" />' +
+            '<button type="button" class="btn btn-sm" id="proj-shot-clear" style="padding:2px 6px;font-size:10px">× Remove</button>'
+          : '<span class="form-hint" style="margin:0">No screenshot yet — leave empty to show the terminal placeholder.</span>') +
+        '</div>' +
+        '</div>' +
+        '<p class="form-hint" style="margin-top:0.25rem">Shown on top of the project card. Use this for projects without a GitHub repo.</p>' +
         '</div>'
       );
     }
@@ -3258,9 +3275,11 @@
     itemModalType = name;
     itemModalIndex = idx;
     certModalPath = item.path || '';
+    projShotPath = item.screenshot || '';
     document.getElementById('item-modal-title').textContent = 'Edit ' + ITEM_TITLES[name];
     document.getElementById('item-modal-body').innerHTML = itemModalFields(name, item);
     if (name === 'certs') bindCertModalUpload();
+    if (name === 'projects') bindProjShotUpload();
     var backdrop = document.getElementById('item-modal-backdrop');
     if (!backdrop) return;
     backdrop.hidden = false;
@@ -3301,6 +3320,7 @@
       if (!item.links) item.links = {};
       item.links.live = imVal('im-live');
       item.links.repo = imVal('im-repo');
+      item.screenshot = projShotPath;
     } else if (itemModalType === 'certs') {
       if (!requireField(document.getElementById('im-name'), 'Certificate name')) return;
       item.name = imVal('im-name');
@@ -3394,6 +3414,58 @@
               clearBtn.addEventListener('click', function () {
                 certModalPath = '';
                 preview.innerHTML = '<span class="form-hint" style="margin:0">No image yet.</span>';
+                input.value = '';
+              });
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Project screenshot upload — same pattern as the cert image: validate,
+  // re-encode through canvas (max 1280px, JPEG 0.85) so localStorage + cloud
+  // payloads stay lean, live preview with a Remove button.
+  function bindProjShotUpload() {
+    var input = document.getElementById('proj-shot-upload');
+    if (!input) return;
+    input.addEventListener('change', function () {
+      var file = input.files[0];
+      if (!file) return;
+      if (!validImageFile(file)) {
+        input.value = '';
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var MAX = 1280;
+          var w = img.width,
+            h = img.height;
+          var ratio = Math.min(1, MAX / w, MAX / h);
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.round(w * ratio);
+          canvas.height = Math.round(h * ratio);
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          projShotPath = canvas.toDataURL('image/jpeg', 0.85);
+          var preview = document.getElementById('proj-shot-preview');
+          if (preview) {
+            preview.innerHTML =
+              '<img src="' +
+              projShotPath +
+              '" style="max-width:150px;max-height:84px;border-radius:4px;object-fit:cover" alt="Project screenshot preview" />' +
+              '<button type="button" class="btn btn-sm" id="proj-shot-clear" style="padding:2px 6px;font-size:10px">× Remove</button>';
+            var clearBtn = preview.querySelector('#proj-shot-clear');
+            if (clearBtn)
+              clearBtn.addEventListener('click', function () {
+                projShotPath = '';
+                preview.innerHTML =
+                  '<span class="form-hint" style="margin:0">No screenshot yet — leave empty to show the terminal placeholder.</span>';
                 input.value = '';
               });
           }

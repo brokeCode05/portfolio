@@ -5,32 +5,33 @@
    ============================================================ */
 
 /* ── New accent + effect tokens (dark default, light override) ── */
-[data-theme="dark"], :root {
-  --color-accent-2: #22D3EE;
-  --ui-glow-green: rgba(74, 222, 128, 0.10);
-  --ui-glow-cyan:  rgba(34, 211, 238, 0.08);
-  --ui-grid-line:  rgba(74, 222, 128, 0.045);
-  --ui-spotlight:  rgba(74, 222, 128, 0.10);
+[data-theme='dark'],
+:root {
+  --color-accent-2: #22d3ee;
+  --ui-glow-green: rgba(74, 222, 128, 0.1);
+  --ui-glow-cyan: rgba(34, 211, 238, 0.08);
+  --ui-grid-line: rgba(74, 222, 128, 0.045);
+  --ui-spotlight: rgba(74, 222, 128, 0.1);
   --ui-spotlight-2: rgba(34, 211, 238, 0.07);
   --ui-surface-alt: rgba(23, 26, 33, 0.55);
   --ui-ring: rgba(74, 222, 128, 0.28);
 }
-[data-theme="light"] {
-  --color-accent-2: #0E7490;
+[data-theme='light'] {
+  --color-accent-2: #0e7490;
   --ui-glow-green: rgba(4, 120, 87, 0.07);
-  --ui-glow-cyan:  rgba(14, 116, 144, 0.06);
-  --ui-grid-line:  rgba(4, 120, 87, 0.05);
-  --ui-spotlight:  rgba(4, 120, 87, 0.06);
+  --ui-glow-cyan: rgba(14, 116, 144, 0.06);
+  --ui-grid-line: rgba(4, 120, 87, 0.05);
+  --ui-spotlight: rgba(4, 120, 87, 0.06);
   --ui-spotlight-2: rgba(14, 116, 144, 0.04);
   --ui-surface-alt: rgba(255, 255, 255, 0.55);
-  --ui-ring: rgba(4, 120, 87, 0.20);
+  --ui-ring: rgba(4, 120, 87, 0.2);
 }
 
 /* ════════════════════════════════════════════════════════════
    1. AMBIENT BACKGROUND — drifting glows + faint grid
    ════════════════════════════════════════════════════════════ */
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -2;
@@ -45,9 +46,15 @@ body::before {
   animation: ui-ambient-drift 48s ease-in-out infinite alternate;
 }
 @keyframes ui-ambient-drift {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(-1.5%, 1%, 0) scale(1.04); }
-  100% { transform: translate3d(1.5%, -1%, 0) scale(1); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.5%, 1%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(1.5%, -1%, 0) scale(1);
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -55,8 +62,10 @@ body::before {
    ════════════════════════════════════════════════════════════ */
 #cursor-glow {
   position: fixed;
-  top: 0; left: 0;
-  width: 340px; height: 340px;
+  top: 0;
+  left: 0;
+  width: 340px;
+  height: 340px;
   margin: -170px 0 0 -170px;
   border-radius: 50%;
   z-index: 940; /* below chatbot (999) + modals, above navbar (100) */
@@ -67,10 +76,18 @@ body::before {
   transition: opacity 0.35s ease;
   will-change: transform;
 }
-body.ui-cursor-on #cursor-glow { opacity: 1; }
+body.ui-cursor-on #cursor-glow {
+  opacity: 1;
+}
 /* screen blend is invisible on light backgrounds — switch to normal there */
-[data-theme="light"] #cursor-glow { mix-blend-mode: normal; }
-@media (pointer: coarse) { #cursor-glow { display: none; } }
+[data-theme='light'] #cursor-glow {
+  mix-blend-mode: normal;
+}
+@media (pointer: coarse) {
+  #cursor-glow {
+    display: none;
+  }
+}
 
 /* ════════════════════════════════════════════════════════════
    3. SECTION RHYTHM + TERMINAL DIVIDERS
@@ -80,7 +97,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 /* Terminal-style divider label above each heading */
 .section-header[data-label]::before {
-  content: "// -- " attr(data-label) " --";
+  content: '// -- ' attr(data-label) ' --';
   display: block;
   font-family: var(--font-code);
   font-size: var(--text-xs);
@@ -93,7 +110,9 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 /* ════════════════════════════════════════════════════════════
    4. ENHANCED REVEALS — direction-aware, no JS change
    ════════════════════════════════════════════════════════════ */
-[data-reveal] { will-change: transform, opacity; }
+[data-reveal] {
+  will-change: transform, opacity;
+}
 
 /* Projects + certs: rise with a touch more travel */
 .projects-grid .project-card[data-reveal],
@@ -106,9 +125,15 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 
 /* Timeline: slide in from the sides */
-.timeline-item[data-reveal]:nth-child(odd) { transform: translateX(-26px); }
-.timeline-item[data-reveal]:nth-child(even) { transform: translateX(26px); }
-.timeline-item[data-reveal].revealed { transform: translateX(0); }
+.timeline-item[data-reveal]:nth-child(odd) {
+  transform: translateX(-26px);
+}
+.timeline-item[data-reveal]:nth-child(even) {
+  transform: translateX(26px);
+}
+.timeline-item[data-reveal].revealed {
+  transform: translateX(0);
+}
 
 /* Timeline line: drawn with scroll progress via --tl-progress (0%–100%).
    Falls back to the plain border-colored line when JS is off or motion is
@@ -122,21 +147,35 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 
 /* Experience items cascade in one after another */
-#experience .timeline-item[data-reveal]:nth-child(2) { transition-delay: 0.12s; }
-#experience .timeline-item[data-reveal]:nth-child(3) { transition-delay: 0.24s; }
-#experience .timeline-item[data-reveal]:nth-child(4) { transition-delay: 0.36s; }
+#experience .timeline-item[data-reveal]:nth-child(2) {
+  transition-delay: 0.12s;
+}
+#experience .timeline-item[data-reveal]:nth-child(3) {
+  transition-delay: 0.24s;
+}
+#experience .timeline-item[data-reveal]:nth-child(4) {
+  transition-delay: 0.36s;
+}
 
 /* Marker pops in when its item reveals (one-shot, no fill, so hover still grows) */
-.timeline-item[data-reveal]:not(.revealed) .timeline-marker { transform: scale(0.4); }
+.timeline-item[data-reveal]:not(.revealed) .timeline-marker {
+  transform: scale(0.4);
+}
 /* backwards fill holds the 0% keyframe through the delay (no transition
    double-motion gap) but doesn't persist, so hover scale still applies */
 .timeline-item[data-reveal].revealed .timeline-marker {
   animation: tl-marker-pop 0.45s ease 0.1s backwards;
 }
 @keyframes tl-marker-pop {
-  0%   { transform: scale(0.3); }
-  60%  { transform: scale(1.4); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.3);
+  }
+  60% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* GitHub stat values: soft glow while the count-up is running. The
@@ -155,10 +194,14 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 /* ════════════════════════════════════════════════════════════
    5. BUTTONS — shine sweep + glow
    ════════════════════════════════════════════════════════════ */
-.btn { position: relative; }
-.btn-primary { overflow: hidden; }
+.btn {
+  position: relative;
+}
+.btn-primary {
+  overflow: hidden;
+}
 .btn-primary::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -130%;
@@ -169,18 +212,27 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   transition: left 0.55s ease;
   pointer-events: none;
 }
-.btn-primary:hover::after { left: 140%; }
+.btn-primary:hover::after {
+  left: 140%;
+}
 .btn-primary:hover {
-  box-shadow: 0 0 0 1px var(--color-accent), 0 6px 22px var(--ui-ring);
+  box-shadow:
+    0 0 0 1px var(--color-accent),
+    0 6px 22px var(--ui-ring);
 }
 .btn-ghost {
-  transition: border-color var(--transition-fast), color var(--transition-fast),
-              background-color var(--transition-fast), transform var(--transition-fast),
-              box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 .btn-ghost:hover {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--ui-ring), 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 0 0 1px var(--ui-ring),
+    0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -199,7 +251,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .cert-card::before,
 .github-card::before,
 .github-graph-wrap::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -207,7 +259,12 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--ui-spotlight) 0%, var(--ui-spotlight-2) 45%, transparent 70%);
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    var(--ui-spotlight) 0%,
+    var(--ui-spotlight-2) 45%,
+    transparent 70%
+  );
 }
 .project-card:hover::before,
 .skill-compact-card:hover::before,
@@ -246,21 +303,24 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   will-change: auto;
   /* opacity keeps the scroll-reveal fade working (equal specificity,
      ui-upgrade loads later, so omit it here and the fade snaps) */
-  transition: opacity var(--transition-slow),
+  transition:
+    opacity var(--transition-slow),
     border-color var(--transition-fast),
     box-shadow var(--transition-base),
     transform var(--transition-base);
 }
 .cert-card:hover {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+  box-shadow:
+    0 0 0 1px var(--color-accent-subtle),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 /* Focus keeps the site's clear keyboard ring AND adds the glow + lift */
 .cert-card:focus-visible {
   border-color: var(--color-accent);
-  box-shadow: var(--focus-ring),
+  box-shadow:
+    var(--focus-ring),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
   transform: translateY(-2px);
 }
@@ -277,7 +337,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 /* Blinking block cursor after the title, like a caret in a terminal */
 .cert-card:hover .cert-card-title::after,
 .cert-card:focus-visible .cert-card-title::after {
-  content: "█";
+  content: '█';
   display: inline-block;
   margin-left: 4px;
   color: var(--color-accent);
@@ -285,7 +345,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 /* "$ open --view" hint in the corner, types in like a command hint */
 .cert-card-front::after {
-  content: "$ open --view";
+  content: '$ open --view';
   position: absolute;
   top: var(--space-sm);
   right: var(--space-md);
@@ -294,7 +354,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity var(--transition-fast) 0.12s,
+  transition:
+    opacity var(--transition-fast) 0.12s,
     transform var(--transition-fast) 0.12s;
   pointer-events: none;
 }
@@ -313,9 +374,9 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
    the card tilts toward the cursor, lifts, and lights up like a
    focused terminal window at the same time. */
 .certs-grid .cert-card[data-reveal].revealed:hover {
-  transform: translateY(-2px) scale(1) perspective(800px)
-    rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: border-color var(--transition-fast),
+  transform: translateY(-2px) scale(1) perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    border-color var(--transition-fast),
     box-shadow var(--transition-base),
     opacity var(--transition-slow),
     transform 0.14s ease-out;
@@ -331,7 +392,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .github-graph-wrap {
   position: relative;
   /* opacity keeps the scroll-reveal fade working */
-  transition: opacity var(--transition-slow),
+  transition:
+    opacity var(--transition-slow),
     border-color var(--transition-fast),
     box-shadow var(--transition-base),
     transform var(--transition-base);
@@ -341,7 +403,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .github-card:focus-visible,
 .github-graph-wrap:focus-visible {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+  box-shadow:
+    0 0 0 1px var(--color-accent-subtle),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
   transform: translateY(-2px);
@@ -349,7 +412,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 /* Focus keeps the site's clear keyboard ring AND adds the glow */
 .github-card:focus-visible,
 .github-graph-wrap:focus-visible {
-  box-shadow: var(--focus-ring),
+  box-shadow:
+    var(--focus-ring),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 /* Blinking block cursor after the title, like a caret in a terminal */
@@ -357,7 +421,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .github-graph-wrap:hover .github-card-title::after,
 .github-card:focus-visible .github-card-title::after,
 .github-graph-wrap:focus-visible .github-card-title::after {
-  content: "█";
+  content: '█';
   display: inline-block;
   margin-left: 4px;
   color: var(--color-accent);
@@ -378,18 +442,19 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity var(--transition-fast) 0.12s,
+  transition:
+    opacity var(--transition-fast) 0.12s,
     transform var(--transition-fast) 0.12s;
   pointer-events: none;
 }
 .github-card::after {
-  content: "$ gh --streak";
+  content: '$ gh --streak';
 }
 .gh-stats-card::after {
-  content: "$ gh --stats";
+  content: '$ gh --stats';
 }
 .github-graph-wrap::after {
-  content: "$ gh --graph";
+  content: '$ gh --graph';
 }
 /* Stats tiles sit flush inside the card (the card owns the padding) */
 .gh-stats-card .gh-stats-grid {
@@ -418,7 +483,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .project-card {
   position: relative;
   /* opacity keeps the scroll-reveal fade working */
-  transition: opacity var(--transition-slow),
+  transition:
+    opacity var(--transition-slow),
     border-color var(--transition-fast),
     box-shadow var(--transition-base),
     transform var(--transition-base);
@@ -426,20 +492,22 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .project-card:hover,
 .project-card:focus-visible {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent-subtle),
+  box-shadow:
+    0 0 0 1px var(--color-accent-subtle),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
   transform: translateY(-2px);
 }
 /* Focus keeps the site's clear keyboard ring AND adds the glow */
 .project-card:focus-visible {
-  box-shadow: var(--focus-ring),
+  box-shadow:
+    var(--focus-ring),
     0 0 22px color-mix(in srgb, var(--color-accent) 18%, transparent);
 }
 /* Blinking block cursor after the title, like a caret in a terminal */
 .project-card:hover .project-card-title::after,
 .project-card:focus-visible .project-card-title::after {
-  content: "█";
+  content: '█';
   display: inline-block;
   margin-left: 4px;
   color: var(--color-accent);
@@ -450,7 +518,7 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 }
 /* git clone hint in the corner */
 .project-card::after {
-  content: "$ git clone";
+  content: '$ git clone';
   position: absolute;
   top: var(--space-sm);
   right: var(--space-md);
@@ -459,7 +527,8 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   color: var(--color-accent);
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity var(--transition-fast) 0.12s,
+  transition:
+    opacity var(--transition-fast) 0.12s,
     transform var(--transition-fast) 0.12s;
   pointer-events: none;
 }
@@ -472,6 +541,305 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .project-card:hover .project-card-title,
 .project-card:focus-visible .project-card-title {
   color: var(--color-accent);
+}
+
+/* ── Project card media: screenshot or terminal placeholder ──
+   Projects with an admin-uploaded screenshot show it on top of the card
+   (expand icon opens a lightbox). Projects without one get a mini terminal
+   window so cards never look empty. The status pill sits on the media.
+   Fixed media height keeps every card in the grid the same size and stops
+   tall screenshots from blowing up one card. The card itself keeps overflow
+   visible so the keyboard focus ring isn't clipped; the media does its own
+   clipping + rounds the top corners to match the card radius. */
+.project-card-media {
+  position: relative;
+  margin: calc(var(--space-xl) * -1) calc(var(--space-xl) * -1) 0;
+  height: 178px;
+  background:
+    radial-gradient(
+      120% 160% at 85% -20%,
+      color-mix(in srgb, var(--color-accent) 10%, transparent),
+      transparent 55%
+    ),
+    var(--color-surface-hover);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  overflow: hidden;
+}
+.project-card-shot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.project-card:hover .project-card-shot,
+.project-card:focus-visible .project-card-shot {
+  transform: scale(1.04);
+}
+/* subtle scanline sheen over the screenshot, like the ID/cert viewers */
+.project-card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+/* expand icon — appears on hover/focus, top-right of the media */
+.project-shot-expand {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 17, 21, 0.72);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast),
+    background-color var(--transition-fast);
+}
+.project-card:hover .project-shot-expand,
+.project-card:focus-visible .project-shot-expand {
+  opacity: 1;
+  transform: translateY(0);
+}
+.project-shot-expand:hover {
+  background: rgba(74, 222, 128, 0.9);
+  color: #0f1115;
+}
+/* live/draft status pill on the media */
+.project-card-shot-status {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 2;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid;
+  backdrop-filter: blur(4px);
+}
+.project-card-shot-status.is-live {
+  color: var(--color-accent);
+  border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+  background: rgba(15, 17, 21, 0.72);
+}
+.project-card-shot-status.is-draft {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(15, 17, 21, 0.72);
+}
+/* mini terminal placeholder for projects without a screenshot */
+.project-card-terminal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1.1rem;
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+}
+.project-card-terminal-dots {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.project-card-terminal-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+.project-card-terminal-dots i:nth-child(1) {
+  background: #f87171;
+}
+.project-card-terminal-dots i:nth-child(2) {
+  background: #fbbf24;
+}
+.project-card-terminal-dots i:nth-child(3) {
+  background: var(--color-accent);
+}
+.project-card-terminal-cmd {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-primary);
+}
+.project-card-terminal-cursor {
+  color: var(--color-accent);
+  animation: blink 1s step-end infinite;
+}
+.project-card:hover .project-card-terminal-cursor,
+.project-card:focus-visible .project-card-terminal-cursor {
+  animation: none;
+  opacity: 0;
+}
+/* links pin to the bottom so cards in a row align evenly */
+.project-card-links {
+  margin-top: auto;
+}
+
+/* ── Project screenshot lightbox (matches cert viewer language) ── */
+.shot-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  z-index: 300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.shot-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.shot-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.82) translateY(14px);
+  opacity: 0;
+  z-index: 301;
+  width: min(900px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+.shot-overlay.open ~ .shot-modal {
+  animation: shot-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: auto;
+}
+.shot-modal.closing {
+  animation: shot-out 0.3s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+  transition: none;
+  opacity: 1;
+  /* take the close button out of the tab order during the exit */
+  visibility: hidden;
+  transition: visibility 0.3s;
+}
+@keyframes shot-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.82) translateY(14px);
+    opacity: 0;
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.015) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes shot-out {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.015) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.82) translateY(14px);
+    opacity: 0;
+  }
+}
+.shot-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      100% 140% at 50% 0%,
+      color-mix(in srgb, var(--color-accent) 8%, transparent),
+      transparent 60%
+    ),
+    #0f1115;
+  padding: 1rem;
+}
+.shot-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.shot-cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+}
+.shot-path {
+  color: var(--color-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shot-hint {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.shot-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 17, 21, 0.72);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.shot-close:hover {
+  background: rgba(248, 113, 113, 0.9);
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shot-overlay.open ~ .shot-modal,
+  .shot-modal.closing {
+    animation: none;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -491,15 +859,33 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
 .hero-terminal {
   animation: ui-hero-in 0.6s ease both;
 }
-.hero-status      { animation-delay: 0.08s; }
-.hero-title       { animation-delay: 0.16s; }
-.hero-roles       { animation-delay: 0.26s; }
-.hero-description { animation-delay: 0.34s; }
-.hero-actions     { animation-delay: 0.44s; }
-.hero-terminal    { animation-delay: 0.56s; }
+.hero-status {
+  animation-delay: 0.08s;
+}
+.hero-title {
+  animation-delay: 0.16s;
+}
+.hero-roles {
+  animation-delay: 0.26s;
+}
+.hero-description {
+  animation-delay: 0.34s;
+}
+.hero-actions {
+  animation-delay: 0.44s;
+}
+.hero-terminal {
+  animation-delay: 0.56s;
+}
 @keyframes ui-hero-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Rotating role line (element added in HTML, text driven by JS) */
@@ -513,7 +899,10 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   font-size: var(--text-lg);
   color: var(--color-accent);
 }
-.hero-roles-prompt { color: var(--color-text-secondary); font-size: var(--text-sm); }
+.hero-roles-prompt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
 .hero-roles-caret {
   color: var(--color-accent);
   animation: blink 1s step-end infinite;
@@ -532,8 +921,10 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   background-color: var(--color-surface);
-  transition: border-color var(--transition-fast), transform var(--transition-base),
-              box-shadow var(--transition-base);
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 .hero-stat:hover {
   border-color: var(--color-accent);
@@ -575,21 +966,30 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   border: none;
   transition: color var(--transition-fast);
 }
-.hero-scroll-indicator:hover { color: var(--color-accent); }
+.hero-scroll-indicator:hover {
+  color: var(--color-accent);
+}
 .hero-scroll-indicator svg {
   width: 18px;
   height: 18px;
   animation: ui-bounce 1.8s ease-in-out infinite;
 }
 @keyframes ui-bounce {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
 }
 
 /* .hero needs relative for the scroll indicator; the badge physics live in
    index.html (hero-badge-wrap/hero-badge), so only the parallax hint is
    kept here. */
-.hero { position: relative; }
+.hero {
+  position: relative;
+}
 .hero-media[data-parallax] {
   will-change: transform;
 }
@@ -621,15 +1021,19 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   background: conic-gradient(var(--color-accent) var(--p, 0%), var(--color-border) 0);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
   border: none;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
-#back-to-top.visible { display: flex; }
+#back-to-top.visible {
+  display: flex;
+}
 #back-to-top:hover {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 24px var(--ui-ring);
 }
 #back-to-top::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 3px;
   border-radius: 50%;
@@ -670,9 +1074,12 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-              background-color var(--transition-fast), transform var(--transition-fast),
-              box-shadow var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 .filter-chip:hover {
   color: var(--color-text-primary);
@@ -695,8 +1102,11 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   transition: opacity 0.24s ease;
 }
 .project-card {
-  transition: opacity 0.24s ease, border-color var(--transition-fast),
-              transform var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    opacity 0.24s ease,
+    border-color var(--transition-fast),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 .tech-marquee-row.ui-hide,
 .project-card.ui-hide {
@@ -765,17 +1175,31 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
    12. RESPONSIVE
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
-  .hero-roles { font-size: var(--text-base); }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-roles {
+    font-size: var(--text-base);
+  }
   /* Phase 5 fix: guard against horizontal page scroll on tablet widths
      (481-768px) where the old 480px-only container rule didn't apply. */
-  body { overflow-x: hidden; }
+  body {
+    overflow-x: hidden;
+  }
 }
 @media (max-width: 480px) {
-  .hero-stats { gap: var(--space-sm); }
-  .hero-stat-value { font-size: var(--text-2xl); }
-  .hero-scroll-indicator { display: none; }
-  .section:nth-of-type(even) { background: none; }
+  .hero-stats {
+    gap: var(--space-sm);
+  }
+  .hero-stat-value {
+    font-size: var(--text-2xl);
+  }
+  .hero-scroll-indicator {
+    display: none;
+  }
+  .section:nth-of-type(even) {
+    background: none;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -787,12 +1211,18 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   .hero-roles-caret,
   .btn-primary::after,
   #back-to-top,
-  .hero-status, .hero-title, .hero-roles,
-  .hero-description, .hero-actions, .hero-terminal {
+  .hero-status,
+  .hero-title,
+  .hero-roles,
+  .hero-description,
+  .hero-actions,
+  .hero-terminal {
     animation: none !important;
     transition: none !important;
   }
-  #cursor-glow { display: none !important; }
+  #cursor-glow {
+    display: none !important;
+  }
   .projects-grid .project-card[data-reveal],
   .certs-grid .cert-card[data-reveal],
   .timeline-item[data-reveal] {
@@ -864,13 +1294,13 @@ body.ui-cursor-on #cursor-glow { opacity: 1; }
   margin: var(--space-sm, 0.5rem) 0 0;
   font-family: var(--font-code, monospace);
   font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, #A0A5B0);
+  color: var(--color-text-secondary, #a0a5b0);
   min-height: 1rem;
 }
 .footer-updated {
   font-family: var(--font-code, monospace);
   font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, #A0A5B0);
+  color: var(--color-text-secondary, #a0a5b0);
   white-space: nowrap;
 }
 @media (max-width: 480px) {

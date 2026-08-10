@@ -194,12 +194,56 @@ function renderProjects(data) {
         })
         .join('');
       var tagsAttr = 'data-tags="' + escapeHtml((proj.tags || []).join(',')) + '"';
+      var shot = proj.screenshot || '';
+      var shotAttr = shot ? ' data-shot="' + escapeHtml(shot) + '"' : '';
+      var status = proj.status === 'draft' ? 'Draft' : 'Published';
+      var statusCls = proj.status === 'draft' ? 'is-draft' : 'is-live';
+      // Media area — an uploaded screenshot when one exists (admin uploads it),
+      // otherwise a terminal placeholder so cards without repos still look
+      // intentional instead of empty.
+      var mediaHtml =
+        '<div class="project-card-media">' +
+        (shot
+          ? '<img class="project-card-shot" src="' +
+            escapeHtml(shot) +
+            '" alt="' +
+            escapeHtml(proj.title) +
+            ' screenshot" loading="lazy" />' +
+            '<button type="button" class="project-shot-expand" aria-label="View ' +
+            escapeHtml(proj.title) +
+            ' screenshot" data-expand="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></button>' +
+            '<span class="project-card-shot-status ' +
+            statusCls +
+            '">' +
+            status +
+            '</span>'
+          : '<div class="project-card-terminal" aria-hidden="true">' +
+            '<span class="project-card-terminal-dots"><i></i><i></i><i></i></span>' +
+            '<span class="project-card-terminal-cmd">$ ./' +
+            escapeHtml(
+              (proj.title || 'project')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .slice(0, 20)
+            ) +
+            ' --demo</span>' +
+            '<span class="project-card-terminal-cursor" aria-hidden="true">\u258A</span>' +
+            '</div>' +
+            '<span class="project-card-shot-status ' +
+            statusCls +
+            '">' +
+            status +
+            '</span>') +
+        '</div>';
       return (
         '<article class="project-card" ' +
         tagsAttr +
+        shotAttr +
         ' data-reveal data-reveal-delay="' +
         (100 + idx * 100) +
         '">' +
+        mediaHtml +
         '<div class="project-card-header">' +
         '<div class="project-card-icon" aria-hidden="true">' +
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -213,7 +257,7 @@ function renderProjects(data) {
         '<p class="project-card-description">' +
         escapeHtml(proj.description) +
         '</p>' +
-        '<div class="project-card-links flex gap-sm" style="margin-bottom:var(--space-md)">' +
+        '<div class="project-card-links flex gap-sm" style="margin-top:auto;padding-top:var(--space-md)">' +
         links +
         '</div>' +
         '<div class="project-card-tech flex flex-wrap gap-sm">' +

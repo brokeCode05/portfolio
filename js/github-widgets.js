@@ -885,3 +885,77 @@ window.trapFocus =
     };
   }
 })();
+
+// ─── Project Screenshot Viewer ────────────────────────────────
+// A minimal frameless lightbox for the screenshots uploaded from the admin
+// panel. Same animation language as the cert viewer (fade + scale pop),
+// but stripped down: just the image, a terminal-style path caption and a
+// close button. Opens from the expand icon on project cards that have one.
+(function () {
+  var overlay = document.getElementById('shot-overlay');
+  var modal = document.getElementById('shot-modal');
+  var img = document.getElementById('shot-img');
+  var pathEl = document.getElementById('shot-path');
+  var closeBtn = document.getElementById('shot-close');
+  if (!overlay || !modal || !img) return;
+
+  function openShot(card) {
+    if (!card) return;
+    var src = card.getAttribute('data-shot');
+    if (!src) return;
+    img.src = src;
+    img.alt = 'Screenshot — ' + (card.querySelector('.project-card-title') || {}).textContent || 'project';
+    if (pathEl) {
+      var title = (card.querySelector('.project-card-title') || {}).textContent || 'project';
+      pathEl.textContent =
+        '~/projects/' +
+        title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+    }
+    modal.hidden = false;
+    modal.classList.remove('closing');
+    void modal.offsetWidth; // restart the pop animation
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    modal.focus();
+  }
+
+  function closeShot() {
+    if (modal.classList.contains('closing')) return;
+    modal.classList.add('closing');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    setTimeout(function () {
+      modal.classList.remove('closing');
+      modal.hidden = true;
+      img.src = '';
+    }, 300);
+  }
+
+  // Delegate clicks — cards are re-rendered after every save, so live
+  // delegation survives re-renders without re-binding.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.project-shot-expand[data-expand]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openShot(btn.closest('.project-card'));
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeShot);
+  overlay.addEventListener('click', closeShot);
+  modal.addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (modal.hidden) return;
+    if (e.key === 'Escape') {
+      closeShot();
+    } else if (e.key === 'Tab' && window.trapFocus) {
+      window.trapFocus(e, modal);
+    }
+  });
+})();
