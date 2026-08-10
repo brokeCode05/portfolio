@@ -2486,21 +2486,15 @@ body.modal-open {
 }
 /* Entire card is clickable — let clicks pass through children */
 .cert-card-badge,
-.cert-card-body,
-.cert-card-media {
+.cert-card-body {
   pointer-events: none;
 }
 .cert-card-badge svg,
-.cert-card-body *,
-.cert-card-media * {
+.cert-card-body * {
   pointer-events: none;
 }
 .cert-card:active {
   transform: translateY(-1px) scale(0.97);
-}
-/* Cert card media strip — keep it proportionate on small screens */
-.cert-card-media {
-  height: 128px;
 }
 @media (max-width: 600px) {
   .cert-modal {

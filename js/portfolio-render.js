@@ -289,24 +289,6 @@ function renderCerts(data) {
         '" data-cert-index="' +
         idx +
         '" data-reveal onclick="openCertViewer(this)" onkeydown="if(event.key===\' \'||event.key===\'Enter\'){event.preventDefault();openCertViewer(this)}" tabindex="0" role="button">' +
-        (path
-          ? '<div class="cert-card-media">' +
-            '<img class="cert-card-media-img" src="' +
-            path +
-            '" alt="' +
-            name +
-            ' certificate" loading="lazy" />' +
-            '<span class="cert-card-expand" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></span>' +
-            '<span class="cert-card-media-pill">Verified</span>' +
-            '</div>'
-          : '<div class="cert-card-media">' +
-            '<div class="cert-card-media-terminal" aria-hidden="true">' +
-            '<span class="cert-card-media-terminal-dots"><i></i><i></i><i></i></span>' +
-            '<span class="cert-card-media-terminal-cmd">$ cat cert --view</span>' +
-            '<span class="cert-card-media-terminal-cursor" aria-hidden="true">\u258A</span>' +
-            '</div>' +
-            '<span class="cert-card-media-pill">Verified</span>' +
-            '</div>') +
         '<div class="cert-card-front">' +
         '<div class="cert-card-badge" aria-hidden="true">' +
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
