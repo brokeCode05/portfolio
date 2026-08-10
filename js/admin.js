@@ -168,6 +168,9 @@
       el.classList.toggle('done', elIdx < idx);
       el.textContent = elIdx < idx ? doneLabels[elStep] : labels[elStep];
     });
+    // Progress fill under the pills: email ≈1/3, code ≈2/3, passcode = full.
+    var fill = document.getElementById('login-steps-fill');
+    if (fill) fill.style.width = ((idx + 1) / order.length) * 100 + '%';
   }
 
   // Send OTP Code (6-digit code to email)

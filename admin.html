@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260810m" />
+  <link rel="stylesheet" href="css/admin.css?v=20260810n" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -43,6 +43,7 @@
         <span class="login-step-pill" id="step-pill-email">1 · Email</span>
         <span class="login-step-pill" id="step-pill-otp">2 · Code</span>
         <span class="login-step-pill" id="step-pill-passcode">3 · Passcode</span>
+        <span class="login-steps-track" aria-hidden="true"><span class="login-steps-fill" id="login-steps-fill"></span></span>
       </div>
 
       <!-- Step 1: Email (read-only) + Send -->
@@ -858,7 +859,7 @@ DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260810m"></script>
-<script src="js/admin.js?v=20260810m"></script>
+<script src="js/portfolio-data.js?v=20260810n"></script>
+<script src="js/admin.js?v=20260810n"></script>
 </body>
 </html>
