@@ -527,14 +527,19 @@ window.trapFocus =
 (function () {
   var overlay = document.getElementById('cert-overlay');
   var modal = document.getElementById('cert-modal');
+  var cmdLine = document.getElementById('cert-command-line');
   var certImg = document.getElementById('cert-modal-image');
+  var filenameEl = document.getElementById('cert-modal-filename');
   var prevBtn = document.getElementById('cert-prev');
   var nextBtn = document.getElementById('cert-next');
   var counterEl = document.getElementById('cert-counter');
   var closeBtn = document.getElementById('cert-close-btn');
+  var statusLine = document.getElementById('cert-status-line');
   var imgWrap = document.getElementById('cert-image-wrap');
+  var zoomLabel = document.getElementById('cert-zoom-label');
+  var downloadBtn = document.getElementById('cert-download');
 
-  if (!overlay || !modal || !certImg) return;
+  if (!overlay || !modal) return;
 
   // ---- Live DOM query (never cached — read fresh every time) ----
   function getCertCards() {
@@ -557,6 +562,25 @@ window.trapFocus =
   var certData = getCertCards();
 
   var currentIndex = -1;
+  var typingTimer = null;
+
+  function typeCommand(text, callback) {
+    cmdLine.innerHTML = '';
+    var i = 0;
+    var cmdPrefix = '<span class="cmd-prompt">$</span> cat ';
+    cmdLine.innerHTML = cmdPrefix;
+    typingTimer = setInterval(function () {
+      if (i < text.length) {
+        cmdLine.innerHTML = cmdPrefix + text.substring(0, i + 1) + '<span class="cursor-blink">▊</span>';
+        i++;
+      } else {
+        clearInterval(typingTimer);
+        typingTimer = null;
+        cmdLine.innerHTML = cmdPrefix + text;
+        if (callback) callback();
+      }
+    }, 30);
+  }
 
   // ---- Zoom (click toggles 100% <-> 160%, wheel adjusts, + / - keys) ----
   var zoomLevel = 1;
@@ -567,6 +591,9 @@ window.trapFocus =
   function applyZoom() {
     certImg.style.transform = 'scale(' + zoomLevel + ')';
     certImg.classList.toggle('zoomed', zoomLevel > 1);
+    if (zoomLabel) {
+      zoomLabel.textContent = '[zoom ' + Math.round(zoomLevel * 100) + '%]';
+    }
   }
   function setZoom(v) {
     zoomLevel = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(v * 10) / 10));
@@ -598,6 +625,40 @@ window.trapFocus =
     }
   }
 
+  // ---- Status line: types [ OK ] / [ ERR ] after the command ----
+  var statusTimer = null;
+  function typeStatus(text, ok) {
+    if (!statusLine) return;
+    if (statusTimer) {
+      clearInterval(statusTimer);
+      statusTimer = null;
+    }
+    statusLine.className = 'cert-status-line' + (ok ? '' : ' err');
+    statusLine.textContent = '';
+    // Reduced motion: show instantly, like the About terminal does
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      statusLine.textContent = text;
+      return;
+    }
+    var i = 0;
+    statusTimer = setInterval(function () {
+      i++;
+      statusLine.textContent = text.substring(0, i);
+      if (i >= text.length) {
+        clearInterval(statusTimer);
+        statusTimer = null;
+      }
+    }, 20);
+  }
+  function clearStatus() {
+    if (statusTimer) {
+      clearInterval(statusTimer);
+      statusTimer = null;
+    }
+    if (statusLine) statusLine.textContent = '';
+  }
+
   // Refresh certData from live DOM (solves stale cache after dynamic re-render)
   function refreshCertData() {
     certData = getCertCards();
@@ -610,6 +671,10 @@ window.trapFocus =
     if (index < 0 || index >= certData.length) return;
     currentIndex = index;
     var cert = certData[index];
+
+    // Build filename
+    var filename = cert.name.toLowerCase().replace(/\s+/g, '-') + ' --view';
+    filenameEl.textContent = filename;
 
     // Update counter
     counterEl.textContent = index + 1 + ' / ' + certData.length;
@@ -626,47 +691,47 @@ window.trapFocus =
     var oldPlaceholder = document.querySelector('.cert-image-wrap .cert-error-placeholder');
     if (oldPlaceholder) oldPlaceholder.remove();
 
-    // Reset zoom (unless navigating prev/next)
+    // Reset zoom (unless navigating prev/next) + status + download
     if (!keepZoom) resetZoom();
-
-    // Load the image immediately
-    certImg.style.display = '';
-    certImg.src = cert.path;
-    certImg.alt = (cert.name || 'Certificate') + (cert.issuer ? ' — ' + cert.issuer : '') + ' certificate';
-    if (!cert.path) {
-      showNoImageNotice();
+    clearStatus();
+    if (downloadBtn) {
+      downloadBtn.classList.toggle('disabled', !cert.path);
+      if (cert.path) {
+        downloadBtn.setAttribute('href', cert.path);
+      } else {
+        downloadBtn.removeAttribute('href');
+      }
     }
+
+    // Type the command
+    var cmdText = filename;
+    typeCommand(cmdText, function () {
+      // Remove any placeholder that may have been added by phantom error from src=''
+      var p = document.querySelector('.cert-image-wrap .cert-error-placeholder');
+      if (p) p.remove();
+      // After typing finishes, load the image
+      certImg.style.display = '';
+      certImg.src = cert.path;
+      certImg.alt = (cert.name || 'Certificate') + (cert.issuer ? ' — ' + cert.issuer : '') + ' certificate';
+      if (!cert.path) {
+        typeStatus('[ ERR ] no image on file', false);
+      }
+    });
   }
 
-  function showNoImageNotice() {
-    // No image on file — show a small inline notice above the empty frame.
-    var wrap = document.querySelector('.cert-image-wrap');
-    if (!wrap) return;
-    var old = wrap.querySelector('.cert-error-placeholder');
-    if (old) old.remove();
-    var div = document.createElement('div');
-    div.className = 'cert-error-placeholder';
-    div.style.cssText =
-      'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center;gap:0.75rem;width:100%';
-    div.innerHTML =
-      '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-      '<p style="font-family:var(--font-code);font-size:var(--text-xs);color:var(--color-text-secondary);margin:0">Certificate image not available</p>' +
-      '<p style="font-family:var(--font-body);font-size:11px;color:#6B7280;margin:0;max-width:280px">Save and view from the same location (both local or both deployed) for uploaded images to work.</p>' +
-      '<a href="https://github.com/brokeCode05" target="_blank" rel="noopener noreferrer" style="font-family:var(--font-code);font-size:var(--text-xs);color:var(--color-accent);text-decoration:underline">Visit GitHub →</a>';
-    wrap.appendChild(div);
-  }
-
-  // When image loads, fade it in
+  // When image loads, fade it in + log [ OK ]
   certImg.addEventListener('load', function () {
     // Guard against phantom loads from the temporary src='' reset
     var path = currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : '';
     if (!path) return;
     certImg.classList.add('loaded');
+    typeStatus('[ OK ] image loaded', true);
   });
   certImg.addEventListener('error', function () {
     // Check if this is a real error (non-empty path) or a phantom error from src=''
     var path = currentIndex >= 0 && certData[currentIndex] ? certData[currentIndex].path : '';
     if (!path) return; // Ignore phantom errors from certImg.src = ''
+    typeStatus('[ ERR ] image failed to load', false);
     // If image fails, show visible SVG placeholder
     certImg.style.display = 'none';
     var wrap = document.querySelector('.cert-image-wrap');
@@ -711,6 +776,10 @@ window.trapFocus =
   function closeModal() {
     // Guard against double-close while the exit animation runs.
     if (window._certCloseTimer) return;
+    if (typingTimer) {
+      clearInterval(typingTimer);
+      typingTimer = null;
+    }
     // Cancel any pending open timer (e.g. if user closes during pulse animation)
     if (window._certTimer) {
       clearTimeout(window._certTimer);
@@ -722,9 +791,11 @@ window.trapFocus =
     // Reduced-motion users get an instant hide (no exit animation, no delay).
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       modal.setAttribute('hidden', '');
+      cmdLine.innerHTML = '';
       certImg.classList.remove('loaded');
       certImg.src = '';
       resetZoom();
+      clearStatus();
       currentIndex = -1;
       return;
     }
@@ -733,12 +804,14 @@ window.trapFocus =
     window._certCloseTimer = setTimeout(function () {
       modal.classList.remove('closing');
       modal.setAttribute('hidden', '');
+      cmdLine.innerHTML = '';
       certImg.classList.remove('loaded');
       certImg.src = '';
       resetZoom();
+      clearStatus();
       currentIndex = -1;
       window._certCloseTimer = null;
-    }, 320);
+    }, 460);
   }
 
   // Global function called by onclick on cert cards
@@ -801,6 +874,16 @@ window.trapFocus =
   modal.addEventListener('click', function (e) {
     e.stopPropagation();
   });
+
+  // Reduced motion
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Override typing speed to instant
+    var origTypeCommand = typeCommand;
+    typeCommand = function (text, callback) {
+      cmdLine.innerHTML = '<span class="cmd-prompt">$</span> cat ' + text;
+      if (callback) setTimeout(callback, 50);
+    };
+  }
 })();
 
 // ─── Project Screenshot Viewer ────────────────────────────────

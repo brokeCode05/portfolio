@@ -1,876 +1,1669 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Content-Security-Policy (defense-in-depth). Supabase-js is loaded from the
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Content-Security-Policy (defense-in-depth). Supabase-js is loaded from the
        CDN, so script-src allows it; connect-src only allows the project's own
        Supabase host (REST + functions + realtime websocket). -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://mnsgwitzgwhmiccbojck.supabase.co wss://mnsgwitzgwhmiccbojck.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
-  <!-- Prevent the browser from serving a stale cached copy of this admin page -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>Admin — Portfolio Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260810r" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://mnsgwitzgwhmiccbojck.supabase.co wss://mnsgwitzgwhmiccbojck.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <!-- Prevent the browser from serving a stale cached copy of this admin page -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Admin — Portfolio Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/admin.css?v=20260810r" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <a class="admin-skip-link" href="#admin-main">Skip to content</a>
 
-<a class="admin-skip-link" href="#admin-main">Skip to content</a>
-
-<!-- ============ LOGIN ============ -->
-<div id="login-screen" class="admin-login">
-  <div class="admin-login-box">
-    
-    <!-- Terminal-style header bar -->
-    <div class="login-terminal-bar">
-      <span class="login-terminal-dot"></span>
-      <span class="login-terminal-dot"></span>
-      <span class="login-terminal-dot"></span>
-      <span class="terminal-title">admin-sign-in</span>
-      <span class="login-terminal-path">~/dashboard</span>
-    </div>
-
-    <div class="login-body">
-      <h1 class="login-title">Portfolio Dashboard</h1>
-      <p class="login-subtitle">Sign in to manage your portfolio content. An access code will be sent to your inbox.</p>
-
-      <div class="login-steps" aria-hidden="true">
-        <span class="login-step-pill" id="step-pill-email">1 · Email</span>
-        <span class="login-step-pill" id="step-pill-otp">2 · Code</span>
-        <span class="login-step-pill" id="step-pill-passcode">3 · Passcode</span>
-        <span class="login-steps-track" aria-hidden="true"><span class="login-steps-fill" id="login-steps-fill"></span></span>
-      </div>
-
-      <!-- Step 1: Email (read-only) + Send -->
-      <div id="login-step-email">
-        <div class="login-field-group">
-          <label class="login-field-label">Email <span class="field-hint">(authorized account)</span></label>
-          <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" readonly />
+    <!-- ============ LOGIN ============ -->
+    <div id="login-screen" class="admin-login">
+      <div class="admin-login-box">
+        <!-- Terminal-style header bar -->
+        <div class="login-terminal-bar">
+          <span class="login-terminal-dot"></span>
+          <span class="login-terminal-dot"></span>
+          <span class="login-terminal-dot"></span>
+          <span class="terminal-title">admin-sign-in</span>
+          <span class="login-terminal-path">~/dashboard</span>
         </div>
-        <div class="login-error" id="login-error"></div>
-        
-        <button class="login-btn" id="auth-send-otp-btn">
-          <span id="auth-send-text">Send Access Code</span>
-          <span class="login-spinner" id="auth-send-spinner"></span>
-        </button>
-      </div>
 
-      <!-- Sent confirmation -->
-      <div class="login-sent-msg" id="login-sent-msg">
-        <p>Code sent to <strong id="auth-email-display">jhnbryn05@gmail.com</strong>.</p>
-        <p>Check your email and enter the 8-digit code below.</p>
-      </div>
+        <div class="login-body">
+          <h1 class="login-title">Portfolio Dashboard</h1>
+          <p class="login-subtitle">
+            Sign in to manage your portfolio content. An access code will be sent to your inbox.
+          </p>
 
-      <!-- Step 2: OTP Verification -->
-      <div id="login-step-otp" style="display:none">
-        <div class="login-field-group" style="margin-bottom:0.75rem">
-          <label class="login-field-label">Access Code</label>
-          <input type="text" id="otp-input" maxlength="8" placeholder="00000000" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" />
-        </div>
-        <div class="login-error" id="otp-error"></div>
-        
-        <button class="login-btn" id="verify-otp-btn">
-          <span id="verify-otp-text">Verify &amp; Sign In</span>
-          <span class="login-spinner" id="verify-otp-spinner"></span>
-        </button>
-        
-        <button class="login-btn-secondary" id="back-to-email-btn">Resend code</button>
-      </div>
-
-      <!-- Step 3: Optional admin passcode (only shown when one is set) -->
-      <div id="login-step-passcode" style="display:none">
-        <div id="passcode-main">
-          <div class="login-passcode-head">
-            <span class="login-passcode-icon" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="login-steps" aria-hidden="true">
+            <span class="login-step-pill" id="step-pill-email">1 · Email</span>
+            <span class="login-step-pill" id="step-pill-otp">2 · Code</span>
+            <span class="login-step-pill" id="step-pill-passcode">3 · Passcode</span>
+            <span class="login-steps-track" aria-hidden="true">
+              <span class="login-steps-fill" id="login-steps-fill"></span>
             </span>
-            <span class="login-passcode-title">Security passcode</span>
-            <span class="login-passcode-badge">2FA</span>
           </div>
-          <div class="login-field-group" style="margin-bottom:0.75rem">
-            <label class="login-field-label">Passcode</label>
-            <input type="password" id="passcode-input" autocomplete="current-password" placeholder="••••••••" />
-            <p class="field-hint" style="margin-top:0.375rem;font-size:0.75rem">Second factor on top of the access code — manage it in the Security section.</p>
-          </div>
-          <div class="login-error" id="passcode-error"></div>
 
-          <button class="login-btn" id="verify-passcode-btn">
-            <span id="verify-passcode-text">Unlock Dashboard</span>
-            <span class="login-spinner" id="verify-passcode-spinner"></span>
-          </button>
-          <button type="button" class="login-btn-secondary" id="forgot-passcode-btn" style="margin-top:0.5rem">Forgot passcode?</button>
-        </div>
-        <!-- Recovery panel is built by js/admin.js on first click of the
+          <!-- Step 1: Email (read-only) + Send -->
+          <div id="login-step-email">
+            <div class="login-field-group">
+              <label class="login-field-label">
+                Email
+                <span class="field-hint">(authorized account)</span>
+              </label>
+              <input type="email" id="auth-email-input" value="jhnbryn05@gmail.com" readonly />
+            </div>
+            <div class="login-error" id="login-error"></div>
+
+            <button class="login-btn" id="auth-send-otp-btn">
+              <span id="auth-send-text">Send Access Code</span>
+              <span class="login-spinner" id="auth-send-spinner"></span>
+            </button>
+          </div>
+
+          <!-- Sent confirmation -->
+          <div class="login-sent-msg" id="login-sent-msg">
+            <p>
+              Code sent to
+              <strong id="auth-email-display">jhnbryn05@gmail.com</strong>
+              .
+            </p>
+            <p>Check your email and enter the 8-digit code below.</p>
+          </div>
+
+          <!-- Step 2: OTP Verification -->
+          <div id="login-step-otp" style="display: none">
+            <div class="login-field-group" style="margin-bottom: 0.75rem">
+              <label class="login-field-label">Access Code</label>
+              <input
+                type="text"
+                id="otp-input"
+                maxlength="8"
+                placeholder="00000000"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+                pattern="[0-9]*"
+              />
+            </div>
+            <div class="login-error" id="otp-error"></div>
+
+            <button class="login-btn" id="verify-otp-btn">
+              <span id="verify-otp-text">Verify &amp; Sign In</span>
+              <span class="login-spinner" id="verify-otp-spinner"></span>
+            </button>
+
+            <button class="login-btn-secondary" id="back-to-email-btn">Resend code</button>
+          </div>
+
+          <!-- Step 3: Optional admin passcode (only shown when one is set) -->
+          <div id="login-step-passcode" style="display: none">
+            <div id="passcode-main">
+              <div class="login-passcode-head">
+                <span class="login-passcode-icon" aria-hidden="true">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </span>
+                <span class="login-passcode-title">Security passcode</span>
+                <span class="login-passcode-badge">2FA</span>
+              </div>
+              <div class="login-field-group" style="margin-bottom: 0.75rem">
+                <label class="login-field-label">Passcode</label>
+                <input
+                  type="password"
+                  id="passcode-input"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                />
+                <p class="field-hint" style="margin-top: 0.375rem; font-size: 0.75rem">
+                  Second factor on top of the access code — manage it in the Security section.
+                </p>
+              </div>
+              <div class="login-error" id="passcode-error"></div>
+
+              <button class="login-btn" id="verify-passcode-btn">
+                <span id="verify-passcode-text">Unlock Dashboard</span>
+                <span class="login-spinner" id="verify-passcode-spinner"></span>
+              </button>
+              <button
+                type="button"
+                class="login-btn-secondary"
+                id="forgot-passcode-btn"
+                style="margin-top: 0.5rem"
+              >
+                Forgot passcode?
+              </button>
+            </div>
+            <!-- Recovery panel is built by js/admin.js on first click of the
              forgot button (sends a fresh OTP, then clears the passcode). -->
-        <div id="passcode-recovery" hidden></div>
-      </div>
-
-      <div class="login-authorized">
-        Authorized account &mdash; <code>jhnbryn05@gmail.com</code>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  #login-sent-msg { animation: fadeIn 0.3s ease; }
-</style>
-
-<!-- ============ DASHBOARD ============ -->
-<div id="admin-app" class="admin-app" style="display:none">
-
-  <!-- Mobile drawer backdrop -->
-  <div class="admin-backdrop" id="admin-backdrop" hidden></div>
-
-  <!-- Sidebar -->
-  <aside class="admin-sidebar" id="admin-sidebar">
-    <div class="admin-sidebar-header">
-      <div class="admin-sidebar-brand">
-        <h2>Portfolio</h2>
-        <p>Content Manager</p>
-      </div>
-      <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-    </div>
-    <nav class="admin-nav" id="admin-nav">
-      <div class="admin-nav-group">
-        <span class="admin-nav-group-label">Dashboard</span>
-        <button class="admin-nav-btn active" data-section="dashboard">
-          <span class="nav-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-          </span>
-          <span>Dashboard</span>
-        </button>
-      </div>
-      <div class="admin-nav-group">
-        <span class="admin-nav-group-label">Content</span>
-        <button class="admin-nav-btn" data-section="hero">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </span>
-        <span>Hero</span>
-      </button>
-      <button class="admin-nav-btn" data-section="about">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        </span>
-        <span>About</span>
-      </button>
-      <button class="admin-nav-btn" data-section="skills">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-        </span>
-        <span>Tech Stack</span>
-      </button>
-      <button class="admin-nav-btn" data-section="currently">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </span>
-        <span>Currently</span>
-      </button>
-      <button class="admin-nav-btn" data-section="projects">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        </span>
-        <span>Projects</span>
-        <span class="nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="certs">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </span>
-        <span>Certifications</span>
-        <span class="nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="experience">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </span>
-        <span>Experience</span>
-        <span class="nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="learning">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2M8 18l4 4 4-4M8 6l4-4 4 4"/><circle cx="12" cy="12" r="10"/></svg>
-        </span>
-        <span>Learning</span>
-        <span class="nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="contact">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </span>
-        <span>Contact</span>
-        <span class="nav-count"></span>
-      </button>
-      </div>
-      <div class="admin-nav-group">
-        <span class="admin-nav-group-label">Communication</span>
-        <button class="admin-nav-btn" data-section="messages">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </span>
-        <span>Messages</span>
-        <span class="nav-count" id="messages-nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="chats">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        </span>
-        <span>Chat Insights</span>
-        <span class="nav-count" id="chats-nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="faq">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </span>
-        <span>Chat FAQ</span>
-        <span class="nav-count" id="faq-nav-count"></span>
-      </button>
-      <button class="admin-nav-btn" data-section="chatbot">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></svg>
-        </span>
-        <span>Chatbot</span>
-      </button>
-      </div>
-      <div class="admin-nav-group">
-        <span class="admin-nav-group-label">System</span>
-        <button class="admin-nav-btn" data-section="security">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        <span>Security</span>
-      </button>
-        <button class="admin-nav-btn" data-section="cloud">
-        <span class="nav-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
-        </span>
-        <span>Cloud Sync</span>
-      </button>
-      </div>
-    </nav>
-    <div class="admin-sidebar-footer">
-      <div style="font-size:0.6875rem;color:var(--admin-text-secondary);text-align:center;padding:0 0.5rem" id="auth-email-footer"></div>
-      <button class="btn btn-sm" id="admin-signout-btn" style="width:100%;justify-content:center;font-size:0.75rem">Sign Out
-      </button>
-      <button class="btn btn-sm" id="admin-reset-btn" style="width:100%;justify-content:center">
-        Reset to Defaults
-      </button>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <div class="admin-main" id="admin-main" tabindex="-1">
-    <div class="admin-topbar">
-      <button class="topbar-menu-btn" id="topbar-menu-btn" type="button" title="Menu" aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <h3 id="section-title">Dashboard</h3>
-      <div class="admin-topbar-actions">
-        <button class="btn btn-sm" id="admin-export-btn">Export JSON</button>
-        <label class="btn btn-sm" style="cursor:pointer">
-          Import JSON
-          <input type="file" id="admin-import-input" accept=".json" style="display:none" />
-        </label>
-        <a href="index.html" class="btn btn-sm" target="_blank">View Site</a>
-      </div>
-    </div>
-    <div class="admin-content" id="admin-content">
-
-      <!-- ===== DASHBOARD SECTION (landing) ===== -->
-      <div class="admin-section active" id="section-dashboard">
-        <div class="dash-hello">
-          <h2 class="dash-hello-title">Welcome back</h2>
-          <p class="dash-hello-sub">Manage your portfolio from one place.<span class="dash-date" id="dash-date"></span></p>
-        </div>
-
-        <div class="dash-stats" id="dash-stats"></div>
-
-        <div class="dash-grid">
-          <div class="admin-card">
-            <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
-              <h4>Recent Messages</h4>
-              <button class="btn btn-sm" id="dash-view-messages">View all</button>
-            </div>
-            <div id="dash-recent-messages" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem"></div>
+            <div id="passcode-recovery" hidden></div>
           </div>
 
-          <div class="admin-card">
-            <div class="admin-card-header"><h4>Quick Actions</h4></div>
-            <div class="dash-actions" id="dash-actions">
-              <button class="dash-action" data-go="projects">+ Add Project</button>
-              <button class="dash-action" data-go="certs">+ Add Certificate</button>
-              <button class="dash-action" data-go="experience">+ Add Experience</button>
-              <button class="dash-action" data-go="messages">View Messages</button>
-              <button class="dash-action" id="dash-test-chat">Test AI Chatbot</button>
-              <a class="dash-action" href="index.html" target="_blank" rel="noopener">Preview Portfolio</a>
-              <button class="dash-action" data-go="cloud">Publish to Cloud</button>
-            </div>
+          <div class="login-authorized">
+            Authorized account &mdash;
+            <code>jhnbryn05@gmail.com</code>
           </div>
         </div>
-
-        <div class="admin-card dash-status-card">
-          <div class="admin-card-header"><h4>Portfolio Status</h4></div>
-          <div class="dash-status" id="dash-status"></div>
-        </div>
       </div>
+    </div>
 
-      <!-- ===== HERO SECTION ===== -->
-      <div class="admin-section" id="section-hero">
-        <h2 class="admin-section-title">Hero Section</h2>
-        <p class="admin-section-desc">Edit the hero content shown at the top of your portfolio. The ID card below <em>is</em> the editor — click any text printed on it to change it.</p>
-        <div class="admin-card">
-          <h3 class="admin-subgroup">1 · ID Card <span class="admin-subgroup-tag">click the card to edit</span></h3>
-          <p class="admin-subgroup-desc">Type directly on the front of the card. The back face updates live as you type.</p>
+    <style>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      #login-sent-msg {
+        animation: fadeIn 0.3s ease;
+      }
+    </style>
 
-          <div class="idp-preview-grid">
-            <!-- Front face = the editor -->
-            <div class="idp-preview-col">
-              <span class="idp-preview-caption">Front — edit here</span>
-              <div class="id-front-preview">
-                <div class="idp-card">
-                  <input type="file" id="hero-photo-upload" accept="image/*" hidden />
-                  <div class="idp-head">
-                    <span class="idp-logo" aria-hidden="true">~</span>
-                    <input type="text" id="hero-school" class="idp-input idp-school-edit" placeholder="Student ID" aria-label="School title on ID card" />
-                    <input type="text" id="hero-school-sub" class="idp-input idp-sub-edit" placeholder="brokeCode05.dev" aria-label="School subtitle on ID card" />
-                  </div>
-                  <div class="idp-front-body">
-                    <div class="idp-photo">
-                      <img id="idp-front-photo" alt="" />
-                      <div class="idp-photo-empty" id="idp-front-photo-empty">no photo</div>
-                      <label class="idp-photo-edit" for="hero-photo-upload" title="Upload photo">Change photo</label>
-                      <button type="button" class="idp-photo-remove" id="hero-photo-clear" title="Remove photo" aria-label="Remove photo" hidden>×</button>
-                    </div>
-                    <div class="idp-front-info">
-                      <input type="text" id="hero-name" class="idp-input idp-input-name" placeholder="John Bryan Capellan" aria-label="Name on ID card" />
-                      <input type="text" id="hero-badge" class="idp-input idp-input-role" placeholder="Information Technology Student" aria-label="Role line 1 on ID card" />
-                      <input type="text" id="hero-badge2" class="idp-input idp-input-role" placeholder="BSIT Student" aria-label="Role line 2 on ID card" />
-                      <span class="idp-front-idno">ID No. <input type="text" id="hero-idno" class="idp-input idp-input-idno" placeholder="IT-2024-0842" aria-label="ID number on ID card" /></span>
-                      <span class="idp-front-stamp" aria-hidden="true">VERIFIED</span>
-                    </div>
-                  </div>
+    <!-- ============ DASHBOARD ============ -->
+    <div id="admin-app" class="admin-app" style="display: none">
+      <!-- Mobile drawer backdrop -->
+      <div class="admin-backdrop" id="admin-backdrop" hidden></div>
+
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="admin-sidebar-header">
+          <div class="admin-sidebar-brand">
+            <h2>Portfolio</h2>
+            <p>Content Manager</p>
+          </div>
+          <button
+            class="sidebar-collapse-btn"
+            id="sidebar-collapse-btn"
+            type="button"
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+        <nav class="admin-nav" id="admin-nav">
+          <div class="admin-nav-group">
+            <span class="admin-nav-group-label">Dashboard</span>
+            <button class="admin-nav-btn active" data-section="dashboard">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="9" />
+                  <rect x="14" y="3" width="7" height="5" />
+                  <rect x="14" y="12" width="7" height="9" />
+                  <rect x="3" y="16" width="7" height="5" />
+                </svg>
+              </span>
+              <span>Dashboard</span>
+            </button>
+          </div>
+          <div class="admin-nav-group">
+            <span class="admin-nav-group-label">Content</span>
+            <button class="admin-nav-btn" data-section="hero">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </span>
+              <span>Hero</span>
+            </button>
+            <button class="admin-nav-btn" data-section="about">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+              </span>
+              <span>About</span>
+            </button>
+            <button class="admin-nav-btn" data-section="skills">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="16 18 22 12 16 6" />
+                  <polyline points="8 6 2 12 8 18" />
+                </svg>
+              </span>
+              <span>Tech Stack</span>
+            </button>
+            <button class="admin-nav-btn" data-section="currently">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </span>
+              <span>Currently</span>
+            </button>
+            <button class="admin-nav-btn" data-section="projects">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
+              </span>
+              <span>Projects</span>
+              <span class="nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="certs">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </span>
+              <span>Certifications</span>
+              <span class="nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="experience">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+              </span>
+              <span>Experience</span>
+              <span class="nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="learning">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 6V2M8 18l4 4 4-4M8 6l4-4 4 4" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+              </span>
+              <span>Learning</span>
+              <span class="nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="contact">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                  />
+                </svg>
+              </span>
+              <span>Contact</span>
+              <span class="nav-count"></span>
+            </button>
+          </div>
+          <div class="admin-nav-group">
+            <span class="admin-nav-group-label">Communication</span>
+            <button class="admin-nav-btn" data-section="messages">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </span>
+              <span>Messages</span>
+              <span class="nav-count" id="messages-nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="chats">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              </span>
+              <span>Chat Insights</span>
+              <span class="nav-count" id="chats-nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="faq">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </span>
+              <span>Chat FAQ</span>
+              <span class="nav-count" id="faq-nav-count"></span>
+            </button>
+            <button class="admin-nav-btn" data-section="chatbot">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="4" y="4" width="16" height="12" rx="2" />
+                  <path d="M8 20h8" />
+                  <path d="M12 16v4" />
+                </svg>
+              </span>
+              <span>Chatbot</span>
+            </button>
+          </div>
+          <div class="admin-nav-group">
+            <span class="admin-nav-group-label">System</span>
+            <button class="admin-nav-btn" data-section="security">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </span>
+              <span>Security</span>
+            </button>
+            <button class="admin-nav-btn" data-section="cloud">
+              <span class="nav-icon">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" />
+                </svg>
+              </span>
+              <span>Cloud Sync</span>
+            </button>
+          </div>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <div
+            style="
+              font-size: 0.6875rem;
+              color: var(--admin-text-secondary);
+              text-align: center;
+              padding: 0 0.5rem;
+            "
+            id="auth-email-footer"
+          ></div>
+          <button
+            class="btn btn-sm"
+            id="admin-signout-btn"
+            style="width: 100%; justify-content: center; font-size: 0.75rem"
+          >
+            Sign Out
+          </button>
+          <button class="btn btn-sm" id="admin-reset-btn" style="width: 100%; justify-content: center">
+            Reset to Defaults
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="admin-main" id="admin-main" tabindex="-1">
+        <div class="admin-topbar">
+          <button
+            class="topbar-menu-btn"
+            id="topbar-menu-btn"
+            type="button"
+            title="Menu"
+            aria-label="Open menu"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+          <h3 id="section-title">Dashboard</h3>
+          <div class="admin-topbar-actions">
+            <button class="btn btn-sm" id="admin-export-btn">Export JSON</button>
+            <label class="btn btn-sm" style="cursor: pointer">
+              Import JSON
+              <input type="file" id="admin-import-input" accept=".json" style="display: none" />
+            </label>
+            <a href="index.html" class="btn btn-sm" target="_blank">View Site</a>
+          </div>
+        </div>
+        <div class="admin-content" id="admin-content">
+          <!-- ===== DASHBOARD SECTION (landing) ===== -->
+          <div class="admin-section active" id="section-dashboard">
+            <div class="dash-hello">
+              <h2 class="dash-hello-title">Welcome back</h2>
+              <p class="dash-hello-sub">
+                Manage your portfolio from one place.
+                <span class="dash-date" id="dash-date"></span>
+              </p>
+            </div>
+
+            <div class="dash-stats" id="dash-stats"></div>
+
+            <div class="dash-grid">
+              <div class="admin-card">
+                <div
+                  class="admin-card-header"
+                  style="display: flex; justify-content: space-between; align-items: center"
+                >
+                  <h4>Recent Messages</h4>
+                  <button class="btn btn-sm" id="dash-view-messages">View all</button>
+                </div>
+                <div
+                  id="dash-recent-messages"
+                  style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem"
+                ></div>
+              </div>
+
+              <div class="admin-card">
+                <div class="admin-card-header"><h4>Quick Actions</h4></div>
+                <div class="dash-actions" id="dash-actions">
+                  <button class="dash-action" data-go="projects">+ Add Project</button>
+                  <button class="dash-action" data-go="certs">+ Add Certificate</button>
+                  <button class="dash-action" data-go="experience">+ Add Experience</button>
+                  <button class="dash-action" data-go="messages">View Messages</button>
+                  <button class="dash-action" id="dash-test-chat">Test AI Chatbot</button>
+                  <a class="dash-action" href="index.html" target="_blank" rel="noopener">
+                    Preview Portfolio
+                  </a>
+                  <button class="dash-action" data-go="cloud">Publish to Cloud</button>
                 </div>
               </div>
             </div>
 
-            <!-- Back face = live preview -->
-            <div class="idp-preview-col">
-              <span class="idp-preview-caption">Back — live preview</span>
-              <div class="id-back-preview" id="id-back-preview">
-                <div class="idp-card">
-                  <div class="idp-head">
-                    <span class="idp-logo" aria-hidden="true">~</span>
-                    <span class="idp-school" id="idp-school">Student ID</span>
-                    <span class="idp-sub" id="idp-sub">brokeCode05.dev</span>
-                  </div>
-                  <div class="idp-body">
-                    <div class="idp-scan">
-                      <div class="idp-qr" id="idp-qr" aria-hidden="true">
-                        <span class="idp-qr-c1"></span>
-                        <span class="idp-qr-c2"></span>
-                        <span class="idp-qr-c3"></span>
-                        <span class="idp-qr-target" id="idp-qr-target">QR</span>
+            <div class="admin-card dash-status-card">
+              <div class="admin-card-header"><h4>Portfolio Status</h4></div>
+              <div class="dash-status" id="dash-status"></div>
+            </div>
+          </div>
+
+          <!-- ===== HERO SECTION ===== -->
+          <div class="admin-section" id="section-hero">
+            <h2 class="admin-section-title">Hero Section</h2>
+            <p class="admin-section-desc">
+              Edit the hero content shown at the top of your portfolio. The ID card below
+              <em>is</em>
+              the editor — click any text printed on it to change it.
+            </p>
+            <div class="admin-card">
+              <h3 class="admin-subgroup">
+                1 · ID Card
+                <span class="admin-subgroup-tag">click the card to edit</span>
+              </h3>
+              <p class="admin-subgroup-desc">
+                Type directly on the front of the card. The back face updates live as you type.
+              </p>
+
+              <div class="idp-preview-grid">
+                <!-- Front face = the editor -->
+                <div class="idp-preview-col">
+                  <span class="idp-preview-caption">Front — edit here</span>
+                  <div class="id-front-preview">
+                    <div class="idp-card">
+                      <input type="file" id="hero-photo-upload" accept="image/*" hidden />
+                      <div class="idp-head">
+                        <span class="idp-logo" aria-hidden="true">~</span>
+                        <input
+                          type="text"
+                          id="hero-school"
+                          class="idp-input idp-school-edit"
+                          placeholder="Student ID"
+                          aria-label="School title on ID card"
+                        />
+                        <input
+                          type="text"
+                          id="hero-school-sub"
+                          class="idp-input idp-sub-edit"
+                          placeholder="brokeCode05.dev"
+                          aria-label="School subtitle on ID card"
+                        />
+                      </div>
+                      <div class="idp-front-body">
+                        <div class="idp-photo">
+                          <img id="idp-front-photo" alt="" />
+                          <div class="idp-photo-empty" id="idp-front-photo-empty">no photo</div>
+                          <label class="idp-photo-edit" for="hero-photo-upload" title="Upload photo">
+                            Change photo
+                          </label>
+                          <button
+                            type="button"
+                            class="idp-photo-remove"
+                            id="hero-photo-clear"
+                            title="Remove photo"
+                            aria-label="Remove photo"
+                            hidden
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div class="idp-front-info">
+                          <input
+                            type="text"
+                            id="hero-name"
+                            class="idp-input idp-input-name"
+                            placeholder="John Bryan Capellan"
+                            aria-label="Name on ID card"
+                          />
+                          <input
+                            type="text"
+                            id="hero-badge"
+                            class="idp-input idp-input-role"
+                            placeholder="Information Technology Student"
+                            aria-label="Role line 1 on ID card"
+                          />
+                          <input
+                            type="text"
+                            id="hero-badge2"
+                            class="idp-input idp-input-role"
+                            placeholder="BSIT Student"
+                            aria-label="Role line 2 on ID card"
+                          />
+                          <span class="idp-front-idno">
+                            ID No.
+                            <input
+                              type="text"
+                              id="hero-idno"
+                              class="idp-input idp-input-idno"
+                              placeholder="IT-2024-0842"
+                              aria-label="ID number on ID card"
+                            />
+                          </span>
+                          <span class="idp-front-stamp" aria-hidden="true">VERIFIED</span>
+                        </div>
                       </div>
                     </div>
-                    <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
-                    <span class="idp-site-link" id="idp-site-link">brokeCode05.dev</span>
-                    <span class="idp-qrlink-field">QR opens
-                      <input type="url" id="hero-qrlink" class="idp-input idp-qrlink-edit" placeholder="https://github.com/brokeCode05" aria-label="QR code link on ID card" />
-                    </span>
                   </div>
-                  <div class="idp-foot">
-                    <span class="idp-id" id="idp-id">IT-2024-0842</span>
+                </div>
+
+                <!-- Back face = live preview -->
+                <div class="idp-preview-col">
+                  <span class="idp-preview-caption">Back — live preview</span>
+                  <div class="id-back-preview" id="id-back-preview">
+                    <div class="idp-card">
+                      <div class="idp-head">
+                        <span class="idp-logo" aria-hidden="true">~</span>
+                        <span class="idp-school" id="idp-school">Student ID</span>
+                        <span class="idp-sub" id="idp-sub">brokeCode05.dev</span>
+                      </div>
+                      <div class="idp-body">
+                        <div class="idp-scan">
+                          <div class="idp-qr" id="idp-qr" aria-hidden="true">
+                            <span class="idp-qr-c1"></span>
+                            <span class="idp-qr-c2"></span>
+                            <span class="idp-qr-c3"></span>
+                            <span class="idp-qr-target" id="idp-qr-target">QR</span>
+                          </div>
+                        </div>
+                        <span class="idp-scan-label" id="idp-scan-label">Scan to connect</span>
+                        <span class="idp-site-link" id="idp-site-link">brokeCode05.dev</span>
+                        <span class="idp-qrlink-field">
+                          QR opens
+                          <input
+                            type="url"
+                            id="hero-qrlink"
+                            class="idp-input idp-qrlink-edit"
+                            placeholder="https://github.com/brokeCode05"
+                            aria-label="QR code link on ID card"
+                          />
+                        </span>
+                      </div>
+                      <div class="idp-foot">
+                        <span class="idp-id" id="idp-id">IT-2024-0842</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <h3 class="admin-subgroup">2 · Hero Text</h3>
+              <p class="admin-subgroup-desc">The headline and intro shown beside the card.</p>
+              <div class="form-group">
+                <label>Headline Title</label>
+                <input type="text" id="hero-title" />
+                <div class="char-count">
+                  Use
+                  <code>&lt;br /&gt;</code>
+                  for line breaks
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea id="hero-desc" rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Role Rotator</label>
+                <input
+                  type="text"
+                  id="hero-roles"
+                  placeholder="BSIT Student, Web Developer, Network &amp; Security Enthusiast, Lifelong Learner"
+                />
+                <small class="form-hint">
+                  The rotating line beside the headline — comma-separated, e.g. &quot;BSIT Student, Web
+                  Developer&quot;.
+                </small>
+              </div>
+
+              <button class="btn btn-primary" id="hero-save">Save Hero</button>
             </div>
           </div>
 
-          <h3 class="admin-subgroup">2 · Hero Text</h3>
-          <p class="admin-subgroup-desc">The headline and intro shown beside the card.</p>
-          <div class="form-group">
-            <label>Headline Title</label>
-            <input type="text" id="hero-title" />
-            <div class="char-count">Use <code>&lt;br /&gt;</code> for line breaks</div>
-          </div>
-          <div class="form-group">
-            <label>Description</label>
-            <textarea id="hero-desc" rows="4"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Role Rotator</label>
-            <input type="text" id="hero-roles" placeholder="BSIT Student, Web Developer, Network &amp; Security Enthusiast, Lifelong Learner" />
-            <small class="form-hint">The rotating line beside the headline — comma-separated, e.g. &quot;BSIT Student, Web Developer&quot;.</small>
-          </div>
-
-          <button class="btn btn-primary" id="hero-save">Save Hero</button>
-        </div>
-      </div>
-
-      <!-- ===== ABOUT SECTION ===== -->
-      <div class="admin-section" id="section-about">
-        <h2 class="admin-section-title">About Section</h2>
-        <p class="admin-section-desc">Edit your bio and terminal JSON display.</p>
-        <div class="admin-card">
-          <div class="form-group">
-            <label>Bio Paragraph</label>
-            <textarea id="about-bio" rows="6"></textarea>
-          </div>
-          <details class="admin-details">
-            <summary>Terminal JSON <span class="form-hint" style="display:inline;margin:0">— what shows in the About terminal</span></summary>
-            <div class="admin-details-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Role</label>
-              <input type="text" id="about-role" />
-            </div>
-            <div class="form-group">
-              <label>Philosophy</label>
-              <input type="text" id="about-philosophy" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Path (comma separated)</label>
-              <input type="text" id="about-path" placeholder="Web Dev, Networking, Security" />
-            </div>
-            <div class="form-group">
-              <label>Status</label>
-              <input type="text" id="about-status" />
-            </div>
-          </div>
-            </div>
-          </details>
-          <button class="btn btn-primary" id="about-save">Save About</button>
-        </div>
-      </div>
-
-      <!-- ===== TECH STACK SECTION ===== -->
-      <div class="admin-section" id="section-skills">
-        <div>
-          <h2 class="admin-section-title">Tech Stack</h2>
-          <p class="admin-section-desc">Click <strong>+ Add</strong> on a category or <strong>Edit</strong> on an item. Changes auto-save.</p>
-        </div>
-        <div id="tech-list"></div>
-      </div>
-
-      <!-- ===== CURRENTLY SECTION ===== -->
-      <div class="admin-section" id="section-currently">
-        <h2 class="admin-section-title">Currently</h2>
-        <p class="admin-section-desc">Topics, courses, and resources you're actively exploring.</p>
-        <div class="admin-card">
-          <div class="tag-input-wrap">
-            <input type="text" id="currently-input" placeholder="Add a new item..." />
-            <button class="btn btn-sm btn-primary" id="currently-add">Add</button>
-          </div>
-          <div class="tag-list" id="currently-list"></div>
-          <button class="btn btn-primary" id="currently-save" style="margin-top:1rem">Save Currently</button>
-        </div>
-      </div>
-
-      <!-- ===== PROJECTS SECTION ===== -->
-      <div class="admin-section" id="section-projects">
-        <h2 class="admin-section-title">Projects <span class="admin-count" id="projects-count">0</span></h2>
-        <p class="admin-section-desc">Manage your featured projects. Click <strong>Edit</strong> on a project to update it — changes save instantly.</p>
-        <div class="messages-toolbar" style="margin-bottom:0.75rem">
-          <input type="search" id="projects-search" placeholder="Search projects…" aria-label="Search projects" />
-        </div>
-        <div id="projects-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="projects-add">+ Add Project</button>
-        </div>
-      </div>
-
-      <!-- ===== CERTS SECTION ===== -->
-      <div class="admin-section" id="section-certs">
-        <h2 class="admin-section-title">Certifications <span class="admin-count" id="certs-count">0</span></h2>
-        <p class="admin-section-desc">Manage your certificate cards. Click <strong>Edit</strong> to change a certificate — changes save instantly.</p>
-        <div id="certs-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="certs-add">+ Add Certificate</button>
-        </div>
-      </div>
-
-      <!-- ===== EXPERIENCE SECTION ===== -->
-      <div class="admin-section" id="section-experience">
-        <h2 class="admin-section-title">Experience <span class="admin-count" id="experience-count">0</span></h2>
-        <p class="admin-section-desc">Manage your work experience timeline. Click <strong>Edit</strong> on an entry — changes save instantly.</p>
-        <div id="experience-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="experience-add">+ Add Experience</button>
-        </div>
-      </div>
-
-      <!-- ===== LEARNING JOURNEY SECTION ===== -->
-      <div class="admin-section" id="section-learning">
-        <h2 class="admin-section-title">Learning Journey <span class="admin-count" id="learning-count">0</span></h2>
-        <p class="admin-section-desc">Key milestones in your learning path. Click <strong>Edit</strong> on a milestone — changes save instantly.</p>
-        <div id="learning-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="learning-add">+ Add Milestone</button>
-        </div>
-      </div>
-
-      <!-- ===== DIRECT CONTACT SECTION ===== -->
-      <div class="admin-section" id="section-contact">
-        <h2 class="admin-section-title">Direct Contact <span class="admin-count" id="contact-links-count">0</span></h2>
-        <p class="admin-section-desc">Links shown in the Contact section (Email, GitHub, LinkedIn, etc.). Click <strong>Edit</strong> on a method — changes save instantly.</p>
-        <div id="contact-links-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="contact-links-add">+ Add Contact Method</button>
-        </div>
-      </div>
-
-      <!-- ===== MESSAGES SECTION ===== -->
-      <div class="admin-section" id="section-messages">
-        <h2 class="admin-section-title">Contact Messages</h2>
-        <p class="admin-section-desc">Messages submitted through the Contact form on your site. Requires the contact_messages table (see docs/supabase-rls.sql).</p>
-        <div class="admin-card">
-          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
-            <h4>Inbox</h4>
-            <button class="btn btn-sm" id="messages-refresh" title="Refresh inbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
-          </div>
-          <div class="messages-toolbar">
-            <input type="search" id="messages-search" placeholder="Search messages…" aria-label="Search messages" />
-            <select id="messages-filter" aria-label="Filter messages">
-              <option value="all">All</option>
-              <option value="unread">Unread</option>
-              <option value="read">Read</option>
-            </select>
-            <button class="btn btn-sm" id="messages-mark-read" title="Mark every unread message as read">Mark all read</button>
-          </div>
-          <div id="messages-inbox" style="display:flex;flex-direction:column;gap:0.75rem">
-            <p style="color:var(--admin-text-secondary);font-size:0.875rem">Loading messages…</p>
-          </div>
-          <p id="messages-empty" style="display:none;color:var(--admin-text-secondary);font-size:0.875rem;padding:0.5rem 0">No messages match your search.</p>
-        </div>
-      </div>
-
-      <!-- ===== CHAT INSIGHTS SECTION ===== -->
-      <div class="admin-section" id="section-chats">
-        <h2 class="admin-section-title">Chat Insights</h2>
-        <p class="admin-section-desc">Every question visitors ask the terminal chatbot (js/chatbot.js). Unanswered questions are the best source for new FAQ entries.</p>
-        <div class="admin-card" style="margin-bottom:1rem">
-          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
-            <h4>Overview</h4>
-            <div style="display:flex;gap:0.5rem">
-              <button class="btn btn-sm btn-danger-ghost" id="chats-clear" title="Delete all chat logs — wipes Chat Insights">Clear Logs</button>
-              <button class="btn btn-sm" id="chats-refresh" title="Refresh chat insights"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
-            </div>
-          </div>
-          <div id="chats-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin-top:0.75rem"></div>
-        </div>
-        <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Common questions</h4>
-          <div id="chats-topics"></div>
-        </div>
-        <details class="admin-details">
-          <summary>Detailed insights</summary>
-          <div class="admin-details-body">
-            <div class="admin-card" style="margin-bottom:1rem">
-              <h4 style="margin-bottom:0.75rem">Unanswered questions — consider adding to the FAQ</h4>
-              <div id="chats-unanswered"></div>
-            </div>
+          <!-- ===== ABOUT SECTION ===== -->
+          <div class="admin-section" id="section-about">
+            <h2 class="admin-section-title">About Section</h2>
+            <p class="admin-section-desc">Edit your bio and terminal JSON display.</p>
             <div class="admin-card">
-              <h4 style="margin-bottom:0.75rem">Recent chats</h4>
-              <div id="chats-recent"></div>
+              <div class="form-group">
+                <label>Bio Paragraph</label>
+                <textarea id="about-bio" rows="6"></textarea>
+              </div>
+              <details class="admin-details">
+                <summary>
+                  Terminal JSON
+                  <span class="form-hint" style="display: inline; margin: 0">
+                    — what shows in the About terminal
+                  </span>
+                </summary>
+                <div class="admin-details-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Role</label>
+                      <input type="text" id="about-role" />
+                    </div>
+                    <div class="form-group">
+                      <label>Philosophy</label>
+                      <input type="text" id="about-philosophy" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Path (comma separated)</label>
+                      <input type="text" id="about-path" placeholder="Web Dev, Networking, Security" />
+                    </div>
+                    <div class="form-group">
+                      <label>Status</label>
+                      <input type="text" id="about-status" />
+                    </div>
+                  </div>
+                </div>
+              </details>
+              <button class="btn btn-primary" id="about-save">Save About</button>
             </div>
           </div>
-        </details>
-      </div>
 
-      <!-- ===== CHATBOT CONFIG SECTION ===== -->
-      <div class="admin-section" id="section-chatbot">
-        <h2 class="admin-section-title">AI Chatbot</h2>
-        <p class="admin-section-desc">Configure how the terminal chatbot greets visitors. Answers come from your Chat FAQ entries, the AI (Groq), and your live portfolio content — there is no separate knowledge base to maintain.</p>
-
-        <div class="admin-card" style="margin-bottom:1rem">
-          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center">
-            <h4>Status</h4>
-            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem">
-              <input type="checkbox" id="chatbot-enabled" style="width:auto" />
-              Enabled on the site
-            </label>
-          </div>
-          <p class="form-hint" style="margin-top:0.5rem">When disabled, the launcher button is hidden from visitors. Your FAQ entries and AI answers are kept.</p>
-        </div>
-
-        <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Greeting</h4>
-          <div class="form-group">
-            <label for="chatbot-greeting">Greeting message</label>
-            <textarea id="chatbot-greeting" rows="3" placeholder="Welcome message shown when a visitor opens the chat…" maxlength="600"></textarea>
-            <p class="form-hint">Leave empty to use the default greeting. Supports [label](skills)-style links and [[CONTACT]] for a contact button.</p>
-          </div>
-        </div>
-
-        <details class="admin-details">
-          <summary>Advanced settings</summary>
-          <div class="admin-details-body">
-            <div class="form-group">
-              <label for="chatbot-name">Bot name</label>
-              <input type="text" id="chatbot-name" placeholder="bryan-bot" maxlength="32" />
-              <p class="form-hint">Shown in the chat header and command prompts.</p>
-            </div>
-          </div>
-        </details>
-
-        <div class="admin-card" style="margin-top:1rem">
-          <div class="admin-card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+          <!-- ===== TECH STACK SECTION ===== -->
+          <div class="admin-section" id="section-skills">
             <div>
-              <h4 style="margin-bottom:0.25rem">Test it</h4>
-              <p style="font-size:0.8125rem;color:var(--admin-text-secondary)">Send a question exactly like a visitor would.</p>
+              <h2 class="admin-section-title">Tech Stack</h2>
+              <p class="admin-section-desc">
+                Click
+                <strong>+ Add</strong>
+                on a category or
+                <strong>Edit</strong>
+                on an item. Changes auto-save.
+              </p>
             </div>
-            <button class="btn btn-sm" id="chatbot-test-open">Test AI Chatbot</button>
+            <div id="tech-list"></div>
           </div>
-        </div>
 
-        <div style="display:flex;gap:0.5rem;margin-top:1rem">
-          <button class="btn btn-primary" id="chatbot-config-save">Save Chatbot</button>
-        </div>
-      </div>
-
-      <!-- ===== CHAT FAQ SECTION ===== -->
-      <div class="admin-section" id="section-faq">
-        <h2 class="admin-section-title">Chat FAQ <span class="admin-count" id="faq-count">0</span></h2>
-        <p class="admin-section-desc">Custom answers for the terminal chatbot. Each entry matches when a visitor's question contains any of its keywords (comma-separated). Custom entries are checked before the built-in answers. Click <strong>Edit</strong> on an entry — changes save instantly.</p>
-        <div id="faq-list"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn" id="faq-add">+ Add FAQ Entry</button>
-        </div>
-      </div>
-
-      <!-- ===== SECURITY SECTION ===== -->
-      <div class="admin-section" id="section-security">
-        <h2 class="admin-section-title">Security</h2>
-        <p class="admin-section-desc">Optional two-factor protection for your dashboard login.</p>
-
-        <!-- Lockout warning — shown when the passcode step is locked (live countdown) -->
-        <div class="security-warning" id="security-lock-banner" role="alert" hidden>
-          <span class="security-warning-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </span>
-          <div>
-            <strong>Passcode step locked</strong>
-            <span id="security-lock-banner-text"></span>
-          </div>
-        </div>
-
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">Admin Passcode <span style="font-weight:400;opacity:0.6">(optional)</span></h4>
-          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
-            An extra <strong>second factor</strong> on top of the email access code. When set, you'll be asked
-            for this passcode after entering your access code. Leave blank and save to keep the OTP-only login.
-            Stored in your browser only.
-          </p>
-          <div class="form-group">
-            <div class="password-wrap">
-              <input type="password" id="admin-passcode-input" placeholder="Optional extra passcode" />
-              <button type="button" class="pw-toggle" data-toggle-for="admin-passcode-input" aria-label="Show passcode" title="Show passcode">Show</button>
+          <!-- ===== CURRENTLY SECTION ===== -->
+          <div class="admin-section" id="section-currently">
+            <h2 class="admin-section-title">Currently</h2>
+            <p class="admin-section-desc">Topics, courses, and resources you're actively exploring.</p>
+            <div class="admin-card">
+              <div class="tag-input-wrap">
+                <input type="text" id="currently-input" placeholder="Add a new item..." />
+                <button class="btn btn-sm btn-primary" id="currently-add">Add</button>
+              </div>
+              <div class="tag-list" id="currently-list"></div>
+              <button class="btn btn-primary" id="currently-save" style="margin-top: 1rem">
+                Save Currently
+              </button>
             </div>
           </div>
-          <button class="btn btn-primary" id="admin-passcode-save-btn">Save Passcode</button>
-        </div>
 
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">How two-factor login works</h4>
-          <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
-            <li>Set a passcode here (4+ characters) — it becomes the final step of your login.</li>
-            <li>Sign in with your email access code, then enter the passcode.</li>
-            <li>5 wrong attempts lock the passcode step for 5 minutes.</li>
-            <li>Forgot it? Use <strong>Forgot passcode?</strong> on the login screen — a fresh code is emailed to you.</li>
-            <li>Sessions end when the browser closes — you'll sign in again next time (no lingering auto-login).</li>
-          </ol>
-        </div>
-      </div>
-
-      <!-- ===== CLOUD SYNC SECTION ===== -->
-      <div class="admin-section" id="section-cloud">
-        <h2 class="admin-section-title">Cloud Sync</h2>
-        <p class="admin-section-desc">Sync your portfolio data to Supabase so everyone sees your updates on any device.</p>
-
-        <div class="admin-card" style="margin-bottom:1rem">
-          <h4 style="margin-bottom:0.75rem">Connection Status</h4>
-          <div id="cloud-status">
-            <div style="display:flex;align-items:center;gap:8px;padding:8px 0">
-              <span id="cloud-status-icon" style="display:inline-flex;align-items:center" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
-              <span id="cloud-status-text" style="color:var(--admin-text-secondary)">Checking connection...</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap">
-            <button class="btn btn-primary" id="cloud-publish-btn" title="Push local data to Supabase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Publish to Cloud</button>
-            <button class="btn" id="cloud-fetch-btn" title="Pull the latest data from Supabase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Fetch from Cloud</button>
-          </div>
-        </div>
-
-        <details class="admin-details">
-          <summary>Sync settings</summary>
-          <div class="admin-details-body">
-
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">Secure Mode — No Service Key Needed</h4>
-          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6">
-            Your Supabase database uses <strong>Row Level Security (RLS)</strong> with your admin password as the write key.
-            The <strong>service role key is NEVER stored in the browser</strong>, making this much safer.
-          </p>
-          <div class="form-group" style="margin-top:0.75rem">
-            <label>Before first use, run this SQL in your Supabase SQL Editor:</label>
-            <code id="rls-sql-block" style="display:block;background:#1A1D27;padding:1rem;border-radius:4px;font-size:0.6875rem;line-height:1.5;white-space:pre-wrap;word-break:break-all;cursor:pointer" title="Click to copy" onclick="navigator.clipboard.writeText(this.textContent).then(function(){showToast('SQL copied! Paste it in Supabase SQL Editor.', 'success')}).catch(function(){})">
--- 1. Enable RLS on portfolio_data table
-ALTER TABLE portfolio_data ENABLE ROW LEVEL SECURITY;
-
--- 2. Allow public read access (anyone can view your portfolio)
-CREATE POLICY "Public read portfolio_data"
-  ON portfolio_data FOR SELECT
-  TO anon
-  USING (true);
-
--- 3. SECURITY FIX — writes are function-only. The old "Admin write" policies
---    allowed anonymous INSERT/UPDATE and never validated the password header,
---    so anyone with the public key could overwrite the site. Drop them:
-DROP POLICY IF EXISTS "Admin write portfolio_data" ON portfolio_data;
-DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
-
---    Writes now go through the portfolio-sync edge function, which checks the
---    password against PORTFOLIO_SYNC_SECRET server-side. Public SELECT (step 2)
---    stays open so visitors can still read the portfolio.
-            </code>
-            <p style="font-size:0.75rem;color:var(--admin-text-secondary);margin-top:4px">
-              Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL Editor.
+          <!-- ===== PROJECTS SECTION ===== -->
+          <div class="admin-section" id="section-projects">
+            <h2 class="admin-section-title">
+              Projects
+              <span class="admin-count" id="projects-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Manage your featured projects. Click
+              <strong>Edit</strong>
+              on a project to update it — changes save instantly.
             </p>
-          </div>
-        </div>
-
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">Cloud Sync Password</h4>
-          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
-            Set a <strong>secret password</strong> used to authorize cloud sync writes. This is NOT your login password — 
-            it's sent as a custom header that the <code>portfolio-sync</code> edge function checks server-side
-            (matching the <code>PORTFOLIO_SYNC_SECRET</code> secret). Direct REST writes are closed.
-          </p>
-          <div class="form-group">
-            <div class="password-wrap">
-              <input type="password" id="cloud-password-input" placeholder="Enter a secret cloud sync password" />
-              <button type="button" class="pw-toggle" data-toggle-for="cloud-password-input" aria-label="Show password" title="Show password">Show</button>
+            <div class="messages-toolbar" style="margin-bottom: 0.75rem">
+              <input
+                type="search"
+                id="projects-search"
+                placeholder="Search projects…"
+                aria-label="Search projects"
+              />
+            </div>
+            <div id="projects-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="projects-add">+ Add Project</button>
             </div>
           </div>
-          <button class="btn btn-primary" id="cloud-save-password-btn">Save Password</button>
-        </div>
 
-        <div class="admin-card">
-          <h4 style="margin-bottom:0.75rem">GitHub API Token</h4>
-          <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
-            Add a <strong>GitHub personal access token</strong> (public repo scope) to raise API rate limits
-            from 60 to 5,000 requests/hour. Get one from
-            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" style="color:var(--admin-accent)">GitHub Settings → Tokens</a>.
-            Stored in your browser only — never shared.
-          </p>
-          <div class="form-group">
-            <div class="password-wrap">
-              <input type="password" id="github-token-input" placeholder="ghp_... or github_pat_..." />
-              <button type="button" class="pw-toggle" data-toggle-for="github-token-input" aria-label="Show token" title="Show token">Show</button>
+          <!-- ===== CERTS SECTION ===== -->
+          <div class="admin-section" id="section-certs">
+            <h2 class="admin-section-title">
+              Certifications
+              <span class="admin-count" id="certs-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Manage your certificate cards. Click
+              <strong>Edit</strong>
+              to change a certificate — changes save instantly.
+            </p>
+            <div id="certs-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="certs-add">+ Add Certificate</button>
             </div>
           </div>
-          <button class="btn btn-primary" id="github-token-save-btn">Save Token</button>
-        </div>
 
-        <div class="admin-card" style="background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)">
-          <h4 style="margin-bottom:0.5rem">How It Works</h4>
-          <ol style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.8;padding-left:1.2rem">
-            <li><strong>Run the SQL above</strong> in your Supabase SQL Editor (one-time setup)</li>
-            <li>Set a <strong>Cloud Sync Password</strong> above (used for write authorization)</li>
-            <li>Any <strong>Save</strong> action auto-publishes to the cloud</li>
-            <li>Visitors fetch the latest data from Supabase automatically</li>
-            <li>Changes are <strong>instant and worldwide</strong>!</li>
-          </ol>
-        </div>
-
+          <!-- ===== EXPERIENCE SECTION ===== -->
+          <div class="admin-section" id="section-experience">
+            <h2 class="admin-section-title">
+              Experience
+              <span class="admin-count" id="experience-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Manage your work experience timeline. Click
+              <strong>Edit</strong>
+              on an entry — changes save instantly.
+            </p>
+            <div id="experience-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="experience-add">+ Add Experience</button>
+            </div>
           </div>
-        </details>
+
+          <!-- ===== LEARNING JOURNEY SECTION ===== -->
+          <div class="admin-section" id="section-learning">
+            <h2 class="admin-section-title">
+              Learning Journey
+              <span class="admin-count" id="learning-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Key milestones in your learning path. Click
+              <strong>Edit</strong>
+              on a milestone — changes save instantly.
+            </p>
+            <div id="learning-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="learning-add">+ Add Milestone</button>
+            </div>
+          </div>
+
+          <!-- ===== DIRECT CONTACT SECTION ===== -->
+          <div class="admin-section" id="section-contact">
+            <h2 class="admin-section-title">
+              Direct Contact
+              <span class="admin-count" id="contact-links-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Links shown in the Contact section (Email, GitHub, LinkedIn, etc.). Click
+              <strong>Edit</strong>
+              on a method — changes save instantly.
+            </p>
+            <div id="contact-links-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="contact-links-add">+ Add Contact Method</button>
+            </div>
+          </div>
+
+          <!-- ===== MESSAGES SECTION ===== -->
+          <div class="admin-section" id="section-messages">
+            <h2 class="admin-section-title">Contact Messages</h2>
+            <p class="admin-section-desc">
+              Messages submitted through the Contact form on your site. Requires the contact_messages table
+              (see docs/supabase-rls.sql).
+            </p>
+            <div class="admin-card">
+              <div
+                class="admin-card-header"
+                style="display: flex; justify-content: space-between; align-items: center"
+              >
+                <h4>Inbox</h4>
+                <button class="btn btn-sm" id="messages-refresh" title="Refresh inbox">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M23 4v6h-6" />
+                    <path d="M1 20v-6h6" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+              <div class="messages-toolbar">
+                <input
+                  type="search"
+                  id="messages-search"
+                  placeholder="Search messages…"
+                  aria-label="Search messages"
+                />
+                <select id="messages-filter" aria-label="Filter messages">
+                  <option value="all">All</option>
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                </select>
+                <button class="btn btn-sm" id="messages-mark-read" title="Mark every unread message as read">
+                  Mark all read
+                </button>
+              </div>
+              <div id="messages-inbox" style="display: flex; flex-direction: column; gap: 0.75rem">
+                <p style="color: var(--admin-text-secondary); font-size: 0.875rem">Loading messages…</p>
+              </div>
+              <p
+                id="messages-empty"
+                style="
+                  display: none;
+                  color: var(--admin-text-secondary);
+                  font-size: 0.875rem;
+                  padding: 0.5rem 0;
+                "
+              >
+                No messages match your search.
+              </p>
+            </div>
+          </div>
+
+          <!-- ===== CHAT INSIGHTS SECTION ===== -->
+          <div class="admin-section" id="section-chats">
+            <h2 class="admin-section-title">Chat Insights</h2>
+            <p class="admin-section-desc">
+              Every question visitors ask the terminal chatbot (js/chatbot.js). Unanswered questions are the
+              best source for new FAQ entries.
+            </p>
+            <div class="admin-card" style="margin-bottom: 1rem">
+              <div
+                class="admin-card-header"
+                style="display: flex; justify-content: space-between; align-items: center"
+              >
+                <h4>Overview</h4>
+                <div style="display: flex; gap: 0.5rem">
+                  <button
+                    class="btn btn-sm btn-danger-ghost"
+                    id="chats-clear"
+                    title="Delete all chat logs — wipes Chat Insights"
+                  >
+                    Clear Logs
+                  </button>
+                  <button class="btn btn-sm" id="chats-refresh" title="Refresh chat insights">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M23 4v6h-6" />
+                      <path d="M1 20v-6h6" />
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+              <div
+                id="chats-stats"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                  gap: 0.75rem;
+                  margin-top: 0.75rem;
+                "
+              ></div>
+            </div>
+            <div class="admin-card" style="margin-bottom: 1rem">
+              <h4 style="margin-bottom: 0.75rem">Common questions</h4>
+              <div id="chats-topics"></div>
+            </div>
+            <details class="admin-details">
+              <summary>Detailed insights</summary>
+              <div class="admin-details-body">
+                <div class="admin-card" style="margin-bottom: 1rem">
+                  <h4 style="margin-bottom: 0.75rem">Unanswered questions — consider adding to the FAQ</h4>
+                  <div id="chats-unanswered"></div>
+                </div>
+                <div class="admin-card">
+                  <h4 style="margin-bottom: 0.75rem">Recent chats</h4>
+                  <div id="chats-recent"></div>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- ===== CHATBOT CONFIG SECTION ===== -->
+          <div class="admin-section" id="section-chatbot">
+            <h2 class="admin-section-title">AI Chatbot</h2>
+            <p class="admin-section-desc">
+              Configure how the terminal chatbot greets visitors. Answers come from your Chat FAQ entries, the
+              AI (Groq), and your live portfolio content — there is no separate knowledge base to maintain.
+            </p>
+
+            <div class="admin-card" style="margin-bottom: 1rem">
+              <div
+                class="admin-card-header"
+                style="display: flex; justify-content: space-between; align-items: center"
+              >
+                <h4>Status</h4>
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    cursor: pointer;
+                    font-size: 0.875rem;
+                  "
+                >
+                  <input type="checkbox" id="chatbot-enabled" style="width: auto" />
+                  Enabled on the site
+                </label>
+              </div>
+              <p class="form-hint" style="margin-top: 0.5rem">
+                When disabled, the launcher button is hidden from visitors. Your FAQ entries and AI answers
+                are kept.
+              </p>
+            </div>
+
+            <div class="admin-card" style="margin-bottom: 1rem">
+              <h4 style="margin-bottom: 0.75rem">Greeting</h4>
+              <div class="form-group">
+                <label for="chatbot-greeting">Greeting message</label>
+                <textarea
+                  id="chatbot-greeting"
+                  rows="3"
+                  placeholder="Welcome message shown when a visitor opens the chat…"
+                  maxlength="600"
+                ></textarea>
+                <p class="form-hint">
+                  Leave empty to use the default greeting. Supports [label](skills)-style links and
+                  [[CONTACT]] for a contact button.
+                </p>
+              </div>
+            </div>
+
+            <details class="admin-details">
+              <summary>Advanced settings</summary>
+              <div class="admin-details-body">
+                <div class="form-group">
+                  <label for="chatbot-name">Bot name</label>
+                  <input type="text" id="chatbot-name" placeholder="bryan-bot" maxlength="32" />
+                  <p class="form-hint">Shown in the chat header and command prompts.</p>
+                </div>
+              </div>
+            </details>
+
+            <div class="admin-card" style="margin-top: 1rem">
+              <div
+                class="admin-card-header"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  flex-wrap: wrap;
+                  gap: 0.5rem;
+                "
+              >
+                <div>
+                  <h4 style="margin-bottom: 0.25rem">Test it</h4>
+                  <p style="font-size: 0.8125rem; color: var(--admin-text-secondary)">
+                    Send a question exactly like a visitor would.
+                  </p>
+                </div>
+                <button class="btn btn-sm" id="chatbot-test-open">Test AI Chatbot</button>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem">
+              <button class="btn btn-primary" id="chatbot-config-save">Save Chatbot</button>
+            </div>
+          </div>
+
+          <!-- ===== CHAT FAQ SECTION ===== -->
+          <div class="admin-section" id="section-faq">
+            <h2 class="admin-section-title">
+              Chat FAQ
+              <span class="admin-count" id="faq-count">0</span>
+            </h2>
+            <p class="admin-section-desc">
+              Custom answers for the terminal chatbot. Each entry matches when a visitor's question contains
+              any of its keywords (comma-separated). Custom entries are checked before the built-in answers.
+              Click
+              <strong>Edit</strong>
+              on an entry — changes save instantly.
+            </p>
+            <div id="faq-list"></div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem">
+              <button class="btn" id="faq-add">+ Add FAQ Entry</button>
+            </div>
+          </div>
+
+          <!-- ===== SECURITY SECTION ===== -->
+          <div class="admin-section" id="section-security">
+            <h2 class="admin-section-title">Security</h2>
+            <p class="admin-section-desc">Optional two-factor protection for your dashboard login.</p>
+
+            <!-- Lockout warning — shown when the passcode step is locked (live countdown) -->
+            <div class="security-warning" id="security-lock-banner" role="alert" hidden>
+              <span class="security-warning-icon" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </span>
+              <div>
+                <strong>Passcode step locked</strong>
+                <span id="security-lock-banner-text"></span>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <h4 style="margin-bottom: 0.75rem">
+                Admin Passcode
+                <span style="font-weight: 400; opacity: 0.6">(optional)</span>
+              </h4>
+              <p
+                style="
+                  font-size: 0.8125rem;
+                  color: var(--admin-text-secondary);
+                  line-height: 1.6;
+                  margin-bottom: 0.75rem;
+                "
+              >
+                An extra
+                <strong>second factor</strong>
+                on top of the email access code. When set, you'll be asked for this passcode after entering
+                your access code. Leave blank and save to keep the OTP-only login. Stored in your browser
+                only.
+              </p>
+              <div class="form-group">
+                <div class="password-wrap">
+                  <input type="password" id="admin-passcode-input" placeholder="Optional extra passcode" />
+                  <button
+                    type="button"
+                    class="pw-toggle"
+                    data-toggle-for="admin-passcode-input"
+                    aria-label="Show passcode"
+                    title="Show passcode"
+                  >
+                    Show
+                  </button>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="admin-passcode-save-btn">Save Passcode</button>
+            </div>
+
+            <div class="admin-card">
+              <h4 style="margin-bottom: 0.75rem">How two-factor login works</h4>
+              <ol
+                style="
+                  font-size: 0.8125rem;
+                  color: var(--admin-text-secondary);
+                  line-height: 1.8;
+                  padding-left: 1.2rem;
+                "
+              >
+                <li>Set a passcode here (4+ characters) — it becomes the final step of your login.</li>
+                <li>Sign in with your email access code, then enter the passcode.</li>
+                <li>5 wrong attempts lock the passcode step for 5 minutes.</li>
+                <li>
+                  Forgot it? Use
+                  <strong>Forgot passcode?</strong>
+                  on the login screen — a fresh code is emailed to you.
+                </li>
+                <li>
+                  Sessions end when the browser closes — you'll sign in again next time (no lingering
+                  auto-login).
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- ===== CLOUD SYNC SECTION ===== -->
+          <div class="admin-section" id="section-cloud">
+            <h2 class="admin-section-title">Cloud Sync</h2>
+            <p class="admin-section-desc">
+              Sync your portfolio data to Supabase so everyone sees your updates on any device.
+            </p>
+
+            <div class="admin-card" style="margin-bottom: 1rem">
+              <h4 style="margin-bottom: 0.75rem">Connection Status</h4>
+              <div id="cloud-status">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0">
+                  <span
+                    id="cloud-status-icon"
+                    style="display: inline-flex; align-items: center"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  </span>
+                  <span id="cloud-status-text" style="color: var(--admin-text-secondary)">
+                    Checking connection...
+                  </span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap">
+                <button class="btn btn-primary" id="cloud-publish-btn" title="Push local data to Supabase">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  Publish to Cloud
+                </button>
+                <button class="btn" id="cloud-fetch-btn" title="Pull the latest data from Supabase">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Fetch from Cloud
+                </button>
+              </div>
+            </div>
+
+            <details class="admin-details">
+              <summary>Sync settings</summary>
+              <div class="admin-details-body">
+                <div class="admin-card">
+                  <h4 style="margin-bottom: 0.75rem">Secure Mode — No Service Key Needed</h4>
+                  <p style="font-size: 0.8125rem; color: var(--admin-text-secondary); line-height: 1.6">
+                    Your Supabase database uses
+                    <strong>Row Level Security (RLS)</strong>
+                    with your admin password as the write key. The
+                    <strong>service role key is NEVER stored in the browser</strong>
+                    , making this much safer.
+                  </p>
+                  <div class="form-group" style="margin-top: 0.75rem">
+                    <label>Before first use, run this SQL in your Supabase SQL Editor:</label>
+                    <code
+                      id="rls-sql-block"
+                      style="
+                        display: block;
+                        background: #1a1d27;
+                        padding: 1rem;
+                        border-radius: 4px;
+                        font-size: 0.6875rem;
+                        line-height: 1.5;
+                        white-space: pre-wrap;
+                        word-break: break-all;
+                        cursor: pointer;
+                      "
+                      title="Click to copy"
+                      onclick="
+                        navigator.clipboard
+                          .writeText(this.textContent)
+                          .then(function () {
+                            showToast('SQL copied! Paste it in Supabase SQL Editor.', 'success');
+                          })
+                          .catch(function () {})
+                      "
+                    >
+                      -- 1. Enable RLS on portfolio_data table ALTER TABLE portfolio_data ENABLE ROW LEVEL
+                      SECURITY; -- 2. Allow public read access (anyone can view your portfolio) CREATE POLICY
+                      "Public read portfolio_data" ON portfolio_data FOR SELECT TO anon USING (true); -- 3.
+                      SECURITY FIX — writes are function-only. The old "Admin write" policies -- allowed
+                      anonymous INSERT/UPDATE and never validated the password header, -- so anyone with the
+                      public key could overwrite the site. Drop them: DROP POLICY IF EXISTS "Admin write
+                      portfolio_data" ON portfolio_data; DROP POLICY IF EXISTS "Admin update portfolio_data"
+                      ON portfolio_data; -- Writes now go through the portfolio-sync edge function, which
+                      checks the -- password against PORTFOLIO_SYNC_SECRET server-side. Public SELECT (step 2)
+                      -- stays open so visitors can still read the portfolio.
+                    </code>
+                    <p style="font-size: 0.75rem; color: var(--admin-text-secondary); margin-top: 4px">
+                      Click the SQL block above to copy, then paste it in your Supabase Dashboard → SQL
+                      Editor.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="admin-card">
+                  <h4 style="margin-bottom: 0.75rem">Cloud Sync Password</h4>
+                  <p
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--admin-text-secondary);
+                      line-height: 1.6;
+                      margin-bottom: 0.75rem;
+                    "
+                  >
+                    Set a
+                    <strong>secret password</strong>
+                    used to authorize cloud sync writes. This is NOT your login password — it's sent as a
+                    custom header that the
+                    <code>portfolio-sync</code>
+                    edge function checks server-side (matching the
+                    <code>PORTFOLIO_SYNC_SECRET</code>
+                    secret). Direct REST writes are closed.
+                  </p>
+                  <div class="form-group">
+                    <div class="password-wrap">
+                      <input
+                        type="password"
+                        id="cloud-password-input"
+                        placeholder="Enter a secret cloud sync password"
+                      />
+                      <button
+                        type="button"
+                        class="pw-toggle"
+                        data-toggle-for="cloud-password-input"
+                        aria-label="Show password"
+                        title="Show password"
+                      >
+                        Show
+                      </button>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary" id="cloud-save-password-btn">Save Password</button>
+                </div>
+
+                <div class="admin-card">
+                  <h4 style="margin-bottom: 0.75rem">GitHub API Token</h4>
+                  <p
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--admin-text-secondary);
+                      line-height: 1.6;
+                      margin-bottom: 0.75rem;
+                    "
+                  >
+                    Add a
+                    <strong>GitHub personal access token</strong>
+                    (public repo scope) to raise API rate limits from 60 to 5,000 requests/hour. Get one from
+                    <a
+                      href="https://github.com/settings/tokens?type=beta"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style="color: var(--admin-accent)"
+                    >
+                      GitHub Settings → Tokens
+                    </a>
+                    . Stored in your browser only — never shared.
+                  </p>
+                  <div class="form-group">
+                    <div class="password-wrap">
+                      <input
+                        type="password"
+                        id="github-token-input"
+                        placeholder="ghp_... or github_pat_..."
+                      />
+                      <button
+                        type="button"
+                        class="pw-toggle"
+                        data-toggle-for="github-token-input"
+                        aria-label="Show token"
+                        title="Show token"
+                      >
+                        Show
+                      </button>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary" id="github-token-save-btn">Save Token</button>
+                </div>
+
+                <div
+                  class="admin-card"
+                  style="background: rgba(251, 191, 36, 0.06); border-color: rgba(251, 191, 36, 0.2)"
+                >
+                  <h4 style="margin-bottom: 0.5rem">How It Works</h4>
+                  <ol
+                    style="
+                      font-size: 0.8125rem;
+                      color: var(--admin-text-secondary);
+                      line-height: 1.8;
+                      padding-left: 1.2rem;
+                    "
+                  >
+                    <li>
+                      <strong>Run the SQL above</strong>
+                      in your Supabase SQL Editor (one-time setup)
+                    </li>
+                    <li>
+                      Set a
+                      <strong>Cloud Sync Password</strong>
+                      above (used for write authorization)
+                    </li>
+                    <li>
+                      Any
+                      <strong>Save</strong>
+                      action auto-publishes to the cloud
+                    </li>
+                    <li>Visitors fetch the latest data from Supabase automatically</li>
+                    <li>
+                      Changes are
+                      <strong>instant and worldwide</strong>
+                      !
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Save Status Bar — in-flow at the bottom, never covers controls -->
+        <div class="admin-statusbar" id="admin-statusbar">
+          <span class="statusbar-dot" id="statusbar-dot"></span>
+          <span class="statusbar-text" id="statusbar-text">Ready</span>
+          <span class="statusbar-section" id="statusbar-section"></span>
+          <span class="statusbar-shortcut">Ctrl+S</span>
+        </div>
       </div>
 
-    </div>
-
-    <!-- Save Status Bar — in-flow at the bottom, never covers controls -->
-    <div class="admin-statusbar" id="admin-statusbar">
-      <span class="statusbar-dot" id="statusbar-dot"></span>
-      <span class="statusbar-text" id="statusbar-text">Ready</span>
-      <span class="statusbar-section" id="statusbar-section"></span>
-      <span class="statusbar-shortcut">Ctrl+S</span>
-    </div>
-  </div>
-
-  <!-- AI Chatbot Test Modal -->
-  <div class="admin-modal-backdrop" id="chat-test-backdrop" hidden>
-    <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="chat-test-title">
-      <div class="admin-modal-head">
-        <h4 id="chat-test-title">Test AI Chatbot</h4>
-        <button class="admin-modal-close" id="chat-test-close" type="button" aria-label="Close">&times;</button>
+      <!-- AI Chatbot Test Modal -->
+      <div class="admin-modal-backdrop" id="chat-test-backdrop" hidden>
+        <div class="admin-modal" role="dialog" aria-modal="true" aria-labelledby="chat-test-title">
+          <div class="admin-modal-head">
+            <h4 id="chat-test-title">Test AI Chatbot</h4>
+            <button class="admin-modal-close" id="chat-test-close" type="button" aria-label="Close">
+              &times;
+            </button>
+          </div>
+          <div class="admin-modal-body">
+            <p class="chat-test-hint">
+              Send a question exactly like a visitor would — the answer comes from the deployed
+              <code>chat-ai</code>
+              edge function (Groq AI with FAQ + portfolio context).
+            </p>
+            <textarea
+              id="chat-test-input"
+              rows="3"
+              placeholder="Ask something a visitor might ask…"
+              maxlength="500"
+            ></textarea>
+            <button class="btn btn-primary" id="chat-test-send" style="margin-top: 0.5rem">Send</button>
+            <div id="chat-test-result" class="chat-test-result" hidden></div>
+          </div>
+        </div>
       </div>
-      <div class="admin-modal-body">
-        <p class="chat-test-hint">Send a question exactly like a visitor would — the answer comes from the deployed <code>chat-ai</code> edge function (Groq AI with FAQ + portfolio context).</p>
-        <textarea id="chat-test-input" rows="3" placeholder="Ask something a visitor might ask…" maxlength="500"></textarea>
-        <button class="btn btn-primary" id="chat-test-send" style="margin-top:0.5rem">Send</button>
-        <div id="chat-test-result" class="chat-test-result" hidden></div>
+
+      <!-- Item Editor Modal -->
+      <div class="admin-modal-backdrop" id="item-modal-backdrop" hidden>
+        <div
+          class="admin-modal admin-modal-lg"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="item-modal-title"
+        >
+          <div class="admin-modal-head">
+            <h4 id="item-modal-title">Edit Item</h4>
+            <button class="admin-modal-close" id="item-modal-close" type="button" aria-label="Close">
+              &times;
+            </button>
+          </div>
+          <div class="admin-modal-body" id="item-modal-body"></div>
+          <div class="admin-modal-foot">
+            <button class="btn" id="item-modal-cancel">Cancel</button>
+            <button class="btn btn-primary" id="item-modal-save">Save Changes</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Item Editor Modal -->
-  <div class="admin-modal-backdrop" id="item-modal-backdrop" hidden>
-    <div class="admin-modal admin-modal-lg" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
-      <div class="admin-modal-head">
-        <h4 id="item-modal-title">Edit Item</h4>
-        <button class="admin-modal-close" id="item-modal-close" type="button" aria-label="Close">&times;</button>
+    <!-- Confirmation Modal -->
+    <div class="confirm-overlay" id="confirm-overlay">
+      <div class="confirm-dialog">
+        <div class="confirm-header">
+          <div class="confirm-icon">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <span>confirm action</span>
+          <span style="margin-left: auto; opacity: 0.4; font-size: 0.6875rem">~/dashboard</span>
+        </div>
+        <div class="confirm-body">
+          <p id="confirm-message">Are you sure?</p>
+        </div>
+        <div class="confirm-actions">
+          <button class="confirm-btn confirm-btn-cancel" id="confirm-cancel-btn">Cancel</button>
+          <button class="confirm-btn confirm-btn-danger" id="confirm-ok-btn">Delete</button>
+        </div>
       </div>
-      <div class="admin-modal-body" id="item-modal-body"></div>
-      <div class="admin-modal-foot">
-        <button class="btn" id="item-modal-cancel">Cancel</button>
-        <button class="btn btn-primary" id="item-modal-save">Save Changes</button>
-      </div>
     </div>
-  </div>
 
-</div>
+    <!-- Toast -->
+    <div class="admin-toast" id="admin-toast"></div>
 
-<!-- Confirmation Modal -->
-<div class="confirm-overlay" id="confirm-overlay">
-  <div class="confirm-dialog">
-    <div class="confirm-header">
-      <div class="confirm-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
-      <span>confirm action</span>
-      <span style="margin-left:auto;opacity:0.4;font-size:0.6875rem">~/dashboard</span>
-    </div>
-    <div class="confirm-body">
-      <p id="confirm-message">Are you sure?</p>
-    </div>
-    <div class="confirm-actions">
-      <button class="confirm-btn confirm-btn-cancel" id="confirm-cancel-btn">Cancel</button>
-      <button class="confirm-btn confirm-btn-danger" id="confirm-ok-btn">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="admin-toast" id="admin-toast"></div>
-
-<script src="js/portfolio-data.js?v=20260810r"></script>
-<script src="js/admin.js?v=20260810r"></script>
-</body>
+    <script src="js/portfolio-data.js?v=20260810r"></script>
+    <script src="js/admin.js?v=20260810r"></script>
+  </body>
 </html>

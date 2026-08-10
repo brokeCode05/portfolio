@@ -1007,13 +1007,21 @@
       id="cert-modal"
       role="dialog"
       aria-modal="true"
-      aria-label="Certificate viewer"
+      aria-labelledby="cert-modal-filename"
       hidden
     >
-      <button type="button" class="cert-close-btn" id="cert-close-btn" aria-label="Close viewer">
-        &times;
-      </button>
+      <div class="cert-modal-header">
+        <span class="cert-modal-dot red"></span>
+        <span class="cert-modal-dot yellow"></span>
+        <span class="cert-modal-dot green"></span>
+        <span class="cert-modal-title">
+          ~/certificates/
+          <span class="cert-highlight" id="cert-modal-filename"></span>
+        </span>
+      </div>
       <div class="cert-modal-body">
+        <div class="cert-command-line" id="cert-command-line"></div>
+        <div class="cert-status-line" id="cert-status-line" aria-live="polite"></div>
         <div class="cert-image-wrap" id="cert-image-wrap">
           <img id="cert-modal-image" src="" alt="Certificate" loading="lazy" />
           <div class="scanlines" aria-hidden="true"></div>
@@ -1023,9 +1031,19 @@
         </div>
       </div>
       <div class="cert-modal-footer">
-        <button class="cert-nav-btn" id="cert-prev" aria-label="Previous certificate">‹</button>
-        <span class="cert-nav-counter" id="cert-counter"></span>
-        <button class="cert-nav-btn" id="cert-next" aria-label="Next certificate">›</button>
+        <div class="cert-nav">
+          <button class="cert-nav-btn" id="cert-prev" aria-label="Previous certificate">◀ Prev</button>
+          <span class="cert-nav-counter" id="cert-counter"></span>
+          <button class="cert-nav-btn" id="cert-next" aria-label="Next certificate">Next ▶</button>
+        </div>
+        <div class="cert-tools">
+          <a class="cert-download" id="cert-download" href="#" download>$ save</a>
+          <span class="cert-zoom-label" id="cert-zoom-label" aria-live="polite">[zoom 100%]</span>
+          <button class="cert-close-btn" id="cert-close-btn">
+            $ _ close
+            <span class="key-hint">[ESC]</span>
+          </button>
+        </div>
       </div>
     </div>
 
