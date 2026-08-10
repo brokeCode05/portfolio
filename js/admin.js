@@ -14,10 +14,24 @@
   var SUPABASE_ANON_KEY =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uc2d3aXR6Z3dobWljY2JvamNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMTA3NzIsImV4cCI6MjEwMDg4Njc3Mn0.KQnCRuyC8amh7On1A5G-tVx1yRvUlPxSZiFlTEpzy0g';
 
+  // Session persistence: the admin session lives in sessionStorage, so it ends
+  // when the browser/tab closes — signing back in requires the full login
+  // (email → access code → passcode) next time. Reloads within the same tab
+  // keep you signed in (the passcode gate still applies on restore).
   try {
     if (typeof supabase !== 'undefined' && supabase.createClient) {
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          storage: window.sessionStorage
+        }
+      });
     }
+    // One-time cleanup: remove the old persistent (localStorage) session that
+    // used to keep the dashboard logged in across browser restarts.
+    var sbHost = SUPABASE_URL.replace(/^https?:\/\//, '').split('.')[0];
+    localStorage.removeItem('sb-' + sbHost + '-auth-token');
   } catch (e) {
     console.error('Failed to initialize Supabase:', e);
   }
