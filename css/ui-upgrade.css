@@ -283,13 +283,13 @@ body.ui-cursor-on #cursor-glow {
   z-index: 1;
 }
 
-/* ── Cert cards: terminal focus frame on hover ───────────────
-   No image reveal — the certificate only shows in the click-to-view
-   modal. On hover the card reads as a focused terminal window:
-   the border lights up with an accent glow, a blinking block cursor
-   appears after the title, and a "$ open --view" hint fades into
-   the corner. The cursor tilt stays on the outer card so the tilt
-   and the focus frame compose. */
+/* ── Cert cards: media header + terminal focus frame on hover ──
+   Like the project cards, each cert card gets an edge-to-edge media
+   strip: the certificate image (with an expand icon + Verified pill),
+   or a mini terminal for certificates without an uploaded image. The
+   card keeps its existing click-to-view behaviour — the full modal
+   viewer opens from the card click or keyboard. The cursor tilt stays
+   on the outer card so the tilt and the focus frame compose. */
 .cert-card {
   display: block;
   padding: 0;
@@ -308,6 +308,134 @@ body.ui-cursor-on #cursor-glow {
     border-color var(--transition-fast),
     box-shadow var(--transition-base),
     transform var(--transition-base);
+}
+/* Media strip — same language as the project cards */
+.cert-card-media {
+  position: relative;
+  height: 168px;
+  margin: calc(var(--space-lg) * -1) calc(var(--space-lg) * -1) 0;
+  background:
+    radial-gradient(
+      120% 160% at 85% -20%,
+      color-mix(in srgb, var(--color-accent) 10%, transparent),
+      transparent 55%
+    ),
+    var(--color-surface-hover);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  overflow: hidden;
+}
+.cert-card-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cert-card:hover .cert-card-media-img,
+.cert-card:focus-visible .cert-card-media-img {
+  transform: scale(1.04);
+}
+/* scanline sheen over the media, matching the ID/cert viewers */
+.cert-card-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+/* expand icon — appears on hover/focus, top-right of the media */
+.cert-card-expand {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(15, 17, 21, 0.72);
+  color: #fff;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+.cert-card:hover .cert-card-expand,
+.cert-card:focus-visible .cert-card-expand {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Verified pill on the media */
+.cert-card-media-pill {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 2;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  background: rgba(15, 17, 21, 0.72);
+  backdrop-filter: blur(4px);
+}
+/* mini terminal placeholder for certs without an uploaded image */
+.cert-card-media-terminal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1.1rem;
+  font-family: var(--font-code);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+}
+.cert-card-media-terminal-dots {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.cert-card-media-terminal-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+.cert-card-media-terminal-dots i:nth-child(1) {
+  background: #f87171;
+}
+.cert-card-media-terminal-dots i:nth-child(2) {
+  background: #fbbf24;
+}
+.cert-card-media-terminal-dots i:nth-child(3) {
+  background: var(--color-accent);
+}
+.cert-card-media-terminal-cmd {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-primary);
+}
+.cert-card-media-terminal-cursor {
+  color: var(--color-accent);
+  animation: blink 1s step-end infinite;
+}
+.cert-card:hover .cert-card-media-terminal-cursor,
+.cert-card:focus-visible .cert-card-media-terminal-cursor {
+  animation: none;
+  opacity: 0;
 }
 .cert-card:hover {
   border-color: var(--color-accent);
@@ -343,11 +471,12 @@ body.ui-cursor-on #cursor-glow {
   color: var(--color-accent);
   animation: blink 1s step-end infinite;
 }
-/* "$ open --view" hint in the corner, types in like a command hint */
+/* "$ open --view" hint in the corner, types in like a command hint.
+   Bottom-right — the top-right corner belongs to the media header now. */
 .cert-card-front::after {
   content: '$ open --view';
   position: absolute;
-  top: var(--space-sm);
+  bottom: var(--space-sm);
   right: var(--space-md);
   font-family: var(--font-code);
   font-size: var(--text-xs);
