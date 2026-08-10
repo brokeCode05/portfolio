@@ -382,6 +382,39 @@
     return m > 0 ? m + 'm ' + r + 's' : r + 's';
   }
 
+  // ─── Security section: lockout warning banner ───
+  // Shows a live countdown in the Security section while the passcode step is
+  // locked. The 1s interval runs only while that section is visible (it is
+  // started on section switch and cleared when leaving).
+  var securityLockTimer = null;
+
+  function updateSecurityLockBanner() {
+    var banner = document.getElementById('security-lock-banner');
+    var textEl = document.getElementById('security-lock-banner-text');
+    if (!banner || !textEl) return;
+    if (securityLockTimer) {
+      clearInterval(securityLockTimer);
+      securityLockTimer = null;
+    }
+    function render() {
+      var until = getPasscodeLockUntil();
+      var remain = until - Date.now();
+      if (until <= 0 || remain <= 0) {
+        banner.hidden = true;
+        if (securityLockTimer) {
+          clearInterval(securityLockTimer);
+          securityLockTimer = null;
+        }
+        return;
+      }
+      banner.hidden = false;
+      textEl.textContent =
+        'Too many incorrect attempts. Try again in ' + fmtLock(Math.ceil(remain / 1000)) + '.';
+    }
+    render();
+    if (!banner.hidden) securityLockTimer = setInterval(render, 1000);
+  }
+
   // ─── Passcode recovery (forgot passcode → fresh OTP → reset) ───
   // Lets the owner prove live email access with a NEW 8-digit code, then
   // clears the passcode AND any lockout. The passcode is browser-local, so a
@@ -1848,6 +1881,13 @@
       if (id === 'messages') loadMessages();
       if (id === 'chats') loadChatInsights();
       if (id === 'chatbot') loadChatConfig();
+      // Lockout banner lives in the Security section — start/stop its countdown
+      // so it never runs in the background while the section is hidden.
+      if (id === 'security') updateSecurityLockBanner();
+      else if (securityLockTimer) {
+        clearInterval(securityLockTimer);
+        securityLockTimer = null;
+      }
       document.querySelectorAll('.admin-nav-btn').forEach(function (el) {
         el.classList.remove('active');
       });

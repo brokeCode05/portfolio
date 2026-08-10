@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/admin.css?v=20260810n" />
+  <link rel="stylesheet" href="css/admin.css?v=20260810o" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -655,6 +655,17 @@
         <h2 class="admin-section-title">Security</h2>
         <p class="admin-section-desc">Optional two-factor protection for your dashboard login.</p>
 
+        <!-- Lockout warning — shown when the passcode step is locked (live countdown) -->
+        <div class="security-warning" id="security-lock-banner" role="alert" hidden>
+          <span class="security-warning-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </span>
+          <div>
+            <strong>Passcode step locked</strong>
+            <span id="security-lock-banner-text"></span>
+          </div>
+        </div>
+
         <div class="admin-card">
           <h4 style="margin-bottom:0.75rem">Admin Passcode <span style="font-weight:400;opacity:0.6">(optional)</span></h4>
           <p style="font-size:0.8125rem;color:var(--admin-text-secondary);line-height:1.6;margin-bottom:0.75rem">
@@ -859,7 +870,7 @@ DROP POLICY IF EXISTS "Admin update portfolio_data" ON portfolio_data;
 <!-- Toast -->
 <div class="admin-toast" id="admin-toast"></div>
 
-<script src="js/portfolio-data.js?v=20260810n"></script>
-<script src="js/admin.js?v=20260810n"></script>
+<script src="js/portfolio-data.js?v=20260810o"></script>
+<script src="js/admin.js?v=20260810o"></script>
 </body>
 </html>
