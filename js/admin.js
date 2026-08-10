@@ -75,6 +75,7 @@
             loginStepEmail.style.display = 'none';
             loginStepOtp.style.display = 'none';
             loginStepPasscode.style.display = 'block';
+            setLoginStep('passcode');
             passcodeInput.value = '';
             passcodeError.textContent = '';
             passcodeInput.focus();
@@ -97,6 +98,7 @@
     if (statusBar) statusBar.style.display = 'none';
     loginStepEmail.style.display = 'block';
     loginStepOtp.style.display = 'none';
+    setLoginStep('email');
     if (loginStepPasscode) loginStepPasscode.style.display = 'none';
     loginSentMsg.style.display = 'none';
     loginError.textContent = '';
@@ -136,6 +138,14 @@
   function clearAllErrors() {
     loginError.textContent = '';
     otpError.textContent = '';
+  }
+
+  // Login step indicator — highlights the current step (Email → Code → Passcode).
+  function setLoginStep(step) {
+    var map = { email: 'step-pill-email', otp: 'step-pill-otp', passcode: 'step-pill-passcode' };
+    document.querySelectorAll('.login-step-pill').forEach(function (el) {
+      el.classList.toggle('active', el.id === map[step]);
+    });
   }
 
   // Send OTP Code (6-digit code to email)
@@ -194,6 +204,7 @@
         authEmailDisplay.textContent = email;
         loginStepEmail.style.display = 'none';
         loginStepOtp.style.display = 'block';
+        setLoginStep('otp');
         otpInput.value = '';
         otpError.textContent = '';
         otpInput.focus();
@@ -235,6 +246,7 @@
         if (passcode && loginStepPasscode) {
           loginStepOtp.style.display = 'none';
           loginStepPasscode.style.display = 'block';
+          setLoginStep('passcode');
           passcodeInput.value = '';
           passcodeError.textContent = '';
           passcodeInput.focus();
@@ -257,7 +269,7 @@
       applyPasscodeGate();
       return;
     }
-    var entered = passcodeInput.value;
+    var entered = passcodeInput.value.trim(); // save side trims too
     if (!entered) {
       passcodeError.textContent = 'Enter your admin passcode.';
       return;
@@ -378,10 +390,17 @@
     if (!panel || panel.dataset.built) return;
     panel.dataset.built = '1';
     panel.innerHTML =
+      '<div class="login-passcode-head">' +
+      '<span class="login-passcode-icon" aria-hidden="true">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+      '</span>' +
+      '<span class="login-passcode-title">Reset passcode</span>' +
+      '<span class="login-passcode-badge">Recovery</span>' +
+      '</div>' +
       '<p class="field-hint" style="margin:0 0 0.75rem;font-size:0.75rem;line-height:1.5">' +
       "Forgot it? We'll email a new access code to <strong>" +
       ADMIN_EMAIL +
-      "</strong> to confirm it's you. Entering it clears the passcode — you can set a new one in Cloud Sync settings.</p>" +
+      "</strong> to confirm it's you. Entering it clears the passcode — you can set a new one in the Security section.</p>" +
       '<div class="login-error" id="recovery-error"></div>' +
       '<button class="login-btn" id="recovery-send-btn"><span id="recovery-send-text">Send Recovery Code</span><span class="login-spinner" id="recovery-send-spinner"></span></button>' +
       '<div id="recovery-code-row" style="display:none;margin-top:0.75rem">' +
@@ -404,6 +423,7 @@
         if (passcodeMainEl) passcodeMainEl.style.display = '';
         if (forgotPasscodeBtn) forgotPasscodeBtn.style.display = '';
         panel.hidden = true;
+        setLoginStep('passcode');
         resetRecoveryPanel();
         passcodeInput.focus();
       });
@@ -496,7 +516,7 @@
           clearInterval(passcodeLockTimer);
           passcodeLockTimer = null;
         }
-        showToast('Passcode removed — set a new one in Cloud Sync settings.', 'success');
+        showToast('Passcode removed — set a new one in the Security section.', 'success');
         showDashboard(ADMIN_EMAIL);
       })
       .catch(function (err2) {
@@ -513,6 +533,7 @@
       if (passcodeMainEl) passcodeMainEl.style.display = 'none';
       forgotPasscodeBtn.style.display = 'none';
       panel.hidden = false;
+      setLoginStep('passcode');
       resetRecoveryPanel();
       var sendBtn = document.getElementById('recovery-send-btn');
       if (sendBtn) sendBtn.focus();
@@ -558,6 +579,7 @@
   backToEmailBtn.addEventListener('click', function () {
     loginStepOtp.style.display = 'none';
     loginStepEmail.style.display = 'block';
+    setLoginStep('email');
     loginSentMsg.style.display = 'none';
     loginError.textContent = '';
     otpError.textContent = '';
@@ -1851,7 +1873,8 @@
       // Messages (inbox search/filter + reply compose) and Cloud Sync fields
       // talk to Supabase/localStorage directly — they are not portfolio content,
       // so editing them must not trigger the unsaved-changes warning.
-      if (t.closest('#section-messages') || t.closest('#section-cloud')) return;
+      if (t.closest('#section-messages') || t.closest('#section-cloud') || t.closest('#section-security'))
+        return;
       if (t.id === 'projects-search') return;
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') markDirty();
     });
